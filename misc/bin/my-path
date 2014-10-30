@@ -1,0 +1,10 @@
+if [ "$1" = "android-sdk" ]; then
+    export PATH="$HOME/android-ndk:$HOME/android-sdk-linux/tools:$HOME/android-sdk-linux/platform-tools:$PATH"
+elif [ "$1" = "appengine-java" ]; then
+    export PATH="$HOME/appengine/appengine-java-sdk-1.8.6/bin:$PATH"
+elif [ "$1" = "appengine-py" ]; then
+    export PATH="$HOME/appengine/google_appengine:$PATH"
+else
+    printf "Usage . my-path android-sdk | appengine-java | appengine-py\n"
+fi
+
