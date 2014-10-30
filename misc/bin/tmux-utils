@@ -1,0 +1,43 @@
+#!/bin/bash
+
+func=$1; shift
+
+# A key that would be never used
+DUMMY_KEY="F20"
+
+function tmux_option_save {
+    local new_value="$2"
+    local name="$1"
+    local local_name="@saved-${name}"
+
+    tmux set -q "$local_name" "`tmux show -vq "${name}"`"
+    tmux set -q "$name" "$new_value"
+}
+
+function tmux_option_restore {
+    local name="$1"
+    local local_name="@saved-${name}"
+    local saved_value="`tmux show -vq "${local_name}"`"
+
+    if [ -z "$saved_value" ]; then tmux set -uq ${name}
+    else tmux set -q "$name" "$saved_value"; fi
+}
+
+case "$func" in
+    "toggle-escape")
+        on_flag="`tmux show -vq @escape-disabled`"
+        if [ -z "$on_flag" ]; then
+            tmux_option_save "mode-mouse" "off"
+            tmux_option_save "prefix" "$DUMMY_KEY"
+
+            tmux set -q @escape-disabled 1
+            tmux display "Escaped from tmux keys"
+        else
+            tmux_option_restore "mode-mouse"
+            tmux_option_restore "prefix"
+
+            tmux set -uq @escape-disabled
+            tmux display "Returned to tmux keys"
+        fi
+        ;;
+esac

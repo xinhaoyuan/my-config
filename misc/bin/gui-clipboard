@@ -1,0 +1,18 @@
+#!/bin/sh
+
+OP="$1"
+OS=`uname`
+
+if [ "$OP" = "paste" ]; then
+    if [ "$OS" = "Darwin" ]; then
+        exec pbpaste
+    elif [ "$OS" = "Linux" -a -n "$DISPLAY" ]; then
+        exec xclip -o -selection clipboard 2>/dev/null
+    fi    
+elif [ "$OP" = "copy" ]; then
+    if [ "$OS" = "Darwin" ]; then
+        exec pbcopy
+    elif [ "$OS" = "Linux" -a -n "$DISPLAY" ]; then
+        exec xclip -i -selection clipboard
+    fi
+fi
