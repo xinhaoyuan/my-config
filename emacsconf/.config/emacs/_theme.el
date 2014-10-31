@@ -75,7 +75,8 @@
            (progn
              (setq frame-background-mode 'dark)
              (xterm-mouse-mode)
-             (if (string-match "^screen" (getenv "TERM"))
+             (if (or (string-match "^screen" (getenv "TERM"))
+                     (string-match "^xterm" (getenv "TERM")))
                  (let ((m function-key-map))
                    (let ((function-key-map local-function-key-map))
                      (require 'xterm-extras)
