@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# depend on the util ``xdotool''
+
+sessionname=$1
+[ -z "$sessionname" ] && sessionname="Local-`xdotool get_desktop`"
+
+classname=LocalTE
+termtitle="Terminal-$sessionname"
+
+unset TMUX
+
+tmux has-session -t "$sessionname" || \
+    tmux new-session -d -s "$sessionname"
+xdotool search --name "$termtitle" windowraise windowfocus || \
+    exec urxvt -title "$termtitle" -name "$classname" -e \
+    tmux attach-session -d -t "$sessionname"
+# xdotool search --name "$termtitle" windowraise windowfocus || \
+#     exec gnome-terminal --title "$termtitle" --name "$classname" -e \
+#     "tmux attach-session -d -t \"$sessionname\""
