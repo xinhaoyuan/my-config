@@ -1,0 +1,5 @@
+Manual Setup
+
+.zshrc:
+
+source $HOME/.zshrc.conf
