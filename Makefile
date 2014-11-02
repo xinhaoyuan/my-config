@@ -3,6 +3,7 @@
 all:
 
 install:
-	./install.sh
+	./install.sh install
 
 uninstall:
+	./install.sh uninstall
