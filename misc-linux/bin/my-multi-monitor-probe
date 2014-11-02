@@ -1,0 +1,11 @@
+#!/bin/sh
+
+if xrandr -q | grep "VGA1 connected"; then
+    xrandr --output VGA1 --preferred --left-of LVDS1
+    nitrogen --restore
+    my-conky-reset
+elif xrandr -q | grep "HDMI1 connected"; then
+    xrandr --output HDMI1 --preferred --left-of LVDS1
+    nitrogen --restore
+    my-conky-reset
+fi

@@ -5,3 +5,7 @@ cd $(dirname $0)
 
 stow emacsconf
 stow misc
+
+if [ `uname` = 'linux' ]; then
+	stow misc-linux
+fi

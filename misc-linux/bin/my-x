@@ -1,0 +1,4 @@
+#!/bin/sh
+
+tmux kill-session -t XServer 2>/dev/null
+( cd $HOME; tmux new-session -d -s XServer "ck-launch-session startx" )
