@@ -1,8 +1,9 @@
 .PHONY: all install uninstall
 
 all:
+	./install.sh prepare
 
-install:
+install: all
 	./install.sh install
 
 uninstall:

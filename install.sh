@@ -10,6 +10,16 @@ generate_package_names() {
     fi
 }
 
+if [ "$1" = 'prepare' ]; then
+    IFS="$(printf '\n\t')"
+    for package in `generate_package_names`; do
+        if [ -e ${package}/Makefile ]; then
+            make -C $package || exit 1
+        fi
+    done
+    exit 0
+fi
+
 command -v stow 2>/dev/null 1>&2 || { echo "stow needed."; exit 0; }
 cd $(dirname $0)
 
@@ -22,5 +32,5 @@ fi
 
 generate_package_names | while read package; do
     echo "$1" $package
-    stow $OP $package
+    stow --no-folding --ignore='^Makefile$' $OP $package
 done

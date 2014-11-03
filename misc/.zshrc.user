@@ -6,7 +6,6 @@ if [[ ! ":$PATH:" =~ ":$HOME/bin:" ]]; then
    export PATH="$HOME/bin:$PATH"
 fi
 
-
 alias my-path="source my-path"
 
 PROMPT='${ret_status}%{$fg_bold[green]%}%p[%j] %{$fg[cyan]%}%c %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%} % %{$reset_color%}'

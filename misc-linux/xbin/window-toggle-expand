@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# emulate the WIN + Left/Right behavior in Windows
+
+eval $(wmctrl -d | 
+    perl -ne 'if (/\*.*WA:.* ([0-9]+),([0-9]+) ([0-9]+)x([0-9]+)/) { print "DX=$1;DY=$2;DW=$3;DH=$4;"; }')
+WIN=`xdotool getactivewindow`
+FL=0;FR=0;FU=0;FD=0;
+eval $(xwininfo -id $WIN -all | \
+    perl -ne '
+if (/Corners:\s*\+([0-9]*)\+([0-9]*)/) { print "SX=$1;SY=$2;" }
+if (/Width:\s*([0-9]*)/) { print "WIDTH=$1;" }
+if (/Height:\s*([0-9]*)/) { print "HEIGHT=$1;" }
+if (/Frame extents:\s*([0-9]*),\s*([0-9]*),\s*([0-9]*),\s*([0-9]*)/) { print "FL=$1;FR=$2;FU=$3;FD=$4;" }
+')
+
+# multi monitor support
+eval `xinq $DX $DY $DW $DH $SX $SY $WIDTH $HEIGHT | awk '{ print "DX="$1";DY="$2";DW="$3";DH="$4";" }'`
+
+wmctrl -i -r $WIN -b remove,maximized_vert
+wmctrl -i -r $WIN -b remove,maximized_horz
+if [[ "$1" = "left" ]]; then
+    wmctrl -i -r $WIN -e 0,$DX,$DY,$(($DW / 2 - $FL - $FR)),$(($DH - $FU - $FD))
+elif [[ "$1" = "right" ]]; then
+    wmctrl -i -r $WIN -e 0,$(($DX + $DW / 2)),$DY,$(($DW / 2 - $FL - $FR)),$(($DH - $FU - $FD))
+fi 

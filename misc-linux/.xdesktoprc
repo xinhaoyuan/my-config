@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# will be executed after the window manager is ready
+
+nitrogen --restore
+xscreensaver -no-splash &
+xfce4-panel &
+wicd-client -t &
+blueman-applet &
+

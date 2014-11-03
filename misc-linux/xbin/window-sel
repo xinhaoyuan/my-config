@@ -1,0 +1,32 @@
+#!/bin/bash
+
+eval `xdotool getmouselocation --shell`
+echo $X $Y > /tmp/$$
+
+xdotool search --onlyvisible --desktop `xdotool get_desktop` --name '' | while read line; do 
+    PROP=`xprop -id $line _NET_WM_STATE`
+    [[ $PROP =~ MAXIMIZED ]] || {
+        fl=0;fr=0;fu=0;fd=0;
+        eval $(xwininfo -id $line -all | \
+            perl -ne '
+if (/Corners:\s*\+([0-9]*)\+([0-9]*)/) { print "sx=$1;sy=$2;" }
+if (/Width:\s*([0-9]*)/) { print "width=$1;" }
+if (/Height:\s*([0-9]*)/) { print "height=$1;" }
+if (/Frame extents:\s*([0-9]*),\s*([0-9]*),\s*([0-9]*),\s*([0-9]*)/) { print "fl=$1;fr=$2;fu=$3;fd=$4;" }
+')
+        echo $line $(( $sx - $fl )) $(( $sy - $fu )) $(( $width + $fl + $fr )) $(( $height + $fu + $fd ))
+    }
+done >> /tmp/$$
+
+R=`cat /tmp/$$ | osd-box-sel -h`
+if [ -n "$R" ]; then
+    read -a A <<EOF
+$R
+EOF
+    WINDOW=${A[0]}
+    X=${A[1]}
+    Y=${A[2]}
+    xdotool windowfocus --sync $WINDOW windowraise $WINDOW
+    xdotool mousemove $X $Y
+fi
+rm /tmp/$$
