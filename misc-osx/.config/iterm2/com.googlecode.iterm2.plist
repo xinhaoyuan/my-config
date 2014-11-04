@@ -155,7 +155,7 @@
 	<key>HighlightTabLabels</key>
 	<true/>
 	<key>HotKeyBookmark</key>
-	<string>A489AEDA-AA71-4F1D-AAAA-D2E3467F2FFD</string>
+	<string>9B3AC9B8-BE5B-40BD-8429-B72F53BAE5D3</string>
 	<key>HotKeyTogglesWindow</key>
 	<true/>
 	<key>Hotkey</key>
@@ -208,7 +208,7 @@
 	<key>NSWindow Frame iTerm Window 0</key>
 	<string>4 300 710 476 0 0 1280 777 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
-	<string>570 302 710 476 0 0 1280 778 </string>
+	<string>570 301 710 476 0 0 1280 777 </string>
 	<key>NSWindow Frame iTerm Window 2</key>
 	<string>303 67 570 401 0 0 1280 778 </string>
 	<key>NSWindow Frame iTerm Window 3</key>

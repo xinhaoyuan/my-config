@@ -1,8 +1,6 @@
 include ../common.mk
 
 prepare:
-	${MAKE} -C xbin
-	${MAKE} -C .config/fontconfig
 
 install:
 	${STOW} -S ${PACKAGE}
