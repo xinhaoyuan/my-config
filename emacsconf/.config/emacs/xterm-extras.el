@@ -827,7 +827,50 @@
   (define-key function-key-map "\e[z5v"    [C-menu])
   (define-key function-key-map "\e[z6v"    [C-S-menu])
   (define-key function-key-map "\e[z7v"    [M-C-menu])
-  (define-key function-key-map "\e[z8v"    [S-M-C-menu]))
+  (define-key function-key-map "\e[z8v"    [S-M-C-menu])
+  ;; modified by xinhaoyuan@gmail.com
+  ;; -- more keys
+  (define-key function-key-map "\e[z3z1"    (kbd "M-!"))
+  (define-key function-key-map "\e[z5z1"    (kbd "C-!"))
+  (define-key function-key-map "\e[z7z1"    (kbd "M-C-!"))
+  
+  (define-key function-key-map "\e[z3z2"    (kbd "M-@"))
+  (define-key function-key-map "\e[z5z2"    (kbd "C-@"))
+  (define-key function-key-map "\e[z7z2"    (kbd "M-C-@"))
+
+  (define-key function-key-map "\e[z3z3"    (kbd "M-#"))
+  (define-key function-key-map "\e[z5z3"    (kbd "C-#"))
+  (define-key function-key-map "\e[z7z3"    (kbd "M-C-#"))
+
+  (define-key function-key-map "\e[z3z4"    (kbd "M-$"))
+  (define-key function-key-map "\e[z5z4"    (kbd "C-$"))
+  (define-key function-key-map "\e[z7z4"    (kbd "M-C-$"))
+
+  (define-key function-key-map "\e[z3z5"    (kbd "M-%"))
+  (define-key function-key-map "\e[z5z5"    (kbd "C-%"))
+  (define-key function-key-map "\e[z7z5"    (kbd "M-C-%"))
+
+  (define-key function-key-map "\e[z3z6"    (kbd "M-^"))
+  (define-key function-key-map "\e[z5z6"    (kbd "C-^"))
+  (define-key function-key-map "\e[z7z6"    (kbd "M-C-^"))
+
+  (define-key function-key-map "\e[z3z7"    (kbd "M-&"))
+  (define-key function-key-map "\e[z5z7"    (kbd "C-&"))
+  (define-key function-key-map "\e[z7z7"    (kbd "M-C-&"))
+
+  (define-key function-key-map "\e[z3z8"    (kbd "M-*"))
+  (define-key function-key-map "\e[z5z8"    (kbd "C-*"))
+  (define-key function-key-map "\e[z7z8"    (kbd "M-C-*"))
+
+  (define-key function-key-map "\e[z3z9"    (kbd "M-("))
+  (define-key function-key-map "\e[z5z9"    (kbd "C-("))
+  (define-key function-key-map "\e[z7z9"    (kbd "M-C-("))
+
+  (define-key function-key-map "\e[z3z0"    (kbd "M-)"))
+  (define-key function-key-map "\e[z5z0"    (kbd "C-)"))
+  (define-key function-key-map "\e[z7z0"    (kbd "M-C-)"))
+
+  )
 
 (defun xterm-extra-screen-keys ()
   ;; These may be necessary when running GNU screen inside an xterm,
