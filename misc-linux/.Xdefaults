@@ -258,4 +258,66 @@ Ctrl  Meta  Shift  <Key> KP_9:        string(0x1b) string("[z8u") \n\
 Ctrl  ~Meta ~Shift <Key> Menu:        string(0x1b) string("[z5v") \n\
 Ctrl  ~Meta Shift  <Key> Menu:        string(0x1b) string("[z6v") \n\
 Ctrl  Meta  ~Shift <Key> Menu:        string(0x1b) string("[z7v") \n\
-Ctrl  Meta  Shift  <Key> Menu:        string(0x1b) string("[z8v") \n
+Ctrl  Meta  Shift  <Key> Menu:        string(0x1b) string("[z8v") \n\
+\
+~Ctrl Meta  Shift  <Key> 1:           string(0x1b) string("[z3z1")\n\
+Ctrl  ~Meta Shift  <Key> 1:           string(0x1b) string("[z5z1")\n\
+Ctrl  Meta  Shift  <Key> 1:           string(0x1b) string("[z7z1")\n\
+~Ctrl Meta  Shift  <Key> 2:           string(0x1b) string("[z3z2")\n\
+Ctrl  ~Meta Shift  <Key> 2:           string(0x1b) string("[z5z2")\n\
+Ctrl  Meta  Shift  <Key> 2:           string(0x1b) string("[z7z2")\n\
+~Ctrl Meta  Shift  <Key> 3:           string(0x1b) string("[z3z3")\n\
+Ctrl  ~Meta Shift  <Key> 3:           string(0x1b) string("[z5z3")\n\
+Ctrl  Meta  Shift  <Key> 3:           string(0x1b) string("[z7z3")\n\
+~Ctrl Meta  Shift  <Key> 4:           string(0x1b) string("[z3z4")\n\
+Ctrl  ~Meta Shift  <Key> 4:           string(0x1b) string("[z5z4")\n\
+Ctrl  Meta  Shift  <Key> 4:           string(0x1b) string("[z7z4")\n\
+~Ctrl Meta  Shift  <Key> 5:           string(0x1b) string("[z3z5")\n\
+Ctrl  ~Meta Shift  <Key> 5:           string(0x1b) string("[z5z5")\n\
+Ctrl  Meta  Shift  <Key> 5:           string(0x1b) string("[z7z5")\n\
+~Ctrl Meta  Shift  <Key> 6:           string(0x1b) string("[z3z6")\n\
+Ctrl  ~Meta Shift  <Key> 6:           string(0x1b) string("[z5z6")\n\
+Ctrl  Meta  Shift  <Key> 6:           string(0x1b) string("[z7z6")\n\
+~Ctrl Meta  Shift  <Key> 7:           string(0x1b) string("[z3z7")\n\
+Ctrl  ~Meta Shift  <Key> 7:           string(0x1b) string("[z5z7")\n\
+Ctrl  Meta  Shift  <Key> 7:           string(0x1b) string("[z7z7")\n\
+~Ctrl Meta  Shift  <Key> 8:           string(0x1b) string("[z3z8")\n\
+Ctrl  ~Meta Shift  <Key> 8:           string(0x1b) string("[z5z8")\n\
+Ctrl  Meta  Shift  <Key> 8:           string(0x1b) string("[z7z8")\n\
+~Ctrl Meta  Shift  <Key> 9:           string(0x1b) string("[z3z9")\n\
+Ctrl  ~Meta Shift  <Key> 9:           string(0x1b) string("[z5z9")\n\
+Ctrl  Meta  Shift  <Key> 9:           string(0x1b) string("[z7z9")\n\
+~Ctrl Meta  Shift  <Key> 0:           string(0x1b) string("[z3z0")\n\
+Ctrl  ~Meta Shift  <Key> 0:           string(0x1b) string("[z5z0")\n\
+Ctrl  Meta  Shift  <Key> 0:           string(0x1b) string("[z7z0")
+
+URxvt.keysym.M-exclam:         \033[z3z1
+URxvt.keysym.C-exclam:         \033[z5z1
+URxvt.keysym.M-C-exclam:       \033[z7z1
+URxvt.keysym.M-at:             \033[z3z2
+URxvt.keysym.C-at:             \033[z5z2
+URxvt.keysym.M-C-at:           \033[z7z2
+URxvt.keysym.M-numbersign:     \033[z3z3
+URxvt.keysym.C-numbersign:     \033[z5z3
+URxvt.keysym.M-C-numbersign:   \033[z7z3
+URxvt.keysym.M-dollar:         \033[z3z4
+URxvt.keysym.C-dollar:         \033[z5z4
+URxvt.keysym.M-C-dollar:       \033[z7z4
+URxvt.keysym.M-percent:        \033[z3z5
+URxvt.keysym.C-percent:        \033[z5z5
+URxvt.keysym.M-C-percent:      \033[z7z5
+URxvt.keysym.M-asciicircum:    \033[z3z6
+URxvt.keysym.C-asciicircum:    \033[z5z6
+URxvt.keysym.M-C-asciicircum:  \033[z7z6
+URxvt.keysym.M-ampersand:      \033[z3z7
+URxvt.keysym.C-ampersand:      \033[z5z7
+URxvt.keysym.M-C-ampersand:    \033[z7z7
+URxvt.keysym.M-asterisk:       \033[z3z8
+URxvt.keysym.C-asterisk:       \033[z5z8
+URxvt.keysym.M-C-asterisk:     \033[z7z8
+URxvt.keysym.M-parenleft:      \033[z3z9
+URxvt.keysym.C-parenleft:      \033[z5z9
+URxvt.keysym.M-C-parenleft:    \033[z7z9
+URxvt.keysym.M-parenright:     \033[z3z0
+URxvt.keysym.C-parenright:     \033[z5z0
+URxvt.keysym.M-C-parenright:   \033[z7z0
