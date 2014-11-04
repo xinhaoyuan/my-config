@@ -2,3 +2,4 @@
 
 all:
 	${MAKE} -C xbin
+	${MAKE} -C .config/fontconfig
