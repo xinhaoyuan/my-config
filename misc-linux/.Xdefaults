@@ -50,6 +50,8 @@ LocalTE*saveLines: 0
 LocalTE*geometry: 80x40
 LocalTE*colorIT: S_cyan
 
+xterm*termName: xterm-256color
+
 xterm*fullscreen: never
 xterm*renderFont: true
 xterm*faceName: Terminus:pixelsize=14
