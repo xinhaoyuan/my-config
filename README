@@ -3,3 +3,7 @@ Manual Setup
 .zshrc:
 
 source $HOME/.zshrc.conf
+
+iTerm2:
+
+change setting directory
