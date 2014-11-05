@@ -206,7 +206,7 @@
 	<key>NSWindow Frame Preferences</key>
 	<string>202 126 924 485 0 0 1280 777 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>4 300 710 476 0 0 1280 777 </string>
+	<string>131 73 710 476 0 0 1280 777 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
 	<string>570 301 710 476 0 0 1280 777 </string>
 	<key>NSWindow Frame iTerm Window 2</key>
@@ -220,6 +220,18 @@
 		<dict>
 			<key>ASCII Anti Aliased</key>
 			<true/>
+			<key>AWDS Pane Directory</key>
+			<string></string>
+			<key>AWDS Pane Option</key>
+			<string>No</string>
+			<key>AWDS Tab Directory</key>
+			<string></string>
+			<key>AWDS Tab Option</key>
+			<string>No</string>
+			<key>AWDS Window Directory</key>
+			<string></string>
+			<key>AWDS Window Option</key>
+			<string>No</string>
 			<key>Allow Title Reporting</key>
 			<true/>
 			<key>Ambiguous Double Width</key>
@@ -411,7 +423,7 @@
 			<key>Columns</key>
 			<integer>100</integer>
 			<key>Command</key>
-			<string>/usr/local/bin/tmux new-session -A -s default</string>
+			<string></string>
 			<key>Cursor Color</key>
 			<dict>
 				<key>Blue Component</key>
@@ -433,7 +445,7 @@
 			<key>Cursor Type</key>
 			<integer>2</integer>
 			<key>Custom Command</key>
-			<string>Yes</string>
+			<string>No</string>
 			<key>Custom Directory</key>
 			<string>No</string>
 			<key>Default Bookmark</key>
@@ -464,7 +476,7 @@
 			<key>Idle Code</key>
 			<integer>0</integer>
 			<key>Initial Text</key>
-			<string></string>
+			<string>exec tmux new-session -A -s default</string>
 			<key>Jobs to Ignore</key>
 			<array>
 				<string>rlogin</string>
@@ -558,27 +570,6 @@
 					<key>Text</key>
 					<string>[z7z5</string>
 				</dict>
-				<key>0x5e-0x60000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[z5z6</string>
-				</dict>
-				<key>0x5e-0xa0000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[z3z6</string>
-				</dict>
-				<key>0x5e-0xe0000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[z7z6</string>
-				</dict>
 				<key>0x26-0x60000</key>
 				<dict>
 					<key>Action</key>
@@ -599,27 +590,6 @@
 					<integer>10</integer>
 					<key>Text</key>
 					<string>[z7z7</string>
-				</dict>
-				<key>0x2a-0x60000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[z5z8</string>
-				</dict>
-				<key>0x2a-0xa0000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[z3z8</string>
-				</dict>
-				<key>0x2a-0xe0000</key>
-				<dict>
-					<key>Action</key>
-					<integer>10</integer>
-					<key>Text</key>
-					<string>[z7z8</string>
 				</dict>
 				<key>0x28-0x60000</key>
 				<dict>
@@ -642,7 +612,7 @@
 					<key>Text</key>
 					<string>[z7z9</string>
 				</dict>
-                <key>0x29-0x60000</key>
+				<key>0x29-0x60000</key>
 				<dict>
 					<key>Action</key>
 					<integer>10</integer>
@@ -662,6 +632,27 @@
 					<integer>10</integer>
 					<key>Text</key>
 					<string>[z7z0</string>
+				</dict>
+				<key>0x2a-0x60000</key>
+				<dict>
+					<key>Action</key>
+					<integer>10</integer>
+					<key>Text</key>
+					<string>[z5z8</string>
+				</dict>
+				<key>0x2a-0xa0000</key>
+				<dict>
+					<key>Action</key>
+					<integer>10</integer>
+					<key>Text</key>
+					<string>[z3z8</string>
+				</dict>
+				<key>0x2a-0xe0000</key>
+				<dict>
+					<key>Action</key>
+					<integer>10</integer>
+					<key>Text</key>
+					<string>[z7z8</string>
 				</dict>
 				<key>0x2d-0x40000</key>
 				<dict>
@@ -739,6 +730,27 @@
 					<integer>10</integer>
 					<key>Text</key>
 					<string>[z7z2</string>
+				</dict>
+				<key>0x5e-0x60000</key>
+				<dict>
+					<key>Action</key>
+					<integer>10</integer>
+					<key>Text</key>
+					<string>[z5z6</string>
+				</dict>
+				<key>0x5e-0xa0000</key>
+				<dict>
+					<key>Action</key>
+					<integer>10</integer>
+					<key>Text</key>
+					<string>[z3z6</string>
+				</dict>
+				<key>0x5e-0xe0000</key>
+				<dict>
+					<key>Action</key>
+					<integer>10</integer>
+					<key>Text</key>
+					<string>[z7z6</string>
 				</dict>
 				<key>0xf700-0x220000</key>
 				<dict>
@@ -1237,6 +1249,8 @@
 			<string>/Users/xinhaoyuan</string>
 		</dict>
 	</array>
+	<key>NoSyncNeverRemindPrefsChangesCopy</key>
+	<true/>
 	<key>OnlyWhenMoreTabs</key>
 	<true/>
 	<key>OpenArrangementAtStartup</key>
@@ -1313,7 +1327,7 @@
 	<key>ShowPaneTitles</key>
 	<true/>
 	<key>SmartPlacement</key>
-	<false/>
+	<true/>
 	<key>SplitPaneDimmingAmount</key>
 	<real>0.40000000596046448</real>
 	<key>SwitchTabModifier</key>
