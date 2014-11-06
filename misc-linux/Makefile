@@ -1,7 +1,7 @@
 include ../common.mk
 
 prepare:
-	${MAKE} -C xbin
+	${MAKE} -C bin
 	${MAKE} -C .config/fontconfig
 
 install:
