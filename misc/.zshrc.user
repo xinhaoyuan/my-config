@@ -9,7 +9,13 @@ fi
 alias my-path="source my-path"
 alias emacs="emacs -nw"
 
+local ret_status="%(?:%{$fg_bold[green]%}-> :%{$fg_bold[red]%}-> %s)"
 PROMPT='${ret_status}%{$fg_bold[green]%}%p[%j] %{$fg[cyan]%}%c %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%} % %{$reset_color%}'
+
+ZSH_THEME_GIT_PROMPT_PREFIX="git:(%{$fg[red]%}"
+ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}"
+ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[blue]%}) %{$fg[yellow]%}(x)%{$reset_color%}"
+ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[blue]%})"
 
 setopt NO_HUP
 setopt NO_CHECK_JOBS
