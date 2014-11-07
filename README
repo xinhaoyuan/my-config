@@ -2,8 +2,11 @@ Dependency
 
 all:
 stow
+tmux
+zsh
 
 linux:
+xdotool
 xclip
 libx11
 libxinerama
@@ -11,6 +14,8 @@ libxinerama
 mac:
 
 Manual Setup
+
+change default shell to zsh
 
 .zshrc:
 
