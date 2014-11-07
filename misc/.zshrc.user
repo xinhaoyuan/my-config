@@ -21,3 +21,8 @@ ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[blue]%})"
 
 setopt NO_HUP
 setopt NO_CHECK_JOBS
+
+if [[ $TERM = "dumb" ]]; then
+    unsetopt zle
+    PS1='$ '
+fi
