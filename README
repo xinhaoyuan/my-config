@@ -4,6 +4,7 @@ all:
 stow
 tmux
 zsh
+emacs
 
 linux:
 xdotool
@@ -12,6 +13,9 @@ libx11
 libxinerama
 
 mac:
+brew
+reattach-to-user-namespace
+iterm2
 
 Manual Setup
 
