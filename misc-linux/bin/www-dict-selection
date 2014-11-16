@@ -1,0 +1,3 @@
+#!/bin/sh
+
+xdg-open "http://dict.cn/$(xclip -o -l 1)"

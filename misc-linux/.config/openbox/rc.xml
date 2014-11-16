@@ -170,7 +170,7 @@
       </action>
     </keybind>
     <!-- Keybindings for desktop switching -->
-    <keybind key="W-1">
+    <keybind key="W-S-1">
       <action name="ToggleAlwaysOnTop"/>
     </keybind>
     <keybind key="W-Left">
@@ -303,6 +303,11 @@
       </action>
     </keybind>
     <!-- Keybindings for running applications -->
+    <keybind key="W-1">
+      <action name="Execute">
+        <command>www-dict-selection</command>
+      </action>
+    </keybind>
     <keybind key="W-slash">
       <action name="Execute">
         <command>x-www-browser</command>
