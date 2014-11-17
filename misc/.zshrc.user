@@ -26,5 +26,6 @@ if [[ $TERM = "dumb" ]]; then
     PS1='$ '
 fi
 
-LANG="en_US.UTF-8"
-LC_CTYPE="zh_CN.UTF-8"
+if [[ -e "$HOME/.zshrc.user.os" ]]; then
+   source "$HOME/.zshrc.user.os"
+fi
