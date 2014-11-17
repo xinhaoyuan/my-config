@@ -131,7 +131,7 @@
   ""
   (interactive)
   (and (y-or-n-p "Are you sure to exit Emacs?")
-       (if (or server-mode (eq (server-running-p) 't))
+       (if server-process
            ;; feature <disabled>: if the current frame is the last
            ;; frame, just minimize it.
            (let* ((frame (selected-frame))
