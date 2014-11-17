@@ -130,8 +130,8 @@
 (defun my-exit ()
   ""
   (interactive)
-  (and (y-or-n-p "Are you sure to exit Emacs?")
-       (if server-process
+  (if server-process
+      (and (y-or-n-p "Are you sure to kill this frame?")
            ;; feature <disabled>: if the current frame is the last
            ;; frame, just minimize it.
            (let* ((frame (selected-frame))
@@ -142,9 +142,11 @@
              (delete-frame frame 't)
              ;; (select-frame-set-input-focus nframe)
              ;;  )
-             )
+             ))
+    (and (y-or-n-p "Are you sure to kill emacs?")
          (kill-emacs))
-       ))
+    )
+  )
 
 (defun tabify-buffer ()
   ""
