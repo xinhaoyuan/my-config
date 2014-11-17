@@ -7,9 +7,8 @@ if [[ ! ":$PATH:" =~ ":$HOME/bin:" ]]; then
 fi
 
 alias my-path="source my-path"
-alias emacs="emacs -nw"
-
-
+alias emacsx="my-emacs"
+alias emacs="my-emacs -nw"
 
 local ret_status="%(?:%{$fg_bold[green]%}-> :%{$fg_bold[red]%}-> %s)"
 PROMPT='${ret_status}%{$fg_bold[green]%}%p[${SSH_TTY:+%n@%m:}%j] %{$fg[cyan]%}%c %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%} % %{$reset_color%}'
@@ -26,3 +25,6 @@ if [[ $TERM = "dumb" ]]; then
     unsetopt zle
     PS1='$ '
 fi
+
+LANG="en_US.UTF-8"
+LC_CTYPE="zh_CN.UTF-8"

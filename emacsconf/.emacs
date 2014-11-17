@@ -126,19 +126,22 @@
   (interactive)
   (find-file-other-window "Makefile"))
 
+(require 'server)
 (defun my-exit ()
   ""
   (interactive)
   (and (y-or-n-p "Are you sure to exit Emacs?")
-       (if server-mode
+       (if (or server-mode (eq (server-running-p) 't))
+           ;; feature <disabled>: if the current frame is the last
+           ;; frame, just minimize it.
            (let* ((frame (selected-frame))
                   (nframe (next-frame frame))
                   )
-             (if (eq frame nframe)
-                 (iconify-frame frame)
-               (delete-frame frame 't)
-               ;; (select-frame-set-input-focus nframe)
-               )
+             ;; (if (eq frame nframe)
+             ;;     (iconify-frame frame)
+             (delete-frame frame 't)
+             ;; (select-frame-set-input-focus nframe)
+             ;;  )
              )
          (kill-emacs))
        ))
