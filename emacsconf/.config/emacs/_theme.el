@@ -74,21 +74,15 @@
            ;; console
            (progn
              (setq frame-background-mode 'dark)
-             ;; (xterm-mouse-mode)
-             (if (or (string-match "^screen" (getenv "TERM"))
-                     (string-match "^xterm" (getenv "TERM"))
-                     (string-match "^rxvt" (getenv "TERM"))
-                     )
-                 (let ((m function-key-map))
-                   (let ((function-key-map local-function-key-map))
-                     (require 'xterm-extras)
-                     (xterm-extra-keys)
-                     (setq local-function-key-map function-key-map)
-                     )
-                   (setq function-key-map m)))
              )
            )
          )))
   (add-hook 'after-make-frame-functions init-new-frame)
-  (mapc init-new-frame (frame-list))
   )
+
+(add-hook 'after-init-hook
+          (lambda ()
+            (mapc
+             (lambda (f)
+               (run-hook-with-args 'after-make-frame-functions f))
+             (frame-list))))

@@ -6,7 +6,7 @@
 (load "_term.el")
 (load "_python.el")
 (load "_spell.el")
-
+(load "_tty.el")
 ;; misc {{{
 
 (setq eshell-save-history-on-exit nil)
