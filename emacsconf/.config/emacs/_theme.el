@@ -74,7 +74,7 @@
            ;; console
            (progn
              (setq frame-background-mode 'dark)
-             (xterm-mouse-mode)
+             ;; (xterm-mouse-mode)
              (if (or (string-match "^screen" (getenv "TERM"))
                      (string-match "^xterm" (getenv "TERM"))
                      (string-match "^rxvt" (getenv "TERM"))
