@@ -1,11 +1,11 @@
 (require 'xt-mouse)
+(xterm-mouse-mode)
+
 (add-hook 'after-make-frame-functions
           (lambda (f)
             (select-frame f)
             (if (not (window-system))
                 (progn
-                  (if (not xterm-mouse-mode)
-                      (xterm-mouse-mode))
                   (if (or (string-match "^screen" (getenv "TERM"))
                           (string-match "^xterm" (getenv "TERM"))
                           (string-match "^rxvt" (getenv "TERM"))
