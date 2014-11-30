@@ -11,7 +11,7 @@ install:
 		LPATH=$${LPATH#$${LPATH%/*/*}/};\
 		mkdir -p ../../.config;\
 		cd ../../.config;\
-		ln -s ../$${LPATH}/.config/iterm2;\
+		ln -sf ../$${LPATH}/.config/iterm2;\
 	)
 	${STOW} -S ${PACKAGE}
 
