@@ -5,13 +5,13 @@ OS=`uname`
 
 if [ "$OP" = "paste" ]; then
     if [ "$OS" = "Darwin" ]; then
-        exec pbpaste
+        exec reattach-to-user-namespace pbpaste
     elif [ "$OS" = "Linux" -a -n "$DISPLAY" ]; then
         exec xclip -l 1 -o -selection clipboard 2>/dev/null
     fi    
 elif [ "$OP" = "copy" ]; then
     if [ "$OS" = "Darwin" ]; then
-        exec pbcopy
+        exec reattach-to-user-namespace pbcopy
     elif [ "$OS" = "Linux" -a -n "$DISPLAY" ]; then
         exec xclip -l 1 -i -selection clipboard
     fi
