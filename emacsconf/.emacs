@@ -192,7 +192,7 @@
 (define-key my-prefix (kbd "p") 'org-publish-current-project)
 (define-key my-prefix (kbd "C-z") 'delete-surrounding-blank)
 (define-key my-prefix (kbd "DEL") 'delete-surrounding-blank)
-(define-key my-prefix (kbd "SPC") (lambda () (interactive) (term "/bin/bash")))
+(define-key my-prefix (kbd "!") (lambda () (interactive) (term (or (getenv "SHELL") "/bin/sh"))))
 (define-key my-prefix (kbd "=") 'toggle-frame-fullscreen)
 (define-key my-prefix (kbd "m") 'mingus)
 (define-key my-prefix (kbd "<next>") 'mingus-next)
