@@ -1,3 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
-\emacsclient -a '' -c "$@"
+declare -a args
+for arg in "$@"; do
+    if [[ $arg == -* ]]; then
+        args+=( "$arg" )
+    else
+        path=`cd $(dirname "$arg"); pwd`/`basename $arg`
+        args+=( "-e" "(find-file \"$path\")" )
+    fi
+done
+
+\emacsclient -a '' -c "${args[@]}"
