@@ -1,9 +1,10 @@
 Dependency
 
 all:
-stow
+stow (>= 2.2.0)
 tmux
-zsh
+git
+zsh (oh-my-zsh)
 emacs
 
 linux:
@@ -11,6 +12,8 @@ xdotool
 xclip
 libx11
 libxinerama
+php
+pkg-config
 
 mac:
 brew
@@ -20,6 +23,8 @@ iterm2
 Manual Setup
 
 change default shell to zsh
+oh-my-zsh:
+git clone git://github.com/robbyrussell/oh-my-zsh.git $HOME/.oh-my-zsh
 
 .zshrc:
 
