@@ -28,7 +28,7 @@ git clone git://github.com/robbyrussell/oh-my-zsh.git $HOME/.oh-my-zsh
 
 .zshrc:
 
-source $HOME/.zshrc.conf
+source $HOME/.zshrc.user
 
 iTerm2:
 
