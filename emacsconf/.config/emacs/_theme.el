@@ -33,9 +33,14 @@
        (lambda (f)
          ;; set font/color
          (select-frame f)
-         (if (window-system)
+         (if (display-graphic-p f)
              ;; window
              (progn
+	       (setq x-select-enable-clipboard t)
+	       (setq frame-title-format "%b %n %p")
+	       (set-scroll-bar-mode nil)
+	       (tool-bar-mode -1)
+	       ;; (menu-bar-mode -1)
                (let ((try-font
                       (lambda (cur)
                         (if (eq cur nil)
