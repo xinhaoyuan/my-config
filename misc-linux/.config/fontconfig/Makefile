@@ -1,2 +1,2 @@
 fonts.conf: fonts.conf.php
-	php $< > $@
+	php -d short_open_tag=off $< > $@
