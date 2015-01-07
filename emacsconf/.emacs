@@ -126,7 +126,8 @@
   ""
   (interactive)
   (if server-process
-      (and (y-or-n-p "Are you sure to kill this frame?")
+      (and ;; no asking anymore
+           ;; (y-or-n-p "Are you sure to kill this frame?")
            ;; feature <disabled>: if the current frame is the last
            ;; frame, just minimize it.
            (let* ((frame (selected-frame))
