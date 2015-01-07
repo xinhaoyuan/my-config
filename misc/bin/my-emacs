@@ -1,8 +1,15 @@
 #!/bin/bash
 
 declare -a args
+push_next=0
 for arg in "$@"; do
-    if [[ $arg == -* ]]; then
+    if [[ "$arg" =~ ^-[edsfa]$ || "$arg" == "--eval" ]]; then
+        args+=( "$arg" )
+        push_next=1
+    elif [[ $push_next == 1 ]]; then
+        args+=( "$arg" )
+        push_next=0
+    elif [[ "$arg" == -* ]]; then
         args+=( "$arg" )
     else
         path=`cd $(dirname "$arg"); pwd`/`basename $arg`
