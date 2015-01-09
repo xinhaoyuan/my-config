@@ -6,7 +6,7 @@ if [[ ! "$info" =~ 'already set' ]]; then
    # run extension engine
     echo 'Starting tmux session extension.'
     TMUX_PATH=`whence -p tmux`
-    # tmux run -b "python3 $LOCAL/tmux-extension-engine.py $TMUX_PATH '#{session_id}'"
+    tmux run -b "python3 $LOCAL/tmux-extension-engine.py $TMUX_PATH '#{session_id}'"
 fi
 
 if [[ `uname` == 'Darwin' ]]; then
