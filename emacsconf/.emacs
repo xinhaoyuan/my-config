@@ -194,10 +194,13 @@
 (define-key my-prefix (kbd "<next>") 'mingus-next)
 (define-key my-prefix (kbd "<prior>") 'mingus-prev)
 
-(define-key my-prefix (kbd "<up>") 'windmove-up)
-(define-key my-prefix (kbd "<down>") 'windmove-down)
-(define-key my-prefix (kbd "<left>") 'windmove-left)
-(define-key my-prefix (kbd "<right>") 'windmove-right)
+(define-key my-prefix (kbd "2")       'tmux-split-v)
+(define-key my-prefix (kbd "3")       'tmux-split-h)
+(define-key my-prefix (kbd ":")       'tmux-command)
+(define-key my-prefix (kbd "<up>")    'my-move-up)
+(define-key my-prefix (kbd "<down>")  'my-move-down)
+(define-key my-prefix (kbd "<left>")  'my-move-left)
+(define-key my-prefix (kbd "<right>") 'my-move-right)
 
 (define-key my-prefix (kbd "f") 'toggle-big-font)
 (define-key my-prefix (kbd "<f11>") 'toggle-fullscreen)
