@@ -9,10 +9,11 @@
   )
 
 (defun send-apc-to-terminal (terminal message)
-  (send-string-to-terminal (format "\e_%s\e\\" message)))
+  (send-string-to-terminal (format "\e_%s\e\\" message) terminal))
 
 (add-hook 'after-make-frame-functions
           (lambda (f)
+            (message "after-make-frame")
             (with-selected-frame f
               (if (not (window-system))
                   (progn
@@ -28,11 +29,11 @@
                             )
                           (setq function-key-map m)))
                     
-                    (define-key local-function-key-map
+                    (define-key input-decode-map
                       "\e[I"
                       (lambda (_event)
                         (terminal-gain-focus (frame-terminal (selected-frame))) ""))
-                    (define-key local-function-key-map
+                    (define-key input-decode-map
                       "\e[O"
                       (lambda (_event)
                         (terminal-lose-focus (frame-terminal (selected-frame))) ""))
@@ -137,20 +138,19 @@
                (send-apc-to-terminal (frame-terminal) "cmd,select-pane -R"))))
   )
 
-(defun tmux-split-h ()
+(defun send-tmux-prefix ()
   (interactive)
-  (if (and (not (display-graphic-p))
-           (getenv "TMUX" (selected-frame)))
-      (send-apc-to-terminal (frame-terminal) "cmd,split-window -h")))
+  (condition-case nil
+      (windmove-right)
+    (error (if (and (not (display-graphic-p))
+                    (getenv "TMUX" (selected-frame)))
+               (send-apc-to-terminal (frame-terminal) "cmd,send-prefix -U"))))
+  )
 
-(defun tmux-split-v ()
-  (interactive)
-  (if (and (not (display-graphic-p))
-           (getenv "TMUX" (selected-frame)))
-      (send-apc-to-terminal (frame-terminal) "cmd,split-window -v")))
-
-(defun tmux-command ()
-  (interactive)
-  (if (and (not (display-graphic-p))
-           (getenv "TMUX" (selected-frame)))
-      (shell-command "tmux command-prompt")))
+(add-hook 'my-prefix-undefined-hook
+          (lambda (keys)
+            (if (and (not (display-graphic-p))
+                     (getenv "TMUX" (selected-frame)))
+                (let ((line (format "tmux send -U %s %c" "C-F1" (elt keys 1))))
+                  (shell-command line)
+                  ))))
