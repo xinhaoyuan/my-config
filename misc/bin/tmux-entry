@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env zsh
 
 LOCAL=`cd $(dirname $0); pwd`
 info=`tmux set -o @extension 1 2>&1`
