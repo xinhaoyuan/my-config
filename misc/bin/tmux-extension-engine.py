@@ -17,20 +17,26 @@ def main(argv):
                        stdout = subprocess.PIPE,
                        env = nenv)
 
+  level = 0
+
   for l in p.stdout:
     line = l.decode('utf-8')
     m = re.match('%apc %[0-9]+ enter-emacs', line)
     if m:
-      print("enter")
-      p.stdin.write(bytes('set -q prefix C-F1\n', 'utf-8'))
-      p.stdin.flush()
+      level = level + 1
+      if level == 1:
+        print("enter")
+        p.stdin.write(bytes('set -q prefix C-F1\n', 'utf-8'))
+        p.stdin.flush()
       continue
 
     m = re.match('%apc %[0-9]+ leave-emacs', line)
     if m:
-      print("leave")
-      p.stdin.write(bytes('set -q prefix C-z\n', 'utf-8'))
-      p.stdin.flush()
+      if level > 0: level = level - 1
+      if level == 0:
+        print("leave")
+        p.stdin.write(bytes('set -q prefix C-z\n', 'utf-8'))
+        p.stdin.flush()
       continue
 
     m = re.match('%apc %[0-9]+ cmd,(.*)', line)
