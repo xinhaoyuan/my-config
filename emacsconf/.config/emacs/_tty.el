@@ -1,21 +1,20 @@
 (require 'xt-mouse)
 
 (defun turn-on-focus-event-on-terminal (terminal)
-  (send-string-to-terminal "\e[?1004h" terminal)
-  )
+  (send-string-to-terminal "\e[?1004h" terminal))
 
 (defun turn-off-focus-event-on-terminal (terminal)
-  (send-string-to-terminal "\e[?1004l" terminal)
-  )
+  (send-string-to-terminal "\e[?1004l" terminal))
 
 (defun send-apc-to-terminal (terminal message)
   (send-string-to-terminal (format "\e_%s\e\\" message) terminal))
 
+
 (add-hook 'after-make-frame-functions
-          (lambda (f)
-            (message "after-make-frame")
-            (with-selected-frame f
-              (if (not (window-system))
+          (lambda (frame)
+            (let ((tty (frame-terminal frame)))
+              (select-frame frame)
+              (if tty
                   (progn
                     (if (or (string-match "^screen" (getenv "TERM"))
                             (string-match "^xterm" (getenv "TERM"))
@@ -41,38 +40,40 @@
                     ;; let the terminal to resend the focus signal
                     (turn-off-focus-event-on-terminal (frame-terminal))
                     (turn-on-focus-event-on-terminal (frame-terminal))
-                    )))))
 
-(add-hook 'suspend-resume-hook
-          (lambda () (if (not (display-graphic-p))
-                         (progn
-                           (turn-on-focus-event-on-terminal (frame-terminal))
-                           (terminal-gain-focus (frame-terminal))))))
+                    )))
+            ))
+
+
+;; (add-hook 'suspend-resume-hook
+;;           (lambda () (if (not (display-graphic-p))
+;;                          (progn
+;;                            (turn-on-focus-event-on-terminal (frame-terminal))
+;;                            (terminal-gain-focus (frame-terminal))))))
+
+;; (add-hook 'suspend-hook
+;;           (lambda () (if (not (display-graphic-p))
+;;                          (progn
+;;                            (turn-off-focus-event-on-terminal (frame-terminal))
+;;                            (terminal-lose-focus (frame-terminal))))))
+
+;; (add-hook 'delete-frame-functions
+;;           (lambda (f) (if (and (frame-live-p f) (not (display-graphic-p f)))
+;;                           (with-selected-frame f
+;;                             (turn-off-focus-event-on-terminal (frame-terminal))
+;;                             (terminal-lose-focus (frame-terminal))
+;;                             ))))
 
 (add-hook 'resume-tty-functions
-          (lambda (tty) (if (not (display-graphic-p))
-                         (progn
-                           (turn-on-focus-event-on-terminal tty)
-                           (terminal-gain-focus tty)))))
-
-
-(add-hook 'suspend-hook
-          (lambda () (if (not (display-graphic-p))
-                         (progn
-                           (turn-off-focus-event-on-terminal (frame-terminal))
-                           (terminal-lose-focus (frame-terminal))))))
+          (lambda (tty)
+            (turn-on-focus-event-on-terminal tty)
+            (terminal-gain-focus tty)))
 
 (add-hook 'suspend-tty-functions
           (lambda (tty)
             (turn-off-focus-event-on-terminal tty)
             (terminal-lose-focus tty)))
 
-(add-hook 'delete-frame-functions
-          (lambda (f) (if (and (frame-live-p f) (not (display-graphic-p f)))
-                          (with-selected-frame f
-                            (turn-off-focus-event-on-terminal (frame-terminal))
-                            (terminal-lose-focus (frame-terminal))
-                            ))))
 
 (add-hook 'delete-terminal-functions
           (lambda (tty)
