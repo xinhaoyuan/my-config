@@ -36,7 +36,7 @@
 (setq kill-ring-max 256)
 (setq undo-limit 1000000)
 (setq enable-recursive-minibuffers t)
-(setq default-tab-width 4)
+(setq default-tab-width 8)
 (global-set-key (kbd "C-x C-b") 'electric-buffer-list)
 
 (require 'redo)
