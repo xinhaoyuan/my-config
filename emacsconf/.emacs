@@ -7,6 +7,7 @@
 (load "_python.el")
 (load "_spell.el")
 (load "_tty.el")
+(load "_tmux.el")
 ;; misc {{{
 
 (setq eshell-save-history-on-exit nil)
@@ -177,14 +178,13 @@
 (global-unset-key (kbd "C-z"))
 (define-prefix-command 'my-prefix)
 (global-set-key (kbd "C-z") 'my-prefix)
-(define-key my-prefix "1" 'my-tmux-break-pane)
+(define-key my-prefix "1" 'my-tmux-zoom)
 (define-key my-prefix "2" 'my-tmux-split-v)
 (define-key my-prefix "3" 'my-tmux-split-h)
 (define-key my-prefix ":" 'my-tmux-command)
 (define-key my-prefix "c" 'my-tmux-new-window)
 (define-key my-prefix (kbd "<C-left>") 'my-tmux-prev-window)
 (define-key my-prefix (kbd "<C-right>") 'my-tmux-next-window)
-(define-key my-prefix "z" 'my-tmux-zoom)
 (define-key my-prefix (kbd "a") 'menu-bar-open)
 (define-key my-prefix (kbd "<return>") 'newline)
 (define-key my-prefix (kbd "q z") 'reload-dotemacs)
