@@ -17,4 +17,4 @@ for arg in "$@"; do
     fi
 done
 
-\emacsclient -a '' -c "${args[@]}"
+exec \emacsclient -a '' -c "${args[@]}"
