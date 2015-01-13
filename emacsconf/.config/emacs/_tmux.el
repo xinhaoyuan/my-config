@@ -49,10 +49,10 @@ White space here is any of: space, tab, emacs newline (line feed, ASCII 10)."
 
 (add-hook 'delete-frame-functions
           (lambda (f)
-            (if (and (frame-live-p) (frame-terminal) (getenv "TMUX"))
+            (if (and (frame-live-p f) (frame-terminal f) (getenv "TMUX" f))
                 (tmux-command 
                  (format "setp -t %s passthrough-keys off"
-                         (frame-parameter nil 'tmux-pane-id)))
+                         (frame-parameter f 'tmux-pane-id)))
               )))
 
 (add-hook 'kill-emacs-hook
@@ -71,12 +71,11 @@ White space here is any of: space, tab, emacs newline (line feed, ASCII 10)."
             (if (getenv "TMUX" (selected-frame))
                 (progn
                   (set-terminal-parameter
-                   (frame-terminal) 'tmux-pane-id
-                   (trim-string
-                    (tmux-command "display -p \"#{pane_id}\"")))
+                   nil 'tmux-pane-id
+                   (tmux-command "display -p \"#{pane_id}\""))
                   (tmux-command 
                    (format "setp -t %s passthrough-keys on"
-                           (frame-parameter frame 'tmux-pane-id)))
+                           (terminal-parameter nil 'tmux-pane-id)))
                   ))))
                  
 (add-hook 'resume-tty-functions
