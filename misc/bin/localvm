@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+
+CLIENT_ENTRY_TO_HOST="/media/sf_host-home"
+CLIENT_ENTRY_LOCATION="$HOME"
+
+WORKING_DIR=`pwd`
+
+if [[ "$WORKING_DIR" != ${CLIENT_ENTRY_LOCATION}* ]]; then
+    echo "Cannot execute remote command out of client entry"
+    exit 1
+fi
+
+exec ssh localvm "cd ${CLIENT_ENTRY_TO_HOST}${WORKING_DIR#${CLIENT_ENTRY_LOCATION}} && $*"
