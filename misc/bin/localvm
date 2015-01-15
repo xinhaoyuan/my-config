@@ -10,4 +10,8 @@ if [[ "$WORKING_DIR" != ${CLIENT_ENTRY_LOCATION}* ]]; then
     exit 1
 fi
 
-exec ssh localvm "cd ${CLIENT_ENTRY_TO_HOST}${WORKING_DIR#${CLIENT_ENTRY_LOCATION}} && $*"
+if [[ $# == 0 ]]; then
+    exec ssh localvm -t "cd ${CLIENT_ENTRY_TO_HOST}${WORKING_DIR#${CLIENT_ENTRY_LOCATION}} && exec \$SHELL"
+else
+    exec ssh localvm "cd ${CLIENT_ENTRY_TO_HOST}${WORKING_DIR#${CLIENT_ENTRY_LOCATION}} && $*"
+fi

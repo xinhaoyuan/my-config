@@ -197,9 +197,8 @@
 (define-key my-prefix (kbd "DEL") 'delete-surrounding-blank)
 (define-key my-prefix (kbd "!") (lambda () (interactive) (term (or (getenv "SHELL") "/bin/sh"))))
 (define-key my-prefix (kbd "=") 'toggle-frame-fullscreen)
-(define-key my-prefix (kbd "m") 'mingus)
-(define-key my-prefix (kbd "<next>") 'mingus-next)
-(define-key my-prefix (kbd "<prior>") 'mingus-prev)
+(define-key my-prefix (kbd "m") 'compile)
+(define-key my-prefix (kbd "C-m") 'find-Makefile)
 
 (define-key my-prefix (kbd "<up>")    'my-move-up)
 (define-key my-prefix (kbd "<down>")  'my-move-down)
