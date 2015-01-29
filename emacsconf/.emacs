@@ -6,6 +6,7 @@
 (load "_term.el")
 (load "_python.el")
 (load "_spell.el")
+(load "_flyspell.el")
 (load "_tty.el")
 (load "_tmux.el")
 ;; misc {{{
