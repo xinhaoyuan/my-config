@@ -31,3 +31,5 @@
 (eval-after-load "flyspell"
   '(progn
      (fset 'flyspell-emacs-popup 'flyspell-emacs-popup-textual)))
+
+(add-hook 'tex-mode-hook (lambda () (flyspell-mode)))
