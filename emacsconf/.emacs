@@ -137,6 +137,7 @@
                   )
              ;; (if (eq frame nframe)
              ;;     (iconify-frame frame)
+             (save-some-buffers t)
              (delete-frame frame 't)
              ;; (select-frame-set-input-focus nframe)
              ;;  )
