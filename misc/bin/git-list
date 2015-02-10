@@ -1,0 +1,7 @@
+#!/bin/zsh
+
+IFS=$'\n'
+for p in $(find ${HOME} -name ".git" -type d); do
+    cd $(dirname $p)
+    [[ -n `git status -s` ]] && echo $(dirname $p)
+done
