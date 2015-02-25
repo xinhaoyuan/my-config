@@ -15,7 +15,8 @@
               (select-frame frame)
               (if tty
                   (progn
-                    (if (or (string-match "^screen" (getenv "TERM"))
+                    (if (or (string-match "^dvtm" (getenv "TERM"))
+                            (string-match "^screen" (getenv "TERM"))
                             (string-match "^xterm" (getenv "TERM"))
                             (string-match "^rxvt" (getenv "TERM"))
                             )
