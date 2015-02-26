@@ -30,6 +30,16 @@
                     )))
             ))
 
+(defun terminal-init-dvtm ()
+  "Terminal initialization function for dvtm."
+  ;; Use the xterm color initialization code.
+  (let ((file (locate-library (concat term-file-prefix "xterm"))))
+    (and file
+         (or (assoc file load-history)
+             (load file t t))))
+  (xterm-register-default-colors)
+  (tty-set-up-initial-frame-faces))
+
 ;; (defun terminal-gain-focus (tty)
 ;;   (if (not (terminal-parameter tty 'has-focus))
 ;;       (progn
