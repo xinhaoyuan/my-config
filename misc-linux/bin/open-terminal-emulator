@@ -10,11 +10,8 @@ termtitle="Terminal-$sessionname"
 
 unset TMUX
 
-tmux has-session -t "$sessionname" || \
-    tmux new-session -d -s "$sessionname"
 xdotool search --name "$termtitle" windowraise windowfocus || \
-    exec urxvt -title "$termtitle" -name "$classname" -e \
-    tmux attach-session -d -t "$sessionname"
+    exec urxvt -title "$termtitle" -name "$classname" -e dvtm-status
 # xdotool search --name "$termtitle" windowraise windowfocus || \
 #     exec gnome-terminal --title "$termtitle" --name "$classname" -e \
 #     "tmux attach-session -d -t \"$sessionname\""
