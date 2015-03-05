@@ -10,7 +10,11 @@ alias my-path="source my-path"
 alias emacsx="my-emacs"
 alias emacs="my-emacs -nw"
 
-eval `TERM=xterm-256color dircolors`
+if [[ "$TERM" = dvtm || "$TERM" = dvtm-* ]]; then 
+    eval `TERM=xterm${TERM#dvtm} dircolors`
+else
+    eval `dircolors`
+fi
 
 local ret_status="%(?:%{$fg_bold[green]%}-> :%{$fg_bold[red]%}-> %s)"
 PROMPT='${ret_status}%{$fg_bold[green]%}%p[${SSH_TTY:+%n@%m:}%j] %{$fg[cyan]%}%c %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%} % %{$reset_color%}'
