@@ -10,10 +10,12 @@ alias my-path="source my-path"
 alias emacsx="my-emacs"
 alias emacs="my-emacs -nw"
 
-if [[ "$TERM" = dvtm || "$TERM" = dvtm-* ]]; then 
-    eval `TERM=xterm${TERM#dvtm} dircolors`
-else
-    eval `dircolors`
+if type -p dircolors > /dev/null; then
+    if [[ "$TERM" = dvtm || "$TERM" = dvtm-* ]]; then 
+        eval `TERM=xterm${TERM#dvtm} dircolors`
+    else
+        eval `dircolors`
+    fi
 fi
 
 local ret_status="%(?:%{$fg_bold[green]%}-> :%{$fg_bold[red]%}-> %s)"
