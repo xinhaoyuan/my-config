@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 
 declare -a args
+has_action=0
 push_next=0
 for arg in "$@"; do
-    if [[ "$arg" =~ ^-[edsfa]$ || "$arg" == "--eval" ]]; then
+    if [[ "$arg" = "-e" || "$arg" == "--eval" ]]; then
+        args+=( "$arg" )
+        push_next=1
+        has_action=1
+    elif [[ "$arg" =~ ^-[dsfa]$ ]]; then
         args+=( "$arg" )
         push_next=1
     elif [[ $push_next == 1 ]]; then
@@ -14,7 +19,12 @@ for arg in "$@"; do
     else
         path=`cd $(dirname "$arg"); pwd`/`basename $arg`
         args+=( "-e" "(find-file \"$path\")" )
+        has_action=1
     fi
 done
+
+if [[ $has_action = 0 ]]; then
+    args+=( "-e" "(switch-to-buffer (other-buffer))")
+fi
 
 exec \emacsclient -a '' -c "${args[@]}"
