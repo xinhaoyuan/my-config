@@ -1,0 +1,25 @@
+#!/bin/bash
+
+LOCAL=`cd $(dirname "$0"); pwd`
+PORT=8080
+TRY=0
+
+if [ ! -f "${LOCAL}/fs.php" ]; then
+    echo "${LOCAL}/fs.php not found"
+    exit 1
+fi
+
+export FS_ACCESS_CODE=`openssl rand -hex 4`
+while true; do
+    echo "try :${PORT}/?ac=${FS_ACCESS_CODE}"
+    php -S 0.0.0.0:${PORT} "${LOCAL}/fs.php" && break
+    let PORT=$PORT+1
+    let TRY=$TRY+1
+    if [[ $TRY -ge 10 ]]; then
+        echo "too many tries"
+        exit 1
+    fi
+done
+      
+      
+
