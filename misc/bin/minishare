@@ -9,7 +9,10 @@ if [ ! -f "${LOCAL}/fs.php" ]; then
     exit 1
 fi
 
-export FS_ACCESS_CODE=`openssl rand -hex 2`
+if [[ "$1" != "np" ]]; then
+    export FS_ACCESS_CODE=`openssl rand -hex 2`
+fi
+
 while true; do
     echo "try :${PORT}/?ac=${FS_ACCESS_CODE}"
     php -S 0.0.0.0:${PORT} "${LOCAL}/fs.php" && break
