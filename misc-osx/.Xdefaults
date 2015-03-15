@@ -1,0 +1,111 @@
+*background: #2d2d2d
+*foreground: #c0c0c0
+*cursorColor: #93a1a1
+*pointerColorBackground:#586e75
+*pointerColorForeground:#93a1a1
+
+*color0:  #000000000000
+*color1:  #CCCC00000000
+
+*color2:  #4E4E9A9A0606
+*color3:  #C4C4A0A00000
+
+*color4:  #34346565A4A4
+*color5:  #757550507B7B
+
+*color6:  #060698209A9A
+*color7: #D3D3D7D7CFCF
+
+*color8:  #555557575353
+*color9: #EFEF29292929
+
+*color10: #8A8AE2E23434
+*color11: #FCFCE9E94F4F
+
+*color12:  #72729F9FCFCF
+*color13: #ADAD7F7FA8A8
+
+*color14:  #3434E2E2E2E2
+*color15: #EEEEEEEEECEC
+
+URxvt*termName: rxvt-unicode-256color
+URxvt*font:   xft:Terminus:pixelsize=14,xft:SimSun:pixelsize=16
+URxvt*preeditType: OverTheSpot
+! Disable all perl extentions and iso14755
+URxvt*iso14755: False
+URxvt*perl-ext-common:
+URxvt*perl-ext:
+! Scroll to bottom only when key presses
+URxvt*scrollTtyOutput: false
+URxvt*scrollWithBuffer: true
+URxvt*scrollTtyKeypress: true
+URxvt*scrollBar: False
+URxvt*saveLines: 8000
+URxvt*geometry: 80x38
+URxvt*depth: 32
+
+URxvt.keysym.M-exclam:         \033[33;3u
+URxvt.keysym.C-exclam:         \033[33;5u
+URxvt.keysym.M-C-exclam:       \033[33;7u
+URxvt.keysym.M-at:             \033[64;3u
+URxvt.keysym.C-at:             \033[64;5u
+URxvt.keysym.M-C-at:           \033[64;7u
+URxvt.keysym.M-numbersign:     \033[35;3u
+URxvt.keysym.C-numbersign:     \033[35;5u
+URxvt.keysym.M-C-numbersign:   \033[35;7u
+URxvt.keysym.M-dollar:         \033[36;3u
+URxvt.keysym.C-dollar:         \033[36;5u
+URxvt.keysym.M-C-dollar:       \033[36;7u
+URxvt.keysym.M-percent:        \033[37;3u
+URxvt.keysym.C-percent:        \033[37;5u
+URxvt.keysym.M-C-percent:      \033[37;7u
+URxvt.keysym.M-asciicircum:    \033[94;3u
+URxvt.keysym.C-asciicircum:    \033[94;5u
+URxvt.keysym.M-C-asciicircum:  \033[94;7u
+URxvt.keysym.M-ampersand:      \033[38;3u
+URxvt.keysym.C-ampersand:      \033[38;5u
+URxvt.keysym.M-C-ampersand:    \033[38;7u
+URxvt.keysym.M-asterisk:       \033[42;3u
+URxvt.keysym.C-asterisk:       \033[42;5u
+URxvt.keysym.M-C-asterisk:     \033[42;7u
+URxvt.keysym.M-parenleft:      \033[40;3u
+URxvt.keysym.C-parenleft:      \033[40;5u
+URxvt.keysym.M-C-parenleft:    \033[40;7u
+URxvt.keysym.M-parenright:     \033[41;3u
+URxvt.keysym.C-parenright:     \033[41;5u
+URxvt.keysym.M-C-parenright:   \033[41;7u
+URxvt.keysym.M-slash:          \033[47;3u
+URxvt.keysym.C-slash:          \033[47;5u
+URxvt.keysym.M-C-slash:        \033[47;7u
+
+URxvt.keysym.S-Up:             \033[1;2A
+URxvt.keysym.M-Up:             \033[1;3A
+URxvt.keysym.M-S-Up:           \033[1;4A
+URxvt.keysym.C-Up:             \033[1;5A
+URxvt.keysym.C-S-Up:           \033[1;6A
+URxvt.keysym.C-M-Up:           \033[1;7A
+URxvt.keysym.C-M-S-Up:         \033[1;8A
+
+URxvt.keysym.S-Down:             \033[1;2B
+URxvt.keysym.M-Down:             \033[1;3B
+URxvt.keysym.M-S-Down:           \033[1;4B
+URxvt.keysym.C-Down:             \033[1;5B
+URxvt.keysym.C-S-Down:           \033[1;6B
+URxvt.keysym.C-M-Down:           \033[1;7B
+URxvt.keysym.C-M-S-Down:         \033[1;8B
+
+URxvt.keysym.S-Right:             \033[1;2C
+URxvt.keysym.M-Right:             \033[1;3C
+URxvt.keysym.M-S-Right:           \033[1;4C
+URxvt.keysym.C-Right:             \033[1;5C
+URxvt.keysym.C-S-Right:           \033[1;6C
+URxvt.keysym.C-M-Right:           \033[1;7C
+URxvt.keysym.C-M-S-Right:         \033[1;8C
+
+URxvt.keysym.S-Left:             \033[1;2D
+URxvt.keysym.M-Left:             \033[1;3D
+URxvt.keysym.M-S-Left:           \033[1;4D
+URxvt.keysym.C-Left:             \033[1;5D
+URxvt.keysym.C-S-Left:           \033[1;6D
+URxvt.keysym.C-M-Left:           \033[1;7D
+URxvt.keysym.C-M-S-Left:         \033[1;8D
