@@ -210,6 +210,8 @@
 (define-key my-prefix (kbd "f") 'toggle-big-font)
 (define-key my-prefix (kbd "<f11>") 'toggle-fullscreen)
 
+(define-key my-prefix (kbd "v") 'set-variable)
+
 (global-unset-key (kbd "C-x C-c"))
 (global-set-key (kbd "C-x C-c") 'my-exit)
 (global-set-key (kbd "M-<up>") 'scroll-down)
@@ -219,6 +221,26 @@
 
 (require 'sr-speedbar)
 (global-set-key (kbd "C-z s") 'sr-speedbar-toggle)
+
+(defun my-move-up ()
+  (interactive)
+  (windmove-up)
+  )
+
+(defun my-move-down ()
+  (interactive)
+  (windmove-down)
+  )
+
+(defun my-move-left ()
+  (interactive)
+  (windmove-left)
+  )
+
+(defun my-move-right ()
+  (interactive)
+  (windmove-right)
+  )
 
 ;; Outline mode
 (global-set-key (kbd "C-z \\") 'hide-other)

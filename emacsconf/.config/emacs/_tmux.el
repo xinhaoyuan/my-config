@@ -101,43 +101,6 @@
 ;;                      (terminal-parameter tty 'tmux-pane-id)))
 ;;             ))
 
-;; (defun my-move-up ()
-;;   (interactive)
-;;   (condition-case nil
-;;       (windmove-up)
-;;     (error (if (and (not (display-graphic-p))
-;;                     (getenv "TMUX" (selected-frame)))
-;;                (tmux-command "select-pane -U")
-;;                )))
-;;   )
-
-;; (defun my-move-down ()
-;;   (interactive)
-;;   (condition-case nil
-;;       (windmove-down)
-;;     (error (if (and (not (display-graphic-p))
-;;                     (getenv "TMUX" (selected-frame)))
-;;                (tmux-command "select-pane -D"))))
-;;   )
-
-;; (defun my-move-left ()
-;;   (interactive)
-;;   (condition-case nil
-;;       (windmove-left)
-;;     (error (if (and (not (display-graphic-p))
-;;                     (getenv "TMUX" (selected-frame)))
-;;                (tmux-command "select-pane -L"))))
-;;   )
-
-;; (defun my-move-right ()
-;;   (interactive)
-;;   (condition-case nil
-;;       (windmove-right)
-;;     (error (if (and (not (display-graphic-p))
-;;                     (getenv "TMUX" (selected-frame)))
-;;                (tmux-command "select-pane -R"))))
-;;   )
-
 ;; (defun my-tmux-split-h ()
 ;;   (interactive)
 ;;   (tmux-command "split-window -h"))
