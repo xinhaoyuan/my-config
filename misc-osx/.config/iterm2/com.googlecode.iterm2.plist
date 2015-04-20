@@ -210,9 +210,9 @@
 	<key>NSWindow Frame NSFontPanel</key>
 	<string>835 284 445 270 0 0 1920 1058 </string>
 	<key>NSWindow Frame Preferences</key>
-	<string>356 341 924 485 0 0 1920 1058 </string>
+	<string>127 174 924 485 0 0 1280 778 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>0 0 1280 778 0 0 1280 778 </string>
+	<string>131 73 710 416 0 0 1280 778 </string>
 	<key>NeverWarnAboutShortLivedSessions_2E4046EC-C9EC-482A-98B7-DFB9D4833751</key>
 	<true/>
 	<key>NeverWarnAboutShortLivedSessions_9B3AC9B8-BE5B-40BD-8429-B72F53BAE5D3</key>
@@ -490,6 +490,13 @@
 			</array>
 			<key>Keyboard Map</key>
 			<dict>
+				<key>0x1b-0x0</key>
+				<dict>
+					<key>Action</key>
+					<integer>10</integer>
+					<key>Text</key>
+					<string>[27;1u</string>
+				</dict>
 				<key>0x21-0x60000</key>
 				<dict>
 					<key>Action</key>
@@ -2504,13 +2511,15 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2015-03-10T20:55:17Z</date>
+	<date>2015-04-13T01:41:45Z</date>
 	<key>SavePasteHistory</key>
 	<false/>
 	<key>Show Toolbelt</key>
 	<false/>
 	<key>ShowBookmarkName</key>
 	<false/>
+	<key>ShowFullScreenTabBar</key>
+	<true/>
 	<key>ShowPaneTitles</key>
 	<true/>
 	<key>SmartPlacement</key>
@@ -2540,7 +2549,7 @@
 	<key>WebKitDefaultFontSize</key>
 	<integer>11</integer>
 	<key>WebKitStandardFont</key>
-	<string>.Helvetica Neue DeskInterface</string>
+	<string>.Lucida Grande UI</string>
 	<key>WindowNumber</key>
 	<true/>
 	<key>WindowStyle</key>

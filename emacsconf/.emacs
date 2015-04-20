@@ -363,9 +363,6 @@
 ;;           (lambda () (if (not indent-tabs-mode)
 ;;                          (untabify (point-min) (point-max)))))
 
-;; Python setttings
-(setq python-check-command "pyflakes")
-(setq python-indent-offset 2)
 (setq debug-on-error nil)
 
 (if (require 'package nil 'noerror)
