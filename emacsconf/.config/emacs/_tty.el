@@ -38,12 +38,13 @@
          (or (assoc file load-history)
              (load file t t))))
   ;; (tty-run-terminal-initialization (selected-frame) "xterm")
-  (terminal-init-xterm)
+  ;; (terminal-init-xterm)
+  (xterm-register-default-colors)
+  (tty-set-up-initial-frame-faces)
+
   ;; Don't know why this keymaps haven't been made in xterm init
-  (define-key (keymap-parent input-decode-map) "\e[H" [home])
-  (define-key (keymap-parent input-decode-map) "\e[F" [end])
-  ;; (xterm-register-default-colors)
-  ;; (tty-set-up-initial-frame-faces)
+  (define-key input-decode-map "\e[H" [home])
+  (define-key input-decode-map "\e[F" [end])
   )
 
 ;; (defun terminal-gain-focus (tty)
