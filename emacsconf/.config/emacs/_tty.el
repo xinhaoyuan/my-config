@@ -37,8 +37,10 @@
     (and file
          (or (assoc file load-history)
              (load file t t))))
-  (xterm-register-default-colors)
-  (tty-set-up-initial-frame-faces))
+  (terminal-init-xterm)
+  ;; (xterm-register-default-colors)
+  ;; (tty-set-up-initial-frame-faces)
+  )
 
 ;; (defun terminal-gain-focus (tty)
 ;;   (if (not (terminal-parameter tty 'has-focus))
