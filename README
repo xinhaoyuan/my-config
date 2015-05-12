@@ -33,3 +33,7 @@ source $HOME/.zshrc.user
 iTerm2:
 
 change setting directory
+
+dvtm terminfo issue:
+
+change the kbs entry parent term info to ^H if backspace keep sending ^H inside dvtm
