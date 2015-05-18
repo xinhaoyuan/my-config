@@ -8,11 +8,12 @@ zsh (oh-my-zsh)
 emacs
 
 linux:
+build-essential
 xdotool
 xclip
-libx11
-libxinerama
-php
+libx11      (xorg-dev)
+libxinerama (xorg-dev)
+php         (php5-cli)
 pkg-config
 
 mac:
@@ -24,11 +25,10 @@ Manual Setup
 
 change default shell to zsh
 oh-my-zsh:
+
 git clone git://github.com/robbyrussell/oh-my-zsh.git $HOME/.oh-my-zsh
-
-.zshrc:
-
-source $HOME/.zshrc.user
+cp $HOME/.oh-my-zsh/templates/zshrc.zsh-template $HOME/.zshrc
+echo "source $HOME/.zshrc.user" >> $HOME/.zshrc
 
 iTerm2:
 
