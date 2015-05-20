@@ -123,6 +123,17 @@
   (interactive)
   (find-file-other-window "Makefile"))
 
+(defun switch-to-file-buffer ()
+  "switch to the first file buffer in buffer list"
+  (interactive)
+  (let ((bl (buffer-list)))
+    (while bl
+      (if (buffer-file-name (car bl))
+          (progn
+            (switch-to-buffer (car bl))
+            (setq bl ()))
+        (setq bl (cdr bl))))))
+
 (require 'server)
 (defun my-exit ()
   ""
