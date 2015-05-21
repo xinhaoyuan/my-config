@@ -140,7 +140,8 @@
   (interactive)
   (if (and my-last-file-buffer
            (buffer-live-p my-last-file-buffer))
-      (switch-to-buffer my-last-file-buffer)))
+      (switch-to-buffer my-last-file-buffer)
+    ))
 
 (require 'server)
 (defun my-exit ()

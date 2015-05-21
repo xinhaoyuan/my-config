@@ -24,7 +24,7 @@ for arg in "$@"; do
 done
 
 if [[ $has_action = 0 ]]; then
-    args+=( "-e" "(switch-to-file-buffer)")
+    args+=( "-e" "(switch-to-last-file-buffer)")
 fi
 
 exec \emacsclient -a '' -c "${args[@]}"
