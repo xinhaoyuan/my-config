@@ -126,14 +126,16 @@
 (defvar my-last-file-buffer nil
   "last selected file buffer")
 
-(add-hook 'buffer-list-update-hook
-          (lambda ()
-            (let ((b (current-buffer)))
+(defun my-last-file-buffer-update ()
+  (let ((b (current-buffer)))
               (if (buffer-file-name b)
                   (progn
-                    ;; (message "last-file-buffer is %s" (buffer-name b))
+                    (message "last-file-buffer is %s" (buffer-name b))
                     (setq my-last-file-buffer b))
-                ))))
+                )))
+
+(add-hook 'buffer-list-update-hook
+          'my-last-file-buffer-update)
 
 (defun switch-to-last-file-buffer ()
   "switch to the first file buffer in buffer list"
