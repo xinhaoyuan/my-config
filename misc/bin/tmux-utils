@@ -3,7 +3,7 @@
 func=$1; shift
 
 # A key that would be never used
-DUMMY_KEY="F20"
+DUMMY_KEY="C-M-F12"
 
 function tmux_option_save {
     local new_value="$2"
