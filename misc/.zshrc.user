@@ -6,6 +6,10 @@ if [[ ! ":$PATH:" =~ ":$HOME/bin:" ]]; then
    export PATH="$HOME/bin:$PATH"
 fi
 
+if [[ -z "$SHELL" ]]; then
+    export SHELL=`command -v zsh`
+fi
+
 alias my-path="source my-path"
 alias emacsx="my-emacs"
 alias emacs="my-emacs -nw"
