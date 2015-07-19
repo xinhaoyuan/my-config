@@ -130,7 +130,7 @@
   (let ((b (current-buffer)))
               (if (buffer-file-name b)
                   (progn
-                    (message "last-file-buffer is %s" (buffer-name b))
+                    ;; (message "last-file-buffer is %s" (buffer-name b))
                     (setq my-last-file-buffer b))
                 )))
 
@@ -159,13 +159,36 @@
                   )
              ;; (if (eq frame nframe)
              ;;     (iconify-frame frame)
-             (save-some-buffers t)
+             (save-and-kill-local-buffers)
              (delete-frame frame 't)
              ;; (select-frame-set-input-focus nframe)
              ;;  )
              ))
     (and (y-or-n-p "Are you sure to kill emacs?")
          (kill-emacs))
+    )
+  )
+
+(defun save-and-kill-local-buffers ()
+  "interactively save and kill local buffers (which is only opened at current frame)"
+  (interactive)
+  (let* ((local-frame (selected-frame))
+         (buffers (buffer-list local-frame)))
+    (cl-block BUFFER-LOOP
+      (dolist (buffer buffers)
+        (if (and (buffer-live-p buffer) (buffer-file-name buffer))
+            (let ((is-local t)
+                  (windows (get-buffer-window-list buffer nil t)))
+              (dolist (window windows)
+                (let ((frame (window-frame window)))
+                  (if (not (eq local-frame frame))
+                      (setq is-local nil))))
+              (if is-local
+                  (progn
+                    (kill-buffer buffer))
+                (cl-return-from BUFFER-LOOP))
+              ))
+          ))
     )
   )
 
