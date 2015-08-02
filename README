@@ -9,12 +9,16 @@ emacs
 
 linux:
 build-essential
+consolekit (ck-launch-session)
 xdotool
 xclip
+wmctrl
 libx11      (xorg-dev)
 libxinerama (xorg-dev)
 php         (php5-cli)
 pkg-config
+
+sudo apt-get install stow tmux git zsh emacs build-essential consolekit xdotool xclip wmctrl xorg-dev php5-cli pkg-config
 
 mac:
 brew
@@ -30,6 +34,9 @@ git clone https://github.com/robbyrussell/oh-my-zsh.git $HOME/.oh-my-zsh
 cp $HOME/.oh-my-zsh/templates/zshrc.zsh-template $HOME/.zshrc
 echo 'source $HOME/.zshrc.user' >> $HOME/.zshrc
 
+Xorg:
+In /etc/X11/Xwrapper.config, change allowed_users to anybody
+
 iTerm2:
 
 change setting directory
@@ -37,3 +44,5 @@ change setting directory
 dvtm terminfo issue:
 
 change the kbs entry parent term info to ^H if backspace keep sending ^H inside dvtm
+
+tic -s <(infocmp -1 | sed -e 's/kbs=\\177/kbs=^H/g')
