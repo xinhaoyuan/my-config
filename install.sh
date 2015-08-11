@@ -7,6 +7,8 @@ generate_package_names() {
 	    echo misc-linux
     elif [ `uname` = 'Darwin' ]; then
         echo misc-osx
+    elif [ `uname -o` = 'Cygwin' ]; then
+        echo misc-cygwin
     fi
 }
 
