@@ -23,5 +23,7 @@ Return a list of installed packages or nil for every skipped package."
          packages))
       
       (defun ensure-packages ()
-          (ensure-package-installed 'mwim))
+        (ensure-package-installed 'mwim))
+
+      (package-initialize)
       ))

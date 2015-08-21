@@ -1,5 +1,6 @@
 (defcustom my-configure-dir "~/.config/emacs" "")
 (add-to-list 'load-path my-configure-dir)
+(load "_package.el")
 (load "_theme.el")
 (load "_dired.el")
 ;; (load "_tabbar.el")
@@ -9,7 +10,7 @@
 (load "_flyspell.el")
 (load "_tty.el")
 (load "_tmux.el")
-(load "_package.el")
+(load "_markdown.el")
 ;; misc {{{
 
 (setq eshell-save-history-on-exit nil)
