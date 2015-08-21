@@ -9,6 +9,7 @@
 (load "_flyspell.el")
 (load "_tty.el")
 (load "_tmux.el")
+(load "_package.el")
 ;; misc {{{
 
 (setq eshell-save-history-on-exit nil)
@@ -208,8 +209,10 @@
 ;; }}}
 
 ;; key mapping {{{
-(global-set-key (kbd "<end>") 'move-end-of-line)
-(global-set-key (kbd "<home>") 'move-beginning-of-line)
+(global-set-key (kbd "<end>") 'mwim-beginning-of-code-or-line) ;;'move-end-of-line)
+(global-set-key (kbd "<home>") 'mwim-end-of-code-or-line) ;;'move-beginning-of-line)
+(global-set-key (kbd "C-a") 'mwim-beginning-of-code-or-line)
+(global-set-key (kbd "C-e") 'mwim-end-of-code-or-line)
 (global-set-key (kbd "C-/") 'undo)
 (global-set-key (kbd "C-M-/") 'redo)
 (global-set-key (kbd "C-M-_") 'redo)
@@ -411,12 +414,6 @@
 
 (setq debug-on-error nil)
 
-(if (require 'package nil 'noerror)
-    (progn
-      ;; ELPA
-      (add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
-      (add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/"))
-      ))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
