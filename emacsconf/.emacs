@@ -143,7 +143,9 @@
                  (+ (length raw-file-name) 1))
               (substring file-link (+ (length raw-file-name) 1))
             nil))
-         (wd (file-name-directory buffer-file-name)))
+         (wd (if buffer-file-name
+                 (file-name-directory buffer-file-name)
+               "")))
     (find-file (concat wd file-name))
     (and file-archor
          (if (not (search-forward file-archor nil t))
