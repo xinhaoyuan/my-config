@@ -210,9 +210,9 @@
 	<key>NSWindow Frame NSFontPanel</key>
 	<string>835 284 445 270 0 0 1920 1058 </string>
 	<key>NSWindow Frame Preferences</key>
-	<string>127 174 924 485 0 0 1280 778 </string>
+	<string>127 173 605 485 0 0 1280 777 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>131 73 710 416 0 0 1280 778 </string>
+	<string>0 361 710 416 0 0 1280 777 </string>
 	<key>NeverWarnAboutShortLivedSessions_2E4046EC-C9EC-482A-98B7-DFB9D4833751</key>
 	<true/>
 	<key>NeverWarnAboutShortLivedSessions_9B3AC9B8-BE5B-40BD-8429-B72F53BAE5D3</key>
@@ -2511,7 +2511,7 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2015-04-13T01:41:45Z</date>
+	<date>2015-04-28T14:46:24Z</date>
 	<key>SavePasteHistory</key>
 	<false/>
 	<key>Show Toolbelt</key>
@@ -2549,7 +2549,7 @@
 	<key>WebKitDefaultFontSize</key>
 	<integer>11</integer>
 	<key>WebKitStandardFont</key>
-	<string>.Lucida Grande UI</string>
+	<string>.Helvetica Neue DeskInterface</string>
 	<key>WindowNumber</key>
 	<true/>
 	<key>WindowStyle</key>
@@ -2557,6 +2557,6 @@
 	<key>WordCharacters</key>
 	<string>/-+\~_.</string>
 	<key>iTerm Version</key>
-	<string>2.0.0.20141103</string>
+	<string>2.0.0.20150412</string>
 </dict>
 </plist>

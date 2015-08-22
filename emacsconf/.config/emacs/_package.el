@@ -18,12 +18,12 @@ Return a list of installed packages or nil for every skipped package."
            (if (package-installed-p package)
                nil
              (if (y-or-n-p (format "Package %s is missing. Install it? " package))
-                 (package-install packag)
+                 (package-install package)
                package)))
          packages))
       
       (defun ensure-packages ()
-        (ensure-package-installed 'mwim))
+        (ensure-package-installed 'mwim 'markdown-mode))
 
       (package-initialize)
       ))

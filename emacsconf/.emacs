@@ -133,25 +133,38 @@
   (let* ((file-link (file-link-at-point))
          (raw-file-name 
           (save-match-data
-            (string-match "\\([^#\\\\]*\\(\\\\.\\)*\\)+" file-link)
+            (string-match "\\([^#?\\\\]*\\(\\\\.\\)*\\)+" file-link)
             (match-string 0 file-link)))
          (file-name
           (replace-regexp-in-string
            "\\\\\\(.\\)" "\\1" raw-file-name))
-         (file-archor
+         (raw-file-archor
           (if (> (length file-link)
                  (+ (length raw-file-name) 1))
-              (substring file-link (+ (length raw-file-name) 1))
+              (substring file-link (length raw-file-name))
             nil))
          (wd (if buffer-file-name
                  (file-name-directory buffer-file-name)
-               "")))
-    (find-file (concat wd file-name))
-    (and file-archor
-         (if (not (search-forward file-archor nil t))
-             (search-backward file-archor)))
+               ""))
+         (file-path (concat wd file-name))
+         )
+    (if (or (file-exists-p file-path)
+            (y-or-n-p (format "File \"%s\" not exist, open any way?" file-path)))
+        (progn
+          (find-file file-path)
+          
+          (if raw-file-archor
+              (let ((file-archor
+                     (cond
+                      ((string-prefix-p "#" raw-file-archor)
+                       (concat "[" (substring raw-file-archor 1) "]"))
+                      ((string-prefix-p "?" raw-file-archor)
+                       (substring raw-file-archor 1)))))
+                (if (not (search-forward file-archor nil t))
+                    (search-backward file-archor))))
+          ))
     ))
-    
+
 (defun toggle-fullscreen ()
   "Toggle full screen on X11"
   (interactive)
