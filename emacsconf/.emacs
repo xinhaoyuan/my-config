@@ -43,6 +43,7 @@
 (setq default-tab-width 8)
 (global-set-key (kbd "C-x C-b") 'electric-buffer-list)
 
+(require 'subr-x)
 (require 'redo)
 (require 'psvn)
 (require 'htmlize)
@@ -107,6 +108,48 @@
     (delete-region left right)
     ))
 
+(defun file-link-at-point ()
+  (let ((before-r (string-reverse
+                   (save-excursion
+                     (let ((end (point)))
+                       (forward-line 0)
+                       (buffer-substring-no-properties (point) end)
+                       ))))
+        (after (save-excursion
+                 (let ((start (point)))
+                   (forward-line 1)
+                   (buffer-substring-no-properties start (point))
+                   ))))
+    (concat (save-match-data
+              (string-match "\\([^[:space:]]*\\([[:space:]]\\\\\\(\\\\\\\\\\)*\\)*\\)+" before-r)
+              (string-reverse (match-string 0 before-r)))
+            (save-match-data
+              (string-match "\\([^[:space:]\n\\\\]*\\(\\\\.\\)*\\)+" after)
+              (match-string 0 after)))
+    ))
+
+(defun goto-file-link-at-point ()
+  (interactive)
+  (let* ((file-link (file-link-at-point))
+         (raw-file-name 
+          (save-match-data
+            (string-match "\\([^#\\\\]*\\(\\\\.\\)*\\)+" file-link)
+            (match-string 0 file-link)))
+         (file-name
+          (replace-regexp-in-string
+           "\\\\\\(.\\)" "\\1" raw-file-name))
+         (file-archor
+          (if (> (length file-link)
+                 (+ (length raw-file-name) 1))
+              (substring file-link (+ (length raw-file-name) 1))
+            nil))
+         (wd (file-name-directory buffer-file-name)))
+    (find-file (concat wd file-name))
+    (and file-archor
+         (if (not (search-forward file-archor nil t))
+             (search-backward file-archor)))
+    ))
+    
 (defun toggle-fullscreen ()
   "Toggle full screen on X11"
   (interactive)
@@ -251,6 +294,7 @@
 (define-key my-prefix (kbd "=") 'toggle-frame-fullscreen)
 (define-key my-prefix (kbd "m") 'compile)
 (define-key my-prefix (kbd "C-m") 'find-Makefile)
+(define-key my-prefix (kbd ".") 'goto-file-link-at-point)
 
 (define-key my-prefix (kbd "<up>")    'my-move-up)
 (define-key my-prefix (kbd "<down>")  'my-move-down)
