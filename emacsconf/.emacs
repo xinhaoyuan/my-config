@@ -114,7 +114,7 @@
 
 (defun file-link-at-point ()
   (save-excursion
-    (let* ((pt (progn (while (char-equal (char-before) ?\\) (backward-char))  (point))) 
+    (let* ((pt (progn (while (and (char-before) (char-equal (char-before) ?\\)) (backward-char))  (point))) 
            (before-r (string-reverse
                       (let ((end pt))
                         (forward-line 0)
