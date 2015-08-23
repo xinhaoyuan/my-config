@@ -13,6 +13,10 @@
 (load "_markdown.el")
 ;; misc {{{
 
+(defvar server-frame nil "The frame of current emacs server")
+(if (and (daemonp) (eq (length (frame-list)) 1))
+    (setq server-frame (selected-frame)))
+
 (setq eshell-save-history-on-exit nil)
 (setq completion-ignore-case t)
 (setq read-file-name-completion-ignore-case t)
@@ -249,9 +253,10 @@
               (dolist (window windows)
                 (if (window-live-p window)
                     (let ((frame (window-frame window)))
-                      (if (eq local-frame frame)
-                          (setq is-remote nil)
-                        (setq is-local nil)))))
+                      (if (and (frame-live-p frame) (not (eq frame server-frame))) 
+                          (if (eq local-frame frame)
+                              (setq is-remote nil)
+                            (setq is-local nil))))))
               (if is-local (kill-buffer buffer))
               (if is-remote (cl-return-from BUFFER-LOOP))
               ))
