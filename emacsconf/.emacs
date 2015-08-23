@@ -109,24 +109,24 @@
     ))
 
 (defun file-link-at-point ()
-  (let ((before-r (string-reverse
-                   (save-excursion
-                     (let ((end (point)))
-                       (forward-line 0)
-                       (buffer-substring-no-properties (point) end)
-                       ))))
-        (after (save-excursion
-                 (let ((start (point)))
-                   (forward-line 1)
-                   (buffer-substring-no-properties start (point))
-                   ))))
-    (concat (save-match-data
-              (string-match "\\([^[:space:]]*\\([[:space:]]\\\\\\(\\\\\\\\\\)*\\)*\\)+" before-r)
-              (string-reverse (match-string 0 before-r)))
-            (save-match-data
-              (string-match "\\([^[:space:]\n\\\\]*\\(\\\\.\\)*\\)+" after)
-              (match-string 0 after)))
-    ))
+  (save-excursion
+    (let* ((pt (progn (while (char-equal (char-before) ?\\) (backward-char))  (point))) 
+           (before-r (string-reverse
+                      (let ((end pt))
+                        (forward-line 0)
+                        (buffer-substring-no-properties (point) end)
+                       )))
+           (after (let ((start pt))
+                    (forward-line 1)
+                    (buffer-substring-no-properties start (point))
+                    )))
+      (concat (save-match-data
+                (string-match "\\([^][[:space:]]*\\([][[:space:]]\\\\\\(\\\\\\\\\\)*\\)*\\)+" before-r)
+                (string-reverse (match-string 0 before-r)))
+              (save-match-data
+                (string-match "\\([^][[:space:]\n\\\\]*\\(\\\\.\\)*\\)+" after)
+                (match-string 0 after)))
+      )))
 
 (defun goto-file-link-at-point ()
   (interactive)
@@ -148,8 +148,14 @@
                ""))
          (file-path (concat wd file-name))
          )
-    (if (or (file-exists-p file-path)
-            (y-or-n-p (format "File \"%s\" not exist, open any way?" file-path)))
+    (if (and (or (> (length file-name) 0)
+                 (y-or-n-p
+                  (format "Open \"%s\"?"
+                          file-path)))
+             (or (file-exists-p file-path)
+                 (y-or-n-p
+                  (format "File \"%s\" not exist, open any way?"
+                          file-path))))
         (progn
           (find-file file-path)
           
@@ -313,6 +319,7 @@
 (define-key my-prefix (kbd "m") 'compile)
 (define-key my-prefix (kbd "C-m") 'find-Makefile)
 (define-key my-prefix (kbd ".") 'goto-file-link-at-point)
+(define-key my-prefix (kbd "C-.") 'goto-file-link-at-point)
 
 (define-key my-prefix (kbd "<up>")    'my-move-up)
 (define-key my-prefix (kbd "<down>")  'my-move-down)
