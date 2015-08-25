@@ -125,10 +125,10 @@
                     (buffer-substring-no-properties start (point))
                     )))
       (concat (save-match-data
-                (string-match "\\([^][[:space:]]*\\([][[:space:]]\\\\\\(\\\\\\\\\\)*\\)*\\)+" before-r)
+                (string-match "\\([^][(){}<>\"[:space:]]*\\([][(){}<>\"[:space:]]\\\\\\(\\\\\\\\\\)*\\)*\\)+" before-r)
                 (string-reverse (match-string 0 before-r)))
               (save-match-data
-                (string-match "\\([^][[:space:]\n\\\\]*\\(\\\\.\\)*\\)+" after)
+                (string-match "\\([^][(){}<>\"[:space:]\n\\\\]*\\(\\\\.\\)*\\)+" after)
                 (match-string 0 after)))
       )))
 
