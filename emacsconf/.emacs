@@ -112,7 +112,7 @@
     (delete-region left right)
     ))
 
-(defun file-link-at-point ()
+(defun wrapped-thing-at-point ()
   (save-excursion
     (let* ((pt (progn (while (and (char-before) (char-equal (char-before) ?\\)) (backward-char))  (point))) 
            (before-r (string-reverse
@@ -125,27 +125,34 @@
                     (buffer-substring-no-properties start (point))
                     )))
       (concat (save-match-data
-                (string-match "\\([^][(){}<>\"[:space:]]*\\([][(){}<>\"[:space:]]\\\\\\(\\\\\\\\\\)*\\)*\\)+" before-r)
+                (string-match "\\([^][(){}<>\"'[:space:]]*\\([][(){}<>\"'[:space:]]\\\\\\(\\\\\\\\\\)*\\)*\\)+" before-r)
                 (string-reverse (match-string 0 before-r)))
               (save-match-data
-                (string-match "\\([^][(){}<>\"[:space:]\n\\\\]*\\(\\\\.\\)*\\)+" after)
+                (string-match "\\([^][(){}<>\"'[:space:]\n\\\\]*\\(\\\\.\\)*\\)+" after)
                 (match-string 0 after)))
       )))
 
-(defun goto-file-link-at-point ()
+(defun save-wrapped-thing-at-point ()
   (interactive)
-  (let* ((file-link (file-link-at-point))
+  (let ((thing (wrapped-thing-at-point)))
+    (kill-new thing)
+    (message "String saved: %s" thing))
+  )
+
+(defun open-wrapped-thing-at-point ()
+  (interactive)
+  (let* ((wrapped-thing (wrapped-thing-at-point))
          (raw-file-name 
           (save-match-data
-            (string-match "\\([^#?\\\\]*\\(\\\\.\\)*\\)+" file-link)
-            (match-string 0 file-link)))
+            (string-match "\\([^#?\\\\]*\\(\\\\.\\)*\\)+" wrapped-thing)
+            (match-string 0 wrapped-thing)))
          (file-name
           (replace-regexp-in-string
            "\\\\\\(.\\)" "\\1" raw-file-name))
          (raw-file-archor
-          (if (> (length file-link)
+          (if (> (length wrapped-thing)
                  (+ (length raw-file-name) 1))
-              (substring file-link (length raw-file-name))
+              (substring wrapped-thing (length raw-file-name))
             nil))
          (wd (if buffer-file-name
                  (file-name-directory buffer-file-name)
@@ -323,8 +330,9 @@
 (define-key my-prefix (kbd "=") 'toggle-frame-fullscreen)
 (define-key my-prefix (kbd "m") 'compile)
 (define-key my-prefix (kbd "C-m") 'find-Makefile)
-(define-key my-prefix (kbd ".") 'goto-file-link-at-point)
-(define-key my-prefix (kbd "C-.") 'goto-file-link-at-point)
+(define-key my-prefix (kbd "C-w") 'save-wrapped-thing-at-point)
+(define-key my-prefix (kbd ".") 'open-wrapped-thing-at-point)
+(define-key my-prefix (kbd "C-.") 'open-wrapped-thing-at-point)
 
 (define-key my-prefix (kbd "<up>")    'my-move-up)
 (define-key my-prefix (kbd "<down>")  'my-move-down)
