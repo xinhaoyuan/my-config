@@ -10,7 +10,7 @@
                    '("melpa" . "http://melpa.milkbox.net/packages/"))
 
       (package-initialize)
-
+      
       (defun ensure-package-installed (&rest packages)
         "Assure every package s installed, ask for initiallation if it's not.
 
@@ -26,5 +26,6 @@ Return a list of installed packages or nil for every skipped package."
       
       (defun ensure-packages ()
         (interactive)
-        (ensure-package-installed 'mwim 'markdown-mode))
+        (ignore-errors (package-refresh-contents))
+        (ensure-package-installed 'mwim 'markdown-mode 'popup))
       ))

@@ -11,6 +11,7 @@
 (load "_tty.el")
 (load "_tmux.el")
 (load "_markdown.el")
+(load "_csharp.el")
 ;; misc {{{
 
 (defvar server-frame nil "The frame of current emacs server")
