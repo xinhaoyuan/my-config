@@ -13,6 +13,7 @@ fi
 alias my-path="source my-path"
 alias emacsx="my-emacs"
 alias emacs="my-emacs -nw"
+alias reset-emacs="emacsclient --alternate-editor=true -e '(kill-emacs)'"
 
 if type -p dircolors > /dev/null; then
     if [[ "$TERM" = dvtm || "$TERM" = dvtm-* ]]; then 
