@@ -52,7 +52,13 @@
 (require 'redo)
 (require 'psvn)
 (require 'htmlize)
-(require 'visual-fill-column nil 'noerror)
+(if (require 'visual-fill-column nil 'noerror)
+    (add-hook 'visual-line-mode-hook
+              (lambda ()
+                (if visual-line-mode
+                    (visual-fill-column-mode 1)
+                  (visual-fill-column-mode -1))
+                )))
 (require 'nlinum)
  
 (setq nlinum-format-function
@@ -325,7 +331,6 @@
 (define-key my-prefix (kbd "<C-right>") 'my-tmux-next-window)
 (define-key my-prefix (kbd "a") 'menu-bar-open)
 (define-key my-prefix (kbd "<return>") 'newline)
-(define-key my-prefix (kbd "q z") 'reload-dotemacs)
 (define-key my-prefix (kbd "C-<tab>") 'indent-region)
 (define-key my-prefix (kbd "/") 'auto-insert)
 (define-key my-prefix (kbd "t") 'tabify-buffer)
@@ -340,7 +345,7 @@
 (define-key my-prefix (kbd "C-w") 'save-wrapped-thing-at-point)
 (define-key my-prefix (kbd ".") 'open-wrapped-thing-at-point)
 (define-key my-prefix (kbd "C-.") 'open-wrapped-thing-at-point)
-
+(define-key my-prefix (kbd "q") 'visual-line-mode)
 (define-key my-prefix (kbd "<up>")    'my-move-up)
 (define-key my-prefix (kbd "<down>")  'my-move-down)
 (define-key my-prefix (kbd "<left>")  'my-move-left)
@@ -348,7 +353,6 @@
 
 (define-key my-prefix (kbd "f") 'toggle-big-font)
 (define-key my-prefix (kbd "<f11>") 'toggle-fullscreen)
-(define-key my-prefix (kbd "M-q") 'visual-fill-column-mode)
 
 (define-key my-prefix (kbd "v") 'set-variable)
 
