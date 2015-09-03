@@ -52,12 +52,18 @@
 (require 'redo)
 (require 'psvn)
 (require 'htmlize)
-(require 'nlinum "nlinum-1.2.el")
+(require 'visual-fill-column nil 'noerror)
+(require 'nlinum)
+ 
 (setq nlinum-format-function
- (lambda (line)
-   (let* ((fmt (format "%%%dd " (- nlinum--width 1)))
-          (str (propertize (format fmt line) 'face 'linum)))
-     str)))
+      (lambda (line width)
+        (let ((str (format "%d " line)))
+          (when (< (length str) width)
+            ;; Left pad to try and right-align the line-numbers.
+            (setq str (concat (make-string (- width (length str)) ?\ ) str)))
+          (put-text-property 0 width 'face 'linum str)
+          str)))
+
 (defun turn-on-linum-mode () ""
   (nlinum-mode 1))
 ;; display line number for C/C++/JAVA and scheme
@@ -342,6 +348,7 @@
 
 (define-key my-prefix (kbd "f") 'toggle-big-font)
 (define-key my-prefix (kbd "<f11>") 'toggle-fullscreen)
+(define-key my-prefix (kbd "M-q") 'visual-fill-column-mode)
 
 (define-key my-prefix (kbd "v") 'set-variable)
 

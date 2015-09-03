@@ -27,5 +27,9 @@ Return a list of installed packages or nil for every skipped package."
       (defun ensure-packages ()
         (interactive)
         (ignore-errors (package-refresh-contents))
-        (ensure-package-installed 'mwim 'markdown-mode 'popup))
+        (ensure-package-installed
+         'mwim 'popup 'nlinum                        ;; Basic enhancements
+         'visual-fill-column                         ;; Text editing
+         'markdown-mode 'csharp-mode 'omnisharp      ;; Extra modes
+         ))
       ))
