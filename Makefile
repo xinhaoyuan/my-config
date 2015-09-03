@@ -1,4 +1,4 @@
-.PHONY: all install uninstall
+.PHONY: all install uninstall sync
 
 all:
 	./install.sh prepare
@@ -8,3 +8,6 @@ install: all
 
 uninstall:
 	./install.sh uninstall
+
+sync:
+	./sync.sh
