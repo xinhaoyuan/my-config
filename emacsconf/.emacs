@@ -59,19 +59,19 @@
                     (visual-fill-column-mode 1)
                   (visual-fill-column-mode -1))
                 )))
-(require 'nlinum)
- 
-(setq nlinum-format-function
-      (lambda (line width)
-        (let ((str (format "%d " line)))
-          (when (< (length str) width)
-            ;; Left pad to try and right-align the line-numbers.
-            (setq str (concat (make-string (- width (length str)) ?\ ) str)))
-          (put-text-property 0 width 'face 'linum str)
-          str)))
-
-(defun turn-on-linum-mode () ""
-  (nlinum-mode 1))
+(if (require 'nlinum nil 'noerror)
+    (progn
+      (setq nlinum-format-function
+            (lambda (line width)
+              (let ((str (format "%d " line)))
+                (when (< (length str) width)
+                  ;; Left pad to try and right-align the line-numbers.
+                  (setq str (concat (make-string (- width (length str)) ?\ ) str)))
+                (put-text-property 0 width 'face 'linum str)
+                str)))
+      (defun turn-on-linum-mode () ""
+             (nlinum-mode 1))
+      ))
 ;; display line number for C/C++/JAVA and scheme
 (add-hook 'c-mode-common-hook 'turn-on-linum-mode)
 (add-hook 'scheme-mode-hook   'turn-on-linum-mode)
