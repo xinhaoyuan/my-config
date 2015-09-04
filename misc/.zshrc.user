@@ -40,10 +40,6 @@ if [[ $TERM = "dumb" ]]; then
     PS1='$ '
 fi
 
-if [[ -e "$HOME/.zshrc.user.os" ]]; then
-   source "$HOME/.zshrc.user.os"
-fi
-
 bindkey "\e[1;3D"  backward-word
 bindkey "\e[1;5D"  backward-word
 bindkey "\e[1;3C"  forward-word
@@ -51,3 +47,7 @@ bindkey "\e[1;5C"  forward-word
 bindkey "\e[47;5u" undo
 bindkey "\e[47;7u" redo
 bindkey "^W"       kill-region
+
+if [[ -e "$HOME/.zshrc.user.os" ]]; then
+   source "$HOME/.zshrc.user.os"
+fi
