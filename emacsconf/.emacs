@@ -350,7 +350,7 @@
 (define-key my-prefix (kbd "<down>")  'my-move-down)
 (define-key my-prefix (kbd "<left>")  'my-move-left)
 (define-key my-prefix (kbd "<right>") 'my-move-right)
-
+(define-key my-prefix (kbd "?") 'flyspell-correct-word-before-point)
 (define-key my-prefix (kbd "f") 'toggle-big-font)
 (define-key my-prefix (kbd "<f11>") 'toggle-fullscreen)
 
