@@ -345,7 +345,6 @@
 (define-key my-prefix (kbd "C-w") 'save-wrapped-thing-at-point)
 (define-key my-prefix (kbd ".") 'open-wrapped-thing-at-point)
 (define-key my-prefix (kbd "C-.") 'open-wrapped-thing-at-point)
-(define-key my-prefix (kbd "q") 'visual-line-mode)
 (define-key my-prefix (kbd "<up>")    'my-move-up)
 (define-key my-prefix (kbd "<down>")  'my-move-down)
 (define-key my-prefix (kbd "<left>")  'my-move-left)
@@ -353,6 +352,10 @@
 (define-key my-prefix (kbd "?") 'flyspell-correct-word-before-point)
 (define-key my-prefix (kbd "f") 'toggle-big-font)
 (define-key my-prefix (kbd "<f11>") 'toggle-fullscreen)
+
+(define-key my-prefix (kbd "M-q") 'visual-line-mode)
+(define-key my-prefix (kbd "M-f") 'flyspell-mode)
+(define-key my-prefix (kbd "M-l") 'nlinum-mode)
 
 (define-key my-prefix (kbd "v") 'set-variable)
 
