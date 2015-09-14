@@ -80,6 +80,18 @@
 (add-to-list 'auto-mode-alist '("\\.S\\'" . gas-mode))
 (require 'quack)
 
+
+(if (require 'company-irony nil 'noerror)
+    (progn
+      (eval-after-load 'company
+        '(add-to-list 'company-backends 'company-irony))
+      (add-hook 'irony-mode-hook
+                (lambda ()
+                  (if irony-mode
+                      (company-mode)
+                    (company-mode -1))))
+      ))
+
 ;; }}}
 
 ;; some procedures {{{
@@ -356,7 +368,8 @@
 (define-key my-prefix (kbd "M-q") 'visual-line-mode)
 (define-key my-prefix (kbd "M-f") 'flyspell-mode)
 (define-key my-prefix (kbd "M-l") 'nlinum-mode)
-
+(define-key my-prefix (kbd "M-c") 'irony-mode)
+    
 (define-key my-prefix (kbd "v") 'set-variable)
 
 (global-unset-key (kbd "C-x C-c"))
