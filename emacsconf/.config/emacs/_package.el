@@ -30,8 +30,8 @@ Return a list of installed packages or nil for every skipped package."
         (ensure-package-installed
          'mwim 'popup 'nlinum                        ;; Basic enhancements
          'visual-fill-column                         ;; Text editing
-         'company-mode                               ;; General completion
+         'company                                    ;; General completion
          'markdown-mode 'csharp-mode 'omnisharp      ;; Extra modes
-         'irony-mode 'company-irony                  ;; C/C++ completion
+         'irony 'company-irony                       ;; C/C++ completion
          ))
       ))
