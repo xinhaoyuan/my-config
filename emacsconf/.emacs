@@ -80,6 +80,9 @@
 (add-to-list 'auto-mode-alist '("\\.S\\'" . gas-mode))
 (require 'quack)
 
+(if (require 'irony nil 'noerror)
+    (progn
+      (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)))
 
 (if (require 'company-irony nil 'noerror)
     (progn
@@ -419,6 +422,7 @@
           (lambda ()
             (outline-minor-mode 1)
             (subword-mode 1)
+            (semantic-mode 1)
             (c-set-style "awk")))
 (add-hook 'c-mode-hook
           (lambda ()
