@@ -14,6 +14,20 @@
 (load "_csharp.el")
 ;; misc {{{
 
+(add-hook 'buffer-list-update-hook
+          (lambda ()
+            (let* ((fn (buffer-file-name))
+                   (win (selected-window))
+                   (frame (window-frame))
+                   )
+              (if (and fn (file-name-directory fn))
+                  (progn
+                    ;; (message "set path to %s" (file-name-directory fn))
+                    (send-string-to-terminal
+                     (format "\e]20;%s\e\\" (file-name-directory fn)) frame)
+                    ))
+              )))
+
 (defvar server-frame nil "The frame of current emacs server")
 (if (and (daemonp) (eq (length (frame-list)) 1))
     (setq server-frame (selected-frame)))
