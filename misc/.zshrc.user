@@ -11,9 +11,10 @@ if [[ -z "$SHELL" ]]; then
 fi
 
 alias my-path="source my-path"
-alias emacsx="my-emacs"
-alias emacs="my-emacs -nw"
-alias reset-emacs="emacsclient --alternate-editor=true -e '(kill-emacs)'"
+alias e="my-emacs -nw"
+alias e-reset="emacsclient --alternate-editor=true -e '(kill-emacs)'"
+alias g="git"
+alias o="open"
 
 if type -p dircolors > /dev/null; then
     if [[ "$TERM" = dvtm || "$TERM" = dvtm-* ]]; then 
@@ -24,6 +25,7 @@ if type -p dircolors > /dev/null; then
 fi
 
 local ret_status="%(?:%{$fg_bold[green]%}-> :%{$fg_bold[red]%}-> %s)"
+
 PROMPT='${ret_status}%{$fg_bold[green]%}%p[${SSH_TTY:+%n@%m:}%j] %{$fg[cyan]%}%c %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%} % %{$reset_color%}'
 
 ZSH_THEME_GIT_PROMPT_PREFIX="git:(%{$fg[red]%}"
