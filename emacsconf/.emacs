@@ -383,10 +383,10 @@
 (define-key my-prefix (kbd "f") 'toggle-big-font)
 (define-key my-prefix (kbd "<f11>") 'toggle-fullscreen)
 
-(define-key my-prefix (kbd "M-q") 'visual-line-mode)
-(define-key my-prefix (kbd "M-f") 'flyspell-mode)
-(define-key my-prefix (kbd "M-l") 'nlinum-mode)
-(define-key my-prefix (kbd "M-c") 'irony-mode)
+(define-key my-prefix (kbd "C-q") 'visual-line-mode)
+(define-key my-prefix (kbd "C-f") 'flyspell-mode)
+(define-key my-prefix (kbd "C-l") 'nlinum-mode)
+(define-key my-prefix (kbd "C-c") 'irony-mode)
     
 (define-key my-prefix (kbd "v") 'set-variable)
 
