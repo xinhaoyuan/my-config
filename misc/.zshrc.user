@@ -14,6 +14,7 @@ alias my-path="source my-path"
 alias e="my-emacs -nw"
 alias e-reset="emacsclient --alternate-editor=true -e '(kill-emacs)'"
 alias g="git"
+alias s="sudo"
 alias o="open"
 
 if type -p dircolors > /dev/null; then
