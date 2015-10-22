@@ -12,6 +12,12 @@
 (load "_tmux.el")
 (load "_markdown.el")
 (load "_csharp.el")
+
+;; coq {{{
+(setq auto-mode-alist (cons '("\\.v$" . coq-mode) auto-mode-alist))
+(autoload 'coq-mode "coq" "Major mode for editing Coq vernacular." t)
+;; }}}
+
 ;; misc {{{
 
 (add-hook 'buffer-list-update-hook
