@@ -300,6 +300,7 @@
   (interactive)
   (let* ((local-frame (selected-frame))
          (buffers (buffer-list local-frame)))
+    ;; (message "==== {{")
     (cl-block BUFFER-LOOP
       (dolist (buffer buffers)
         (if (and (buffer-live-p buffer) (buffer-file-name buffer))
@@ -313,10 +314,12 @@
                           (if (eq local-frame frame)
                               (setq is-remote nil)
                             (setq is-local nil))))))
+              ;; (message "%s %s %s" buffer is-local is-remote) 
               (if is-local (kill-buffer buffer))
-              (if is-remote (cl-return-from BUFFER-LOOP))
+              ;; (if is-remote (cl-return-from BUFFER-LOOP))
               ))
-          ))
+        ))
+    ;; (message "}}====")
     )
   )
 
