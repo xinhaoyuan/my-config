@@ -1,0 +1,3 @@
+#!/bin/sh
+
+socat SYSTEM:"$*",pty,stderr STDOUT | less -R

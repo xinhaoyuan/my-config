@@ -168,7 +168,7 @@
                       (let ((end pt))
                         (forward-line 0)
                         (buffer-substring-no-properties (point) end)
-                       )))
+                        )))
            (after (let ((start pt))
                     (forward-line 1)
                     (buffer-substring-no-properties start (point))
@@ -254,11 +254,11 @@
 
 (defun my-last-file-buffer-update ()
   (let ((b (current-buffer)))
-              (if (buffer-file-name b)
-                  (progn
-                    ;; (message "last-file-buffer is %s" (buffer-name b))
-                    (setq my-last-file-buffer b))
-                )))
+    (if (buffer-file-name b)
+        (progn
+          ;; (message "last-file-buffer is %s" (buffer-name b))
+          (setq my-last-file-buffer b))
+      )))
 
 (add-hook 'buffer-list-update-hook
           'my-last-file-buffer-update)
@@ -277,19 +277,19 @@
   (interactive)
   (if server-process
       (and ;; no asking anymore
-           ;; (y-or-n-p "Are you sure to kill this frame?")
-           ;; feature <disabled>: if the current frame is the last
-           ;; frame, just minimize it.
-           (let* ((frame (selected-frame))
-                  (nframe (next-frame frame))
-                  )
-             ;; (if (eq frame nframe)
-             ;;     (iconify-frame frame)
-             (save-and-kill-local-buffers)
-             (delete-frame frame 't)
-             ;; (select-frame-set-input-focus nframe)
-             ;;  )
-             ))
+       ;; (y-or-n-p "Are you sure to kill this frame?")
+       ;; feature <disabled>: if the current frame is the last
+       ;; frame, just minimize it.
+       (let* ((frame (selected-frame))
+              (nframe (next-frame frame))
+              )
+         ;; (if (eq frame nframe)
+         ;;     (iconify-frame frame)
+         (save-and-kill-local-buffers)
+         (delete-frame frame 't)
+         ;; (select-frame-set-input-focus nframe)
+         ;;  )
+         ))
     (and (y-or-n-p "Are you sure to kill emacs?")
          (kill-emacs))
     )
@@ -397,7 +397,7 @@
 (define-key my-prefix (kbd "C-f") 'flyspell-mode)
 (define-key my-prefix (kbd "C-l") 'nlinum-mode)
 (define-key my-prefix (kbd "C-c") 'irony-mode)
-    
+
 (define-key my-prefix (kbd "v") 'set-variable)
 
 (global-unset-key (kbd "C-x C-c"))
@@ -406,6 +406,22 @@
 (global-set-key (kbd "M-<down>") 'scroll-up)
 (global-unset-key (kbd "C-SPC"))
 (global-set-key (kbd "C-x c") 'kill-this-buffer)
+
+(defun vsplit-last-buffer ()
+  (interactive)
+  (split-window-vertically)
+  (other-window 1 nil)
+  (switch-to-next-buffer)
+  )
+(defun hsplit-last-buffer ()
+  (interactive)
+  (split-window-horizontally)
+  (other-window 1 nil)
+  (switch-to-next-buffer)
+  )
+
+(global-set-key (kbd "C-x 2") 'vsplit-last-buffer)
+(global-set-key (kbd "C-x 3") 'hsplit-last-buffer)
 
 (require 'sr-speedbar)
 (global-set-key (kbd "C-z s") 'sr-speedbar-toggle)
