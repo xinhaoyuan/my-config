@@ -46,3 +46,9 @@ dvtm terminfo issue:
 change the kbs entry parent term info to ^H if backspace keep sending ^H inside dvtm
 
 tic -s <(infocmp -1 | sed -e 's/kbs=\\177/kbs=^H/g')
+
+Cygwin:
+
+To change default shell to zsh:
+mkpasswd -c | sed 's/bash/zsh/g' >> /etc/passwd
+
