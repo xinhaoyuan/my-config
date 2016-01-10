@@ -95,6 +95,14 @@ Ctrl  Meta  Shift  <Key> 9:           string(0x1b) string("[40;7u")\n\
 Ctrl  ~Meta Shift  <Key> 0:           string(0x1b) string("[41;5u")\n\
 Ctrl  Meta  Shift  <Key> 0:           string(0x1b) string("[41;7u")
 
+URxvt.keysym.S-Return:         \033[13;2u
+URxvt.keysym.M-Return:         \033[13;3u
+URxvt.keysym.M-S-Return:       \033[13;4u
+URxvt.keysym.C-Return:         \033[13;5u
+URxvt.keysym.C-S-Return:       \033[13;6u
+URxvt.keysym.C-M-Return:       \033[13;7u
+URxvt.keysym.C-M-S-Return:     \033[13;8u
+
 URxvt.keysym.Escape:           \033[27;1u
 URxvt.keysym.S-Escape:         \033[27;2u
 URxvt.keysym.M-Escape:         \033[27;3u

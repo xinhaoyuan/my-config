@@ -45,6 +45,13 @@
   ;; Don't know why this keymaps haven't been made in xterm init
   (define-key input-decode-map "\e[H" [home])
   (define-key input-decode-map "\e[F" [end])
+
+  ;; More special keys listed here
+  (define-key input-decode-map "\e[13;2u" [S-RET])
+  (define-key input-decode-map "\e[13;4u" [M-S-RET])
+  (define-key input-decode-map "\e[13;5u" [C-RET])
+  (define-key input-decode-map "\e[13;6u" [C-S-RET])
+  (define-key input-decode-map "\e[13;7u" [C-M-RET])
   )
 
 ;; (defun terminal-gain-focus (tty)
