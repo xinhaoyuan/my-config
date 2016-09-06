@@ -12,6 +12,7 @@
 (load "_tmux.el")
 (load "_markdown.el")
 (load "_csharp.el")
+(load "_boogie.el")
 
 ;; coq {{{
 (setq auto-mode-alist (cons '("\\.v$" . coq-mode) auto-mode-alist))
@@ -379,6 +380,7 @@
 (define-key my-prefix (kbd "DEL") 'delete-surrounding-blank)
 (define-key my-prefix (kbd "!") (lambda () (interactive) (term (or (getenv "SHELL") "/bin/sh"))))
 (define-key my-prefix (kbd "=") 'toggle-frame-fullscreen)
+(define-key my-prefix (kbd "-") 'pop-global-mark)
 (define-key my-prefix (kbd "m") 'compile)
 (define-key my-prefix (kbd "C-m") 'find-Makefile)
 (define-key my-prefix (kbd "C-w") 'save-wrapped-thing-at-point)
