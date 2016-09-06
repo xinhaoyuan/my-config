@@ -37,7 +37,7 @@
     <primaryMonitor>Mouse</primaryMonitor>
   </placement>
   <theme>
-    <name>Numix</name>
+    <name>Clearlooks</name>
     <titleLayout>NDLIMC</titleLayout>
     <!--
       available characters are NDSLIMC, each can occur at most once.
@@ -283,7 +283,6 @@
         <command>window-toggle-expand right</command>
       </action>
     </keybind>
-
     <keybind key="A-space">
       <action name="ShowMenu">
         <menu>client-menu</menu>
