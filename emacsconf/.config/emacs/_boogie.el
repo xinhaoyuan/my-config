@@ -1,9 +1,12 @@
-(setq dafny-verification-backend 'server)
-(add-hook 'boogie-friends-hook (lambda () (setq tab-width 4) (indent-tab-mode 1) (prettify-symbols-mode -1)))
-(setq flycheck-dafny-executable (concat (getenv "HOME") "/dafny/Dafny.exe"))
-(setq flycheck-inferior-dafny-executable (concat (getenv "HOME") "/dafny/DafnyServer.exe"))
-
-(require 'dafny-mode)
+(if (require 'dafny-mode nil 'noerror)
+    (progn
+      (setq dafny-verification-backend 'server)
+      (add-hook 'boogie-friends-hook (lambda () (setq tab-width 4) (indent-tab-mode 1) (prettify-symbols-mode -1)))
+      (setq flycheck-dafny-executable
+	    (concat (getenv "HOME") "/dafny/Dafny.exe"))
+      (setq flycheck-inferior-dafny-executable
+	    (concat (getenv "HOME") "/dafny/DafnyServer.exe"))
+      ))
 
 (defun find-indent-ref ()
   (interactive)

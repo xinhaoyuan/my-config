@@ -33,5 +33,6 @@ Return a list of installed packages or nil for every skipped package."
          'company                                    ;; General completion
          'markdown-mode 'csharp-mode 'omnisharp      ;; Extra modes
          'irony 'company-irony                       ;; C/C++ completion
+         'boogie-friends                             ;; Boogie & dafny
          ))
       ))

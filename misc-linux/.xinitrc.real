@@ -5,8 +5,8 @@
 #xrandr --output DFP2 --right-of DFP1
 #xrandr --output DFP2 --primary
 
-xrandr --output DVI-1 --right-of DVI-0
-xrandr --output DVI-1 --primary
+xrandr --output VGA-0 --auto
+xrandr --output VGA-0 --dpi 192
 
 xrdb ~/.Xdefaults
 xset fp+ ~/.fonts
