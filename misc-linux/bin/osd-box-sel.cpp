@@ -306,7 +306,7 @@ main(int argc, char **argv) {
     
     bool b;
     string line;
-    while (b = getline(cin, line)) {
+    while (b = !!getline(cin, line)) {
         istringstream is(line);
         int x, y;
         if (is >> x >> y) {

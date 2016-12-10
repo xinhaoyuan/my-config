@@ -5,20 +5,20 @@ Xcursor.theme: Obsidian
 Xcursor.size : 32
 
 ! Emacs font & color settings (for emacs 22)
-Emacs.Fontset-0:-*-terminus-medium-r-*-*-14-*-*-*-*-*-fontset-song,\
-        chinese-gb2312:-*-simsun-medium-r-*-*-14-*-*-*-*-*-gb*-*,\
-        chinese-big5-1:-*-ar pl new sung-medium-r-*-*-14-*-*-*-*-*-big5*-*,\
-        chinese-big5-2:-*-ar pl new sung-medium-r-*-*-14-*-*-*-*-*-big5*-*,\
-        mule-unicode-0100-24ff:-*-simsun-medium-r-*-*-14-*-*-*-*-*-iso10646*-*,\
-        korean-ksc5601:-*-*-medium-r-*-*-14-*-*-*-*-*-ksc5601*-*,\
-        chinese-cns11643-5:-*-simsun-medium-r-*-*-14-*-*-*-*-*-gb*-*,\
-        chinese-cns11643-6:-*-simsun-medium-r-*-*-14-*-*-*-*-*-gb*-*,\
-        chinese-cns11643-7:-*-simsun-medium-r-*-*-14-*-*-*-*-*-gb*-*,\
-        sjis:-*-*-medium-r-normal-*-14-*-*-*-*-*-jisx0208*-*,\
-        japanese-jisx0208:-*-*-medium-r-*-*-14-*-*-*-*-*-jisx0208*-*,\
-        japanese-jisx0212:-*-*-medium-r-*-*-14-*-*-*-*-*-jisx0212*-*
+! Emacs.Fontset-0:-*-terminus-medium-r-*-*-14-*-*-*-*-*-fontset-song,\
+!         chinese-gb2312:-*-simsun-medium-r-*-*-14-*-*-*-*-*-gb*-*,\
+!         chinese-big5-1:-*-ar pl new sung-medium-r-*-*-14-*-*-*-*-*-big5*-*,\
+!         chinese-big5-2:-*-ar pl new sung-medium-r-*-*-14-*-*-*-*-*-big5*-*,\
+!         mule-unicode-0100-24ff:-*-simsun-medium-r-*-*-14-*-*-*-*-*-iso10646*-*,\
+!         korean-ksc5601:-*-*-medium-r-*-*-14-*-*-*-*-*-ksc5601*-*,\
+!         chinese-cns11643-5:-*-simsun-medium-r-*-*-14-*-*-*-*-*-gb*-*,\
+!         chinese-cns11643-6:-*-simsun-medium-r-*-*-14-*-*-*-*-*-gb*-*,\
+!         chinese-cns11643-7:-*-simsun-medium-r-*-*-14-*-*-*-*-*-gb*-*,\
+!         sjis:-*-*-medium-r-normal-*-14-*-*-*-*-*-jisx0208*-*,\
+!         japanese-jisx0208:-*-*-medium-r-*-*-14-*-*-*-*-*-jisx0208*-*,\
+!         japanese-jisx0212:-*-*-medium-r-*-*-14-*-*-*-*-*-jisx0212*-*
 
-Emacs.font: fontset-song
+! Emacs.font: fontset-song
 
 #include ".Xdefaults.d/urxvt.color.5"
 
@@ -26,7 +26,7 @@ Emacs.font: fontset-song
 ! Rxut-unicode setups
 ! Fonts and input method
 URxvt*termName: rxvt-unicode-256color
-URxvt*font:   xft:Terminus:pixelsize=28,xft:Microsoft YaHei:pixelsize=32
+URxvt*font:   xft:Input:pixelsize=24,xft:Microsoft YaHei:pixelsize=32
 URxvt*preeditType: OverTheSpot
 ! Disable all perl extentions and iso14755
 URxvt*iso14755: False
