@@ -12,9 +12,6 @@ xrdb ~/.Xdefaults
 xset fp+ ~/.fonts
 xset m 1 10
 
-fcitx
-compton -b
-
 export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
 export XMODIFIERS="@im=fcitx"

@@ -26,7 +26,7 @@ Xcursor.size : 32
 ! Rxut-unicode setups
 ! Fonts and input method
 URxvt*termName: rxvt-unicode-256color
-URxvt*font:   xft:Input:pixelsize=24,xft:Microsoft YaHei:pixelsize=32
+URxvt*font:   xft:Input:pixelsize=28,xft:Microsoft YaHei:pixelsize=32
 URxvt*preeditType: OverTheSpot
 ! Disable all perl extentions and iso14755
 URxvt*iso14755: False
