@@ -69,10 +69,10 @@ uppercase no
 # stuff after 'TEXT' will be formatted on screen
 TEXT
 $nodename - $kernel
-${color lightgrey}CPU:${color} ${cpu 1}${color lightgrey}% - ${color}${freq_g 1} ${color lightgrey}Ghz${color}\
- ${cpu 2}${color lightgrey}% - ${color}${freq_g 1} ${color lightgrey}Ghz${color}
-     ${cpu 3}${color lightgrey}% - ${color}${freq_g 1} ${color lightgrey}Ghz${color}\
- ${cpu 4}${color lightgrey}% - ${color}${freq_g 1} ${color lightgrey}Ghz${color}
+${color lightgrey}CPU:${color} ${cpu cpu0}${color lightgrey}% - ${color}${freq_g 1} ${color lightgrey}Ghz${color}\
+ ${cpu cpu2}${color lightgrey}% - ${color}${freq_g 2} ${color lightgrey}Ghz${color}
+     ${cpu cpu3}${color lightgrey}% - ${color}${freq_g 3} ${color lightgrey}Ghz${color}\
+ ${cpu cpu4}${color lightgrey}% - ${color}${freq_g 4} ${color lightgrey}Ghz${color}
 ${color lightgrey}Processes:$color $running_processes/$processes ${offset 6}${color lightgrey}Load:$color ${loadavg 3}
 ${color lightgrey}RAM:$color $memperc${color lightgrey}% ${offset 55}Swap:$color $swapperc%${voffset 5}
 ${color lightgrey}Net: $color${addr wlp58s0}${alignr}${color lightgrey}Quality: ${color}${wireless_link_qual_perc wlp58s0}%
