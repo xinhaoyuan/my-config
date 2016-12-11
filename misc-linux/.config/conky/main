@@ -1,0 +1,83 @@
+background no
+
+cpu_avg_samples 2
+net_avg_samples 2
+
+out_to_console no
+
+use_xft yes
+xftfont Input:size=12
+
+# Text alpha when using Xft
+xftalpha 0.8
+
+# Update interval in seconds
+update_interval 1
+# Create own window instead of using desktop (required in nautilus)
+own_window yes
+own_window_transparent yes
+own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
+
+# Use double buffering (reduces flicker, may not work for everyone)
+double_buffer yes
+
+minimum_size 800 5
+maximum_width 800
+
+# Draw shades?
+draw_shades no
+
+# Draw outlines?
+draw_outline no
+
+# Draw borders around text
+draw_borders no
+
+# Stippled borders?
+stippled_borders 8
+
+# border margins
+border_margin 4
+
+# border width
+border_width 1
+
+# Default colors and also border colors
+default_color white
+default_shade_color black
+default_outline_color black
+
+# Text alignment, other possible values are commented
+#alignment top_left
+#alignment top_right
+#alignment bottom_left
+alignment top_right
+
+# Gap between borders of screen and text
+gap_x 30
+gap_y 20
+
+# Add spaces to keep things from moving about?  This only affects certain objects.
+use_spacer no
+
+# Subtract file system buffers from used memory?
+no_buffers yes
+
+# set to yes if you want all text to be in uppercase
+uppercase no
+
+# stuff after 'TEXT' will be formatted on screen
+TEXT
+$nodename - $kernel
+${color lightgrey}CPU:${color} ${cpu 1}${color lightgrey}% - ${color}${freq_g 1} ${color lightgrey}Ghz${color}\
+ ${cpu 2}${color lightgrey}% - ${color}${freq_g 1} ${color lightgrey}Ghz${color}
+     ${cpu 3}${color lightgrey}% - ${color}${freq_g 1} ${color lightgrey}Ghz${color}\
+ ${cpu 4}${color lightgrey}% - ${color}${freq_g 1} ${color lightgrey}Ghz${color}
+${color lightgrey}Processes:$color $running_processes/$processes ${offset 6}${color lightgrey}Load:$color ${loadavg 3}
+${color lightgrey}RAM:$color $memperc${color lightgrey}% ${offset 55}Swap:$color $swapperc%${voffset 5}
+${color lightgrey}Net: $color${addr wlp58s0}${alignr}${color lightgrey}Quality: ${color}${wireless_link_qual_perc wlp58s0}%
+ ${color lightgrey}Up:${color}   ${upspeedf wlan0} ${color lightgrey}k ${color lightgrey}Tot: ${color}${totalup wlan0}
+ ${color lightgrey}Down:${color} ${downspeedf wlan0} ${color lightgrey}k ${color lightgrey}Tot:${color} ${totaldown wlan0}
+${voffset 5}${color lightgrey}FS: / $color${fs_used_perc /}${color lightgrey}%
+${color lightgrey}BAT: ${color}${battery}
+${color}${time %A, %d %B}${alignr}${offset -22}${time  %H:%M}

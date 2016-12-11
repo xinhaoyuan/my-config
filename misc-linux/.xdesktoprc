@@ -3,6 +3,7 @@
 # will be executed after the window manager is ready
 
 nitrogen --restore
+conky -c $HOME/.config/conky/main -d
 xscreensaver -no-splash &
 xfce4-panel &
 wicd-client -t &
