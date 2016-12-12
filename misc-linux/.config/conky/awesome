@@ -1,0 +1,83 @@
+background no
+
+cpu_avg_samples 2
+net_avg_samples 2
+
+out_to_console no
+
+use_xft yes
+xftfont Input:size=12
+
+# Text alpha when using Xft
+xftalpha 0.8
+
+# Update interval in seconds
+update_interval 1
+# Create own window instead of using desktop (required in nautilus)
+own_window yes
+# own_window_transparent yes
+own_window_colour 000000
+own_window_argb_visual yes
+own_window_argb_value 128
+own_window_class Conky
+own_window_type desktop
+own_window_hints below,skip_taskbar,skip_pager
+
+# Use double buffering (reduces flicker, may not work for everyone)
+double_buffer yes
+
+minimum_size 3200 40
+maximum_width 3200
+
+# Draw shades?
+draw_shades no
+
+# Draw outlines?
+draw_outline no
+
+# Draw borders around text
+draw_borders no
+
+# Stippled borders?
+stippled_borders 8
+
+# Default colors and also border colors
+default_color white
+default_shade_color black
+default_outline_color black
+
+# Text alignment, other possible values are commented
+#alignment top_left
+#alignment top_right
+#alignment bottom_left
+alignment top_left
+
+# Gap between borders of screen and text
+gap_x 0
+gap_y 0
+
+# Add spaces to keep things from moving about?  This only affects certain objects.
+use_spacer no
+
+# Subtract file system buffers from used memory?
+no_buffers yes
+
+# set to yes if you want all text to be in uppercase
+uppercase no
+
+# stuff after 'TEXT' will be formatted on screen
+TEXT
+${color lightgrey}CPUs:${color}\
+ ${cpu cpu0}${color lightgrey}%-${color}${freq_g 1}\
+|${cpu cpu2}${color lightgrey}%-${color}${freq_g 2}\
+|${cpu cpu3}${color lightgrey}%-${color}${freq_g 3}\
+|${cpu cpu4}${color lightgrey}%-${color}${freq_g 4} \
+${color lightgrey}Proc:$color $running_processes/$processes ${offset 6}${color lightgrey}Load:$color ${loadavg 3} \
+${color lightgrey}Ram:$color $memperc${color lightgrey}% Swap:$color $swapperc% \
+${color lightgrey}Net: $color${addr wlp58s0}\
+ ${color lightgrey}Qlty: ${color}${wireless_link_qual_perc wlp58s0}% \
+ ${color lightgrey}Up:${color} ${upspeedf wlan0}${color lightgrey}k\
+ ${color lightgrey}Down:${color} ${downspeedf wlan0}${color lightgrey}k \
+${alignr}\
+${color lightgrey}Bat: ${color}${battery} \
+${color}${time %A, %d %B} ${time  %H:%M}

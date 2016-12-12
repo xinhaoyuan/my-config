@@ -1,0 +1,7 @@
+#!/bin/bash
+
+. $HOME/.xdesktoprc.common
+
+conky -c $HOME/.config/conky/awesome -d
+
+
