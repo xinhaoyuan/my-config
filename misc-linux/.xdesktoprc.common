@@ -6,6 +6,4 @@ fcitx
 compton -b
 nitrogen --restore
 xscreensaver -no-splash &
-wicd-client -t &
-blueman-applet &
 

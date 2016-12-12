@@ -2,6 +2,8 @@
 
 . $HOME/.xdesktoprc.common
 
+wicd-client -t &
+blueman-applet &
 conky -c $HOME/.config/conky/main -d
 xfce4-panel &
 
