@@ -76,8 +76,8 @@ ${color lightgrey}CPU:${color} ${cpu cpu0}${color lightgrey}% - ${color}${freq_g
 ${color lightgrey}Processes:$color $running_processes/$processes ${offset 6}${color lightgrey}Load:$color ${loadavg 3}
 ${color lightgrey}RAM:$color $memperc${color lightgrey}% ${offset 55}Swap:$color $swapperc%${voffset 5}
 ${color lightgrey}Net: $color${addr wlp58s0}${alignr}${color lightgrey}Quality: ${color}${wireless_link_qual_perc wlp58s0}%
- ${color lightgrey}Up:${color}   ${upspeedf wlan0} ${color lightgrey}k ${color lightgrey}Tot: ${color}${totalup wlan0}
- ${color lightgrey}Down:${color} ${downspeedf wlan0} ${color lightgrey}k ${color lightgrey}Tot:${color} ${totaldown wlan0}
+ ${color lightgrey}Up:${color}   ${upspeedf wlp58s0} ${color lightgrey}k ${color lightgrey}Tot: ${color}${totalup wlp58s0}
+ ${color lightgrey}Down:${color} ${downspeedf wlp58s0} ${color lightgrey}k ${color lightgrey}Tot:${color} ${totaldown wlp58s0}
 ${voffset 5}${color lightgrey}FS: / $color${fs_used_perc /}${color lightgrey}%
 ${color lightgrey}BAT: ${color}${battery}
 ${color}${time %A, %d %B}${alignr}${offset -22}${time  %H:%M}
