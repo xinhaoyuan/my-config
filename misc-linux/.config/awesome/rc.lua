@@ -39,10 +39,12 @@ local global_keys = aw.util.table.join(
    
    aw.key({ "Mod1" }, "Tab", function () cyclefocus.cycle(1, { modifier = "Alt_L" }) end),
 
-   aw.key({ "Mod4" }, "h", function (c) aw.tag.incmwfact(-0.1) end),
-   aw.key({ "Mod4" }, "l", function (c) aw.tag.incmwfact( 0.1) end),
-   aw.key({ "Mod4" }, "j", function (c) aw.client.incwfact(-0.1) end),
-   aw.key({ "Mod4" }, "k", function (c) aw.client.incwfact( 0.1) end)
+   aw.key({ "Mod4" }, "h", function () aw.tag.incmwfact(-0.1) end),
+   aw.key({ "Mod4" }, "l", function () aw.tag.incmwfact( 0.1) end),
+   aw.key({ "Mod4" }, "j", function () aw.client.incwfact(-0.1) end),
+   aw.key({ "Mod4" }, "k", function () aw.client.incwfact( 0.1) end),
+
+   aw.key({ "Mod4", "Control" }, "q", awesome.quit)
 )
 
 local client_keys = aw.util.table.join(
@@ -50,7 +52,8 @@ local client_keys = aw.util.table.join(
          c.maximized_horizontal = not c.maximized_horizontal
          c.maximized_vertical = not c.maximized_vertical
    end),
-   aw.key({ "Mod4" }, "c", function (c) c:kill() end)
+   aw.key({ "Mod4" }, "c", function (c) c:kill() end),
+   aw.key({ "Mod4" }, "z", function (c) c:swap(aw.client.getmaster()) end)
 )
 
 local client_buttons = aw.util.table.join(
