@@ -1,0 +1,13 @@
+#!/bin/bash
+
+func=$1
+
+case $func in
+    "no-tb")
+        if [ -z "$2" ]; then
+            cat /sys/devices/system/cpu/intel_pstate/no_turbo
+        else
+            echo $2 > /sys/devices/system/cpu/intel_pstate
+        fi
+        ;;
+esac
