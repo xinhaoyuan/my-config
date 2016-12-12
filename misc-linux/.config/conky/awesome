@@ -67,16 +67,16 @@ uppercase no
 
 # stuff after 'TEXT' will be formatted on screen
 TEXT
-${color lightgrey}CPUs:${color}\
- ${cpu cpu0}${color lightgrey}%-${color}${freq_g 1}\
-|${cpu cpu2}${color lightgrey}%-${color}${freq_g 2}\
-|${cpu cpu3}${color lightgrey}%-${color}${freq_g 3}\
-|${cpu cpu4}${color lightgrey}%-${color}${freq_g 4} \
-${color lightgrey}Proc:$color $running_processes/$processes ${offset 6}${color lightgrey}Load:$color ${loadavg 3} \
-${color lightgrey}Ram:$color $memperc${color lightgrey}% Swap:$color $swapperc% \
-${color lightgrey}Net: $color${addr wlp58s0}\
- ${color lightgrey}Qlty: ${color}${wireless_link_qual_perc wlp58s0}%\
- ${upspeedf wlp58s0}${color lightgrey}k/${downspeedf wlp58s0}${color lightgrey}k \
+${color orange}CPUs:${color}\
+ ${cpu cpu1}%,${freq_g 1}\
+|${cpu cpu2}%,${freq_g 2}\
+|${cpu cpu3}%,${freq_g 3}\
+|${cpu cpu4}%,${freq_g 4} \
+${color orange}Proc:$color $running_processes/$processes ${offset 6}${color orange}Load:$color ${loadavg 3} \
+${color orange}Ram:$color $memperc% ${color orange}Swap:${color} $swapperc% \
+${color orange}Net: $color${addr wlp58s0}\
+ ${color orange}Qlty: ${color}${wireless_link_qual_perc wlp58s0}%\
+ ${upspeedf wlp58s0}k/${downspeedf wlp58s0}k \
 ${alignr}\
-${color lightgrey}Bat: ${color}${battery} \
+${color orange}Bat: ${color}${battery} \
 ${color}${time %A, %d %B} ${time  %H:%M}

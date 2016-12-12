@@ -39,8 +39,8 @@ local global_keys = aw.util.table.join(
    
    aw.key({ "Mod1" }, "Tab", function () cyclefocus.cycle(1, { modifier = "Alt_L" }) end),
 
-   aw.key({ "Mod4" }, "h", function () aw.tag.incmwfact(-0.1) end),
-   aw.key({ "Mod4" }, "l", function () aw.tag.incmwfact( 0.1) end),
+   aw.key({ "Mod4" }, "h", function () aw.tag.incmwfact(-0.05) end),
+   aw.key({ "Mod4" }, "l", function () aw.tag.incmwfact( 0.05) end),
    aw.key({ "Mod4" }, "j", function () aw.client.incwfact(-0.1) end),
    aw.key({ "Mod4" }, "k", function () aw.client.incwfact( 0.1) end),
 
