@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# will be executed after the window manager is ready
+
+# reverse touch scroll direction
+xinput set-button-map 12 1 2 3 5 4 7 6
+# disable double tap drag
+xinput set-prop 12 281 0
+
+fcitx
+compton -b
+nitrogen --restore
+xscreensaver -no-splash &
+wicd-client -t &
+blueman-applet &
+
