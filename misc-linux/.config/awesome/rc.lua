@@ -7,6 +7,7 @@ local be = require("beautiful")
 local cyclefocus = require("cyclefocus")
 
 aw.util.spawn_with_shell("$HOME/.xdesktoprc.awesome")
+be.init("/usr/share/awesome/themes/default/theme.lua")
 
 -- Layouts
 local layouts = {
@@ -36,7 +37,12 @@ local global_keys = aw.util.table.join(
    aw.key({ "Mod4" }, "[", function () aw.layout.inc(layouts, -1) end),
    aw.key({ "Mod4" }, "]", function () aw.layout.inc(layouts, 1) end),
    
-   aw.key({ "Mod1" }, "Tab", function () cyclefocus.cycle(1, { modifier = "Alt_L" }) end)
+   aw.key({ "Mod1" }, "Tab", function () cyclefocus.cycle(1, { modifier = "Alt_L" }) end),
+
+   aw.key({ "Mod4" }, "h", function (c) aw.tag.incmwfact(-0.1) end),
+   aw.key({ "Mod4" }, "l", function (c) aw.tag.incmwfact( 0.1) end),
+   aw.key({ "Mod4" }, "j", function (c) aw.client.incwfact(-0.1) end),
+   aw.key({ "Mod4" }, "k", function (c) aw.client.incwfact( 0.1) end)
 )
 
 local client_keys = aw.util.table.join(
@@ -53,6 +59,17 @@ local client_buttons = aw.util.table.join(
    aw.button({ "Mod4" }, 3, aw.mouse.client.resize)
 )
 
+root.keys(global_keys)
+
+-- rules
+
+client.connect_signal(
+   "focus",
+   function (c) c.border_color = be.border_focus end)
+client.connect_signal(
+   "unfocus",
+   function (c) c.border_color = be.border_normal end)
+
 ar.rules = {
    {
       rule = { },
@@ -60,7 +77,9 @@ ar.rules = {
          focus = true,
          size_hints_honor = false,
          keys = client_keys,
-         buttons = client_buttons
+         buttons = client_buttons,
+         border_width = 4,
+         border_color = be.border_normal
       }
    },
    {
@@ -71,9 +90,9 @@ ar.rules = {
          ontop = false,
          below = true,
          focus = false,
+         border_width = 0,
          focusable = false
       }
    }
 }
 
-root.keys(global_keys)
