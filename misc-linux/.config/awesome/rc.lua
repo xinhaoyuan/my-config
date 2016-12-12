@@ -44,6 +44,10 @@ local global_keys = aw.util.table.join(
    aw.key({ "Mod4" }, "j", function () aw.client.incwfact(-0.1) end),
    aw.key({ "Mod4" }, "k", function () aw.client.incwfact( 0.1) end),
 
+   aw.key({ }, "XF86AudioLowerVolume", function() aw.util.spawn("amixer sset Master,0 2%-") end),
+   aw.key({ }, "XF86AudioRaiseVolume", function() aw.util.spawn("amixer sset Master,0 2%+") end),
+   aw.key({ }, "XF86AudioMute", function() aw.util.spawn("amixer sset Master,0 toggle") end),
+
    aw.key({ "Mod4", "Control" }, "q", awesome.quit)
 )
 
