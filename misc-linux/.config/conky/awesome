@@ -1,82 +1,48 @@
 background no
-
 cpu_avg_samples 2
 net_avg_samples 2
-
 out_to_console no
-
 use_xft yes
 xftfont Input:size=12
-
-# Text alpha when using Xft
-xftalpha 0.8
-
-# Update interval in seconds
 update_interval 1
-# Create own window instead of using desktop (required in nautilus)
 own_window yes
-# own_window_transparent yes
 own_window_colour 000000
 own_window_argb_visual yes
 own_window_argb_value 128
 own_window_class Conky
 own_window_type desktop
 own_window_hints below,skip_taskbar,skip_pager
-
-# Use double buffering (reduces flicker, may not work for everyone)
-double_buffer yes
-
 minimum_size 3200 40
 maximum_width 3200
-
-# Draw shades?
+double_buffer yes
 draw_shades no
-
-# Draw outlines?
 draw_outline no
-
-# Draw borders around text
 draw_borders no
-
-# Stippled borders?
 stippled_borders 8
-
-# Default colors and also border colors
 default_color white
 default_shade_color black
 default_outline_color black
-
-# Text alignment, other possible values are commented
-#alignment top_left
-#alignment top_right
-#alignment bottom_left
 alignment top_left
-
-# Gap between borders of screen and text
 gap_x 0
 gap_y 0
-
-# Add spaces to keep things from moving about?  This only affects certain objects.
 use_spacer no
-
-# Subtract file system buffers from used memory?
 no_buffers yes
-
-# set to yes if you want all text to be in uppercase
 uppercase no
-
-# stuff after 'TEXT' will be formatted on screen
 TEXT
-${color orange}CPUs:${color}\
- ${cpu cpu1}%,${freq_g 1}\
+${color orange}Cpu${color}[\
+${cpu cpu1}%,${freq_g 1}\
 |${cpu cpu2}%,${freq_g 2}\
 |${cpu cpu3}%,${freq_g 3}\
-|${cpu cpu4}%,${freq_g 4} \
-${color orange}Proc:$color $running_processes/$processes ${offset 6}${color orange}Load:$color ${loadavg 3} \
-${color orange}Ram:$color $memperc% ${color orange}Swap:${color} $swapperc% \
-${color orange}Net: $color${addr wlp58s0}\
- ${color orange}Qlty: ${color}${wireless_link_qual_perc wlp58s0}%\
- ${upspeedf wlp58s0}k/${downspeedf wlp58s0}k \
+|${cpu cpu4}%,${freq_g 4}\
+] \
+[${color orange}P${color}$running_processes/$processes,${color orange}L${color}${loadavg 3},\
+${color orange}M${color}$memperc%,${color orange}S${color}$swapperc%] \
+${color orange}Net${color}\
+[${addr wlp58s0}\
+ ${wireless_link_qual_perc wlp58s0}%\
+ ${upspeedf wlp58s0}k/${downspeedf wlp58s0}k]\
+[${addr enx00e1020034d1}\
+ ${upspeedf enx00e1020034d1}k/${downspeedf enx00e1020034d1}k]\
 ${alignr}\
 ${color orange}Bat: ${color}${battery} \
 ${color}${time %A, %d %B} ${time  %H:%M}
