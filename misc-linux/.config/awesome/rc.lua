@@ -4,7 +4,7 @@ local af = require("awful.autofocus")
 local na = require("naughty")
 local be = require("beautiful")
 -- 3rd party libs
-local cyclefocus = require("cyclefocus")
+local cf = require("cyclefocus")
 
 aw.util.spawn_with_shell("$HOME/.xdesktoprc.awesome")
 be.init("/usr/share/awesome/themes/default/theme.lua")
@@ -36,8 +36,6 @@ local global_keys = aw.util.table.join(
    
    aw.key({ "Mod4" }, "[", function () aw.layout.inc(layouts, -1) end),
    aw.key({ "Mod4" }, "]", function () aw.layout.inc(layouts, 1) end),
-   
-   aw.key({ "Mod1" }, "Tab", function () cyclefocus.cycle(1, { modifier = "Alt_L" }) end),
 
    aw.key({ "Mod4" }, "h", function () aw.tag.incmwfact(-0.05) end),
    aw.key({ "Mod4" }, "l", function () aw.tag.incmwfact( 0.05) end),
@@ -52,12 +50,18 @@ local global_keys = aw.util.table.join(
 )
 
 local client_keys = aw.util.table.join(
+   cf.key({ "Mod1" }, "Tab", 1,
+      {
+         modifier = "Alt_L",
+         cycle_filters = { cf.filters.same_screen, cf.filters.common_tag }
+   }),
+
    aw.key({ "Mod4" }, "w", function (c)
          c.maximized_horizontal = not c.maximized_horizontal
          c.maximized_vertical = not c.maximized_vertical
    end),
    aw.key({ "Mod4" }, "c", function (c) c:kill() end),
-   aw.key({ "Mod4" }, "z", function (c) c:swap(aw.client.getmaster()) end)
+   aw.key({ "Mod4" }, "z", function (c) c:swap(aw.client.getmaster()) end)   
 )
 
 local client_buttons = aw.util.table.join(

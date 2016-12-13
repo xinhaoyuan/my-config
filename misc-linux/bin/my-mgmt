@@ -7,7 +7,7 @@ case $func in
         if [ -z "$2" ]; then
             cat /sys/devices/system/cpu/intel_pstate/no_turbo
         else
-            echo $2 > /sys/devices/system/cpu/intel_pstate
+            echo $2 | sudo tee /sys/devices/system/cpu/intel_pstate/no_trubo
         fi
         ;;
 esac
