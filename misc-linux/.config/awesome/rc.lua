@@ -3,12 +3,15 @@ local ar = require("awful.rules")
 local af = require("awful.autofocus")
 local na = require("naughty")
 local be = require("beautiful")
+local wi = require("wibox")
 -- 3rd party libs
 local cf = require("cyclefocus")
 
-na.config.defaults.font = "Sans 32"
+local scale_factor = 2
 
-function debug(msg)
+na.config.defaults.font = "Sans " .. (12 * scale_factor)
+
+local debug = function (msg)
    na.notify({
          text = tostring(msg),
          timeout = 10,
@@ -32,7 +35,79 @@ end
 
 -- reserve room for conky
 
-dummy_status_bar = aw.wibox({ position = "top", screen = 1, ontop = false, width = 1, height = 40 })
+dummy_status_bar = aw.wibox({ position = "top", screen = 1, ontop = false, width = 1, height = 20 * scale_factor })
+
+-- and bottom wibox for task list and tray
+
+local my_wibox = {}
+local my_task_list = {}
+local my_tray = wi.widget.systray()
+
+my_tray:set_base_size(32)
+
+my_task_list.buttons = aw.util.table.join(
+   aw.button({ }, 1, function (c)
+         if c == client.focus then
+            c.minimized = true
+         else
+            -- Without this, the following
+            -- :isvisible() makes no sense
+            c.minimized = false
+            if not c:isvisible() then
+               aw.tag.viewonly(c:tags()[1])
+            end
+            -- This will also un-minimize
+            -- the client, if needed
+            client.focus = c
+            c:raise()
+         end
+   end),
+   aw.button({ }, 3, function ()
+         if instance then
+            instance:hide()
+            instance = nil
+         else
+            instance = aw.menu.clients({ width=500 })
+         end
+   end),
+   aw.button({ }, 4, function ()
+         aw.client.focus.byidx(1)
+         if client.focus then client.focus:raise() end
+   end),
+   aw.button({ }, 5, function ()
+         aw.client.focus.byidx(-1)
+         if client.focus then client.focus:raise() end
+end))
+
+for s = 1, screen.count() do
+   my_task_list[s] = aw.widget.tasklist.new(
+      s,
+      aw.widget.tasklist.filter.currenttags,
+      my_task_list.buttons,
+      {
+         font = "Sans " .. (12 * scale_factor)
+      }
+   )
+   my_wibox[s] = aw.wibox({
+         screen = s,
+         fg = be.fg_normal,
+         bg = be.bg_normal,
+         height = 20 * scale_factor,
+         position = "bottom",
+         border_width = 0,
+   })
+
+   local right_layout = wi.layout.fixed.horizontal()
+   right_layout:add(my_tray)
+
+   local layout = wi.layout.align.horizontal()
+   layout:set_middle(my_task_list[s])
+   layout:set_right(right_layout)
+   
+   my_wibox[s]:set_widget(layout)
+end
+
+-- helper functions
 
 function is_floating (c)
    return c.floating or c.maximized_vertical or c.maximized_horizontal or c.type == "dialog"
@@ -59,6 +134,8 @@ local global_keys = aw.util.table.join(
    aw.key({ }, "XF86AudioRaiseVolume", function() aw.util.spawn("amixer sset Master,0 2%+") end),
    aw.key({ }, "XF86AudioMute", function() aw.util.spawn("amixer sset Master,0 toggle") end),
 
+   aw.key({ "Mod4", "Control" }, "m", function () for _, c in pairs(client.get()) do c.minimized = false end end),
+   
    aw.key({ "Mod4", "Control" }, "q", awesome.quit)
 )
 

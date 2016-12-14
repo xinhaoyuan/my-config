@@ -6,5 +6,4 @@ fcitx
 compton -b
 nitrogen --restore
 xscreensaver -no-splash &
-xfce4-panel &
 wicd-gtk -t &

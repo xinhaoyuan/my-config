@@ -2,5 +2,6 @@
 
 . $HOME/.xdesktoprc.common
 
+xfce4-panel &
 conky -c $HOME/.config/conky/main -d
 
