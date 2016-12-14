@@ -79,25 +79,27 @@ local client_keys = aw.util.table.join(
    }),
    aw.key({ "Mod4" }, "Tab", function(src_c)
          local f = is_floating(src_c)
-         local focus_found = false
+         local new_focus = nil
          for _, c in ipairs(client.get(src_c.screen)) do
             if c:isvisible() and (not aw.client.focus.filter or aw.client.focus.filter(c)) then
                if not is_floating(c) then
                   if f then
                      c:raise()
-                     if not focus_found then
-                        focus_found = true
-                        client.focus = c
+                     if not new_focus then
+                        new_focus = c
                      end
                   else
                      c:lower()
                   end
                else
-                  if not f and not focus_found then
-                     focus_found = true
-                     client.focus = c
+                  if not f and not new_focus then
+                     new_focus = c
                   end
                end
+            end
+
+            if new_focus then
+               client.focus = new_focus
             end
          end
    end),
@@ -126,12 +128,6 @@ client.connect_signal(
 client.connect_signal(
    "unfocus",
    function (c) c.border_color = be.border_normal end)
-client.connect_signal(
-   "manage",
-   function (c) managed_window[c] = true end)
-client.connect_signal(
-   "unmanage",
-   function (c) managed_window[c] = nil end)
 
 ar.rules = {
    {
