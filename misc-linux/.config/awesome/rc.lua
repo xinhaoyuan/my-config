@@ -9,7 +9,7 @@ local cf = require("cyclefocus")
 
 local scale_factor = 2
 
-na.config.defaults.font = "Sans " .. (12 * scale_factor)
+na.config.defaults.font = "Sans " .. (10 * scale_factor)
 
 local debug = function (msg)
    na.notify({
@@ -43,7 +43,7 @@ local my_wibox = {}
 local my_task_list = {}
 local my_tray = wi.widget.systray()
 
-my_tray:set_base_size(32)
+my_tray:set_base_size(20 * scale_factor)
 
 my_task_list.buttons = aw.util.table.join(
    aw.button({ }, 1, function (c)
@@ -85,7 +85,7 @@ for s = 1, screen.count() do
       aw.widget.tasklist.filter.currenttags,
       my_task_list.buttons,
       {
-         font = "Sans " .. (12 * scale_factor)
+         font = "Sans " .. (10 * scale_factor)
       }
    )
    my_wibox[s] = aw.wibox({
