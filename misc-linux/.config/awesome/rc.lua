@@ -115,19 +115,20 @@ end
 
 -- keys and buttons
 local global_keys = aw.util.table.join(
-   aw.key({ "Mod4" }, "Left", aw.tag.viewprev),
-   aw.key({ "Mod4" }, "Right", aw.tag.viewnext),
-   
-   aw.key({ "Mod4" }, "r", function () aw.util.spawn_with_shell("dlauncher open") end),
-   aw.key({ "Mod4" }, "Return", function () aw.util.spawn("open-terminal-emulator") end),
-   aw.key({ "Mod4" }, "space", function () aw.util.spawn("urxvt -name root-terminal") end),
-   
+   aw.key({ "Mod4", "Control" }, "Left", aw.tag.viewprev),
+   aw.key({ "Mod4", "Control" }, "Right", aw.tag.viewnext),
+      
    aw.key({ "Mod4" }, "[", function () aw.layout.inc(layouts, -1) end),
    aw.key({ "Mod4" }, "]", function () aw.layout.inc(layouts, 1) end),
 
-   aw.key({ "Mod4" }, "h", function () aw.tag.incmwfact(-0.05) end),
+   aw.key({ "Mod4" }, "w", function () aw.client.focus.bydirection("up"); client.focus:raise() end),
+   aw.key({ "Mod4" }, "a", function () aw.client.focus.bydirection("left"); client.focus:raise() end),
+   aw.key({ "Mod4" }, "s", function () aw.client.focus.bydirection("down"); client.focus:raise() end),
+   aw.key({ "Mod4" }, "d", function () aw.client.focus.bydirection("right"); client.focus:raise() end),
+
+   aw.key({ "Mod4" }, "j", function () aw.tag.incmwfact(-0.05) end),
    aw.key({ "Mod4" }, "l", function () aw.tag.incmwfact( 0.05) end),
-   aw.key({ "Mod4" }, "j", function () aw.client.incwfact(-0.1) end),
+   aw.key({ "Mod4" }, "i", function () aw.client.incwfact(-0.1) end),
    aw.key({ "Mod4" }, "k", function () aw.client.incwfact( 0.1) end),
 
    aw.key({ }, "XF86AudioLowerVolume", function() aw.util.spawn("amixer sset Master,0 2%-") end),
@@ -135,8 +136,12 @@ local global_keys = aw.util.table.join(
    aw.key({ }, "XF86AudioMute", function() aw.util.spawn("amixer sset Master,0 toggle") end),
 
    aw.key({ "Mod4", "Control" }, "m", function () for _, c in pairs(client.get()) do c.minimized = false end end),
+
+   aw.key({ "Mod4" }, "r", function () aw.util.spawn_with_shell("dlauncher open") end),
+   aw.key({ "Mod4" }, "Return", function () aw.util.spawn("open-terminal-emulator") end),
+   aw.key({ "Mod4" }, "t", function () aw.util.spawn("urxvt -name root-terminal") end),
    
-   aw.key({ "Mod4", "Control" }, "q", awesome.quit)
+   aw.key({ "Mod4", "Control" }, "Escape", awesome.quit)
 )
 
 local client_keys = aw.util.table.join(
@@ -171,17 +176,25 @@ local client_keys = aw.util.table.join(
             end            
          end
 
-         new_focus = cf.find_history(0, { function (c) return is_floating(c) ~= f end })
+         new_focus = cf.find_history(0, { function (c) return cf.filters.same_screen(c, src_c) and cf.filters.common_tag(c, src_c) and is_floating(c) ~= f end })
          
          if new_focus then
             client.focus = new_focus
          end
    end),
 
-   aw.key({ "Mod4" }, "w", function (c)
-         c.maximized_horizontal = not c.maximized_horizontal
-         c.maximized_vertical = not c.maximized_vertical
+   aw.key({ "Mod4" }, "Up", function (c)
+         if c.minimized then
+            c.minimized = false
+         else
+            c.maximized_horizontal = not c.maximized_horizontal
+            c.maximized_vertical = not c.maximized_vertical
+         end
    end),
+   aw.key({ "Mod4" }, "Down", function (c)
+         c.minimized = true
+   end),
+   
    aw.key({ "Mod4" }, "c", function (c) c:kill() end),
    aw.key({ "Mod4" }, "z", function (c) c:swap(aw.client.getmaster()) end)   
 )
@@ -202,6 +215,18 @@ client.connect_signal(
 client.connect_signal(
    "unfocus",
    function (c) c.border_color = be.border_normal end)
+client.connect_signal(
+   "unmanage",
+   function (c)
+      if client.focus == c then
+         new_focus = cf.find_history(0, { function (nc) return cf.filters.same_screen(nc, c) and cf.filters.common_tag(nc, c) end })
+         
+         if new_focus then
+            client.focus = new_focus
+         end
+      end
+end)
+
 
 ar.rules = {
    {

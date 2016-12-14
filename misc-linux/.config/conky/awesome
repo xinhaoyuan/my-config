@@ -10,8 +10,7 @@ own_window_colour 000000
 own_window_argb_visual yes
 own_window_argb_value 128
 own_window_class Conky
-own_window_type desktop
-own_window_hints below,skip_taskbar,skip_pager
+own_window_type override
 minimum_size 3200 40
 maximum_width 3200
 double_buffer yes
@@ -42,6 +41,8 @@ ${color orange}Net${color}\
 [${addr wlp58s0}\
  ${wireless_link_qual_perc wlp58s0}%\
  ${upspeedf wlp58s0}k/${downspeedf wlp58s0}k]\
+[${addr enx00e1020034d1}\
+ ${upspeedf enx00e1020034d1}k/${downspeedf enx00e1020034d1}k]\
 ${alignr}\
 ${color orange}Bat${color}[${battery_short}] \
 ${color}${time %a %d/%m/%Y} ${time %H:%M}

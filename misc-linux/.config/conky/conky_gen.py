@@ -22,8 +22,8 @@ def gen(options):
             "own_window_argb_visual yes",
             "own_window_argb_value 128",
             "own_window_class Conky",
-            "own_window_type desktop",
-            "own_window_hints below,skip_taskbar,skip_pager",
+            "own_window_type override",
+            # "own_window_hints below,skip_taskbar,skip_pager",
             "minimum_size 3200 40",
             "maximum_width 3200"
         ])

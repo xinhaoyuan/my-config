@@ -3,9 +3,9 @@
       (setq dafny-verification-backend 'server)
       (add-hook 'boogie-friends-hook (lambda () (setq tab-width 4) (indent-tab-mode 1) (prettify-symbols-mode -1)))
       (setq flycheck-dafny-executable
-	    (concat (getenv "HOME") "/dafny/Dafny.exe"))
+	    (concat (getenv "HOME") "/opt/dafny-1.9.8/Dafny.exe"))
       (setq flycheck-inferior-dafny-executable
-	    (concat (getenv "HOME") "/dafny/DafnyServer.exe"))
+	    (concat (getenv "HOME") "/opt/dafny-1.9.8/DafnyServer.exe"))
       ))
 
 (defun find-indent-ref ()
