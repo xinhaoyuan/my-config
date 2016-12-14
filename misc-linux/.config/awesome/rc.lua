@@ -14,7 +14,7 @@ na.config.defaults.font = "Sans " .. (10 * scale_factor)
 local debug = function (msg)
    na.notify({
          text = tostring(msg),
-         timeout = 10,
+         timeout = 10
    })
 end
 
@@ -109,7 +109,7 @@ end
 
 -- helper functions
 
-function is_floating (c)
+local is_floating = function (c)
    return c.floating or c.maximized_vertical or c.maximized_horizontal or c.type == "dialog"
 end
 
@@ -157,27 +157,24 @@ local client_keys = aw.util.table.join(
    aw.key({ "Mod4" }, "Tab", function(src_c)
          local f = is_floating(src_c)
          local new_focus = nil
+         
          for _, c in ipairs(client.get(src_c.screen)) do
             if c:isvisible() and (not aw.client.focus.filter or aw.client.focus.filter(c)) then
                if not is_floating(c) then
                   if f then
                      c:raise()
-                     if not new_focus then
-                        new_focus = c
-                     end
                   else
                      c:lower()
                   end
                else
-                  if not f and not new_focus then
-                     new_focus = c
-                  end
                end
-            end
+            end            
+         end
 
-            if new_focus then
-               client.focus = new_focus
-            end
+         new_focus = cf.find_history(0, { function (c) return is_floating(c) ~= f end })
+         
+         if new_focus then
+            client.focus = new_focus
          end
    end),
 
