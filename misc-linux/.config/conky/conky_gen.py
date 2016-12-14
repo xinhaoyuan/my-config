@@ -58,11 +58,12 @@ def gen(options):
         "gap_x 0",
         "gap_y 0",
         # Add spaces to keep things from moving about?  This only affects certain objects.
-        "use_spacer no",
+        "use_spacer left",
         # Subtract file system buffers from used memory?
         "no_buffers yes",
         # set to yes if you want all text to be in uppercase
-        "uppercase no"
+        "uppercase no",
+        "pad_percents 2"
     ])
 
     lines.append("TEXT")

@@ -25,9 +25,10 @@ default_outline_color black
 alignment top_left
 gap_x 0
 gap_y 0
-use_spacer no
+use_spacer left
 no_buffers yes
 uppercase no
+pad_percents 2
 TEXT
 ${color orange}Cpu${color}[\
 ${cpu cpu1}%,${freq_g 1}\
@@ -41,8 +42,6 @@ ${color orange}Net${color}\
 [${addr wlp58s0}\
  ${wireless_link_qual_perc wlp58s0}%\
  ${upspeedf wlp58s0}k/${downspeedf wlp58s0}k]\
-[${addr enx00e1020034d1}\
- ${upspeedf enx00e1020034d1}k/${downspeedf enx00e1020034d1}k]\
 ${alignr}\
 ${color orange}Bat: ${color}${battery} \
 ${color}${time %A, %d %B} ${time  %H:%M}
