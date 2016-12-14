@@ -6,10 +6,19 @@ local be = require("beautiful")
 -- 3rd party libs
 local cf = require("cyclefocus")
 
+na.config.defaults.font = "Sans 32"
+
+function debug(msg)
+   na.notify({
+         text = tostring(msg),
+         timeout = 10,
+   })
+end
+
 aw.util.spawn_with_shell("$HOME/.xdesktoprc.awesome")
 be.init("/usr/share/awesome/themes/default/theme.lua")
 
--- Layouts
+-- layouts
 local layouts = {
    aw.layout.suit.tile,
    aw.layout.suit.fair,
@@ -25,7 +34,11 @@ end
 
 dummy_status_bar = aw.wibox({ position = "top", screen = 1, ontop = false, width = 1, height = 40 })
 
--- Keys and buttons
+function is_floating (c)
+   return c.floating or c.maximized_vertical or c.maximized_horizontal or c.type == "dialog"
+end
+
+-- keys and buttons
 local global_keys = aw.util.table.join(
    aw.key({ "Mod4" }, "Left", aw.tag.viewprev),
    aw.key({ "Mod4" }, "Right", aw.tag.viewnext),
@@ -53,8 +66,41 @@ local client_keys = aw.util.table.join(
    cf.key({ "Mod1" }, "Tab", 1,
       {
          modifier = "Alt_L",
-         cycle_filters = { cf.filters.same_screen, cf.filters.common_tag }
+         cycle_filters = {
+            cf.filters.same_screen, cf.filters.common_tag
+            ,
+            function (c, src_c)
+               if c.pid == src_c.pid then return true
+               else
+                  return is_floating(c) == is_floating(src_c)
+               end
+            end
+         }
    }),
+   aw.key({ "Mod4" }, "Tab", function(src_c)
+         local f = is_floating(src_c)
+         local focus_found = false
+         for _, c in ipairs(client.get(src_c.screen)) do
+            if c:isvisible() and (not aw.client.focus.filter or aw.client.focus.filter(c)) then
+               if not is_floating(c) then
+                  if f then
+                     c:raise()
+                     if not focus_found then
+                        focus_found = true
+                        client.focus = c
+                     end
+                  else
+                     c:lower()
+                  end
+               else
+                  if not f and not focus_found then
+                     focus_found = true
+                     client.focus = c
+                  end
+               end
+            end
+         end
+   end),
 
    aw.key({ "Mod4" }, "w", function (c)
          c.maximized_horizontal = not c.maximized_horizontal
@@ -80,6 +126,12 @@ client.connect_signal(
 client.connect_signal(
    "unfocus",
    function (c) c.border_color = be.border_normal end)
+client.connect_signal(
+   "manage",
+   function (c) managed_window[c] = true end)
+client.connect_signal(
+   "unmanage",
+   function (c) managed_window[c] = nil end)
 
 ar.rules = {
    {
@@ -94,7 +146,7 @@ ar.rules = {
       }
    },
    {
-      rule  = { class = "Conky" },
+      rule = { class = "Conky" },
       properties = {
          floating = true,
          sticky = true,
@@ -104,5 +156,5 @@ ar.rules = {
          border_width = 0,
          focusable = false
       }
-   }
+   },
 }
