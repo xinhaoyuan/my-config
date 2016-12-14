@@ -99,8 +99,8 @@ def gen(options):
 
     lines.extend([
         "${alignr}\\",
-        "${color orange}Bat: ${color}${battery} \\",
-        "${color}${time %A, %d %B} ${time  %H:%M}"
+        "${color orange}Bat${color}[${battery_short}] \\",
+        "${color}${time %a %d/%m/%Y} ${time %H:%M}"
         ])
 
     return lines

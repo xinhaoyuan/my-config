@@ -43,5 +43,5 @@ ${color orange}Net${color}\
  ${wireless_link_qual_perc wlp58s0}%\
  ${upspeedf wlp58s0}k/${downspeedf wlp58s0}k]\
 ${alignr}\
-${color orange}Bat: ${color}${battery} \
-${color}${time %A, %d %B} ${time  %H:%M}
+${color orange}Bat${color}[${battery_short}] \
+${color}${time %a %d/%m/%Y} ${time %H:%M}
