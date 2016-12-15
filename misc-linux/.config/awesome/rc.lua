@@ -216,9 +216,16 @@ local client_keys = aw.util.table.join(
    aw.key({ "Mod4" }, "Down", function (c)
          c.minimized = true
    end),
-   
-   aw.key({ "Mod4" }, "c", function (c) c:kill() end),
-   aw.key({ "Mod4" }, "z", function (c) c:swap(aw.client.getmaster()) end)   
+      
+   aw.key({ "Mod4" }, "Left", function (c)
+         if not is_floating(c) then
+            c:swap(aw.client.getmaster())
+         end
+   end),
+
+   aw.key({ "Mod4" }, "Right", function (c) aw.client.floating.toggle(c) end),
+
+   aw.key({ "Mod4" }, "c", function (c) c:kill() end)
 )
 
 local client_buttons = aw.util.table.join(
