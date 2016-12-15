@@ -40,10 +40,20 @@ dummy_status_bar = aw.wibox({ position = "top", screen = 1, ontop = false, width
 -- and bottom wibox for task list and tray
 
 local my_wibox = {}
+local my_tag_list = {}
 local my_task_list = {}
 local my_tray = wi.widget.systray()
 
 my_tray:set_base_size(20 * scale_factor)
+
+my_tag_list.buttons = aw.util.table.join(
+   aw.button({ }, 1, aw.tag.viewonly),
+   aw.button({ "Mod4" }, 1, aw.client.movetotag),
+   aw.button({ }, 3, aw.tag.viewtoggle),
+   aw.button({ "Mod4" }, 3, aw.client.toggletag),
+   aw.button({ }, 4, function(t) aw.tag.viewnext(aw.tag.getscreen(t)) end),
+   aw.button({ }, 5, function(t) aw.tag.viewprev(aw.tag.getscreen(t)) end)
+)
 
 my_task_list.buttons = aw.util.table.join(
    aw.button({ }, 1, function (c)
@@ -88,6 +98,14 @@ for s = 1, screen.count() do
          font = "Sans " .. (10 * scale_factor)
       }
    )
+
+   my_tag_list[s] = aw.widget.taglist(
+      s, aw.widget.taglist.filter.all, my_tag_list.buttons,
+      {
+         font = "Sans " .. (10 * scale_factor)
+      }
+   )
+   
    my_wibox[s] = aw.wibox({
          screen = s,
          fg = be.fg_normal,
@@ -97,10 +115,14 @@ for s = 1, screen.count() do
          border_width = 0,
    })
 
+   local left_layout = wi.layout.fixed.horizontal()
+   left_layout:add(my_tag_list[s])
+
    local right_layout = wi.layout.fixed.horizontal()
    right_layout:add(my_tray)
 
    local layout = wi.layout.align.horizontal()
+   layout:set_left(left_layout)
    layout:set_middle(my_task_list[s])
    layout:set_right(right_layout)
    
