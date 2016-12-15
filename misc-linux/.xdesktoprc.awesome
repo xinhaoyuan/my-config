@@ -2,6 +2,5 @@
 
 . $HOME/.xdesktoprc.common
 
+python $HOME/.config/conky/conky_gen.py awesome > $HOME/.config/conky/awesome
 conky -c $HOME/.config/conky/awesome -d
-
-

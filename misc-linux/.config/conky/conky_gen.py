@@ -72,7 +72,7 @@ def gen(options):
 
     # print cpu stats
     sys.stderr.write("Found {0} cpus".format(cpu_count))
-    lines.append("${color orange}Cpu${color}[\\")
+    lines.append("[\\")
     first = True
     for cpu in range(0, cpu_count):
         if first:
@@ -87,7 +87,6 @@ def gen(options):
         "${color orange}M${color}$memperc%,${color orange}S${color}$swapperc%] \\"
         ])
 
-    lines.append("${color orange}Net${color}\\")
     for if_name in os.listdir("/sys/class/net"):
         if if_name == "lo":
             continue
@@ -95,7 +94,7 @@ def gen(options):
         lines.append("[${{addr {0}}}\\".format(if_name))
         if wireless:
             lines.append(" ${{wireless_link_qual_perc {0}}}%\\".format(if_name))
-        lines.append(" ${{upspeedf {0}}}k/${{downspeedf {0}}}k]\\".format(if_name))
+        lines.append(" ${{upspeed {0}}}/${{downspeed {0}}}]\\".format(if_name))
 
     lines.extend([
         "${alignr}\\",
