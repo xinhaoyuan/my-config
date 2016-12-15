@@ -1,15 +1,15 @@
+require("my-utils")
 local aw = require("awful")
 local ar = require("awful.rules")
-local af = require("awful.autofocus")
 local na = require("naughty")
 local be = require("beautiful")
 local wi = require("wibox")
 -- 3rd party libs
+local af = require("my-autofocus")
+local sc = require("my-ui-scale")
 local cf = require("cyclefocus")
 
-local scale_factor = 2
-
-na.config.defaults.font = "Sans " .. (10 * scale_factor)
+na.config.defaults.font = "Sans " .. (10 * sc.factor)
 
 local debug = function (msg)
    na.notify({
@@ -17,6 +17,13 @@ local debug = function (msg)
          timeout = 10
    })
 end
+
+awesome.connect_signal(
+   "debug::error",
+   function (msg)
+      debug(msg)
+   end
+)
 
 aw.util.spawn_with_shell("$HOME/.xdesktoprc.awesome")
 be.init("/usr/share/awesome/themes/default/theme.lua")
@@ -35,7 +42,7 @@ end
 
 -- reserve room for conky
 
-dummy_status_bar = aw.wibox({ position = "top", screen = 1, ontop = false, width = 1, height = 20 * scale_factor })
+dummy_status_bar = aw.wibox({ position = "top", screen = 1, ontop = false, width = 1, height = 20 * sc.factor })
 
 -- and bottom wibox for task list and tray
 
@@ -44,7 +51,7 @@ local my_tag_list = {}
 local my_task_list = {}
 local my_tray = wi.widget.systray()
 
-my_tray:set_base_size(20 * scale_factor)
+my_tray:set_base_size(20 * sc.factor)
 
 my_tag_list.buttons = aw.util.table.join(
    aw.button({ }, 1, aw.tag.viewonly),
@@ -95,14 +102,14 @@ for s = 1, screen.count() do
       aw.widget.tasklist.filter.currenttags,
       my_task_list.buttons,
       {
-         font = "Sans " .. (10 * scale_factor)
+         font = "Sans " .. (10 * sc.factor)
       }
    )
 
    my_tag_list[s] = aw.widget.taglist(
       s, aw.widget.taglist.filter.all, my_tag_list.buttons,
       {
-         font = "Sans " .. (10 * scale_factor)
+         font = "Sans " .. (10 * sc.factor)
       }
    )
    
@@ -110,7 +117,7 @@ for s = 1, screen.count() do
          screen = s,
          fg = be.fg_normal,
          bg = be.bg_normal,
-         height = 20 * scale_factor,
+         height = 20 * sc.factor,
          position = "bottom",
          border_width = 0,
    })
@@ -133,6 +140,20 @@ end
 
 local is_floating = function (c)
    return aw.client.floating.get(c) or c.maximized_vertical or c.maximized_horizontal or c.type == "dialog"
+end
+
+af.find_alternative_focus = function(c)   
+   local f = is_floating(c)
+   local new_focus = cf.find_history(
+      0, {
+         function (nc)
+            return
+               nc ~= c
+               and cf.filters.same_screen(nc, c)
+               and is_floating(nc) == f
+         end
+   })
+   return new_focus
 end
 
 -- keys and buttons
@@ -200,7 +221,14 @@ local client_keys = aw.util.table.join(
             end            
          end
 
-         new_focus = cf.find_history(0, { function (c) return cf.filters.same_screen(c, src_c) and cf.filters.common_tag(c, src_c) and is_floating(c) ~= f end })
+         new_focus = cf.find_history(
+            0, {
+               function (c)
+                  return cf.filters.same_screen(c, src_c)
+                     and cf.filters.common_tag(c, src_c)
+                     and is_floating(c) ~= f
+               end
+         })
          
          if new_focus then
             client.focus = new_focus
@@ -242,22 +270,16 @@ root.keys(global_keys)
 
 client.connect_signal(
    "focus",
-   function (c) c.border_color = be.border_focus end)
+   function (c)
+      c.border_color = be.border_focus
+   end
+)
 client.connect_signal(
    "unfocus",
-   function (c) c.border_color = be.border_normal end)
-client.connect_signal(
-   "unmanage",
    function (c)
-      if client.focus == c then
-         new_focus = cf.find_history(0, { function (nc) return cf.filters.same_screen(nc, c) and cf.filters.common_tag(nc, c) end })
-         
-         if new_focus then
-            client.focus = new_focus
-         end
-      end
-end)
-
+      c.border_color = be.border_normal      
+   end
+)
 
 ar.rules = {
    {
