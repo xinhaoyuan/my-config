@@ -132,7 +132,7 @@ end
 -- helper functions
 
 local is_floating = function (c)
-   return c.floating or c.maximized_vertical or c.maximized_horizontal or c.type == "dialog"
+   return aw.client.floating.get(c) or c.maximized_vertical or c.maximized_horizontal or c.type == "dialog"
 end
 
 -- keys and buttons
