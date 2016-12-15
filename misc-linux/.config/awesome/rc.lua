@@ -156,6 +156,8 @@ local global_keys = aw.util.table.join(
    aw.key({ }, "XF86AudioLowerVolume", function() aw.util.spawn("amixer sset Master,0 2%-") end),
    aw.key({ }, "XF86AudioRaiseVolume", function() aw.util.spawn("amixer sset Master,0 2%+") end),
    aw.key({ }, "XF86AudioMute", function() aw.util.spawn("amixer sset Master,0 toggle") end),
+   aw.key({ }, "XF86MonBrightnessUp", function () aw.util.spawn("xbacklight -inc 5") end),
+   aw.key({ }, "XF86MonBrightnessDown", function () aw.util.spawn("xbacklight -dec 5") end),   
 
    aw.key({ "Mod4", "Control" }, "m", function () for _, c in pairs(client.get()) do c.minimized = false end end),
 
