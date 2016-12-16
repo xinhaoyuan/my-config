@@ -9,6 +9,7 @@ local af = require("my-autofocus")
 local sc = require("my-ui-scale")
 local cf = require("cyclefocus")
 
+local HOME_DIR = os.getenv("HOME")
 na.config.defaults.font = "Sans " .. (10 * sc.factor)
 
 local debug = function (msg)
@@ -25,7 +26,7 @@ awesome.connect_signal(
    end
 )
 
-aw.util.spawn_with_shell("$HOME/.xdesktoprc.awesome")
+aw.util.spawn_with_shell(HOME_DIR .. "/.xdesktoprc.awesome")
 be.init("/usr/share/awesome/themes/default/theme.lua")
 
 -- layouts
@@ -102,7 +103,7 @@ local global_keys = aw.util.table.join(
    aw.key({ "Mod4", "Control" }, "m", function () for _, c in pairs(client.get()) do c.minimized = false end end),
 
    aw.key({ "Mod4" }, "r", function () aw.util.spawn_with_shell("dlauncher open") end),
-   aw.key({ "Mod4" }, "Return", function () aw.util.spawn("open-terminal-emulator") end),
+   aw.key({ "Mod4" }, "Return", function () aw.util.spawn(HOME_DIR .. "/bin/open-terminal-emulator") end),
    aw.key({ "Mod4" }, "t", function () aw.util.spawn("urxvt -name root-terminal") end),
    
    aw.key({ "Mod4", "Control" }, "Escape", awesome.quit)
