@@ -8,6 +8,7 @@ local ut = require("my-utils")
 local af = require("my-autofocus")
 local sc = require("my-ui-scale")
 local cf = require("cyclefocus")
+local ch = require("conky-hud")
 
 local HOME_DIR = os.getenv("HOME")
 na.config.defaults.font = "Sans " .. (10 * sc.factor)
@@ -47,10 +48,10 @@ require("my-widgets")
 -- helper functions
 
 local is_floating = function (c)
-   return aw.client.floating.get(c) or c.maximized_vertical or c.maximized_horizontal or c.type == "dialog"
+   return c.floating or c.maximized_vertical or c.maximized_horizontal or c.type == "dialog"
 end
 
-af.find_alternative_focus = function(c)   
+af.find_alternative_focus = function(c)
    local f = is_floating(c)
    local new_focus = cf.find_history(
       0, {
@@ -84,16 +85,6 @@ local global_keys = aw.util.table.join(
    aw.key({ "Mod4" }, "[", function () aw.layout.inc(layouts, -1) end),
    aw.key({ "Mod4" }, "]", function () aw.layout.inc(layouts, 1) end),
 
-   aw.key({ "Mod4" }, "w", function () aw.client.focus.bydirection("up"); client.focus:raise() end),
-   aw.key({ "Mod4" }, "a", function () aw.client.focus.bydirection("left"); client.focus:raise() end),
-   aw.key({ "Mod4" }, "s", function () aw.client.focus.bydirection("down"); client.focus:raise() end),
-   aw.key({ "Mod4" }, "d", function () aw.client.focus.bydirection("right"); client.focus:raise() end),
-
-   aw.key({ "Mod4" }, "j", function () aw.tag.incmwfact(-0.05) end),
-   aw.key({ "Mod4" }, "l", function () aw.tag.incmwfact( 0.05) end),
-   aw.key({ "Mod4" }, "i", function () aw.client.incwfact(-0.1) end),
-   aw.key({ "Mod4" }, "k", function () aw.client.incwfact( 0.1) end),
-
    aw.key({ }, "XF86AudioLowerVolume", function() aw.util.spawn("amixer sset Master,0 2%-") end),
    aw.key({ }, "XF86AudioRaiseVolume", function() aw.util.spawn("amixer sset Master,0 2%+") end),
    aw.key({ }, "XF86AudioMute", function() aw.util.spawn("amixer sset Master,0 toggle") end),
@@ -105,6 +96,8 @@ local global_keys = aw.util.table.join(
    aw.key({ "Mod4" }, "r", function () aw.util.spawn_with_shell("dlauncher open") end),
    aw.key({ "Mod4" }, "Return", function () aw.util.spawn(HOME_DIR .. "/bin/open-terminal-emulator") end),
    aw.key({ "Mod4" }, "t", function () aw.util.spawn("urxvt -name root-terminal") end),
+
+   aw.key({ "Mod4" }, "grave", function () ch.toggle_conky() end),
    
    aw.key({ "Mod4", "Control" }, "Escape", awesome.quit)
 )
@@ -174,6 +167,17 @@ local client_keys = aw.util.table.join(
    end),
 
    aw.key({ "Mod4" }, "Right", function (c) aw.client.floating.toggle(c) end),
+
+   aw.key({ "Mod4" }, "w", function (c) aw.client.focus.bydirection("up"); client.focus:raise() end),
+   aw.key({ "Mod4" }, "a", function (c) aw.client.focus.bydirection("left"); client.focus:raise() end),
+   aw.key({ "Mod4" }, "s", function (c) aw.client.focus.bydirection("down"); client.focus:raise() end),
+   aw.key({ "Mod4" }, "d", function (c) aw.client.focus.bydirection("right"); client.focus:raise() end),
+
+   aw.key({ "Mod4" }, "j", function (c) aw.tag.incmwfact(-0.05) end),
+   aw.key({ "Mod4" }, "l", function (c) aw.tag.incmwfact( 0.05) end),
+   aw.key({ "Mod4" }, "i", function (c) aw.client.incwfact(-0.1) end),
+   aw.key({ "Mod4" }, "k", function (c) aw.client.incwfact( 0.1) end),
+
 
    aw.key({ "Mod4" }, "c", function (c) c:kill() end)
 )

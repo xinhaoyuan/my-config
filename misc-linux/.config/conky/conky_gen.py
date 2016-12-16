@@ -10,6 +10,7 @@ def gen(options):
         "out_to_console no",
         "use_xft yes",
         "xftfont Input:size=12",
+        "xftalpha 0.5",
         # Update interval in seconds
         "update_interval 1"];
 
@@ -22,10 +23,10 @@ def gen(options):
             "own_window_argb_visual yes",
             "own_window_argb_value 128",
             "own_window_class Conky",
-            "own_window_type override",
+            "own_window_type desktop",
             # "own_window_hints below,skip_taskbar,skip_pager",
-            "minimum_size 3200 40",
-            "maximum_width 3200"
+            # "minimum_size 800 40",
+            # "maximum_width 800"
         ])
         
     lines.extend([
@@ -37,6 +38,7 @@ def gen(options):
         "draw_outline no",
         # Draw borders around text
         "draw_borders no",
+        "border_inner_margin 20",
         # Stippled borders?
         "stippled_borders 8",
         # Default colors and also border colors
@@ -55,8 +57,8 @@ def gen(options):
 
     lines.extend([
         # Gap between borders of screen and text
-        "gap_x 0",
-        "gap_y 0",
+        "gap_x 200",
+        "gap_y 200",
         # Add spaces to keep things from moving about?  This only affects certain objects.
         "use_spacer left",
         # Subtract file system buffers from used memory?
@@ -72,7 +74,9 @@ def gen(options):
 
     # print cpu stats
     sys.stderr.write("Found {0} cpus".format(cpu_count))
-    lines.append("[\\")
+    lines.extend([
+        "${color orange}CPU:${color}"
+        "[\\"])
     first = True
     for cpu in range(0, cpu_count):
         if first:
@@ -80,13 +84,16 @@ def gen(options):
             first = False
         else:
             lines.append("|${{cpu cpu{0}}}%,${{freq_g {0}}}\\".format(cpu + 1))
-    lines.append("] \\")
+    lines.append("]")
 
     lines.extend([
+        "",
         "[${color orange}P${color}$running_processes/$processes,${color orange}L${color}${loadavg 3},\\",
-        "${color orange}M${color}$memperc%,${color orange}S${color}$swapperc%] \\"
+        "${color orange}M${color}$memperc%,${color orange}S${color}$swapperc%]"
         ])
 
+    lines.append("")
+    lines.append("${color orange}NET:${color}")
     for if_name in os.listdir("/sys/class/net"):
         if if_name == "lo":
             continue
@@ -94,12 +101,13 @@ def gen(options):
         lines.append("[${{addr {0}}}\\".format(if_name))
         if wireless:
             lines.append(" ${{wireless_link_qual_perc {0}}}%\\".format(if_name))
-        lines.append(" ${{upspeed {0}}}/${{downspeed {0}}}]\\".format(if_name))
+        lines.append(" ${{upspeed {0}}}/${{downspeed {0}}}]".format(if_name))
 
     lines.extend([
-        "${alignr}\\",
-        "${color orange}B${color}[${battery_short}] \\",
-        "${color}${time %a %d/%m/%Y} ${time %H:%M}"
+        "",
+        "${color orange}BAT${color}[${battery_short}]",
+        "",
+        "${time %a %d/%m/%Y} ${time %H:%M}"
         ])
 
     return lines
