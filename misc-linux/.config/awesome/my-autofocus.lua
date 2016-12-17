@@ -58,7 +58,7 @@ local function check_focus_tag(t)
     if (not s) or (not s.valid) then return end
     s = screen[s]
     check_focus({ screen = s })
-    if client.focus and screen[client.focus.screen] ~= s then
+    if not client.focus or screen[client.focus.screen] ~= s then
         local c = aclient.focus.history.get(s, 0, aclient.focus.filter)
         if c then
             c:emit_signal("request::activate", "autofocus.check_focus_tag",
