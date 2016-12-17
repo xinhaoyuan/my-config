@@ -3,10 +3,6 @@ local be = require("beautiful")
 local wi = require("wibox")
 local sc = require("my-ui-scale")
 
--- reserve room for conky
-
-dummy_status_bar = aw.wibox({ position = "top", screen = 1, ontop = false, width = 1, height = 20 * sc.factor })
-
 local my_wibox = {}
 local my_tag_list = {}
 local my_task_list = {}

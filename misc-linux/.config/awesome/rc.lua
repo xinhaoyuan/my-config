@@ -12,6 +12,7 @@ local ch = require("conky-hud")
 
 local HOME_DIR = os.getenv("HOME")
 na.config.defaults.font = "Sans " .. (10 * sc.factor)
+cf.naughty_preset.position = "center_middle"
 
 local debug = function (msg)
    na.notify({
@@ -97,7 +98,8 @@ local global_keys = aw.util.table.join(
    aw.key({ "Mod4" }, "Return", function () aw.util.spawn(HOME_DIR .. "/bin/open-terminal-emulator") end),
    aw.key({ "Mod4" }, "t", function () aw.util.spawn("urxvt -name root-terminal") end),
 
-   aw.key({ "Mod4" }, "grave", function () ch.toggle_conky() end),
+   aw.key({ "Mod4" }, "F1", function () ch.toggle_conky() end),
+   aw.key({ "Mod4" }, "grave", function() ch.raise_conky() end, function() ch.lower_conky_delayed() end),
    
    aw.key({ "Mod4", "Control" }, "Escape", awesome.quit)
 )
