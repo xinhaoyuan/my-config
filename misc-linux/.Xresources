@@ -21,7 +21,7 @@ Xcursor.size : 32
 
 ! Emacs.font: fontset-song
 
-#include ".Xdefaults.d/urxvt.color.5"
+#include ".Xresources.d/urxvt.color.5"
 
 ! ========================================
 ! Rxut-unicode setups

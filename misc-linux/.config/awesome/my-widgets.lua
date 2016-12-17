@@ -59,14 +59,14 @@ for s = 1, screen.count() do
       aw.widget.tasklist.filter.currenttags,
       my_task_list.buttons,
       {
-         font = "Sans " .. (10 * sc.factor)
+         font = "Sans " .. (10 * sc.font_factor)
       }
    )
 
    my_tag_list[s] = aw.widget.taglist(
       s, aw.widget.taglist.filter.all, my_tag_list.buttons,
       {
-         font = "Sans " .. (10 * sc.factor)
+         font = "Sans " .. (10 * sc.font_factor)
       }
    )
    

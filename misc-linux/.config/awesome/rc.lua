@@ -11,7 +11,7 @@ local cf = require("cyclefocus")
 local ch = require("conky-hud")
 
 local HOME_DIR = os.getenv("HOME")
-na.config.defaults.font = "Sans " .. (10 * sc.factor)
+na.config.defaults.font = "Sans " .. (10 * sc.font_factor)
 cf.naughty_preset.position = "center_middle"
 
 local debug = function (msg)

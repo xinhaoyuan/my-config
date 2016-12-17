@@ -8,7 +8,7 @@
 xrandr --output VGA-0 --auto
 xrandr --output VGA-0 --dpi 192
 
-xrdb ~/.Xdefaults
+xrdb -merge ~/.Xresources
 xset fp+ ~/.fonts
 xset m 1 10
 
