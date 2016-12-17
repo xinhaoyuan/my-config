@@ -1,13 +1,15 @@
-Dependency
+# Dependencies
 
-all:
+## all
+
 stow (>= 2.2.0)
 tmux
 git
 zsh (oh-my-zsh)
 emacs
 
-linux:
+## Linux
+
 build-essential
 consolekit (ck-launch-session)
 xdotool
@@ -17,15 +19,22 @@ libx11      (xorg-dev)
 libxinerama (xorg-dev)
 php         (php5-cli)
 pkg-config
+awesome-git
+openbox (not used for now)
+cmake
 
 sudo apt-get install stow tmux git zsh emacs build-essential consolekit xdotool xclip wmctrl xorg-dev php5-cli pkg-config
 
-mac:
+For building awesome git, extra development libs are needed
+
+`CMAKE_ARGS="-DCMAKE_INSTALL_PREFIX=/usr" make package` 
+
+## Mac
 brew
 reattach-to-user-namespace
 iterm2
 
-Manual Setup
+# Manual Setup
 
 change default shell to zsh
 oh-my-zsh:
