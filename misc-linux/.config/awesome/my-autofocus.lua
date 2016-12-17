@@ -35,7 +35,7 @@ local autofocus = {
 local function check_focus(obj)
     if not obj.screen.valid then return end
     -- When no visible client has the focus...
-    if not client.focus or not client.focus:isvisible() then
+    if not client.focus or not client.focus:isvisible() or not aclient.focus.filter(client.focus) then
         local c = autofocus.find_alternative_focus(obj)
         if c then
             c:emit_signal("request::activate", "autofocus.check_focus",
@@ -47,7 +47,7 @@ end
 --- Check client focus (delayed).
 -- @param obj An object that should have a .screen property.
 local function check_focus_delayed(obj)
-    timer.delayed_call(check_focus, {screen = obj.screen})
+    timer.delayed_call(check_focus, obj)
 end
 
 --- Give focus on tag selection change.
@@ -58,7 +58,7 @@ local function check_focus_tag(t)
     if (not s) or (not s.valid) then return end
     s = screen[s]
     check_focus({ screen = s })
-    if not client.focus or screen[client.focus.screen] ~= s then
+    if not client.focus or not aclient.focus.filter(client.focus) or screen[client.focus.screen] ~= s then
         local c = aclient.focus.history.get(s, 0, aclient.focus.filter)
         if c then
             c:emit_signal("request::activate", "autofocus.check_focus_tag",
@@ -70,7 +70,9 @@ end
 tag.connect_signal("property::selected", function (t)
     timer.delayed_call(check_focus_tag, t)
 end)
-client.connect_signal("unmanage",            check_focus_delayed)
+
+client.connect_signal("unfocus",             check_focus_delayed)
+client.connect_signal("unmanage",            check_focus)
 client.connect_signal("tagged",              check_focus_delayed)
 client.connect_signal("untagged",            check_focus_delayed)
 client.connect_signal("property::hidden",    check_focus_delayed)

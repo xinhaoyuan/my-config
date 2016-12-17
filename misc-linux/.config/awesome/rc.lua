@@ -58,7 +58,7 @@ af.find_alternative_focus = function(c)
       0, {
          function (nc)
             return
-               nc ~= c
+               nc.valid
                and cf.filters.same_screen(nc, c)
                and is_floating(nc) == f
          end
@@ -70,7 +70,7 @@ af.find_alternative_focus = function(c)
       0, {
          function (nc)
             return
-               nc ~= c
+               nc.valid
                and cf.filters.same_screen(nc, c)
          end
    })
