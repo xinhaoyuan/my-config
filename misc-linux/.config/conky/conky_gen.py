@@ -68,7 +68,7 @@ def gen(options):
     # print cpu stats
     sys.stderr.write("Found {0} cpus".format(cpu_count))
     lines.extend([
-        "${alignc}==== ${color orange}Perf${color} ====",
+        "${alignc}==== ${color orange}PERF${color} ====",
         ""
     ])
     first = True
