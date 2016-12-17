@@ -44,21 +44,14 @@ def gen(options):
         # Default colors and also border colors
         "default_color white",
         "default_shade_color black",
-        "default_outline_color black"
+        "default_outline_color black",
+        "alignment middle_right"
     ])
-
-    if options["with-awesome"]:
-        lines.append(
-            # Text alignment, other possible values are commented
-            # "alignment top_left"
-            # "alignment top_right"
-            # "alignment bottom_left"
-            "alignment top_left")
 
     lines.extend([
         # Gap between borders of screen and text
-        "gap_x 200",
-        "gap_y 200",
+        "gap_x 100",
+        "gap_y 100",
         # Add spaces to keep things from moving about?  This only affects certain objects.
         "use_spacer left",
         # Subtract file system buffers from used memory?
@@ -75,8 +68,9 @@ def gen(options):
     # print cpu stats
     sys.stderr.write("Found {0} cpus".format(cpu_count))
     lines.extend([
-        "${color orange}CPU:${color}"
-        "[\\"])
+        "${alignc}==== ${color orange}Perf${color} ====",
+        ""
+    ])
     first = True
     for cpu in range(0, cpu_count):
         if first:
@@ -84,30 +78,36 @@ def gen(options):
             first = False
         else:
             lines.append("|${{cpu cpu{0}}}%,${{freq_g {0}}}\\".format(cpu + 1))
-    lines.append("]")
+    lines.append("")
 
     lines.extend([
         "",
-        "[${color orange}P${color}$running_processes/$processes,${color orange}L${color}${loadavg 3},\\",
-        "${color orange}M${color}$memperc%,${color orange}S${color}$swapperc%]"
+        "${alignc}${color orange}Proc:${color} $running_processes/$processes, ${color orange}Load${color} ${loadavg 3}",
+        "${alignc}${color orange}Mem:${color} $memperc%, ${color orange}Swap:${color} $swapperc%"
         ])
 
     lines.append("")
-    lines.append("${color orange}NET:${color}")
+    lines.append("${alignc}==== ${color orange}NET${color} ====")
+    lines.append("")
     for if_name in os.listdir("/sys/class/net"):
         if if_name == "lo":
             continue
-        wireless = os.access("/sys/class/net/{0}/wireless".format(if_name), os.R_OK) 
-        lines.append("[${{addr {0}}}\\".format(if_name))
+        wireless = os.access("/sys/class/net/{0}/wireless".format(if_name), os.R_OK)
+        lines.append("${alignc}\\")
         if wireless:
-            lines.append(" ${{wireless_link_qual_perc {0}}}%\\".format(if_name))
-        lines.append(" ${{upspeed {0}}}/${{downspeed {0}}}]".format(if_name))
+            lines.append("{0}: ${{addr {0}}} - ${{wireless_link_qual_perc {0}}}%".format(if_name))
+        else:
+            lines.append("{0}: ${{addr {0}}}".format(if_name))
+        lines.append("${{alignc}}${{upspeed {0}}}/${{downspeed {0}}}".format(if_name))
+        lines.append("")
 
     lines.extend([
         "",
-        "${color orange}BAT${color}[${battery_short}]",
+        "${alignc}==== ${color orange}MISC${color} ====",
         "",
-        "${time %a %d/%m/%Y} ${time %H:%M}"
+        "${alignc}${color orange}BAT:${color} ${battery}",
+        "",
+        "${alignc}${time %a %d/%m/%Y} ${time %H:%M}"
         ])
 
     return lines
