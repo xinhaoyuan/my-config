@@ -1,14 +1,14 @@
 local aw = require("awful")
 local be = require("beautiful")
 local wi = require("wibox")
-local sc = require("my-ui-scale")
+local cfg = require("my-config")
 
 local my_wibox = {}
 local my_tag_list = {}
 local my_task_list = {}
 local my_tray = wi.widget.systray()
 
-my_tray:set_base_size(20 * sc.factor)
+my_tray:set_base_size(20 * cfg.widget_scale_factor)
 
 my_tag_list.buttons = aw.util.table.join(
    aw.button({ }, 1, aw.tag.viewonly),
@@ -59,14 +59,14 @@ for s = 1, screen.count() do
       aw.widget.tasklist.filter.currenttags,
       my_task_list.buttons,
       {
-         font = "Sans " .. (10 * sc.font_factor)
+         font = "Sans " .. (10 * cfg.font_scale_factor)
       }
    )
 
    my_tag_list[s] = aw.widget.taglist(
       s, aw.widget.taglist.filter.all, my_tag_list.buttons,
       {
-         font = "Sans " .. (10 * sc.font_factor)
+         font = "Sans " .. (10 * cfg.font_scale_factor)
       }
    )
    
@@ -74,7 +74,7 @@ for s = 1, screen.count() do
          screen = s,
          fg = be.fg_normal,
          bg = be.bg_normal,
-         height = 20 * sc.factor,
+         height = 20 * cfg.widget_scale_factor,
          position = "bottom",
          border_width = 0,
    })
@@ -84,6 +84,7 @@ for s = 1, screen.count() do
 
    local right_layout = wi.layout.fixed.horizontal()
    right_layout:add(my_tray)
+   right_layout:add(wi.widget.textclock.new())
 
    local layout = wi.layout.align.horizontal()
    layout:set_left(left_layout)

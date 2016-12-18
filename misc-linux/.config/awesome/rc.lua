@@ -4,14 +4,14 @@ local na = require("naughty")
 local be = require("beautiful")
 local wi = require("wibox")
 -- 3rd party libs
+local cfg = require("my-config")
 local ut = require("my-utils")
 local af = require("my-autofocus")
-local sc = require("my-ui-scale")
 local cf = require("cyclefocus")
 local ch = require("conky-hud")
 
 local HOME_DIR = os.getenv("HOME")
-na.config.defaults.font = "Sans " .. (10 * sc.font_factor)
+na.config.defaults.font = "Sans " .. (10 * cfg.font_scale_factor)
 cf.naughty_preset.position = "center_middle"
 
 local debug = function (msg)

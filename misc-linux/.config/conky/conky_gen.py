@@ -105,7 +105,7 @@ def gen(options):
         "",
         "${alignc}==== ${color orange}MISC${color} ====",
         "",
-        "${alignc}${color orange}BAT:${color} ${battery}",
+        "${alignc}${color orange}Bat:${color} ${battery}",
         "",
         "${alignc}${time %a %d/%m/%Y} ${time %H:%M}"
         ])
