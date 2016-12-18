@@ -33,7 +33,7 @@ local autofocus = {
 --
 -- @param obj An object that should have a .screen property.
 local function check_focus(obj)
-    if not obj.screen.valid then return end
+    if not obj or not obj.screen or not obj.screen.valid then return end
     -- When no visible client has the focus...
     if not client.focus or not client.focus:isvisible() or not aclient.focus.filter(client.focus) then
         local c = autofocus.find_alternative_focus(obj)

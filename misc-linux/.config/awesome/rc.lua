@@ -1,3 +1,6 @@
+-- need to do this before everything, so that signal handler fires before standard ones
+client.connect_signal("unmanage", function (c) c.was_floating = c.floating end)
+
 local aw = require("awful")
 local ar = require("awful.rules")
 local na = require("naughty")
@@ -49,7 +52,7 @@ require("my-widgets")
 -- helper functions
 
 local is_floating = function (c)
-   return c.floating or c.maximized_vertical or c.maximized_horizontal or c.type == "dialog"
+   return c.was_floating or c.floating or c.maximized_vertical or c.maximized_horizontal or c.type == "dialog"
 end
 
 af.find_alternative_focus = function(c)
@@ -231,4 +234,10 @@ ar.rules = {
          focusable = false
       }
    },
+   {
+      rule = { class = "Wicd-client.py" },
+      properties = {
+         floating = true
+      }
+   }
 }
