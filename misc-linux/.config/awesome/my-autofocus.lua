@@ -16,11 +16,11 @@ local aclient = require("awful.client")
 local timer = require("gears.timer")
 local cf = require("cyclefocus")
 
-local find_alternative_focus = function (src_c)
+local find_alternative_focus = function (prev, s)
    return cf.find_history(
       0, {
          function (c)
-            return c.screen == src_c.screen and aclient.focus.filter(c)
+            return c.screen == s and aclient.focus.filter(c)
          end
    })
 end
@@ -31,12 +31,13 @@ local autofocus = {
 
 --- Give focus when clients appear/disappear.
 --
--- @param obj An object that should have a .screen property.
-local function check_focus(obj)
-    if not obj or not obj.screen or not obj.screen.valid then return end
+-- @param prev the previous focus client, may not be valid now
+-- @param s the screen of prev, in case prev.screen is not accessible now
+local function check_focus(prev, s)
+    if not s or not s.valid then return end
     -- When no visible client has the focus...
     if not client.focus or not client.focus:isvisible() or not aclient.focus.filter(client.focus) then
-        local c = autofocus.find_alternative_focus(obj)
+        local c = autofocus.find_alternative_focus(prev, s)
         if c then
             c:emit_signal("request::activate", "autofocus.check_focus",
                           {raise=false})
@@ -47,7 +48,7 @@ end
 --- Check client focus (delayed).
 -- @param obj An object that should have a .screen property.
 local function check_focus_delayed(obj)
-    timer.delayed_call(check_focus, obj)
+    timer.delayed_call(check_focus, obj, obj.screen)
 end
 
 --- Give focus on tag selection change.
@@ -57,7 +58,7 @@ local function check_focus_tag(t)
     local s = t.screen
     if (not s) or (not s.valid) then return end
     s = screen[s]
-    check_focus({ screen = s })
+    check_focus(nil, s)
     if not client.focus or not aclient.focus.filter(client.focus) or screen[client.focus.screen] ~= s then
         local c = aclient.focus.history.get(s, 0, aclient.focus.filter)
         if c then
@@ -72,7 +73,7 @@ tag.connect_signal("property::selected", function (t)
 end)
 
 client.connect_signal("unfocus",             check_focus_delayed)
-client.connect_signal("unmanage",            check_focus)
+client.connect_signal("unmanage",            function (c) check_focus(c, c.screen) end)
 client.connect_signal("tagged",              check_focus_delayed)
 client.connect_signal("untagged",            check_focus_delayed)
 client.connect_signal("property::hidden",    check_focus_delayed)

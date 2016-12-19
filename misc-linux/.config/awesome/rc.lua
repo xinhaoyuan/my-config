@@ -55,26 +55,27 @@ local is_floating = function (c)
    return c.was_floating or c.floating or c.maximized_vertical or c.maximized_horizontal or c.type == "dialog"
 end
 
-af.find_alternative_focus = function(c)
-   local f = is_floating(c)
-   local new_focus = cf.find_history(
-      0, {
-         function (nc)
-            return
-               nc.valid
-               and cf.filters.same_screen(nc, c)
-               and is_floating(nc) == f
-         end
-   })
-
-   if new_focus then return new_focus end
-
+af.find_alternative_focus = function(prev, s)
+   if prev and not prev.valid then prev = nil end
+   if prev then 
+      local f = is_floating(prev)
+      local new_focus = cf.find_history(
+         0, {
+            function (c)
+               return
+                  c.valid and c.screen == s and is_floating(c) == f
+            end
+      })
+      
+      if new_focus then
+         return new_focus
+      end
+   end
+   
    new_focus = cf.find_history(
       0, {
-         function (nc)
-            return
-               nc.valid
-               and cf.filters.same_screen(nc, c)
+         function (c)
+            return c.valid and c.screen == s
          end
    })
 
