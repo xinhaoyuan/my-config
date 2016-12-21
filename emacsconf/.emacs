@@ -1,5 +1,6 @@
 (defcustom my-configure-dir "~/.config/emacs" "")
 (add-to-list 'load-path my-configure-dir)
+(load "_utils.el")
 (load "_package.el")
 (load "_theme.el")
 (load "_dired.el")
