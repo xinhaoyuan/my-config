@@ -33,4 +33,4 @@ TEXT
 ${color orange}Proc ${color} $running_processes/$processes, ${color orange}Load${color} ${loadavg 3} \
 ${color orange}Mem ${color} $memperc%, ${color orange}Swap ${color} $swapperc%\
 ${alignr}${color orange}Bat${color}[${battery_short}] \
-${time %a %d/%m/%Y} ${time %H:%M}
+${time %a %Y/%m/%d} ${time %H:%M}
