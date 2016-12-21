@@ -45,13 +45,13 @@ def gen(options):
         "default_color white",
         "default_shade_color black",
         "default_outline_color black",
-        "alignment middle_right"
+        "alignment top_right"
     ])
 
     lines.extend([
         # Gap between borders of screen and text
-        "gap_x 100",
-        "gap_y 100",
+        "gap_x 0",
+        "gap_y 60",
         # Add spaces to keep things from moving about?  This only affects certain objects.
         "use_spacer left",
         # Subtract file system buffers from used memory?
@@ -68,7 +68,7 @@ def gen(options):
     # print cpu stats
     sys.stderr.write("Found {0} cpus".format(cpu_count))
     lines.extend([
-        "${alignc}==== ${color orange}PERF${color} ====",
+        "${alignc}==== ${color orange}CPU${color} ====",
         ""
     ])
     first = True
@@ -79,12 +79,6 @@ def gen(options):
         else:
             lines.append("|${{cpu cpu{0}}}%,${{freq_g {0}}}\\".format(cpu + 1))
     lines.append("")
-
-    lines.extend([
-        "",
-        "${alignc}${color orange}Proc:${color} $running_processes/$processes, ${color orange}Load${color} ${loadavg 3}",
-        "${alignc}${color orange}Mem:${color} $memperc%, ${color orange}Swap:${color} $swapperc%"
-        ])
 
     lines.append("")
     lines.append("${alignc}==== ${color orange}NET${color} ====")
@@ -100,15 +94,6 @@ def gen(options):
             lines.append("{0}: ${{addr {0}}}".format(if_name))
         lines.append("${{alignc}}${{upspeed {0}}}/${{downspeed {0}}}".format(if_name))
         lines.append("")
-
-    lines.extend([
-        "",
-        "${alignc}==== ${color orange}MISC${color} ====",
-        "",
-        "${alignc}${color orange}Bat:${color} ${battery}",
-        "",
-        "${alignc}${time %a %d/%m/%Y} ${time %H:%M}"
-        ])
 
     return lines
 

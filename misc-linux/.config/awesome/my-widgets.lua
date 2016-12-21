@@ -3,10 +3,13 @@ local be = require("beautiful")
 local wi = require("wibox")
 local cfg = require("my-config")
 
-local my_wibox = {}
+local my_wibar = {}
 local my_tag_list = {}
 local my_task_list = {}
 local my_tray = wi.widget.systray()
+
+-- dummy bar for conky
+aw.wibar.new({ position = "top", height = 40, opacity = 0 })
 
 my_tray:set_base_size(20 * cfg.widget_scale_factor)
 
@@ -70,7 +73,7 @@ for s = 1, screen.count() do
       }
    )
    
-   my_wibox[s] = aw.wibox({
+   my_wibar[s] = aw.wibar({
          screen = s,
          fg = be.fg_normal,
          bg = be.bg_normal,
@@ -91,5 +94,5 @@ for s = 1, screen.count() do
    layout:set_middle(my_task_list[s])
    layout:set_right(right_layout)
    
-   my_wibox[s]:set_widget(layout)
+   my_wibar[s]:set_widget(layout)
 end

@@ -4,3 +4,4 @@
 
 python $HOME/.config/conky/conky_gen.py awesome > $HOME/.config/conky/awesome
 conky -c $HOME/.config/conky/awesome -d
+conky -c $HOME/.config/conky/bar -d
