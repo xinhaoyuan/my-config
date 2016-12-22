@@ -8,6 +8,7 @@
                   (setq-local indent-line-function 'indent-line-simple)
                   (electric-indent-local-mode -1)
                   (fset 'boogie-friends-self-insert-and-indent 'self-insert-command)
+                  (modify-syntax-entry ?_ "_")
                   ))
       (setq flycheck-dafny-executable
 	    (concat (getenv "HOME") "/opt/dafny/Dafny.exe"))
