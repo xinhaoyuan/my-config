@@ -1,8 +1,8 @@
-Xft.dpi: 96
+Xft.dpi: 192
 
 ! Xcursor.theme: Ecliz
-Xcursor.theme: Obsidian
-Xcursor.size : 32
+Xcursor.theme: Capitaine Cursors
+Xcursor*size : 48
 
 ! Emacs font & color settings (for emacs 22)
 ! Emacs.Fontset-0:-*-terminus-medium-r-*-*-14-*-*-*-*-*-fontset-song,\
@@ -26,7 +26,7 @@ Xcursor.size : 32
 ! Rxut-unicode setups
 ! Fonts and input method
 URxvt*termName: rxvt-unicode-256color
-URxvt*font:   xft:Input:size=10,xft:Cambria Math,xft:Microsoft YaHei
+URxvt*font:   xft:Input:size=11,xft:Cambria Math,xft:Microsoft YaHei
 
 URxvt*preeditType: OverTheSpot
 ! Disable all perl extentions and iso14755

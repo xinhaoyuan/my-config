@@ -151,8 +151,8 @@ def gen_details(options):
     return lines
 
 def main(args):
-    options = { "scale-factor" : 1, "screen-width" : 1920 }
-    # options = { "scale-factor" : 2, "screen-width" : 3200 }
+    # options = { "scale-factor" : 1, "screen-width" : 1920 }
+    options = { "scale-factor" : 2, "screen-width" : 3200 }
     
     if args[0] == "details": 
         lines = gen_details(options)
