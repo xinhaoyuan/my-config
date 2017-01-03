@@ -9,7 +9,7 @@ local my_task_list = {}
 local my_tray = wi.widget.systray()
 
 -- dummy bar for conky
-aw.wibar.new({ position = "top", height = 40, opacity = 0 })
+aw.wibar.new({ position = "top", height = 20 * cfg.widget_scale_factor, opacity = 0 })
 
 my_tray:set_base_size(20 * cfg.widget_scale_factor)
 

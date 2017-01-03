@@ -2,7 +2,55 @@ import subprocess
 import os
 import sys
 
-def gen(options):
+def gen_bar(options):
+    lines = [
+        "background no",
+        "cpu_avg_samples 2",
+        "net_avg_samples 2",
+        "out_to_console no",
+        "use_xft yes",
+        "xftfont Input:size=12",
+        "xftalpha 0.5",
+        "update_interval 1",
+        "own_window yes",
+        "own_window_colour 000000",
+        "own_window_argb_visual yes",
+        "own_window_argb_value 128",
+        "own_window_class Conky",
+        "own_window_type override",
+        "double_buffer yes",
+        "draw_shades no",
+        "draw_outline no",
+        "draw_borders no",
+        "stippled_borders 8",
+        "default_color white",
+        "default_shade_color black",
+        "default_outline_color black",
+        "alignment top_left",
+        "minimum_size  {0} {1}".format(options["screen-width"], 20 * options["scale-factor"]),
+        "maximum_width {0}".format(options["screen-width"]),
+        "maximum_height {0}".format(20 * options["scale-factor"]),
+        "border_inner_margin 0",
+        "border_outer_margin 0",
+        "border_width 0",
+        "padding 0",
+        "gap_x 0",
+        "gap_y 0",
+        "use_spacer left",
+        "no_buffers yes",
+        "uppercase no",
+        "pad_percents 2",
+        "TEXT",
+        "${color orange}Proc ${color} $running_processes/$processes, ${color orange}Load${color} ${loadavg 3} \\",
+        "${color orange}Mem ${color} $memperc%, ${color orange}Swap ${color} $swapperc%\\",
+        "${alignc -150}${if_mpd_playing}\\",
+        "${font Vera Sans YuanTi Mono:size=10}${mpd_artist} - ${mpd_title}${font}\\",
+        "${endif}\\",
+        "${alignr}${color orange}Bat${color}[${battery_short}] \\",
+        "${time %a %Y/%m/%d} ${time %H:%M}"]
+    return lines
+    
+def gen_details(options):
     lines = [
         "background no",
         "cpu_avg_samples 2",
@@ -14,19 +62,18 @@ def gen(options):
         # Update interval in seconds
         "update_interval 1"];
 
-    if options["with-awesome"]: 
-        lines.extend([
-            # Create own window instead of using desktop (required in nautilus)
-            "own_window yes",
-            # "own_window_transparent yes",
-            "own_window_colour 000000",
-            "own_window_argb_visual yes",
-            "own_window_argb_value 128",
-            "own_window_class Conky",
-            "own_window_type desktop",
-            # "own_window_hints below,skip_taskbar,skip_pager",
-            # "minimum_size 800 40",
-            # "maximum_width 800"
+    lines.extend([
+        # Create own window instead of using desktop (required in nautilus)
+        "own_window yes",
+        # "own_window_transparent yes",
+        "own_window_colour 000000",
+        "own_window_argb_visual yes",
+        "own_window_argb_value 128",
+        "own_window_class Conky",
+        "own_window_type desktop",
+        # "own_window_hints below,skip_taskbar,skip_pager",
+        # "minimum_size 800 40",
+        # "maximum_width 800"
         ])
         
     lines.extend([
@@ -38,7 +85,9 @@ def gen(options):
         "draw_outline no",
         # Draw borders around text
         "draw_borders no",
-        "border_inner_margin 20",
+        "border_inner_margin {0}".format(10 * options["scale-factor"]),
+        "border_outer_margin 0",
+        "border_width 0",
         # Stippled borders?
         "stippled_borders 8",
         # Default colors and also border colors
@@ -50,8 +99,8 @@ def gen(options):
 
     lines.extend([
         # Gap between borders of screen and text
-        "gap_x 0",
-        "gap_y 60",
+        "gap_x {0}".format(10 * options["scale-factor"]),
+        "gap_y {0}".format(10 * options["scale-factor"] + 20 * options["scale-factor"]),
         # Add spaces to keep things from moving about?  This only affects certain objects.
         "use_spacer left",
         # Subtract file system buffers from used memory?
@@ -78,6 +127,10 @@ def gen(options):
             first = False
         else:
             lines.append("|${{cpu cpu{0}}}%,${{freq_g {0}}}\\".format(cpu + 1))
+        if cpu % 4 == 3:
+            lines.append("")
+            first = True
+            
     lines.append("")
 
     lines.append("")
@@ -98,7 +151,15 @@ def gen(options):
     return lines
 
 def main(args):
-    lines = gen({ "with-awesome" : True })
+    options = { "scale-factor" : 1, "screen-width" : 1920 }
+    # options = { "scale-factor" : 2, "screen-width" : 3200 }
+    
+    if args[0] == "details": 
+        lines = gen_details(options)
+    elif args[0] == "bar":
+        lines = gen_bar(options)
+    else:
+        lines = []
     sys.stdout.write("\n".join(lines))
 
 if __name__ == "__main__":
