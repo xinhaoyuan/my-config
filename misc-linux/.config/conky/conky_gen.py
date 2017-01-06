@@ -43,7 +43,7 @@ def gen_bar(options):
         "TEXT",
         "${color orange}Proc ${color} $running_processes/$processes, ${color orange}Load${color} ${loadavg 3} \\",
         "${color orange}Mem ${color} $memperc%, ${color orange}Swap ${color} $swapperc%\\",
-        "${alignc -150}${if_mpd_playing}\\",
+        "${{alignc {0}}}${{if_mpd_playing}}\\".format(-150 * options["scale-factor"]),
         "${font Vera Sans YuanTi Mono:size=10}${mpd_artist} - ${mpd_title}${font}\\",
         "${endif}\\",
         "${alignr}${color orange}Bat${color}[${battery_short}] \\",
