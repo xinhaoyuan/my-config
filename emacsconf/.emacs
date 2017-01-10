@@ -399,7 +399,7 @@
 (define-key my-prefix (kbd "C-q") 'visual-line-mode)
 (define-key my-prefix (kbd "C-f") 'flyspell-mode)
 (define-key my-prefix (kbd "C-l") 'nlinum-mode)
-(define-key my-prefix (kbd "C-c") 'irony-mode)
+(define-key my-prefix (kbd "C-c") 'flycheck-mode)
 
 (define-key my-prefix (kbd "v") 'set-variable)
 

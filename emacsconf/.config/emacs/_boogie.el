@@ -15,6 +15,7 @@
                   (fset 'boogie-friends-self-insert-and-indent 'self-insert-command)
                   (modify-syntax-entry ?_ "_")
                   (prettify-symbols-mode -1)
+                  (flycheck-mode -1)
                   ))
       (setq flycheck-dafny-executable
 	    (concat (getenv "HOME") "/opt/dafny/Dafny.exe"))
