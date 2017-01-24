@@ -56,3 +56,9 @@ bindkey "^W"       kill-region
 if [[ -e "$HOME/.zshrc.user.os" ]]; then
    source "$HOME/.zshrc.user.os"
 fi
+
+preexec() {
+  DATE=`date +"%H:%M:%S on %Y-%m-%d"`
+  C=$(($COLUMNS-23))
+  echo -e "\033[1A\033[${C}C ${DATE} "
+}
