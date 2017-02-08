@@ -44,7 +44,7 @@ local layouts = {
 
 tags = {}
 for s = 1, screen.count() do
-   tags[s] = aw.tag({ 1, 2 ,3, 4 }, s, layouts[1])
+   tags[s] = aw.tag({ 1, 2, 3, 4 }, s, layouts[1])
 end
 
 require("my-widgets")
@@ -102,8 +102,8 @@ local global_keys = aw.util.table.join(
    aw.key({ "Mod4" }, "Return", function () aw.util.spawn(HOME_DIR .. "/bin/open-terminal-emulator") end),
    aw.key({ "Mod4" }, "t", function () aw.util.spawn("urxvt -name root-terminal") end),
 
-   aw.key({ "Mod4" }, "1", function () ch.toggle_conky() end),
-   aw.key({ "Mod4" }, "2", function () aw.util.spawn("gmpc") end),
+   aw.key({ "Mod4" }, "F1", function () ch.toggle_conky() end),
+   aw.key({ "Mod4" }, "F2", function () aw.util.spawn("gmpc") end),
    aw.key({ "Mod4" }, "grave", function() ch.raise_conky() end, function() ch.lower_conky_delayed() end),
    
    aw.key({ "Mod4", "Control" }, "Escape", awesome.quit)
