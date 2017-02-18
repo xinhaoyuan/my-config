@@ -59,6 +59,7 @@ fi
 
 preexec() {
   DATE=`date +"%H:%M:%S on %Y-%m-%d"`
-  C=$(($COLUMNS-23))
-  echo -e "\033[1A\033[${C}C ${DATE}"
+  # C=$(($COLUMNS-23))
+  # echo -e "\033[1A\033[${C}C ${DATE}"
+  echo ${DATE}
 }
