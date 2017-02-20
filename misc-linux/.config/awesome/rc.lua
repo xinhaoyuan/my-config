@@ -164,6 +164,7 @@ local client_keys = aw.util.table.join(
          if new_focus then
             client.focus = new_focus
          end
+         client.focus:raise()
    end),
 
    aw.key({ "Mod4" }, "Up", function (c)
