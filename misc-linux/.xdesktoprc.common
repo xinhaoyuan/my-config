@@ -6,4 +6,5 @@ fcitx
 compton -b
 nitrogen --restore
 xscreensaver -no-splash &
-wicd-gtk -t &
+# wicd-gtk -t &
+nm-applet &

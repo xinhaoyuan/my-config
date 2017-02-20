@@ -58,8 +58,12 @@ if [[ -e "$HOME/.zshrc.user.os" ]]; then
 fi
 
 preexec() {
-  DATE=`date +"%H:%M:%S on %Y-%m-%d"`
-  # C=$(($COLUMNS-23))
-  # echo -e "\033[1A\033[${C}C ${DATE}"
-  echo ${DATE}
+  DATE=`date +"%H:%M:%S %Y-%m-%d"`
+  C=$(($COLUMNS-22))
+  echo -e "\033[1A\033[${C}C [${DATE}]"
+  export TIME_PREEXEC=`date +%s`
+}
+
+precmd() {
+  export TIME_PRECMD=`date +%s`
 }

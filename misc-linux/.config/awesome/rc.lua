@@ -11,6 +11,7 @@ local cfg = require("my-config")
 local ut = require("my-utils")
 local af = require("my-autofocus")
 local cf = require("cyclefocus")
+local sw = require("awesome-switcher-preview")
 local ch = require("conky-hud")
 
 local HOME_DIR = os.getenv("HOME")
@@ -89,6 +90,15 @@ local global_keys = aw.util.table.join(
       
    aw.key({ "Mod4" }, "[", function () aw.layout.inc(layouts, -1) end),
    aw.key({ "Mod4" }, "]", function () aw.layout.inc(layouts, 1) end),
+
+   -- aw.key({ "Mod1",           }, "Tab",
+   --    function ()
+   --       sw.switch( 1, "Alt_L", "Tab", "ISO_Left_Tab")
+   -- end),
+   -- aw.key({ "Mod1", "Shift"   }, "Tab",
+   --    function ()
+   --       sw.switch(-1, "Alt_L", "Tab", "ISO_Left_Tab")
+   -- end),
 
    aw.key({ }, "XF86AudioLowerVolume", function() aw.util.spawn("amixer sset Master,0 2%-") end),
    aw.key({ }, "XF86AudioRaiseVolume", function() aw.util.spawn("amixer sset Master,0 2%+") end),
