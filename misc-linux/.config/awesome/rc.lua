@@ -253,5 +253,9 @@ ar.rules = {
       properties = {
          floating = true
       }
+   },
+   {
+      rule = { class = "Eclipse" },
+      properties = { floating = true }
    }
 }
