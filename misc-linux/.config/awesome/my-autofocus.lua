@@ -40,7 +40,7 @@ local function check_focus(prev, s)
         local c = autofocus.find_alternative_focus(prev, s)
         if c then
             c:emit_signal("request::activate", "autofocus.check_focus",
-                          {raise=false})
+                          {raise=true})
         end
     end
 end
@@ -63,7 +63,7 @@ local function check_focus_tag(t)
         local c = aclient.focus.history.get(s, 0, aclient.focus.filter)
         if c then
             c:emit_signal("request::activate", "autofocus.check_focus_tag",
-                          {raise=false})
+                          {raise=true})
         end
     end
 end

@@ -4,10 +4,10 @@
 desktop=`xdotool get_desktop`
 
 sessionname=$1
-[ -z "$sessionname" ] && sessionname="Local"
+[ -z "$sessionname" ] && sessionname="local-$desktop"
 
 classname=LocalTE
-termtitle="Terminal-$desktop"
+termtitle="terminal-$desktop"
 
 unset TMUX
 

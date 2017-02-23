@@ -53,8 +53,7 @@ require("my-widgets")
 -- helper functions
 
 local is_floating = function (c)
-   return c.was_floating or c.floating
-      -- or c.maximized_vertical or c.maximized_horizontal or c.type == "dialog"
+   return c.was_floating or c.floating or c.maximized_vertical or c.maximized_horizontal or c.type == "dialog"
 end
 
 af.find_alternative_focus = function(prev, s)
