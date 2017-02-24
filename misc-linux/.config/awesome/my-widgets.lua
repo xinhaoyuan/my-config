@@ -1,4 +1,5 @@
 local aw = require("awful")
+local awc = require("awful.widget.common")
 local be = require("beautiful")
 local wi = require("wibox")
 local cfg = require("my-config")
@@ -63,7 +64,24 @@ for s = 1, screen.count() do
       my_task_list.buttons,
       {
          font = "Sans " .. (10 * cfg.font_scale_factor)
-      }
+      },
+      function (w, b, l, d, objects)
+         -- Reorder the clients so that floating client are on the right side
+         fl_clients = {}
+         clients = {}
+         for i, obj in ipairs(objects) do
+            if obj.floating
+            or obj.maximized or obj.maximized_horizontal or obj.maximized_vertical then
+               fl_clients[#fl_clients + 1] = obj
+            else
+               clients[#clients + 1] = obj
+            end
+         end
+         for i, obj in ipairs(fl_clients) do
+            clients[#clients + 1] = obj
+         end
+         awc.list_update(w, b, l, d, clients)
+      end
    )
 
    my_tag_list[s] = aw.widget.taglist(

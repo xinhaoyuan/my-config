@@ -3,6 +3,7 @@ client.connect_signal("unmanage", function (c) c.was_floating = c.floating end)
 
 local aw = require("awful")
 local ar = require("awful.rules")
+local al = require("awful.layout")
 local na = require("naughty")
 local be = require("beautiful")
 local wi = require("wibox")
@@ -38,9 +39,9 @@ be.init("/usr/share/awesome/themes/default/theme.lua")
 -- layouts
 
 local layouts = {
-   aw.layout.suit.tile,
-   aw.layout.suit.fair,
-   aw.layout.suit.max
+   al.suit.tile,
+   al.suit.fair,
+   al.suit.max
 }
 
 tags = {}
@@ -53,7 +54,11 @@ require("my-widgets")
 -- helper functions
 
 local is_floating = function (c)
-   return c.was_floating or c.floating or c.maximized_vertical or c.maximized_horizontal or c.type == "dialog"
+   return
+      c.was_floating or c.floating
+      or c.maximized_horizontal or c.maximized_vertical or c.maximized
+      or #al.parameters(nil, c.screen).clients <= 1 
+      or c.type == "dialog"
 end
 
 af.find_alternative_focus = function(prev, s)
@@ -88,8 +93,8 @@ local global_keys = aw.util.table.join(
    aw.key({ "Mod4", "Control" }, "Left", aw.tag.viewprev),
    aw.key({ "Mod4", "Control" }, "Right", aw.tag.viewnext),
       
-   aw.key({ "Mod4" }, "[", function () aw.layout.inc(layouts, -1) end),
-   aw.key({ "Mod4" }, "]", function () aw.layout.inc(layouts, 1) end),
+   aw.key({ "Mod4" }, "[", function () al.inc(layouts, -1) end),
+   aw.key({ "Mod4" }, "]", function () al.inc(layouts, 1) end),
 
    -- aw.key({ "Mod1",           }, "Tab",
    --    function ()
@@ -109,7 +114,7 @@ local global_keys = aw.util.table.join(
    aw.key({ "Mod4", "Control" }, "m", function () for _, c in pairs(client.get()) do c.minimized = false end end),
 
    aw.key({ "Mod4" }, "r", function () aw.util.spawn_with_shell("dlauncher open") end),
-   aw.key({ "Mod4" }, "Return", function () aw.util.spawn(HOME_DIR .. "/bin/open-terminal-emulator") end),
+   aw.key({ "Mod4" }, "Return", function () aw.util.spawn("open-terminal-emulator") end),
    aw.key({ "Mod4" }, "t", function () aw.util.spawn("urxvt -name root-terminal") end),
 
    aw.key({ "Mod4" }, "F1", function () ch.toggle_conky() end),
@@ -170,8 +175,9 @@ local client_keys = aw.util.table.join(
          if c.minimized then
             c.minimized = false
          else
-            c.maximized_horizontal = not c.maximized_horizontal
-            c.maximized_vertical = not c.maximized_vertical
+            c.maximized = not c.maximized
+            -- c.maximized_horizontal = not c.maximized_horizontal
+            -- c.maximized_vertical = not c.maximized_vertical
          end
    end),
    aw.key({ "Mod4" }, "Down", function (c)
