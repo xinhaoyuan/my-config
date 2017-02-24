@@ -44,7 +44,7 @@ def gen_bar(options):
         "${color orange}Proc ${color} $running_processes/$processes, ${color orange}Load${color} ${loadavg 3} \\",
         "${color orange}Mem ${color} $memperc%, ${color orange}Swap ${color} $swapperc%\\",
         "${{alignc {0}}}${{if_mpd_playing}}\\".format(-150 * options["scale-factor"]),
-        "${font Vera Sans YuanTi Mono:size=10}${mpd_artist} - ${mpd_title}${font}\\",
+        "${{font {0}}}${{mpd_artist}} - ${{mpd_title}}${{font}}\\".format(options["mpd_font"]),
         "${endif}\\",
         "${alignr}${color orange}Bat${color}[${battery_short}] \\",
         "${time %a %Y/%m/%d} ${time %H:%M}"]
@@ -151,8 +151,8 @@ def gen_details(options):
     return lines
 
 def main(args):
-    # options = { "scale-factor" : 1, "screen-width" : 1920 }
-    options = { "scale-factor" : 2, "screen-width" : 3200 }
+    # options = { "scale-factor" : 1, "screen-width" : 1920, "mpd_font" : "Vera Sans YuanTi Mono:size=10" }
+    options = { "scale-factor" : 2, "screen-width" : 3200, "mpd_font" : "Vera Sans YuanTi Mono:size=10" }
     
     if args[0] == "details": 
         lines = gen_details(options)

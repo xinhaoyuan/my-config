@@ -115,6 +115,7 @@ local global_keys = aw.util.table.join(
 
    aw.key({ "Mod4" }, "r", function () aw.util.spawn_with_shell("dlauncher open") end),
    aw.key({ "Mod4" }, "Return", function () aw.util.spawn("open-terminal-emulator") end),
+   aw.key({ "Mod4", "Control" }, "Return", function () aw.util.spawn_with_shell("open-terminal-emulator background") end),
    aw.key({ "Mod4" }, "t", function () aw.util.spawn("urxvt -name root-terminal") end),
 
    aw.key({ "Mod4" }, "F1", function () ch.toggle_conky() end),

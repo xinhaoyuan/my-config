@@ -1,13 +1,17 @@
 #!/bin/bash
 
 # depend on the util ``xdotool''
-desktop=`xdotool get_desktop`
-
-sessionname=$1
-[ -z "$sessionname" ] && sessionname="local-$desktop"
 
 classname=LocalTE
-termtitle="terminal-$desktop"
+
+if [ -z "$1" ]; then
+    desktop=`xdotool get_desktop`
+    sessionname="local-$desktop"
+    termtitle="terminal-$desktop"
+else
+    sessionname=$1
+    termtitle=$1
+fi
 
 unset TMUX
 
