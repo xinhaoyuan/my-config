@@ -39,8 +39,10 @@ local function check_focus(prev, s)
     if not client.focus or not client.focus:isvisible() or not aclient.focus.filter(client.focus) then
         local c = autofocus.find_alternative_focus(prev, s)
         if c then
+            -- raise the client in "request::activate" will set the urgent flag when switching tag
             c:emit_signal("request::activate", "autofocus.check_focus",
-                          {raise=true})
+                          {raise=false})
+            c:raise()
         end
     end
 end
@@ -62,8 +64,10 @@ local function check_focus_tag(t)
     if not client.focus or not aclient.focus.filter(client.focus) or screen[client.focus.screen] ~= s then
         local c = aclient.focus.history.get(s, 0, aclient.focus.filter)
         if c then
+            -- raise the client in "request::activate" will set the urgent flag when switching tag
             c:emit_signal("request::activate", "autofocus.check_focus_tag",
-                          {raise=true})
+                          {raise=false})
+            c:raise()
         end
     end
 end

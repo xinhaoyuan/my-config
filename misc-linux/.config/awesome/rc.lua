@@ -177,13 +177,20 @@ local client_keys = aw.util.table.join(
             c.minimized = false
          else
             c.maximized = not c.maximized
-            -- c.maximized_horizontal = not c.maximized_horizontal
-            -- c.maximized_vertical = not c.maximized_vertical
          end
    end),
-   aw.key({ "Mod4" }, "Down", function (c)
-         c.minimized = true
+
+   aw.key({ "Mod4", "Shift" }, "Up", function (c)
+         c.maximized_vertical = not c.maximized_vertical
    end),
+
+   aw.key({ "Mod4", "Control" }, "Up", function (c)
+         c.maximized_horizontal = not c.maximized_horizontal
+   end),
+
+   -- aw.key({ "Mod4" }, "Down", function (c)
+   --       c.minimized = true
+   -- end),
       
    aw.key({ "Mod4" }, "Left", function (c)
          if not is_floating(c) then
@@ -191,7 +198,14 @@ local client_keys = aw.util.table.join(
          end
    end),
 
-   aw.key({ "Mod4" }, "Right", function (c) aw.client.floating.toggle(c) end),
+   aw.key({ "Mod4" }, "Right", function (c)
+         if c.floating then
+            c.maximized = false;
+            c.maximized_vertical = false;
+            c.maximized_horizontal = false;
+         end
+         aw.client.floating.toggle(c);
+   end),
 
    aw.key({ "Mod4" }, "w", function (c) aw.client.focus.bydirection("up"); client.focus:raise() end),
    aw.key({ "Mod4" }, "a", function (c) aw.client.focus.bydirection("left"); client.focus:raise() end),
