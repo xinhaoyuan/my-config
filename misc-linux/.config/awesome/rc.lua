@@ -38,6 +38,17 @@ be.init("/usr/share/awesome/themes/default/theme.lua")
 
 -- layouts
 
+local tag_list = {1, 2, 3, 4}
+local global_keys_switch_tags = {}
+
+for i, t in ipairs(tag_list) do
+   if i >= 10 then break end
+   global_keys_switch_tags = aw.util.table.join(
+      global_keys_switch_tags,
+      aw.key({ "Mod4" }, tostring(i), function () aw.screen.focused().tags[i]:view_only() end)
+   )
+end
+
 local layouts = {
    al.suit.tile,
    al.suit.fair,
@@ -46,7 +57,7 @@ local layouts = {
 
 tags = {}
 for s = 1, screen.count() do
-   tags[s] = aw.tag({ 1, 2, 3, 4 }, s, layouts[1])
+   tags[s] = aw.tag(tag_list, s, layouts[1])
 end
 
 require("my-widgets")
@@ -90,6 +101,8 @@ end
 
 -- keys and buttons
 local global_keys = aw.util.table.join(
+   global_keys_switch_tags,
+   
    aw.key({ "Mod4", "Control" }, "Left", aw.tag.viewprev),
    aw.key({ "Mod4", "Control" }, "Right", aw.tag.viewnext),
       
