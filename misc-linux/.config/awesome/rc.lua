@@ -12,7 +12,7 @@ local cfg = require("my-config")
 local ut = require("my-utils")
 local af = require("my-autofocus")
 local cf = require("cyclefocus")
-local sw = require("awesome-switcher-preview")
+-- local sw = require("awesome-switcher-preview")
 local ch = require("conky-hud")
 
 local HOME_DIR = os.getenv("HOME")
@@ -265,7 +265,7 @@ ar.rules = {
          size_hints_honor = false,
          keys = client_keys,
          buttons = client_buttons,
-         border_width = 4,
+         border_width = 2 * cfg.widget_scale_factor,
          border_color = be.border_normal
       }
    },
