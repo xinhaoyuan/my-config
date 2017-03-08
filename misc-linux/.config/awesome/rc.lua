@@ -105,7 +105,7 @@ local my_focus_by_direction = function(dir)
    local new_c = client.focus
    
    if old_c ~= new_c and new_c ~= nil then 
-      aw.screen.focus(new_c.screen)
+      aw.screen.focus(new_c.screen.index)
       new_c:raise()
    end
 end
