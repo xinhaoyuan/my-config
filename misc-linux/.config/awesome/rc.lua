@@ -99,6 +99,17 @@ af.find_alternative_focus = function(prev, s)
    return new_focus
 end
 
+local my_focus_by_direction = function(dir)
+   local old_c = client.focus
+   aw.client.focus.global_bydirection(dir);
+   local new_c = client.focus
+   
+   if old_c ~= new_c and new_c ~= nil then 
+      aw.screen.focus(new_c.screen)
+      new_c:raise()
+   end
+end
+
 -- keys and buttons
 local global_keys = aw.util.table.join(
    global_keys_switch_tags,
@@ -128,7 +139,11 @@ local global_keys = aw.util.table.join(
          }
    }),
 
-
+   aw.key({ "Mod4" }, "w", function () my_focus_by_direction("up") end),
+   aw.key({ "Mod4" }, "a", function () my_focus_by_direction("left") end),
+   aw.key({ "Mod4" }, "s", function () my_focus_by_direction("down") end),
+   aw.key({ "Mod4" }, "d", function () my_focus_by_direction("right") end),
+   
    -- aw.key({ "Mod1",           }, "Tab",
    --    function ()
    --       sw.switch( 1, "Alt_L", "Tab", "ISO_Left_Tab")
@@ -226,10 +241,6 @@ local client_keys = aw.util.table.join(
          aw.client.floating.toggle(c);
    end),
 
-   aw.key({ "Mod4" }, "w", function (c) aw.client.focus.global_bydirection("up"); client.focus:raise() end),
-   aw.key({ "Mod4" }, "a", function (c) aw.client.focus.global_bydirection("left"); client.focus:raise() end),
-   aw.key({ "Mod4" }, "s", function (c) aw.client.focus.global_bydirection("down"); client.focus:raise() end),
-   aw.key({ "Mod4" }, "d", function (c) aw.client.focus.global_bydirection("right"); client.focus:raise() end),
    aw.key({ "Mod4", "Control" }, "w", function (c) aw.client.swap.global_bydirection("up"); gt.delayed_call(function () client.focus = c; c:raise() end); end),
    aw.key({ "Mod4", "Control" }, "a", function (c) aw.client.swap.global_bydirection("left"); gt.delayed_call(function () client.focus = c; c:raise() end); c:raise() end),
    aw.key({ "Mod4", "Control" }, "s", function (c) aw.client.swap.global_bydirection("down"); gt.delayed_call(function () client.focus = c; c:raise() end); c:raise() end),
