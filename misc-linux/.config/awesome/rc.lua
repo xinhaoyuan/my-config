@@ -7,6 +7,7 @@ local al = require("awful.layout")
 local na = require("naughty")
 local be = require("beautiful")
 local wi = require("wibox")
+local gt = require("gears.timer")
 -- 3rd party libs
 local cfg = require("my-config")
 local ut = require("my-utils")
@@ -79,8 +80,7 @@ af.find_alternative_focus = function(prev, s)
       local new_focus = cf.find_history(
          0, {
             function (c)
-               return
-                  c.valid and c.screen == s and is_floating(c) == f
+               return c.valid and c:isvisible() and is_floating(c) == f
             end
       })
       
@@ -92,7 +92,7 @@ af.find_alternative_focus = function(prev, s)
    new_focus = cf.find_history(
       0, {
          function (c)
-            return c.valid and c.screen == s
+            return c.valid and c:isvisible()
          end
    })
 
@@ -108,6 +108,26 @@ local global_keys = aw.util.table.join(
       
    aw.key({ "Mod4" }, "[", function () al.inc(layouts, -1) end),
    aw.key({ "Mod4" }, "]", function () al.inc(layouts, 1) end),
+
+   cf.key({ "Mod1" }, "Tab", 1,
+      {
+         modifier = "Alt_L",
+         cycle_filters = {
+            -- cf.filters.same_screen, cf.filters.common_tag
+            function (c, src_c)
+               return c:isvisible()
+            end
+            ,
+            function (c, src_c)
+               if src_c == nil then return true end
+               if c.pid == src_c.pid then return true
+               else
+                  return is_floating(c) == is_floating(src_c)
+               end
+            end
+         }
+   }),
+
 
    -- aw.key({ "Mod1",           }, "Tab",
    --    function ()
@@ -139,20 +159,6 @@ local global_keys = aw.util.table.join(
 )
 
 local client_keys = aw.util.table.join(
-   cf.key({ "Mod1" }, "Tab", 1,
-      {
-         modifier = "Alt_L",
-         cycle_filters = {
-            cf.filters.same_screen, cf.filters.common_tag
-            ,
-            function (c, src_c)
-               if c.pid == src_c.pid then return true
-               else
-                  return is_floating(c) == is_floating(src_c)
-               end
-            end
-         }
-   }),
    aw.key({ "Mod4" }, "Tab", function(src_c)
          local f = is_floating(src_c)
          local new_focus = nil
@@ -220,10 +226,14 @@ local client_keys = aw.util.table.join(
          aw.client.floating.toggle(c);
    end),
 
-   aw.key({ "Mod4" }, "w", function (c) aw.client.focus.bydirection("up"); client.focus:raise() end),
-   aw.key({ "Mod4" }, "a", function (c) aw.client.focus.bydirection("left"); client.focus:raise() end),
-   aw.key({ "Mod4" }, "s", function (c) aw.client.focus.bydirection("down"); client.focus:raise() end),
-   aw.key({ "Mod4" }, "d", function (c) aw.client.focus.bydirection("right"); client.focus:raise() end),
+   aw.key({ "Mod4" }, "w", function (c) aw.client.focus.global_bydirection("up"); client.focus:raise() end),
+   aw.key({ "Mod4" }, "a", function (c) aw.client.focus.global_bydirection("left"); client.focus:raise() end),
+   aw.key({ "Mod4" }, "s", function (c) aw.client.focus.global_bydirection("down"); client.focus:raise() end),
+   aw.key({ "Mod4" }, "d", function (c) aw.client.focus.global_bydirection("right"); client.focus:raise() end),
+   aw.key({ "Mod4", "Control" }, "w", function (c) aw.client.swap.global_bydirection("up"); gt.delayed_call(function () client.focus = c; c:raise() end); end),
+   aw.key({ "Mod4", "Control" }, "a", function (c) aw.client.swap.global_bydirection("left"); gt.delayed_call(function () client.focus = c; c:raise() end); c:raise() end),
+   aw.key({ "Mod4", "Control" }, "s", function (c) aw.client.swap.global_bydirection("down"); gt.delayed_call(function () client.focus = c; c:raise() end); c:raise() end),
+   aw.key({ "Mod4", "Control" }, "d", function (c) aw.client.swap.global_bydirection("right"); gt.delayed_call(function () client.focus = c; c:raise() end); c:raise() end),
 
    aw.key({ "Mod4" }, "j", function (c) aw.tag.incmwfact(-0.05) end),
    aw.key({ "Mod4" }, "l", function (c) aw.tag.incmwfact( 0.05) end),
