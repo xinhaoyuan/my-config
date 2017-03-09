@@ -48,7 +48,14 @@ for i, t in ipairs(tag_list) do
    if i >= 10 then break end
    global_keys_switch_tags = aw.util.table.join(
       global_keys_switch_tags,
-      aw.key({ "Mod4" }, tostring(i), function () aw.screen.focused().tags[i]:view_only() end)
+      aw.key({ "Mod4" }, tostring(i), function () aw.screen.focused().tags[i]:view_only() end),
+      aw.key({ "Mod4", "Control" }, tostring(i),
+         function ()
+            local c = client.focus
+            if c == nil then return end
+            aw.client.toggletag(c.screen.tags[i], c)
+         end
+      )
    )
 end
 
@@ -121,20 +128,22 @@ local win_pressed = function ()
    kg.run(
       function (mod, key, event)
          if event == "press" and key ~= "Super_L" then
-            for i, k in ipairs(root.keys()) do
-               if aw.key.match(k, mod, key) then
-                  kg.stop()
-                  k:emit_signal("press")
-               end
-            end
-
             local c = client.focus
             if c ~= nil then
                for _, k in ipairs(c:keys()) do
                   if aw.key.match(k, mod, key) then
                      kg.stop()
                      k:emit_signal("press", c)
+                     return
                   end
+               end
+            end
+            
+            for i, k in ipairs(root.keys()) do
+               if aw.key.match(k, mod, key) then
+                  kg.stop()
+                  k:emit_signal("press")
+                  return
                end
             end
          elseif event == "release" and key == "Super_L" then
