@@ -4,10 +4,12 @@ client.connect_signal("unmanage", function (c) c.was_floating = c.floating end)
 local aw = require("awful")
 local ar = require("awful.rules")
 local al = require("awful.layout")
+local ak = require("awful.keygrabber")
 local na = require("naughty")
 local be = require("beautiful")
 local wi = require("wibox")
 local gt = require("gears.timer")
+local kg = keygrabber
 -- 3rd party libs
 local cfg = require("my-config")
 local ut = require("my-utils")
@@ -115,6 +117,34 @@ local my_focus_by_direction = function(dir)
    end
 end
 
+local win_pressed = function ()
+   kg.run(
+      function (mod, key, event)
+         if event == "press" and key ~= "Super_L" then
+            for i, k in ipairs(root.keys()) do
+               if aw.key.match(k, mod, key) then
+                  kg.stop()
+                  k:emit_signal("press")
+               end
+            end
+
+            local c = client.focus
+            if c ~= nil then
+               for _, k in ipairs(c:keys()) do
+                  if aw.key.match(k, mod, key) then
+                     kg.stop()
+                     k:emit_signal("press", c)
+                  end
+               end
+            end
+         elseif event == "release" and key == "Super_L" then
+            -- win key released without any key triggered
+            aw.util.spawn_with_shell("dlauncher open")
+            kg.stop()
+         end
+   end)
+end
+
 -- keys and buttons
 local global_keys = aw.util.table.join(
    global_keys_switch_tags,
@@ -179,8 +209,9 @@ local global_keys = aw.util.table.join(
    aw.key({ "Mod4" }, "t", function () aw.util.spawn("urxvt -name root-terminal") end),
 
    aw.key({ "Mod4" }, "F1", function () ch.toggle_conky() end),
-   aw.key({ "Mod4" }, "F2", function () aw.util.spawn("gmpc") end),
+   aw.key({ "Mod4" }, "F2", function () aw.util.spawn("pcmanfm") end),
    aw.key({ "Mod4" }, "grave", function() ch.raise_conky() end, function() ch.lower_conky_delayed() end),
+   aw.key({ }, "Super_L", win_pressed),
    
    aw.key({ "Mod4", "Control" }, "Escape", awesome.quit)
 )
