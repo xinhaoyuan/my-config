@@ -48,7 +48,14 @@ for i, t in ipairs(tag_list) do
    if i >= 10 then break end
    global_keys_switch_tags = aw.util.table.join(
       global_keys_switch_tags,
-      aw.key({ "Mod4" }, tostring(i), function () aw.screen.focused().tags[i]:view_only() end)
+      aw.key({ "Mod4" }, tostring(i), function () aw.screen.focused().tags[i]:view_only() end),
+      aw.key({ "Mod4", "Control" }, tostring(i),
+         function ()
+            local c = client.focus
+            if c == nil then return end
+            aw.client.toggletag(c.screen.tags[i], c)
+         end
+      )
    )
 end
 
