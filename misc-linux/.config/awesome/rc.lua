@@ -125,24 +125,31 @@ local global_keys = aw.util.table.join(
    aw.key({ "Mod4" }, "[", function () al.inc(layouts, -1) end),
    aw.key({ "Mod4" }, "]", function () al.inc(layouts, 1) end),
 
-   cf.key({ "Mod1" }, "Tab", 1,
-      {
-         modifier = "Alt_L",
-         cycle_filters = {
-            -- cf.filters.same_screen, cf.filters.common_tag
-            function (c, src_c)
-               return c:isvisible()
-            end
-            ,
-            function (c, src_c)
-               if src_c == nil then return true end
-               if c.pid == src_c.pid then return true
-               else
-                  return is_floating(c) == is_floating(src_c)
-               end
-            end
-         }
-   }),
+   aw.key({ "Mod1" }, "Tab",
+      function ()
+         cf.cycle(
+            1,
+            {
+               initiating_client = client.focus,
+               keys = { "Tab" },
+               modifier = "Alt_L",
+               cycle_filters = {
+                  -- cf.filters.same_screen, cf.filters.common_tag
+                  function (c, src_c)
+                     return c:isvisible()
+                  end
+                  ,
+                  function (c, src_c)
+                     if src_c == nil then return true end
+                     if c.pid == src_c.pid then return true
+                     else
+                        return is_floating(c) == is_floating(src_c)
+                     end
+                  end
+               }
+            })
+      end
+   ),
 
    aw.key({ "Mod4" }, "w", function () my_focus_by_direction("up") end),
    aw.key({ "Mod4" }, "a", function () my_focus_by_direction("left") end),
