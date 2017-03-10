@@ -36,7 +36,7 @@ awesome.connect_signal(
    end
 )
 
-aw.util.spawn_with_shell(HOME_DIR .. "/.xdesktoprc.awesome")
+aw.spawn.with_shell(HOME_DIR .. "/.xdesktoprc.awesome")
 be.init("/usr/share/awesome/themes/default/theme.lua")
 
 -- layouts
@@ -127,6 +127,8 @@ end
 local win_pressed = function ()
    kg.run(
       function (mod, key, event)
+         -- ??? bug
+         if key == " " then key = "space" end
          if event == "press" and key ~= "Super_L" then
             local c = client.focus
             if c ~= nil then
@@ -148,7 +150,7 @@ local win_pressed = function ()
             end
          elseif event == "release" and key == "Super_L" then
             -- win key released without any key triggered
-            aw.util.spawn_with_shell("dlauncher open")
+            aw.spawn.with_shell("dlauncher open")
             kg.stop()
          end
    end)
@@ -212,15 +214,16 @@ local global_keys = aw.util.table.join(
 
    aw.key({ "Mod4", "Control" }, "m", function () for _, c in pairs(client.get()) do c.minimized = false end end),
 
-   aw.key({ "Mod4" }, "r", function () aw.util.spawn_with_shell("dlauncher open") end),
+   aw.key({ "Mod4" }, "r", function () aw.spawn.with_shell("dlauncher open") end),
    aw.key({ "Mod4" }, "Return", function () aw.util.spawn("open-terminal-emulator") end),
-   aw.key({ "Mod4", "Control" }, "Return", function () aw.util.spawn_with_shell("open-terminal-emulator background") end),
+   aw.key({ "Mod4", "Control" }, "Return", function () aw.spawn.with_shell("open-terminal-emulator background") end),
    aw.key({ "Mod4" }, "t", function () aw.util.spawn("urxvt -name root-terminal") end),
 
    aw.key({ "Mod4" }, "F1", function () ch.toggle_conky() end),
    aw.key({ "Mod4" }, "F2", function () aw.util.spawn("pcmanfm") end),
    aw.key({ "Mod4" }, "grave", function() ch.raise_conky() end, function() ch.lower_conky_delayed() end),
-   aw.key({ }, "Super_L", win_pressed),
+   -- disabled because of conflict with IME
+   -- aw.key({ }, "Super_L", win_pressed),
    
    aw.key({ "Mod4", "Control" }, "Escape", awesome.quit)
 )
