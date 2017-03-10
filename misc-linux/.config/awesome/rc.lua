@@ -376,7 +376,7 @@ ar.rules = {
       }
    },
    {
-      rule = { class = "Firefox" },
+      rule = { class = "Firefox", type = "normal" },
       properties = {
          floating = true,
          maximized = true,
