@@ -261,14 +261,15 @@ local client_keys = aw.util.table.join(
             end            
          end
 
-         new_focus = cf.find_history(
-            0, {
+         new_focus = cf.find_first_in_history(
+            {
                function (c)
                   return cf.filters.same_screen(c, src_c)
                      and cf.filters.common_tag(c, src_c)
                      and is_floating(c) ~= f
                end
-         })
+            }
+         )
          
          if new_focus then
             client.focus = new_focus
@@ -372,6 +373,13 @@ ar.rules = {
       rule = { class = "Wicd-client.py" },
       properties = {
          floating = true
+      }
+   },
+   {
+      rule = { class = "Firefox" },
+      properties = {
+         floating = true,
+         maximized = true,
       }
    },
    {
