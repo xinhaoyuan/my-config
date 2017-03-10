@@ -1,5 +1,12 @@
 -- need to do this before everything, so that signal handler fires before standard ones
-client.connect_signal("unmanage", function (c) c.was_floating = c.floating end)
+client.connect_signal(
+   "unmanage",
+   function (c)
+      c.tomb_floating = c.floating
+      c.tomb_class = c.class
+      c.tomb_pid = c.pid
+   end
+)
 
 local aw = require("awful")
 local ar = require("awful.rules")
@@ -69,36 +76,32 @@ require("my-widgets")
 
 local is_floating = function (c)
    return
-      c.was_floating or c.floating
+      c.tomb_floating or c.floating
       or c.maximized_horizontal or c.maximized_vertical or c.maximized
       or #al.parameters(nil, c.screen).clients <= 1 
       or c.type == "dialog"
 end
 
 af.find_alternative_focus = function(prev, s)
-   if prev and not prev.valid then prev = nil end
-   if prev then 
-      local f = is_floating(prev)
-      local new_focus = cf.find_history(
-         0, {
-            function (c)
-               return c.valid and c:isvisible() and is_floating(c) == f
-            end
-      })
-      
-      if new_focus then
-         return new_focus
+   local f = nil
+   local pid = nil
+   if prev and prev.valid then
+      f = is_floating(prev)
+      pid = prev.tomb_pid or prev.pid 
+   end
+
+   local filters = {}
+   if pid then
+      filters[#filters + 1] = function (c)
+         return c.valid and c:isvisible() and c.pid == pid
       end
    end
-   
-   new_focus = cf.find_history(
-      0, {
-         function (c)
-            return c.valid and c:isvisible()
-         end
-   })
 
-   return new_focus
+   filters[#filters + 1] = function (c)
+      return c.valid and c:isvisible() and (f == nil or is_floating(c) == f)
+   end
+
+   return cf.find_first_in_history(filters, true)
 end
 
 local my_focus_by_direction = function(dir)
