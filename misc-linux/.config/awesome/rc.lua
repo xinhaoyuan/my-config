@@ -8,7 +8,7 @@ local ak = require("awful.keygrabber")
 local na = require("naughty")
 local be = require("beautiful")
 local wi = require("wibox")
-local gt = require("gears.timer")
+local gtimer = require("gears.timer")
 local kg = keygrabber
 -- 3rd party libs
 local cfg = require("my-config")
@@ -22,17 +22,10 @@ local HOME_DIR = os.getenv("HOME")
 na.config.defaults.font = "Sans " .. (10 * cfg.font_scale_factor)
 cf.naughty_preset.position = "center_middle"
 
-local debug = function (msg)
-   na.notify({
-         text = tostring(msg),
-         timeout = 10
-   })
-end
-
 awesome.connect_signal(
    "debug::error",
    function (msg)
-      debug(msg)
+      print(msg)
    end
 )
 
@@ -154,6 +147,25 @@ local win_pressed = function ()
             kg.stop()
          end
    end)
+end
+
+local window_edit_mode = {}
+function window_edit_mode.start (c)
+   kg.run(
+      function (mod, key, event)
+         if event == "release" then return end
+         if key == "Return" or key == "Escape" then kg.stop(); return end
+
+         local shift = false
+         local ctrl = false
+         local alt = false
+         for _, m in ipairs(mod) do
+            if m == "Shift" then shift = true
+            elseif m == "Control" then ctrl = true
+            elseif m == "Mod1" then alt = true
+            end
+         end
+   end)   
 end
 
 -- keys and buttons
@@ -296,16 +308,12 @@ local client_keys = aw.util.table.join(
          aw.client.floating.toggle(c);
    end),
 
-   aw.key({ "Mod4", "Control" }, "w", function (c) aw.client.swap.global_bydirection("up"); gt.delayed_call(function () client.focus = c; c:raise() end); end),
-   aw.key({ "Mod4", "Control" }, "a", function (c) aw.client.swap.global_bydirection("left"); gt.delayed_call(function () client.focus = c; c:raise() end); c:raise() end),
-   aw.key({ "Mod4", "Control" }, "s", function (c) aw.client.swap.global_bydirection("down"); gt.delayed_call(function () client.focus = c; c:raise() end); c:raise() end),
-   aw.key({ "Mod4", "Control" }, "d", function (c) aw.client.swap.global_bydirection("right"); gt.delayed_call(function () client.focus = c; c:raise() end); c:raise() end),
+   aw.key({ "Mod4", "Control" }, "w", function (c) aw.client.swap.global_bydirection("up"); gtimer.delayed_call(function () client.focus = c; c:raise() end); end),
+   aw.key({ "Mod4", "Control" }, "a", function (c) aw.client.swap.global_bydirection("left"); gtimer.delayed_call(function () client.focus = c; c:raise() end); c:raise() end),
+   aw.key({ "Mod4", "Control" }, "s", function (c) aw.client.swap.global_bydirection("down"); gtimer.delayed_call(function () client.focus = c; c:raise() end); c:raise() end),
+   aw.key({ "Mod4", "Control" }, "d", function (c) aw.client.swap.global_bydirection("right"); gtimer.delayed_call(function () client.focus = c; c:raise() end); c:raise() end),
 
-   aw.key({ "Mod4" }, "j", function (c) aw.tag.incmwfact(-0.05) end),
-   aw.key({ "Mod4" }, "l", function (c) aw.tag.incmwfact( 0.05) end),
-   aw.key({ "Mod4" }, "i", function (c) aw.client.incwfact(-0.1) end),
-   aw.key({ "Mod4" }, "k", function (c) aw.client.incwfact( 0.1) end),
-
+   aw.key({ "Mod4" }, "e", function (c) window_edit_mode.start(c) end),
 
    aw.key({ "Mod4" }, "c", function (c) c:kill() end)
 )
