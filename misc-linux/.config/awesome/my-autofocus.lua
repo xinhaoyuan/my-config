@@ -17,8 +17,8 @@ local timer = require("gears.timer")
 local cf = require("cyclefocus")
 
 local find_alternative_focus = function (prev, s)
-   return cf.find_history(
-      0, {
+   return cf.find_first_in_history(
+      {
          function (c)
             return c.screen == s and aclient.focus.filter(c)
          end

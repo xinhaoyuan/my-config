@@ -1,5 +1,12 @@
 -- need to do this before everything, so that signal handler fires before standard ones
-client.connect_signal("unmanage", function (c) c.was_floating = c.floating end)
+client.connect_signal(
+   "unmanage",
+   function (c)
+      c.tomb_floating = c.floating
+      c.tomb_class = c.class
+      c.tomb_pid = c.pid
+   end
+)
 
 local aw = require("awful")
 local ar = require("awful.rules")
@@ -8,7 +15,7 @@ local ak = require("awful.keygrabber")
 local na = require("naughty")
 local be = require("beautiful")
 local wi = require("wibox")
-local gt = require("gears.timer")
+local gtimer = require("gears.timer")
 local kg = keygrabber
 -- 3rd party libs
 local cfg = require("my-config")
@@ -22,17 +29,10 @@ local HOME_DIR = os.getenv("HOME")
 na.config.defaults.font = "Sans " .. (10 * cfg.font_scale_factor)
 cf.naughty_preset.position = "center_middle"
 
-local debug = function (msg)
-   na.notify({
-         text = tostring(msg),
-         timeout = 10
-   })
-end
-
 awesome.connect_signal(
    "debug::error",
    function (msg)
-      debug(msg)
+      print(msg)
    end
 )
 
@@ -76,36 +76,32 @@ require("my-widgets")
 
 local is_floating = function (c)
    return
-      c.was_floating or c.floating
+      c.tomb_floating or c.floating
       or c.maximized_horizontal or c.maximized_vertical or c.maximized
       or #al.parameters(nil, c.screen).clients <= 1 
       or c.type == "dialog"
 end
 
 af.find_alternative_focus = function(prev, s)
-   if prev and not prev.valid then prev = nil end
-   if prev then 
-      local f = is_floating(prev)
-      local new_focus = cf.find_history(
-         0, {
-            function (c)
-               return c.valid and c:isvisible() and is_floating(c) == f
-            end
-      })
-      
-      if new_focus then
-         return new_focus
+   local f = nil
+   local pid = nil
+   if prev and prev.valid then
+      f = is_floating(prev)
+      pid = prev.tomb_pid or prev.pid 
+   end
+
+   local filters = {}
+   if pid then
+      filters[#filters + 1] = function (c)
+         return c.valid and c:isvisible() and c.pid == pid
       end
    end
-   
-   new_focus = cf.find_history(
-      0, {
-         function (c)
-            return c.valid and c:isvisible()
-         end
-   })
 
-   return new_focus
+   filters[#filters + 1] = function (c)
+      return c.valid and c:isvisible() and (f == nil or is_floating(c) == f)
+   end
+
+   return cf.find_first_in_history(filters, true)
 end
 
 local my_focus_by_direction = function(dir)
@@ -154,6 +150,25 @@ local win_pressed = function ()
             kg.stop()
          end
    end)
+end
+
+local window_edit_mode = {}
+function window_edit_mode.start (c)
+   kg.run(
+      function (mod, key, event)
+         if event == "release" then return end
+         if key == "Return" or key == "Escape" then kg.stop(); return end
+
+         local shift = false
+         local ctrl = false
+         local alt = false
+         for _, m in ipairs(mod) do
+            if m == "Shift" then shift = true
+            elseif m == "Control" then ctrl = true
+            elseif m == "Mod1" then alt = true
+            end
+         end
+   end)   
 end
 
 -- keys and buttons
@@ -246,14 +261,15 @@ local client_keys = aw.util.table.join(
             end            
          end
 
-         new_focus = cf.find_history(
-            0, {
+         new_focus = cf.find_first_in_history(
+            {
                function (c)
                   return cf.filters.same_screen(c, src_c)
                      and cf.filters.common_tag(c, src_c)
                      and is_floating(c) ~= f
                end
-         })
+            }
+         )
          
          if new_focus then
             client.focus = new_focus
@@ -296,16 +312,12 @@ local client_keys = aw.util.table.join(
          aw.client.floating.toggle(c);
    end),
 
-   aw.key({ "Mod4", "Control" }, "w", function (c) aw.client.swap.global_bydirection("up"); gt.delayed_call(function () client.focus = c; c:raise() end); end),
-   aw.key({ "Mod4", "Control" }, "a", function (c) aw.client.swap.global_bydirection("left"); gt.delayed_call(function () client.focus = c; c:raise() end); c:raise() end),
-   aw.key({ "Mod4", "Control" }, "s", function (c) aw.client.swap.global_bydirection("down"); gt.delayed_call(function () client.focus = c; c:raise() end); c:raise() end),
-   aw.key({ "Mod4", "Control" }, "d", function (c) aw.client.swap.global_bydirection("right"); gt.delayed_call(function () client.focus = c; c:raise() end); c:raise() end),
+   aw.key({ "Mod4", "Control" }, "w", function (c) aw.client.swap.global_bydirection("up"); gtimer.delayed_call(function () client.focus = c; c:raise() end); end),
+   aw.key({ "Mod4", "Control" }, "a", function (c) aw.client.swap.global_bydirection("left"); gtimer.delayed_call(function () client.focus = c; c:raise() end); c:raise() end),
+   aw.key({ "Mod4", "Control" }, "s", function (c) aw.client.swap.global_bydirection("down"); gtimer.delayed_call(function () client.focus = c; c:raise() end); c:raise() end),
+   aw.key({ "Mod4", "Control" }, "d", function (c) aw.client.swap.global_bydirection("right"); gtimer.delayed_call(function () client.focus = c; c:raise() end); c:raise() end),
 
-   aw.key({ "Mod4" }, "j", function (c) aw.tag.incmwfact(-0.05) end),
-   aw.key({ "Mod4" }, "l", function (c) aw.tag.incmwfact( 0.05) end),
-   aw.key({ "Mod4" }, "i", function (c) aw.client.incwfact(-0.1) end),
-   aw.key({ "Mod4" }, "k", function (c) aw.client.incwfact( 0.1) end),
-
+   aw.key({ "Mod4" }, "e", function (c) window_edit_mode.start(c) end),
 
    aw.key({ "Mod4" }, "c", function (c) c:kill() end)
 )
@@ -361,6 +373,13 @@ ar.rules = {
       rule = { class = "Wicd-client.py" },
       properties = {
          floating = true
+      }
+   },
+   {
+      rule = { class = "Firefox", type = "normal" },
+      properties = {
+         floating = true,
+         maximized = true,
       }
    },
    {
