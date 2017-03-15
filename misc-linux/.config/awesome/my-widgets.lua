@@ -85,7 +85,7 @@ for s = 1, screen.count() do
    )
 
    my_tag_list[s] = aw.widget.taglist(
-      s, aw.widget.taglist.filter.all, my_tag_list.buttons,
+      s, function (t) return cfg.tag_filter(t.name) end, my_tag_list.buttons,
       {
          font = "Sans " .. (10 * cfg.font_scale_factor)
       }
