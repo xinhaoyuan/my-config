@@ -41,22 +41,26 @@ be.init("/usr/share/awesome/themes/default/theme.lua")
 
 -- layouts
 
-local tag_list = {1, 2, 3, 4}
+local tag_list = { "1", "2", "3", "4", "STICKY" }
 local global_keys_switch_tags = {}
-
+local tag_index = 0
 for i, t in ipairs(tag_list) do
-   if i >= 10 then break end
-   global_keys_switch_tags = aw.util.table.join(
-      global_keys_switch_tags,
-      aw.key({ "Mod4" }, tostring(i), function () aw.screen.focused().tags[i]:view_only() end),
-      aw.key({ "Mod4", "Control" }, tostring(i),
-         function ()
-            local c = client.focus
-            if c == nil then return end
-            aw.client.toggletag(c.screen.tags[i], c)
-         end
+   if cfg.tag_filter(t) then
+      tag_index = tag_index + 1
+      if tag_index >= 10 then break end
+      
+      global_keys_switch_tags = aw.util.table.join(
+         global_keys_switch_tags,
+         aw.key({ "Mod4" }, tostring(tag_index), function () aw.screen.focused().tags[i]:view_only() end),
+         aw.key({ "Mod4", "Control" }, tostring(tag_index),
+            function ()
+               local c = client.focus
+               if c == nil then return end
+               aw.client.toggletag(c.screen.tags[i], c)
+            end
+         )
       )
-   )
+   end
 end
 
 local layouts = {
@@ -366,7 +370,8 @@ ar.rules = {
          below = true,
          focus = false,
          border_width = 0,
-         focusable = false
+         focusable = false,
+         tag = "STICKY"
       }
    },
    {
