@@ -1,1 +1,6 @@
 PATH="$HOME/bin:/usr/local/sbin:/usr/local/bin:$PATH"
+
+if xrandr | grep -e "DP1 connected"; then
+   xrandr --output DP1 --mode 1920x1080 --scale 2x2 --pos 0x0
+   xrandr --output eDP1 --mode 3200x1800 --scale 1x1 --pos 0x2160
+fi
