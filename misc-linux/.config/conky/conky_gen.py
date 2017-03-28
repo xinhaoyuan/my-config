@@ -154,8 +154,11 @@ def gen_details(options):
     return lines
 
 def main(args):
-    hidpi = os.getenv("HIDPI") and len(os.getenv("HIDPI")) > 0 
-    # options = { "scale-factor" : 1, "screen-width" : 1920, "mpd" : False }
+    hidpi = os.getenv("HIDPI") and len(os.getenv("HIDPI")) > 0
+    try:
+        screen_width = int(subprocess.check_output("xrandr | grep -o -e 'connected primary [0-9]*' | awk '{ printf $3 }'"))
+    except:
+        screen_width = 1920
     options = { "scale-factor" : 2 if hidpi else 1,
                 "screen-width" : 3200 if hidpi else 1600,
                 "mpd" : True, "mpd_font" : "Vera Sans YuanTi Mono:size=10" }
