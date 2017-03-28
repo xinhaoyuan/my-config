@@ -11,12 +11,31 @@
                   (setq-local tab-width 4)
                   (setq-local indent-tabs-mode t)
                   (setq-local indent-line-function 'indent-line-simple)
+                  (setq-local indent-region-function
+                              (lambda (start end)
+                                (save-excursion
+                                  (goto-char start)
+                                  (forward-line 0) 
+                                  (replace-regexp "^\\(.\\)" "	\\1" nil (point) end)
+                                  )))
                   (electric-indent-local-mode -1)
                   (fset 'boogie-friends-self-insert-and-indent 'self-insert-command)
                   (modify-syntax-entry ?_ "_")
                   (prettify-symbols-mode -1)
                   (flycheck-mode -1)
                   ))
+      (define-key dafny-mode-map (kbd "<backtab>")
+        (lambda ()
+          (interactive)
+          (if (region-active-p)
+              (let ((start (region-beginning))
+                    (end (region-end)))
+                (save-excursion
+                  (goto-char start)
+                  (forward-line 0) 
+                  (replace-regexp "^	" "" nil (point) end)
+                  ))
+              )))
       (setq flycheck-dafny-executable
 	    (concat (getenv "HOME") "/opt/dafny/Dafny.exe"))
       (setq flycheck-inferior-dafny-executable
