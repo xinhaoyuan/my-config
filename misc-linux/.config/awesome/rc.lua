@@ -179,9 +179,6 @@ end
 local global_keys = aw.util.table.join(
    global_keys_switch_tags,
    
-   aw.key({ "Mod4", "Control" }, "Left", aw.tag.viewprev),
-   aw.key({ "Mod4", "Control" }, "Right", aw.tag.viewnext),
-      
    aw.key({ "Mod4" }, "[", function () al.inc(layouts, -1) end),
    aw.key({ "Mod4" }, "]", function () al.inc(layouts, 1) end),
 
