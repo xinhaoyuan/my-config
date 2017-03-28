@@ -35,7 +35,11 @@
                   (forward-line 0) 
                   (replace-regexp "^	" "" nil (point) end)
                   ))
-              )))
+            (save-excursion
+              (forward-line 0)
+              (if (eq (char-after) ?\t)
+                  (delete-char 1)))
+            )))
       (setq flycheck-dafny-executable
 	    (concat (getenv "HOME") "/opt/dafny/Dafny.exe"))
       (setq flycheck-inferior-dafny-executable
