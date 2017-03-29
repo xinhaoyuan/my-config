@@ -16,6 +16,7 @@
                   (modify-syntax-entry ?_ "_")
                   (prettify-symbols-mode -1)
                   (flycheck-mode -1)
+                  (simple-indent-mode 1)
                   ))
       (setq flycheck-dafny-executable
 	    (concat (getenv "HOME") "/opt/dafny/Dafny.exe"))
