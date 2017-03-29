@@ -1,4 +1,3 @@
 Xft.dpi: 96
 Xcursor*size : 24
-URxvt*font:   xft:Input:size=11,xft:Microsoft YaHei
-URxvt*letterSpace: -1
+URxvt*font:   xft:Terminus:size=10,xft:SimSun
