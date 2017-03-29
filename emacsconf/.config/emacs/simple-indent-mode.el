@@ -5,19 +5,21 @@
     (goto-char end) (forward-line 0) (setq end (point))
     (let ((loop-flag t))
       (while loop-flag
-        (let* ((current-indentation
-                (progn (skip-chars-forward "\t ") (current-column)))
-               (new-indentation (+ current-indentation offset)))
-          (if (<= 0 new-indentation)
-              (indent-line-to new-indentation)
-            (indent-line-to 0)
-            ))
+        (if (< end (line-end-position))
+            (let* ((current-indentation
+                    (progn (skip-chars-forward "\t ") (current-column)))
+                   (new-indentation (+ current-indentation offset)))
+              (if (<= 0 new-indentation)
+                  (indent-line-to new-indentation)
+                (indent-line-to 0)
+                ))
+          )
         (forward-line -1)
         (if (or (>= (point) end) (>= start end)) (setq loop-flag nil))
         (setq end (point))
         ))
     ))
-        
+
 (defun simple-indent-do-indent ()
   (interactive)
   (if (use-region-p)
