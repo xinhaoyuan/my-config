@@ -62,7 +62,7 @@ and <backtab> to some simple rule.
 "
   :global nil
   :init-value nil
-  :lighter t
+  :lighter " SI"
   :keymap simple-indent-mode-map
   )
   
