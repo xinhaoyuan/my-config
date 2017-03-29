@@ -1,5 +1,13 @@
 (defvar simple-indent-width (lambda () tab-width))
 
+(defun simple-indent-get-width ()
+  (or (and (commandp simple-indent-width)
+           (call-interactively simple-indent-width))
+      (and (functionp simple-indent-width)
+           (funcall simple-indent-width))
+      simple-indent-width)
+  )
+
 (defun simple-indent-region (start end offset)
   (interactive)
   (save-excursion
@@ -28,12 +36,7 @@
       (let ((start (region-beginning))
             (end (region-end))
             (deactivate-mark nil)
-            (width
-             (or (and (commandp simple-indent-width)
-                      (call-interactively simple-indent-width))
-                 (and (functionp simple-indent-width)
-                      (funcall simple-indent-width))
-                 simple-indent-width))
+            (width (simple-indent-get-width))
             )
         (simple-indent-region start end width)
         )
@@ -47,12 +50,7 @@
       (let ((start (region-beginning))
             (end (region-end))
             (deactivate-mark nil)
-            (width
-             (or (and (commandp simple-indent-width)
-                      (call-interactively simple-indent-width))
-                 (and (functionp simple-indent-width)
-                      (funcall simple-indent-width))
-                 simple-indent-width))
+            (width (simple-indent-get-width))
             )
         (simple-indent-region start end (- width))
         )
@@ -62,6 +60,42 @@
           (delete-char 1)))
     )
   )
+
+(defun simple-indent-get-current-indentation-unsafe ()
+  (interactive)
+  (forward-line 0)
+  (skip-chars-forward "\t ")
+  (current-column))
+
+(defun simple-indent-get-previous-indentation-unsafe ()
+  (interactive)
+  (forward-line 0)
+  (skip-chars-backward "\r\n\t ")
+  (if (eq (point) (point-min)) 0
+    (simple-indent-get-current-indentation-unsafe)
+    ))
+
+(defun simple-indent-line ()
+  (interactive)
+  (let ((ind -1)
+        (ind-point -1)
+        (prev-ind (save-excursion (simple-indent-get-previous-indentation-unsafe))))
+
+    (save-excursion
+      (forward-line 0)
+      (skip-chars-forward "\t ")
+      (setq ind (current-column))
+      (setq ind-point (point)))
+
+    (if (< (point) ind-point)
+        (goto-char ind-point)
+      (if (and (= (point) ind-point) (< ind prev-ind))
+          (indent-line-to prev-ind)
+        (if (= (point) ind-point)
+            (indent-line-to (+ ind (simple-indent-get-width)))
+          (insert-tab)
+          )))
+    ))
 
 (defvar simple-indent-mode-map
   (let ((keymap (make-sparse-keymap)))
