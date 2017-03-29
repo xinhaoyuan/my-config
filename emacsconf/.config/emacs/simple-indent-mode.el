@@ -1,3 +1,5 @@
+(defvar simple-indent-width (lambda () tab-width))
+
 (defun simple-indent-region (start end offset)
   (interactive)
   (save-excursion
@@ -26,8 +28,14 @@
       (let ((start (region-beginning))
             (end (region-end))
             (deactivate-mark nil)
+            (width
+             (or (and (commandp simple-indent-width)
+                      (call-interactively simple-indent-width))
+                 (and (functionp simple-indent-width)
+                      (funcall simple-indent-width))
+                 simple-indent-width))
             )
-        (simple-indent-region start end tab-width) 
+        (simple-indent-region start end width)
         )
     (call-interactively 'indent-for-tab-command)
     )
@@ -39,8 +47,14 @@
       (let ((start (region-beginning))
             (end (region-end))
             (deactivate-mark nil)
+            (width
+             (or (and (commandp simple-indent-width)
+                      (call-interactively simple-indent-width))
+                 (and (functionp simple-indent-width)
+                      (funcall simple-indent-width))
+                 simple-indent-width))
             )
-        (simple-indent-region start end (- tab-width))
+        (simple-indent-region start end (- width))
         )
     (save-excursion
       (forward-line 0)
