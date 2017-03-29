@@ -14,6 +14,7 @@
 (load "_markdown.el")
 (load "_csharp.el")
 (load "_boogie.el")
+(load "simple-indent-mode.el")
 
 ;; coq {{{
 (setq auto-mode-alist (cons '("\\.v$" . coq-mode) auto-mode-alist))
@@ -400,6 +401,7 @@
 (define-key my-prefix (kbd "C-f") 'flyspell-mode)
 (define-key my-prefix (kbd "C-l") 'nlinum-mode)
 (define-key my-prefix (kbd "C-c") 'flycheck-mode)
+(define-key my-prefix (kbd "TAB") 'simple-indent-mode)
 
 (define-key my-prefix (kbd "v") 'set-variable)
 
