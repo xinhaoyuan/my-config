@@ -1,3 +1,6 @@
 Xft.dpi: 96
 Xcursor*size : 24
-URxvt*font:   xft:Terminus:size=10,xft:SimSun
+URxvt*font:\
+        [codepage=ASCII]xft:Terminus:size=10,\
+        xft:Latin Modern Math:autohint=true:antialias=true,\
+        xft:SimSun
