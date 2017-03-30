@@ -22,6 +22,7 @@ alias s="sudo"
 alias o="open"
 alias xclip="xclip -selection clipboard"
 alias emacs="emacs -nw"
+alias llt="ll --sort=time -r"
 
 if type -p dircolors > /dev/null; then
     if [[ "$TERM" = dvtm || "$TERM" = dvtm-* ]]; then 
