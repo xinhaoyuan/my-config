@@ -56,6 +56,7 @@
 (setq require-final-newline t)
 (setq visible-bell t)
 (setq inhibit-startup-message t)
+(setq show-trailing-whitespace t)
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq next-line-add-newlines nil)
 (column-number-mode 1)
