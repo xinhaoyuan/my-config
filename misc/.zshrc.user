@@ -35,6 +35,7 @@ fi
 local ret_status="%(?:%{$fg_bold[green]%}-> :%{$fg_bold[red]%}-> %s)"
 
 PROMPT='${ret_status}%{$fg_bold[green]%}%p[${SSH_TTY:+%n@%m:}%j] %{$fg[cyan]%}%c %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%} % %{$reset_color%}'
+RPROMPT='${DATE_PRECMD}'
 
 ZSH_THEME_GIT_PROMPT_PREFIX="git:(%{$fg[red]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}"
@@ -66,9 +67,10 @@ preexec() {
   DATE=`date +"%H:%M:%S %Y-%m-%d"`
   C=$(($COLUMNS-22))
   echo -e "\033[1A\033[${C}C [${DATE}]"
-  export TIME_PREEXEC=`date +%s`
+  # export TIME_PREEXEC=`date +%s`
 }
 
 precmd() {
-  export TIME_PRECMD=`date +%s`
+  # export TIME_PRECMD=`date +%s`
+  export DATE_PRECMD=`date +"%H:%M:%S %Y-%m-%d"`
 }
