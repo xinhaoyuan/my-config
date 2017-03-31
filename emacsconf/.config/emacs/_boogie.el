@@ -10,7 +10,7 @@
                 (lambda ()
                   (setq-local tab-width 4)
                   (setq-local indent-tabs-mode t)
-                  (setq-local indent-line-function 'indent-line-simple)
+                  (setq-local indent-line-function 'simple-indent-line)
                   (electric-indent-local-mode -1)
                   (fset 'boogie-friends-self-insert-and-indent 'self-insert-command)
                   (modify-syntax-entry ?_ "_")
