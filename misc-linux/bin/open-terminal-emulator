@@ -6,12 +6,12 @@ classname=LocalTE
 
 if [ -z "$1" ]; then
     desktop=`xdotool get_desktop`
-    sessionname="local-$desktop"
-    termtitle="terminal-$desktop"
 else
-    sessionname=$1
-    termtitle=$1
+    desktop="$1"
 fi
+
+sessionname="L-$desktop"
+termtitle="T-$desktop"
 
 unset TMUX
 

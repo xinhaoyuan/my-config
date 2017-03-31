@@ -231,7 +231,7 @@ local global_keys = aw.util.table.join(
    aw.key({ "Mod4", "Control" }, "m", function () for _, c in pairs(client.get()) do c.minimized = false end end),
 
    aw.key({ "Mod4" }, "r", function () aw.spawn.with_shell("dlauncher open") end),
-   aw.key({ "Mod4" }, "Return", function () aw.util.spawn("open-terminal-emulator") end),
+   aw.key({ "Mod4" }, "Return", function () aw.spawn.with_shell("open-terminal-emulator " .. aw.screen.focused().index .. "-" .. aw.screen.focused().selected_tag.index) end),
    aw.key({ "Mod4", "Control" }, "Return", function () aw.spawn.with_shell("open-terminal-emulator background") end),
    aw.key({ "Mod4" }, "t", function () aw.util.spawn("urxvt -name root-terminal") end),
 
@@ -342,7 +342,7 @@ client.connect_signal(
 client.connect_signal(
    "unfocus",
    function (c)
-      c.border_color = be.border_normal      
+      c.border_color = be.border_normal
    end
 )
 
@@ -355,7 +355,8 @@ ar.rules = {
          keys = client_keys,
          buttons = client_buttons,
          border_width = 2 * cfg.widget_scale_factor,
-         border_color = be.border_normal
+         border_color = be.border_normal,
+         screen = function(c) return awesome.startup and c.screen or aw.screen.focused() end
       }
    },
    {
