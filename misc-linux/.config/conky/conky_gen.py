@@ -9,7 +9,7 @@ def gen_bar(options):
         "net_avg_samples 2",
         "out_to_console no",
         "use_xft yes",
-        "xftfont Input:size=12",
+        "xftfont {0}".format(options["font"]),
         "xftalpha 0.5",
         "update_interval 1",
         "own_window yes",
@@ -52,7 +52,7 @@ def gen_bar(options):
         "${alignr}${color orange}Bat${color}[${battery_short}] \\",
         "${time %a %Y/%m/%d} ${time %H:%M}"])
     return lines
-    
+
 def gen_details(options):
     lines = [
         "background no",
@@ -60,7 +60,7 @@ def gen_details(options):
         "net_avg_samples 2",
         "out_to_console no",
         "use_xft yes",
-        "xftfont Input:size=12",
+        "xftfont {0}".format(options["font"]),
         "xftalpha 0.5",
         # Update interval in seconds
         "update_interval 1"];
@@ -78,7 +78,7 @@ def gen_details(options):
         # "minimum_size 800 40",
         # "maximum_width 800"
         ])
-        
+
     lines.extend([
         # Use double buffering (reduces flicker, may not work for everyone)
         "double_buffer yes",
@@ -126,14 +126,14 @@ def gen_details(options):
     first = True
     for cpu in range(0, cpu_count):
         if first:
-            lines.append("${{cpu cpu{0}}}%,${{freq_g {0}}}\\".format(cpu + 1)) 
+            lines.append("${{cpu cpu{0}}}%,${{freq_g {0}}}\\".format(cpu + 1))
             first = False
         else:
             lines.append("|${{cpu cpu{0}}}%,${{freq_g {0}}}\\".format(cpu + 1))
         if cpu % 4 == 3:
             lines.append("")
             first = True
-            
+
     lines.append("")
 
     lines.append("")
@@ -161,9 +161,10 @@ def main(args):
         screen_width = 1920
     options = { "scale-factor" : 2 if hidpi else 1,
                 "screen-width" : screen_width,
+                "font" : "Input:size=12" if hidpi else "Terminus:size=14",
                 "mpd" : True, "mpd_font" : "Vera Sans YuanTi Mono:size=10" }
-    
-    if args[0] == "details": 
+
+    if args[0] == "details":
         lines = gen_details(options)
     elif args[0] == "bar":
         lines = gen_bar(options)
