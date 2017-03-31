@@ -1,7 +1,9 @@
 export PATH="$HOME/bin:/usr/local/sbin:/usr/local/bin:$PATH"
 export HIDPI=""
 
-. $HOME/.xsessionrc-layout
+if [ -e "$HOME/.xsessionrc-layout" ]; then
+    source $HOME/.xsessionrc-layout
+fi
 
 if [ -z "$HIDPI" ]; then
     xrdb -merge $HOME/.Xresources.d/lowdpi
