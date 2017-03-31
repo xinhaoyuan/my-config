@@ -1,0 +1,4 @@
+#!/bin/sh
+
+python $HOME/.config/conky/conky_gen.py bar > $HOME/.config/conky/bar
+python $HOME/.config/conky/conky_gen.py details > $HOME/.config/conky/details

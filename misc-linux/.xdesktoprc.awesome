@@ -2,7 +2,7 @@
 
 . $HOME/.xdesktoprc.common
 
-python $HOME/.config/conky/conky_gen.py bar > $HOME/.config/conky/bar
-python $HOME/.config/conky/conky_gen.py details > $HOME/.config/conky/details
+conky-gen
+
 conky -c $HOME/.config/conky/bar -d
 conky -c $HOME/.config/conky/details -d
