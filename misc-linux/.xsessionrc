@@ -2,7 +2,7 @@ export PATH="$HOME/bin:/usr/local/sbin:/usr/local/bin:$PATH"
 export HIDPI=""
 
 if [ -e "$HOME/.xsessionrc-layout" ]; then
-    source $HOME/.xsessionrc-layout
+    . $HOME/.xsessionrc-layout
 fi
 
 if [ -z "$HIDPI" ]; then
