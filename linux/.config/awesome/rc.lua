@@ -238,6 +238,7 @@ local global_keys = aw.util.table.join(
 
    aw.key({ "Mod4" }, "F1", function () ch.toggle_conky() end),
    aw.key({ "Mod4" }, "F2", function () aw.util.spawn("pcmanfm") end),
+   aw.key({ "Mod4" }, "F3", function () aw.util.spawn("zim") end),
    aw.key({ "Mod4" }, "grave", function() ch.raise_conky() end, function() ch.lower_conky_delayed() end),
    -- disabled because of conflict with IME
    -- aw.key({ }, "Super_L", win_pressed),
