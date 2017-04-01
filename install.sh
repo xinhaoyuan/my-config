@@ -4,11 +4,11 @@ generate_package_names() {
     echo emacsconf
     echo misc
     if [ `uname` = 'Linux' ]; then
-	    echo misc-linux
+	echo linux
     elif [ `uname` = 'Darwin' ]; then
-        echo misc-osx
+        echo osx
     elif [ `uname -o` = 'Cygwin' ]; then
-        echo misc-cygwin
+        echo cygwin
     fi
 }
 

@@ -23,6 +23,30 @@ my_tag_list.buttons = aw.util.table.join(
    aw.button({ }, 5, function(t) aw.tag.viewprev(aw.tag.getscreen(t)) end)
 )
 
+local wc_button = wi.widget{
+   markup = '☯',
+   font = "Sans " .. (12 * cfg.font_scale_factor),
+   widget = wi.widget.textbox
+}
+
+wc_button:connect_signal(
+   "button::press",
+   function (_, _, _, b)
+      local c = client.focus
+      if c == nil then return end
+      if b == 1 then
+         -- move the mouse to the center of the client before movement
+         mouse.coords({
+               x = c.x + c.width / 2,
+               y = c.y + c.height / 2,
+         }, true)
+         aw.mouse.client.move(c)
+      elseif b == 3 then
+         aw.mouse.client.resize(c)
+      end
+   end
+)
+
 my_task_list.buttons = aw.util.table.join(
    aw.button({ }, 1, function (c)
          if c == client.focus then
@@ -106,6 +130,7 @@ for s = 1, screen.count() do
    local right_layout = wi.layout.fixed.horizontal()
    right_layout:add(my_tray)
    right_layout:add(wi.widget.textclock.new())
+   right_layout:add(wc_button)
 
    local layout = wi.layout.align.horizontal()
    layout:set_left(left_layout)

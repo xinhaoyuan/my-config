@@ -48,7 +48,7 @@ for i, t in ipairs(tag_list) do
    if cfg.tag_filter(t) then
       tag_index = tag_index + 1
       if tag_index >= 10 then break end
-      
+
       global_keys_switch_tags = aw.util.table.join(
          global_keys_switch_tags,
          aw.key({ "Mod4" }, tostring(tag_index), function () aw.screen.focused().tags[i]:view_only() end),
@@ -82,7 +82,7 @@ local is_floating = function (c)
    return
       c.tomb_floating or c.floating
       or c.maximized_horizontal or c.maximized_vertical or c.maximized
-      or #al.parameters(nil, c.screen).clients <= 1 
+      or #al.parameters(nil, c.screen).clients <= 1
       or c.type == "dialog"
 end
 
@@ -91,7 +91,7 @@ af.find_alternative_focus = function(prev, s)
    local pid = nil
    if prev and prev.valid then
       f = is_floating(prev)
-      pid = prev.tomb_pid or prev.pid 
+      pid = prev.tomb_pid or prev.pid
    end
 
    local filters = {}
@@ -114,11 +114,11 @@ local my_focus_by_direction = function(dir)
    if old_c ~= nil and old_c.screen ~= aw.screen.focused() then
       aw.screen.focus(old_c.screen.index)
    end
-   
+
    aw.client.focus.global_bydirection(dir);
    local new_c = client.focus
-   
-   if old_c ~= new_c and new_c ~= nil then 
+
+   if old_c ~= new_c and new_c ~= nil then
       aw.screen.focus(new_c.screen.index)
       new_c:raise()
    end
@@ -140,7 +140,7 @@ local win_pressed = function ()
                   end
                end
             end
-            
+
             for i, k in ipairs(root.keys()) do
                if aw.key.match(k, mod, key) then
                   kg.stop()
@@ -156,6 +156,7 @@ local win_pressed = function ()
    end)
 end
 
+-- WIP
 local window_edit_mode = {}
 function window_edit_mode.start (c)
    kg.run(
@@ -172,13 +173,13 @@ function window_edit_mode.start (c)
             elseif m == "Mod1" then alt = true
             end
          end
-   end)   
+   end)
 end
 
 -- keys and buttons
 local global_keys = aw.util.table.join(
    global_keys_switch_tags,
-   
+
    aw.key({ "Mod4" }, "[", function () al.inc(layouts, -1) end),
    aw.key({ "Mod4" }, "]", function () al.inc(layouts, 1) end),
 
@@ -212,7 +213,7 @@ local global_keys = aw.util.table.join(
    aw.key({ "Mod4" }, "a", function () my_focus_by_direction("left") end),
    aw.key({ "Mod4" }, "s", function () my_focus_by_direction("down") end),
    aw.key({ "Mod4" }, "d", function () my_focus_by_direction("right") end),
-   
+
    -- aw.key({ "Mod1",           }, "Tab",
    --    function ()
    --       sw.switch( 1, "Alt_L", "Tab", "ISO_Left_Tab")
@@ -226,7 +227,7 @@ local global_keys = aw.util.table.join(
    aw.key({ }, "XF86AudioRaiseVolume", function() aw.util.spawn("amixer sset Master,0 2%+") end),
    aw.key({ }, "XF86AudioMute", function() aw.util.spawn("amixer sset Master,0 toggle") end),
    aw.key({ }, "XF86MonBrightnessUp", function () aw.util.spawn("xbacklight -inc 5") end),
-   aw.key({ }, "XF86MonBrightnessDown", function () aw.util.spawn("xbacklight -dec 5") end),   
+   aw.key({ }, "XF86MonBrightnessDown", function () aw.util.spawn("xbacklight -dec 5") end),
 
    aw.key({ "Mod4", "Control" }, "m", function () for _, c in pairs(client.get()) do c.minimized = false end end),
 
@@ -240,7 +241,7 @@ local global_keys = aw.util.table.join(
    aw.key({ "Mod4" }, "grave", function() ch.raise_conky() end, function() ch.lower_conky_delayed() end),
    -- disabled because of conflict with IME
    -- aw.key({ }, "Super_L", win_pressed),
-   
+
    aw.key({ "Mod4", "Control" }, "Escape", awesome.quit)
 )
 
@@ -248,7 +249,7 @@ local client_keys = aw.util.table.join(
    aw.key({ "Mod4" }, "Tab", function(src_c)
          local f = is_floating(src_c)
          local new_focus = nil
-         
+
          for _, c in ipairs(client.get(src_c.screen)) do
             if c:isvisible() and (not aw.client.focus.filter or aw.client.focus.filter(c)) then
                if not is_floating(c) then
@@ -259,7 +260,7 @@ local client_keys = aw.util.table.join(
                   end
                else
                end
-            end            
+            end
          end
 
          new_focus = cf.find_first_in_history(
@@ -271,7 +272,7 @@ local client_keys = aw.util.table.join(
                end
             }
          )
-         
+
          if new_focus then
             client.focus = new_focus
          end
@@ -297,7 +298,7 @@ local client_keys = aw.util.table.join(
    -- aw.key({ "Mod4" }, "Down", function (c)
    --       c.minimized = true
    -- end),
-      
+
    aw.key({ "Mod4" }, "Left", function (c)
          if not is_floating(c) then
             c:swap(aw.client.getmaster())
