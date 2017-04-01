@@ -41,7 +41,7 @@ be.init("/usr/share/awesome/themes/default/theme.lua")
 
 -- layouts
 
-local tag_list = { "1", "2", "3", "4", "STICKY" }
+local tag_list = { "1", "2", "3", "4", "5", "6", "STICKY" }
 local global_keys_switch_tags = {}
 local tag_index = 0
 for i, t in ipairs(tag_list) do
