@@ -18,9 +18,9 @@ my_tag_list.buttons = aw.util.table.join(
    aw.button({ }, 1, aw.tag.viewonly),
    aw.button({ "Mod4" }, 1, aw.client.movetotag),
    aw.button({ }, 3, aw.tag.viewtoggle),
-   aw.button({ "Mod4" }, 3, aw.client.toggletag),
-   aw.button({ }, 4, function(t) aw.tag.viewnext(aw.tag.getscreen(t)) end),
-   aw.button({ }, 5, function(t) aw.tag.viewprev(aw.tag.getscreen(t)) end)
+   aw.button({ "Mod4" }, 3, aw.client.toggletag)
+   -- aw.button({ }, 4, function(t) aw.tag.viewnext(aw.tag.getscreen(t)) end),
+   -- aw.button({ }, 5, function(t) aw.tag.viewprev(aw.tag.getscreen(t)) end)
 )
 
 local wc_button = wi.widget{
@@ -63,23 +63,24 @@ my_task_list.buttons = aw.util.table.join(
             client.focus = c
             c:raise()
          end
-   end),
-   aw.button({ }, 3, function ()
-         if instance then
-            instance:hide()
-            instance = nil
-         else
-            instance = aw.menu.clients({ width=500 })
-         end
-   end),
-   aw.button({ }, 4, function ()
-         aw.client.focus.byidx(1)
-         if client.focus then client.focus:raise() end
-   end),
-   aw.button({ }, 5, function ()
-         aw.client.focus.byidx(-1)
-         if client.focus then client.focus:raise() end
-end))
+   end)
+   -- aw.button({ }, 3, function ()
+   --       if instance then
+   --          instance:hide()
+   --          instance = nil
+   --       else
+   --          instance = aw.menu.clients({ width=500 })
+   --       end
+   -- end),
+   -- aw.button({ }, 4, function ()
+   --       aw.client.focus.byidx(1)
+   --       if client.focus then client.focus:raise() end
+   -- end),
+   -- aw.button({ }, 5, function ()
+   --       aw.client.focus.byidx(-1)
+   --       if client.focus then client.focus:raise() end
+   -- end)
+)
 
 for s = 1, screen.count() do
    my_task_list[s] = aw.widget.tasklist.new(
