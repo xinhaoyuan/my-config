@@ -130,7 +130,7 @@ for s = 1, screen.count() do
 
    local right_layout = wi.layout.fixed.horizontal()
    right_layout:add(my_tray)
-   right_layout:add(wi.widget.textclock.new())
+   right_layout:add(wi.widget.textclock.new(" %m/%d/%y %a %H:%M "))
    right_layout:add(wc_button)
 
    local layout = wi.layout.align.horizontal()

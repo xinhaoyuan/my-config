@@ -45,12 +45,12 @@ def gen_bar(options):
         "${color orange}Mem ${color} $memperc%, ${color orange}Swap ${color} $swapperc%\\"]
     if "mpd" in options and options["mpd"]:
         lines.extend([
-            "${{alignc {0}}}${{if_mpd_playing}}\\".format(-150 * options["scale-factor"]),
+            "${{alignc {0}}}${{if_mpd_playing}}\\".format(-200 * options["scale-factor"]),
             "${{font {0}}}${{mpd_artist}} - ${{mpd_title}}${{font}}\\".format(options["mpd_font"]),
             "${endif}\\"])
     lines.extend([
-        "${alignr}${color orange}Bat${color}[${battery_short}] \\",
-        "${time %a %Y/%m/%d} ${time %H:%M}"])
+        "${alignr}${color orange}Bat${color}[${battery_short}]\\",
+        ""])
     return lines
 
 def gen_details(options):
