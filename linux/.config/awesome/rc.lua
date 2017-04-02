@@ -361,6 +361,9 @@ ar.rules = {
          screen = function(c) return awesome.startup and c.screen or aw.screen.focused() end
       }
    },
+   { rule = { instance = "LocalTE" },
+     properties = { maximized = true }
+   },
    {
       rule = { class = "Conky" },
       properties = {
