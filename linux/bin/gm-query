@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+
+import pycurl
+from xml.dom import minidom
+from StringIO import StringIO
+import sys, os
+
+def main(args):
+    if (len(args) < 1):
+        print("need cookies file")
+        sys.exit(-1)
+
+    out = StringIO()
+    c = pycurl.Curl()
+    c.setopt(c.COOKIEFILE, args[0])
+    c.setopt(c.URL, "https://mail.google.com/mail/feed/atom")
+    c.setopt(c.WRITEDATA, out)
+    c.perform()
+
+    error = False
+
+    try:
+        data = minidom.parseString(out.getvalue())
+        unread_count = int(data.getElementsByTagName("fullcount")[0].firstChild.wholeText)
+    except Exception as x:
+        error = True
+
+    if error:
+        print "error"
+    else:
+        print unread_count
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

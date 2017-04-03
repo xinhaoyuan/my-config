@@ -49,7 +49,9 @@ def gen_bar(options):
             "${{font {0}}}${{mpd_artist}} - ${{mpd_title}}${{font}}\\".format(options["mpd_font"]),
             "${endif}\\"])
     lines.extend([
-        "${alignr}${color orange}Bat${color}[${battery_short}]\\",
+        "${alignr}\\",
+        "${color orange}Mail${color}[${texeci 60 gm-query $HOME/.config/conky/gm-cookies.txt}] \\",
+        "${color orange}Bat${color}[${battery_short}]\\",
         ""])
     return lines
 
