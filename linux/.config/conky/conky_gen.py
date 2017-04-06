@@ -163,7 +163,7 @@ def main(args):
         screen_width = 1920
     options = { "scale-factor" : 2 if hidpi else 1,
                 "screen-width" : screen_width,
-                "font" : "Input:size=12" if hidpi else "Terminus:size=14",
+                "font" : "Input:size=12" if hidpi else "Terminus:size=10",
                 "mpd" : True, "mpd_font" : "Vera Sans YuanTi Mono:size=10" }
 
     if args[0] == "details":

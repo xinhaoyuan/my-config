@@ -36,6 +36,14 @@ awesome.connect_signal(
    end
 )
 
+local spawn = function(cmd, to_notify)
+   aw.spawn.spawn(cmd)
+end
+
+local spawn_with_shell = function(cmd, to_notify)
+   aw.spawn.with_shell(cmd)
+end
+
 aw.spawn.with_shell(HOME_DIR .. "/.xdesktoprc.awesome")
 be.init("/usr/share/awesome/themes/default/theme.lua")
 
@@ -150,7 +158,7 @@ local win_pressed = function ()
             end
          elseif event == "release" and key == "Super_L" then
             -- win key released without any key triggered
-            aw.spawn.with_shell("dlauncher open")
+            spawn_with_shell("dlauncher open")
             kg.stop()
          end
    end)
@@ -223,22 +231,22 @@ local global_keys = aw.util.table.join(
    --       sw.switch(-1, "Alt_L", "Tab", "ISO_Left_Tab")
    -- end),
 
-   aw.key({ }, "XF86AudioLowerVolume", function() aw.util.spawn("amixer sset Master,0 2%-") end),
-   aw.key({ }, "XF86AudioRaiseVolume", function() aw.util.spawn("amixer sset Master,0 2%+") end),
-   aw.key({ }, "XF86AudioMute", function() aw.util.spawn("amixer sset Master,0 toggle") end),
-   aw.key({ }, "XF86MonBrightnessUp", function () aw.util.spawn("xbacklight -inc 5") end),
-   aw.key({ }, "XF86MonBrightnessDown", function () aw.util.spawn("xbacklight -dec 5") end),
+   aw.key({ }, "XF86AudioLowerVolume", function() spawn("amixer sset Master,0 2%-") end),
+   aw.key({ }, "XF86AudioRaiseVolume", function() spawn("amixer sset Master,0 2%+") end),
+   aw.key({ }, "XF86AudioMute", function() spawn("amixer sset Master,0 toggle") end),
+   aw.key({ }, "XF86MonBrightnessUp", function () spawn("xbacklight -inc 5") end),
+   aw.key({ }, "XF86MonBrightnessDown", function () spawn("xbacklight -dec 5") end),
 
    aw.key({ "Mod4", "Control" }, "m", function () for _, c in pairs(client.get()) do c.minimized = false end end),
 
-   aw.key({ "Mod4" }, "r", function () aw.spawn.with_shell("dlauncher open") end),
-   aw.key({ "Mod4" }, "Return", function () aw.spawn.with_shell("open-terminal-emulator " .. aw.screen.focused().index .. "-" .. aw.screen.focused().selected_tag.index) end),
-   aw.key({ "Mod4", "Control" }, "Return", function () aw.spawn.with_shell("open-terminal-emulator background") end),
-   aw.key({ "Mod4" }, "t", function () aw.util.spawn("urxvt -name root-terminal") end),
+   aw.key({ "Mod4" }, "r", function () spawn_with_shell("dlauncher open") end),
+   aw.key({ "Mod4" }, "Return", function () spawn_with_shell("open-terminal-emulator " .. aw.screen.focused().index .. "-" .. aw.screen.focused().selected_tag.index) end),
+   aw.key({ "Mod4", "Control" }, "Return", function () spawn_with_shell("open-terminal-emulator background") end),
+   aw.key({ "Mod4" }, "t", function () spawn("urxvt -name root-terminal") end),
 
    aw.key({ "Mod4" }, "F1", function () ch.toggle_conky() end),
-   aw.key({ "Mod4" }, "F2", function () aw.util.spawn("pcmanfm") end),
-   aw.key({ "Mod4" }, "F3", function () aw.util.spawn("zim") end),
+   aw.key({ "Mod4" }, "F2", function () spawn("pcmanfm") end),
+   aw.key({ "Mod4" }, "F3", function () spawn("zim") end),
    aw.key({ "Mod4" }, "grave", function() ch.raise_conky() end, function() ch.lower_conky_delayed() end),
    -- disabled because of conflict with IME
    -- aw.key({ }, "Super_L", win_pressed),
