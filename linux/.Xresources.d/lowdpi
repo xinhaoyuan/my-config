@@ -1,8 +1,8 @@
 Xft.dpi: 96
-Xcursor*size : 24
+Xcursor*size: 24
 URxvt*font:\
-        [codeset=ASCII]xft:Terminus:size=10,\
-        -misc-fixed-*-*-normal-*-14-*-*-*-*-*-iso10646-1,\
+        [codeset=ASCII]xft:Terminus:size=12,\
+        -*-fixed-*-*-*-*-14-*-*-*-*-*-iso10646-*,\
         xft:Latin Modern Math:autohint=true:antialias=true,\
         xft:SimSun
-
+URxvt*letterSpace: 0
