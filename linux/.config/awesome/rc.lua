@@ -89,7 +89,7 @@ require("my-widgets")
 local is_floating = function (c)
    return
       c.tomb_floating or c.floating
-      or c.maximized_horizontal or c.maximized_vertical or c.maximized
+      or c.maximized_horizontal or c.maximized_vertical or c.maximized or c.fullscreen
       or #al.parameters(nil, c.screen).clients <= 1
       or c.type == "dialog"
 end
@@ -296,12 +296,8 @@ local client_keys = aw.util.table.join(
          end
    end),
 
-   aw.key({ "Mod4", "Shift" }, "Up", function (c)
-         c.maximized_vertical = not c.maximized_vertical
-   end),
-
-   aw.key({ "Mod4", "Control" }, "Up", function (c)
-         c.maximized_horizontal = not c.maximized_horizontal
+   aw.key({ "Mod4" }, "f", function (c)
+         c.fullscreen = not c.fullscreen
    end),
 
    -- aw.key({ "Mod4" }, "Down", function (c)

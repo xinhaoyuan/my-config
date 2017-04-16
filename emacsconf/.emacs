@@ -73,6 +73,14 @@
 (setq default-tab-width 8)
 (global-set-key (kbd "C-x C-b") 'electric-buffer-list)
 
+;; Reverse colors for the border to have nicer line
+(set-face-inverse-video-p 'vertical-border nil)
+(set-face-background 'vertical-border (face-background 'default))
+;; Set symbol for the border
+(set-display-table-slot standard-display-table
+                        'vertical-border
+                        (make-glyph-code ?│))
+
 (require 'subr-x)
 (require 'redo)
 (require 'psvn)
