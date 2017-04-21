@@ -1,10 +1,11 @@
 #!/bin/bash
 
 # will be executed after the window manager is ready
-
-fcitx
-compton -b
 nitrogen --restore
-xscreensaver -no-splash &
-# wicd-gtk -t &
-nm-applet &
+if [ -n $HOME/.xsession-init-guard ]; then
+    fcitx
+    compton -b
+    xscreensaver -no-splash &
+    # wicd-gtk -t &
+    nm-applet &
+fi

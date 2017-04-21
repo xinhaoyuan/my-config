@@ -1,8 +1,12 @@
 #!/bin/bash
 
+pkill conky
+
 . $HOME/.xdesktoprc.common
 
 conky-gen
 
 conky -c $HOME/.config/conky/bar -d
 conky -c $HOME/.config/conky/details -d
+
+touch $HOME/.xsession-init-guard

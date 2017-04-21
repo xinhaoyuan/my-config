@@ -1,6 +1,10 @@
 export PATH="$HOME/bin:/usr/local/sbin:/usr/local/bin:$PATH"
 export HIDPI=""
 
+rm $HOME/.xsession-init-guard
+
+xset +fp $HOME/.fonts/tamsyn-font-1.11
+
 if [ -e "$HOME/.xsessionrc-layout" ]; then
     . $HOME/.xsessionrc-layout
 fi
