@@ -1,3 +1,10 @@
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+(package-initialize)
+
 (defcustom my-configure-dir "~/.config/emacs" "")
 (add-to-list 'load-path my-configure-dir)
 (load "_utils.el")
@@ -437,6 +444,7 @@
 (global-set-key (kbd "C-x 2") 'vsplit-last-buffer)
 (global-set-key (kbd "C-x 3") 'hsplit-last-buffer)
 
+(require 'helm)
 (require 'sr-speedbar)
 (global-set-key (kbd "C-z s") 'sr-speedbar-toggle)
 
@@ -583,17 +591,3 @@
 ;;                          (untabify (point-min) (point-max)))))
 
 (setq debug-on-error nil)
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ns-alternate-modifier (quote super))
- '(ns-command-modifier (quote meta)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )

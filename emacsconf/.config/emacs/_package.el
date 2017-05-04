@@ -18,7 +18,7 @@ Return a list of installed packages or nil for every skipped package."
         (mapcar
          (lambda (package)
            (if (package-installed-p package)
-               nil
+               (message "Package %s is installed" package)
              (if (y-or-n-p (format "Package %s is missing. Install it? " package))
                  (package-install package)
                package)))
@@ -34,5 +34,6 @@ Return a list of installed packages or nil for every skipped package."
          'markdown-mode 'csharp-mode 'omnisharp      ;; Extra modes
          'irony 'company-irony                       ;; C/C++ completion
          'boogie-friends                             ;; Boogie & dafny
+         'sr-speedbar 'helm                          ;; Misc
          ))
       ))
