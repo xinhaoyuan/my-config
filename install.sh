@@ -10,6 +10,7 @@ generate_package_names() {
     elif [ `uname -o` = 'Cygwin' ]; then
         echo cygwin
     fi
+    [ -r .extra-packages ] && cat .extra-packages
 }
 
 command -v stow 2>/dev/null 1>&2 || { echo "stow needed."; exit 0; }

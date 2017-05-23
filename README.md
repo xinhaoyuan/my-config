@@ -72,3 +72,7 @@ infocmp "$screen_terminfo" | sed \
           -e 's/rmso=[^,]*,/rmso=\\E[27m,/' \
           -e '$s/$/ sitm=\\E[3m, ritm=\\E[23m,/' > /tmp/screen.terminfo
 tic -o $HOME/.terminfo /tmp/screen.terminfo
+
+Optional packages (one per line in .extra-packages):
+
+linux-x
