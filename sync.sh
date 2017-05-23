@@ -1,6 +1,7 @@
 #!/bin/sh
 
-if git pull; then
+if git fetch; then
+    git pull
     make uninstall
     make install
 fi
