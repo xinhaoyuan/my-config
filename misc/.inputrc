@@ -5,3 +5,5 @@
 "\e[1;5C": forward-word
 
 "\e[47;5u": undo
+
+set completion-ignore-case On
