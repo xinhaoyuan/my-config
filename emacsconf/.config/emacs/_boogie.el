@@ -13,16 +13,18 @@
                          fname)
                         (setq fname (match-string 1 fname)))
                     (if (not (string-equal fname buffer-file-name))
-                        (let ((old-msg (flycheck-error-message e))
+                        (let ((old-fname (flycheck-error-filename e))
+                              (old-msg (flycheck-error-message e))
                               (old-col (flycheck-error-column e))
                               (old-line (flycheck-error-line e)))
                           (setf (flycheck-error-message e)
-                                (concat (format "[external]%s(%d:%d) "
-                                                (flycheck-error-filename e)
+                                (concat (format "%s(%d:%d)-"
+                                                (file-name-nondirectory fname)
                                                 old-line
                                                 old-col
                                                 )
-                                        old-msg))
+                                        old-msg
+                                        "(" old-fname ")"))
                           (setf (flycheck-error-column e) nil)
                           ;; since line is required ...
                           (setf (flycheck-error-line e) 1)
