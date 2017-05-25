@@ -1,7 +1,35 @@
 (if (require 'dafny-mode nil 'noerror)
     (progn
       (setq dafny-verification-backend 'server)
-      ;; remove the "prettified symbol" by compose-region
+      (setq old-parse-errors (symbol-function 'inferior-dafny-parse-errors))
+      ;; a workaround for removeing [module-name] and dealing with external file locations 
+      (defun inferior-dafny-parse-errors (errors)
+        (mapc (lambda (e)
+                (let ((fname (flycheck-error-filename e)))
+                  (if (eq fname nil)
+                      (setq fname buffer-file-name)
+                    (if (string-match
+                         (rx (group (* (not (in "[]")))) (* anything))
+                         fname)
+                        (setq fname (match-string 1 fname)))
+                    (if (not (string-equal fname buffer-file-name))
+                        (let ((old-msg (flycheck-error-message e))
+                              (old-col (flycheck-error-column e))
+                              (old-line (flycheck-error-line e)))
+                          (setf (flycheck-error-message e)
+                                (concat (format "[external]%s(%d:%d) "
+                                                (flycheck-error-filename e)
+                                                old-line
+                                                old-col
+                                                )
+                                        old-msg))
+                          (setf (flycheck-error-column e) nil)
+                          ;; since line is required ...
+                          (setf (flycheck-error-line e) 1)
+                          (setq fname buffer-file-name))))
+                  (setf (flycheck-error-filename e) fname)
+                  ))
+              (funcall old-parse-errors errors)))
       (let ((p (assoc "\\(\\_<forall\\_>\\).*?::"
                       dafny-font-lock-keywords)))
         (setcdr p (cdr (cdr p)))
