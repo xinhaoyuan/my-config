@@ -2,7 +2,7 @@
     (progn
       (setq dafny-verification-backend 'server)
       (setq old-parse-errors (symbol-function 'inferior-dafny-parse-errors))
-      ;; a workaround for removeing [module-name] and dealing with external file locations 
+      ;; a workaround for removing [module-name] and dealing with external file locations
       (defun inferior-dafny-parse-errors (errors)
         (mapc (lambda (e)
                 (let ((fname (flycheck-error-filename e)))
@@ -53,5 +53,3 @@
       (setq flycheck-inferior-dafny-executable
 	    (concat (getenv "HOME") "/opt/dafny/DafnyServer.exe"))
       ))
-
-
