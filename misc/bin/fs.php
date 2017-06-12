@@ -6,17 +6,22 @@ $access_code = getenv("FS_ACCESS_CODE");
 session_cache_expire(180);
 session_start();
 
+$is_local = $_SERVER['REMOTE_ADDR'] == "127.0.0.1";
+$_SESSION['auth'] = 'no';
+
 if (isset($_REQUEST['ac'])) {
     if ($access_code != FALSE && $_REQUEST['ac'] == $access_code) {
         $_SESSION['auth'] = 'yes';
     }
 }
+else if ($is_local) {
+    $_SESSION['auth'] = 'yes';
+}
 
 if ($access_code != FALSE) {
-    error_log($_SESSION['auth']);
-    
     if ($_SESSION['auth'] != 'yes') {
-        echo 'not authorized';
+        error_log("rejecting request from " . $_SERVER['REMOTE_ADDR']);
+        echo 'not authorized ' . $_SERVER['REMOTE_ADDR'];
         return TRUE;
     }
 }
@@ -28,7 +33,7 @@ $fpath = realpath($_SERVER['DOCUMENT_ROOT'] . $path);
 if ($fpath == realpath(__FILE__)) return TRUE;
 
 if (is_dir($fpath)) {
-    chdir($fpath);    
+    chdir($fpath);
     $g = glob("*");
     usort($g,function($a,$b) {
             if(is_dir($a) == is_dir($b))
