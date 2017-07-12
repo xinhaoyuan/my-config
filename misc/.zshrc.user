@@ -60,25 +60,35 @@ if [[ -e "$HOME/.zshrc.user.os" ]]; then
    source "$HOME/.zshrc.user.os"
 fi
 
-preexec() {
+autoload -Uz add-zsh-hook
+
+preexec_date() {
   DATE=`date +"%H:%M:%S %Y-%m-%d"`
   C=$(($COLUMNS-22))
   echo -e "\033[1A\033[${C}C [${DATE}]"
   # export TIME_PREEXEC=`date +%s`
 }
 
-precmd() {
+precmd_date() {
   # export TIME_PRECMD=`date +%s`
   export DATE_PRECMD=`date +"%H:%M:%S %Y-%m-%d"`
 }
 
+LSPACE() {
+  [[ $# > 0 ]] && echo -n ' '
+  echo $@
+}
+
+add-zsh-hook preexec preexec_date
+add-zsh-hook precmd precmd_date
+
 set_prompt() {
   if [ "$MY_PROMPT_MODE" = "1" ]; then
     PROMPT='%{$fg[cyan]%}%~%{$reset_color%}
-${ret_status}%{$fg_bold[green]%}%p[${SSH_TTY:+%n@%m:}%j] %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%} % %{$reset_color%}'
+${ret_status}%{$fg_bold[green]%}%p[${SSH_TTY:+%n@%m:}%j]%{$fg_bold[blue]%}$(LSPACE $(git_prompt_info))%{$fg_bold[blue]%} % %{$reset_color%}'
     RPROMPT='${DATE_PRECMD}'
   else
-    PROMPT='${ret_status}%{$fg_bold[green]%}%p[${SSH_TTY:+%n@%m:}%j] %{$fg[cyan]%}%c %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%} % %{$reset_color%}'
+    PROMPT='${ret_status}%{$fg_bold[green]%}%p[${SSH_TTY:+%n@%m:}%j] %{$fg[cyan]%}%c%{$fg_bold[blue]%}$(LSPACE $(git_prompt_info))%{$fg_bold[blue]%} % %{$reset_color%}'
     RPROMPT='${DATE_PRECMD}'
   fi
 }
