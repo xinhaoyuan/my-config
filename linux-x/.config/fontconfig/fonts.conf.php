@@ -5,8 +5,8 @@
   <!--  <dir>~/.fonts/artwiz-a:unscaled</dir>
        <dir>~/.fonts/non_zh</dir>
        <dir>~/.fonts/VeraSansYuanTi</dir> !-->
-  
-  <!-- 最小字号 !--> 
+
+  <!-- 最小字号 !-->
   <match target="pattern" >
     <test compare="less_eq" name="pixelsize" >
       <double>10</double>
@@ -15,7 +15,7 @@
       <double>10</double>
     </edit>
   </match>
-  
+
   <!-- 别名替换 !-->
   <match target="pattern" >
     <test name="family" >
@@ -46,6 +46,16 @@
     </prefer>
   </alias>
 
+  <!-- For strange behavior that fontconfig ignore the prefer order -->
+  <match>
+    <test name="family">
+      <string>sans-serif</string>
+    </test>
+    <edit name="family" mode="prepend" binding="strong">
+      <string>DejaVu Sans</string>
+    </edit>
+  </match>
+
   <alias>
     <family>serif</family>
     <prefer>
@@ -55,6 +65,16 @@
       <family>SimSun</family>
     </prefer>
   </alias>
+
+  <!-- For strange behavior that fontconfig ignore the prefer order -->
+  <match>
+    <test name="family">
+      <string>serif</string>
+    </test>
+    <edit name="family" mode="prepend" binding="strong">
+      <string>DejaVu Serif</string>
+    </edit>
+  </match>
 
   <alias>
     <family>monospace</family>
@@ -186,20 +206,20 @@
       <string>Monaco</string>
     </test>
     <edit mode="assign" name="rgba" >
-	  <const>rgb</const>
-	</edit>
-	<edit mode="assign" name="autohint" >
-	  <bool>false</bool>
-	</edit>
-	<edit mode="assign" name="antialias" >
-	  <bool>true</bool>
-	</edit>
-	<edit mode="assign" name="hinting" >
-	  <bool>true</bool>
-	</edit>
-	<edit mode="assign" name="hintstyle" >
-	  <const>hintslight</const>
-	</edit>
+      <const>rgb</const>
+    </edit>
+    <edit mode="assign" name="autohint" >
+      <bool>false</bool>
+    </edit>
+    <edit mode="assign" name="antialias" >
+      <bool>true</bool>
+    </edit>
+    <edit mode="assign" name="hinting" >
+      <bool>true</bool>
+    </edit>
+    <edit mode="assign" name="hintstyle" >
+      <const>hintslight</const>
+    </edit>
   </match>
 
   <!-- CT Fonts  -->
@@ -207,27 +227,27 @@
   <?php foreach ([ "Consolas", "Inconsolata", "Corbel", "Cambria", "Cambria Math", "Candara", "Constantia", "Microsoft YaHei" ]
     as $font_name) { ?>
   <match target="font" >
-	<test compare="eq" name="family" >
-	  <string><?=$font_name?></string>
-	</test>
-	<edit mode="assign" name="rgba" >
-	  <const>rgb</const>
-	</edit>
-	<edit mode="assign" name="autohint" >
-	  <bool>true</bool>
-	</edit>
-	<edit mode="assign" name="antialias" >
-	  <bool>true</bool>
-	</edit>
-	<edit mode="assign" name="hinting" >
-	  <bool>true</bool>
-	</edit>
-	<edit mode="assign" name="hintstyle" >
-	  <const>hintslight</const>
-	</edit>
+    <test compare="eq" name="family" >
+      <string><?=$font_name?></string>
+    </test>
+    <edit mode="assign" name="rgba" >
+      <const>rgb</const>
+    </edit>
+    <edit mode="assign" name="autohint" >
+      <bool>true</bool>
+    </edit>
+    <edit mode="assign" name="antialias" >
+      <bool>true</bool>
+    </edit>
+    <edit mode="assign" name="hinting" >
+      <bool>true</bool>
+    </edit>
+    <edit mode="assign" name="hintstyle" >
+      <const>hintslight</const>
+    </edit>
   </match>
   <?php } ?>
-  
+
   <!-- wqy 字体的设置 -->
 
   <?php foreach ([ "WenQuanYi Zen Hei", "文泉驿正黑", "文泉驛正黑" ]
@@ -236,7 +256,7 @@
   <match target="font">
     <test qual="any" name="family">
       <string><?=$font_name?></string>
-    </test> 
+    </test>
     <edit name="globaladvance"><bool>false</bool></edit>
     <edit name="spacing"><int>0</int></edit>
     <edit name="antialias" mode="assign"><bool>true</bool></edit>
@@ -259,9 +279,9 @@
   </match>
   <?php } ?>
 
-  
+
   <!-- 字体替换 -->
-  
+
   <?php foreach (["Vera Sans YuanTi", "Vera Sans YuanTi Mono", "SimSun", "NSimSun"]
     as $name) { ?>
   <match target="pattern">
