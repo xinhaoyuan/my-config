@@ -87,6 +87,16 @@
     </prefer>
   </alias>
 
+  <!-- For strange behavior that fontconfig ignore the prefer order -->
+  <match>
+    <test name="family">
+      <string>monospace</string>
+    </test>
+    <edit name="family" mode="prepend" binding="strong">
+      <string>DejaVu Sans Mono</string>
+    </edit>
+  </match>
+
   <!-- 双宽度修正 !-->
 
   <match target="font" >
