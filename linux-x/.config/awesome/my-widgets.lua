@@ -23,30 +23,6 @@ my_tag_list.buttons = aw.util.table.join(
    -- aw.button({ }, 5, function(t) aw.tag.viewprev(aw.tag.getscreen(t)) end)
 )
 
-local wc_button = wi.widget{
-   markup = '☯',
-   font = "Sans " .. (12 * cfg.font_scale_factor),
-   widget = wi.widget.textbox
-}
-
-wc_button:connect_signal(
-   "button::press",
-   function (_, _, _, b)
-      local c = client.focus
-      if c == nil then return end
-      if b == 1 then
-         -- move the mouse to the center of the client before movement
-         mouse.coords({
-               x = c.x + c.width / 2,
-               y = c.y + c.height / 2,
-         }, true)
-         aw.mouse.client.move(c)
-      elseif b == 3 then
-         aw.mouse.client.resize(c)
-      end
-   end
-)
-
 my_task_list.buttons = aw.util.table.join(
    aw.button({ }, 1, function (c)
          if c == client.focus then
@@ -82,61 +58,87 @@ my_task_list.buttons = aw.util.table.join(
    -- end)
 )
 
-for s = 1, screen.count() do
-   my_task_list[s] = aw.widget.tasklist.new(
-      s,
-      aw.widget.tasklist.filter.currenttags,
-      my_task_list.buttons,
-      {
-         font = "Sans " .. (10 * cfg.font_scale_factor)
-      },
-      function (w, b, l, d, objects)
-         -- Reorder the clients so that floating client are on the right side
-         fl_clients = {}
-         clients = {}
-         for i, obj in ipairs(objects) do
-            if obj.floating
-            or obj.maximized or obj.maximized_horizontal or obj.maximized_vertical then
-               fl_clients[#fl_clients + 1] = obj
-            else
+aw.screen.connect_for_each_screen(function (scr)
+      s = scr.index
+
+      my_task_list[s] = aw.widget.tasklist.new(
+         s,
+         aw.widget.tasklist.filter.currenttags,
+         my_task_list.buttons,
+         {
+            font = "Sans " .. (10 * cfg.font_scale_factor)
+         },
+         function (w, b, l, d, objects)
+            -- Reorder the clients so that floating client are on the right side
+            fl_clients = {}
+            clients = {}
+            for i, obj in ipairs(objects) do
+               if obj.floating
+               or obj.maximized or obj.maximized_horizontal or obj.maximized_vertical then
+                  fl_clients[#fl_clients + 1] = obj
+               else
+                  clients[#clients + 1] = obj
+               end
+            end
+            for i, obj in ipairs(fl_clients) do
                clients[#clients + 1] = obj
             end
+            awc.list_update(w, b, l, d, clients)
          end
-         for i, obj in ipairs(fl_clients) do
-            clients[#clients + 1] = obj
-         end
-         awc.list_update(w, b, l, d, clients)
-      end
-   )
+      )
 
-   my_tag_list[s] = aw.widget.taglist(
-      s, function (t) return cfg.tag_filter(t.name) end, my_tag_list.buttons,
-      {
-         font = "Sans " .. (10 * cfg.font_scale_factor)
+      my_tag_list[s] = aw.widget.taglist(
+         s, function (t) return cfg.tag_filter(t.name) end, my_tag_list.buttons,
+         {
+            font = "Sans " .. (10 * cfg.font_scale_factor)
+         }
+      )
+
+      my_wibar[s] = aw.wibar({
+            screen = s,
+            fg = be.fg_normal,
+            bg = be.bg_normal,
+            height = 20 * cfg.widget_scale_factor,
+            position = "bottom",
+            border_width = 0,
+      })
+
+      local wc_button = wi.widget{
+         markup = '☯',
+         font = "Sans " .. (12 * cfg.font_scale_factor),
+         widget = wi.widget.textbox
       }
-   )
-   
-   my_wibar[s] = aw.wibar({
-         screen = s,
-         fg = be.fg_normal,
-         bg = be.bg_normal,
-         height = 20 * cfg.widget_scale_factor,
-         position = "bottom",
-         border_width = 0,
-   })
 
-   local left_layout = wi.layout.fixed.horizontal()
-   left_layout:add(my_tag_list[s])
+      wc_button:connect_signal(
+         "button::press",
+         function (_, _, _, b)
+            local c = client.focus
+            if c == nil then return end
+            if b == 1 then
+               -- move the mouse to the center of the client before movement
+               mouse.coords({
+                     x = c.x + c.width / 2,
+                     y = c.y + c.height / 2,
+                            }, true)
+               aw.mouse.client.move(c)
+            elseif b == 3 then
+               aw.mouse.client.resize(c)
+            end
+         end
+      )
 
-   local right_layout = wi.layout.fixed.horizontal()
-   right_layout:add(my_tray)
-   right_layout:add(wi.widget.textclock.new(" %m/%d/%y %a %H:%M "))
-   right_layout:add(wc_button)
+      local left_layout = wi.layout.fixed.horizontal()
+      left_layout:add(my_tag_list[s])
 
-   local layout = wi.layout.align.horizontal()
-   layout:set_left(left_layout)
-   layout:set_middle(my_task_list[s])
-   layout:set_right(right_layout)
-   
-   my_wibar[s]:set_widget(layout)
-end
+      local right_layout = wi.layout.fixed.horizontal()
+      right_layout:add(my_tray)
+      right_layout:add(wi.widget.textclock.new(" %m/%d/%y %a %H:%M "))
+      right_layout:add(wc_button)
+
+      local layout = wi.layout.align.horizontal()
+      layout:set_left(left_layout)
+      layout:set_middle(my_task_list[s])
+      layout:set_right(right_layout)
+
+      my_wibar[s]:set_widget(layout)
+end)
