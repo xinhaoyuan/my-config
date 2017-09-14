@@ -132,7 +132,9 @@ aw.screen.connect_for_each_screen(function (scr)
 
       local right_layout = wi.layout.fixed.horizontal()
       right_layout:add(my_tray)
-      right_layout:add(wi.widget.textclock.new(" %m/%d/%y %a %H:%M "))
+      local clock = wi.widget.textclock.new(" %m/%d/%y %a %H:%M ")
+      clock:set_font("Terminus " .. (10 * cfg.font_scale_factor))
+      right_layout:add(clock)
       right_layout:add(wc_button)
 
       local layout = wi.layout.align.horizontal()
