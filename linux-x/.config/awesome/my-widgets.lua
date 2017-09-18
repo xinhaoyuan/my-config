@@ -2,6 +2,8 @@ local aw = require("awful")
 local awc = require("awful.widget.common")
 local be = require("beautiful")
 local wi = require("wibox")
+local tm = require("gears.timer")
+local shp = require("gears.shape")
 local cfg = require("my-config")
 
 local my_wibar = {}
@@ -58,6 +60,9 @@ my_task_list.buttons = aw.util.table.join(
    -- end)
 )
 
+local wc_button_container = {}
+local current_screen = mouse.screen.index
+
 aw.screen.connect_for_each_screen(function (scr)
       s = scr.index
 
@@ -109,6 +114,17 @@ aw.screen.connect_for_each_screen(function (scr)
          widget = wi.widget.textbox
       }
 
+      wc_button_container[s] = wi.widget {
+         {
+            wc_button,
+            left = 5 * cfg.widget_scale_factor,
+            right = 5 * cfg.widget_scale_factor,
+            widget = wi.container.margin
+         },
+         bg = (s == current_screen and be.bg_focus or be.bg_normal),
+         widget = wi.container.background
+      }
+
       wc_button:connect_signal(
          "button::press",
          function (_, _, _, b)
@@ -135,7 +151,7 @@ aw.screen.connect_for_each_screen(function (scr)
       local clock = wi.widget.textclock.new(" %m/%d/%y %a %H:%M ")
       clock:set_font("Terminus " .. (10 * cfg.font_scale_factor))
       right_layout:add(clock)
-      right_layout:add(wc_button)
+      right_layout:add(wc_button_container[s])
 
       local layout = wi.layout.align.horizontal()
       layout:set_left(left_layout)
@@ -144,3 +160,17 @@ aw.screen.connect_for_each_screen(function (scr)
 
       my_wibar[s]:set_widget(layout)
 end)
+
+tm {
+   timeout = 0.5,
+   autostart = true,
+   callback = function()
+      local nscreen = mouse.screen.index
+      if nscreen ~= current_screen then
+         wc_button_container[current_screen]:set_bg(be.bg_normal)
+         wc_button_container[nscreen]:set_bg(be.bg_focus)
+         -- switch active screen
+         current_screen = nscreen
+      end
+   end
+}
