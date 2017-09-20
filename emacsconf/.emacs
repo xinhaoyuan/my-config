@@ -64,6 +64,7 @@
 (setq visible-bell t)
 (setq inhibit-startup-message t)
 (setq-default show-trailing-whitespace t)
+(set-face-background 'trailing-whitespace (face-background 'fringe))
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq next-line-add-newlines nil)
 (column-number-mode 1)
