@@ -66,6 +66,13 @@ for i, t in ipairs(tag_list) do
                if c == nil then return end
                aw.client.toggletag(c.screen.tags[i], c)
             end
+         ),
+         aw.key({ "Mod4", "Shift" }, tostring(tag_index),
+            function ()
+               for s in screen do
+                  s.tags[i]:view_only()
+               end
+            end
          )
       )
    end
