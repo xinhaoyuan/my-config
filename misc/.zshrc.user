@@ -68,7 +68,12 @@ preexec_date() {
         # Assume expr length S calculate the char width of S on terminal.
         # This would work only for regular ascii cmd ...
         C=`expr \( length "$1" + 19 \) / $COLUMNS + 1`
-        echo -e "\033[${C}A$fg_bold[green][${DATE}]$reset_color"
+        if [[ $C -eq 1 ]]; then
+            echo -e "\033[1A$fg_bold[green][${DATE}]$reset_color"
+        else
+            D=$((C - 1))
+            echo -e "\033[${C}A$fg_bold[green][${DATE}]$reset_color\033[${D}B"
+        fi
         # export TIME_PREEXEC=`date +%s`
     else
         C=$(($COLUMNS-20))
