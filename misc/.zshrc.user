@@ -67,7 +67,7 @@ preexec_date() {
     if [[ "$MY_PROMPT_MODE" = "0" ]]; then
         # Assume expr length S calculate the char width of S on terminal.
         # This would work only for regular ascii cmd ...
-        C=`expr \( length "$1" + 19 \) / $COLUMNS + 1`
+        C=`expr \( length "$1" + length "$(print -P %c)" + 20 \) / $COLUMNS + 1`
         echo -ne "\033[${C}A$fg_bold[green][${DATE}]$reset_color\033[${C}B\r"
         # export TIME_PREEXEC=`date +%s`
     else
@@ -77,8 +77,8 @@ preexec_date() {
 }
 
 precmd_date() {
-  # export TIME_PRECMD=`date +%s`
-  export DATE_PRECMD=`date +"%H:%M:%S %y-%m-%d"`
+    # export TIME_PRECMD=`date +%s`
+    export DATE_PRECMD=`date +"%H:%M:%S %y-%m-%d"`
 }
 
 LSPACE() {
@@ -91,12 +91,12 @@ add-zsh-hook precmd precmd_date
 
 set_prompt() {
   if [[ "$MY_PROMPT_MODE" = "1" ]]; then
-    PROMPT='%{$fg[cyan]%}%~%{$reset_color%}
+    PROMPT='%{$fg_bold[cyan]%}%~%{$reset_color%}
 ${ret_status}%{$fg_bold[green]%}%p[${SSH_TTY:+%n@%m:}%j]%{$fg_bold[blue]%}$(LSPACE $(git_prompt_info))%{$fg_bold[blue]%} % %{$reset_color%}'
     RPROMPT='${DATE_PRECMD}'
   else
-    RPROMPT=' %{$fg_bold[cyan]%}%c%{$fg_bold[blue]%}$(LSPACE $(git_prompt_info))%{$fg_bold[blue]%} ${ret_status}%{$fg_bold[green]%}%p:${SSH_TTY:+%n@%m:}%j%{$reset_color%}'
-    PROMPT=' %{$fg_bold[green]%}${DATE_PRECMD} %{$reset_color%}'
+    RPROMPT=' %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%} ${ret_status}%{$fg_bold[green]%}%p:${SSH_TTY:+%n@%m:}%j%{$reset_color%}'
+    PROMPT=' %{$fg_bold[green]%}${DATE_PRECMD} %{$fg_bold[cyan]%}%c%{$reset_color%} '
   fi
 
   if [[ -n "$MC_SID" ]]; then
