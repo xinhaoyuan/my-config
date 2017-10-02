@@ -64,7 +64,10 @@ autoload -Uz add-zsh-hook
 
 preexec_date() {
     DATE=`date +"%H:%M:%S %y-%m-%d"`
-    if [[ "$MY_PROMPT_MODE" = "0" ]]; then
+    if [[ "$1" == *$'\n'* ]]; then
+        # print simple time for multiline command
+        echo -e "$fg_bold[green][${DATE}]$reset_color"
+    elif [[ "$MY_PROMPT_MODE" = "0" ]]; then
         # Assume expr length S calculate the char width of S on terminal.
         # This would work only for regular ascii cmd ...
         C=`expr \( length "$1" + length "$(print -P %c)" + 20 \) / $COLUMNS + 1`
