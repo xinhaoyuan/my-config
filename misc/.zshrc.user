@@ -70,7 +70,8 @@ preexec_date() {
     elif [[ "$MY_PROMPT_MODE" = "0" ]]; then
         # Assume expr length S calculate the char width of S on terminal.
         # This would work only for regular ascii cmd ...
-        C=`expr \( length "$1" + length "$(print -P %c)" + 20 \) / $COLUMNS + 1`
+        local temp="$1$(print -P %c)"
+        C=$(( ( ${#temp} + 20 ) / $COLUMNS + 1 ))
         echo -ne "\033[${C}A$fg_bold[green][${DATE}]$reset_color\033[${C}B\r"
         # export TIME_PREEXEC=`date +%s`
     else
