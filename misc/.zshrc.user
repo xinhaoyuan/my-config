@@ -38,6 +38,7 @@ ZSH_THEME_GIT_PROMPT_PREFIX="git:(%{$fg[red]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}"
 ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[blue]%}) %{$fg[yellow]%}(x)%{$reset_color%}"
 ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[blue]%})"
+DISABLE_AUTO_TITLE=true
 
 setopt NO_HUP
 setopt NO_CHECK_JOBS
@@ -63,7 +64,16 @@ fi
 autoload -Uz add-zsh-hook
 
 preexec_date() {
-    DATE=`date +"%H:%M:%S %y-%m-%d"`
+    emulate -L zsh
+    setopt extended_glob
+
+    # cmd name only, or if this is sudo or ssh, the next cmd
+    local CMD=${1[(wr)^(*=*|sudo|ssh|mosh|rake|-*)]:gs/%/%%}
+    local LINE="${2:gs/%/%%}"
+    local DATE=`date +"%H:%M:%S %y-%m-%d"`
+
+    title '$CMD' '[$DATE] %100>...>$LINE%<<'
+
     if [[ "$1" == *$'\n'* ]]; then
         # print simple time for multiline command
         echo -e "$fg_bold[green][${DATE}]$reset_color"
@@ -81,8 +91,12 @@ preexec_date() {
 }
 
 precmd_date() {
+    emulate -L zsh
+
     # export TIME_PRECMD=`date +%s`
     export DATE_PRECMD=`date +"%H:%M:%S %y-%m-%d"`
+
+    title $ZSH_THEME_TERM_TAB_TITLE_IDLE $ZSH_THEME_TERM_TITLE_IDLE
 }
 
 LSPACE() {
