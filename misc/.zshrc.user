@@ -25,7 +25,7 @@ alias emacs="emacs -nw"
 alias lt="ll --sort=time -r"
 
 if type -p dircolors > /dev/null; then
-    if [[ "$TERM" = dvtm || "$TERM" = dvtm-* ]]; then 
+    if [[ "$TERM" = dvtm || "$TERM" = dvtm-* ]]; then
         eval `TERM=xterm${TERM#dvtm} dircolors`
     else
         eval `dircolors`
@@ -39,6 +39,43 @@ ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}"
 ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[blue]%}) %{$fg[yellow]%}(x)%{$reset_color%}"
 ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[blue]%})"
 DISABLE_AUTO_TITLE=true
+
+# cloned from lib/termsupport.sh
+function my_title {
+  emulate -L zsh
+  setopt prompt_subst
+
+  [[ "$EMACS" == *term* ]] && return
+
+  # if $2 is unset use $1 as default
+  # if it is set and empty, leave it as is
+  : ${2=$1}
+
+  case "$TERM" in
+    cygwin|xterm*|putty*|rxvt*|ansi)
+      print -Pn "\e]2;$2:q\a" # set window name
+      print -Pn "\e]1;$1:q\a" # set tab name
+      ;;
+    screen*)
+      print -Pn "\e]2;$2:q\a" # set window name
+      print -Pn "\ek$1:q\e\\" # set screen hardstatus
+      ;;
+    *)
+      if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
+        print -Pn "\e]2;$2:q\a" # set window name
+        print -Pn "\e]1;$1:q\a" # set tab name
+      else
+        # Try to use terminfo to set the title
+        # If the feature is available set title
+        if [[ -n "$terminfo[fsl]" ]] && [[ -n "$terminfo[tsl]" ]]; then
+	  echoti tsl
+	  print -Pn "$1"
+	  echoti fsl
+	fi
+      fi
+      ;;
+  esac
+}
 
 setopt NO_HUP
 setopt NO_CHECK_JOBS
@@ -72,7 +109,7 @@ preexec_date() {
     local LINE="${2:gs/%/%%}"
     local DATE=`date +"%H:%M:%S %y-%m-%d"`
 
-    title '$CMD' '[$DATE] %100>...>$LINE%<<'
+    my_title '$CMD' '[$DATE] %100>...>$LINE%<<'
 
     if [[ "$1" == *$'\n'* ]]; then
         # print simple time for multiline command
@@ -96,7 +133,7 @@ precmd_date() {
     # export TIME_PRECMD=`date +%s`
     export DATE_PRECMD=`date +"%H:%M:%S %y-%m-%d"`
 
-    title $ZSH_THEME_TERM_TAB_TITLE_IDLE $ZSH_THEME_TERM_TITLE_IDLE
+    my_title $ZSH_THEME_TERM_TAB_TITLE_IDLE $ZSH_THEME_TERM_TITLE_IDLE
 }
 
 LSPACE() {
