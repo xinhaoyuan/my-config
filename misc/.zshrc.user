@@ -107,7 +107,7 @@ preexec_date() {
     # cmd name only, or if this is sudo or ssh, the next cmd
     local CMD=${1[(wr)^(*=*|sudo|ssh|mosh|rake|-*)]:gs/%/%%}
     local LINE="${2:gs/%/%%}"
-    local DATE=`date +"%H:%M:%S %y-%m-%d"`
+    local DATE="$(date '+%H:%M:%S %y-%m-%d')"
 
     my_title '$CMD' '[$DATE] %100>...>$LINE%<<'
 
@@ -131,7 +131,7 @@ precmd_date() {
     emulate -L zsh
 
     # export TIME_PRECMD=`date +%s`
-    export DATE_PRECMD=`date +"%H:%M:%S %y-%m-%d"`
+    export DATE_PRECMD="$(date '+%H:%M:%S %y-%m-%d')"
 
     my_title $ZSH_THEME_TERM_TAB_TITLE_IDLE $ZSH_THEME_TERM_TITLE_IDLE
 }
