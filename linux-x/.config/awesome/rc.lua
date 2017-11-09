@@ -130,12 +130,11 @@ local my_focus_by_direction = function(dir)
       aw.screen.focus(old_c.screen.index)
    end
 
-   aw.client.focus.global_bydirection(dir);
+   aw.client.focus.bydirection(dir);
    local new_c = client.focus
 
-   if old_c ~= new_c and new_c ~= nil then
-      aw.screen.focus(new_c.screen.index)
-      new_c:raise()
+   if new_c == old_c then
+      aw.screen.focus_bydirection(dir)
    end
 end
 
