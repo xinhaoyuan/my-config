@@ -28,6 +28,30 @@
 (autoload 'coq-mode "coq" "Major mode for editing Coq vernacular." t)
 ;; }}}
 
+(defun set-char-widths (alist)
+  (while (char-table-parent char-width-table)
+    (setq char-width-table (char-table-parent char-width-table)))
+  (dolist (pair alist)
+    (let ((width (car pair))
+          (chars (cdr pair))
+          (table (make-char-table nil)))
+      (dolist (char chars)
+        (set-char-table-range table char width))
+      (optimize-char-table table)
+      (set-char-table-parent table char-width-table)
+      (setq char-width-table table))))
+
+(set-char-widths '((1 . (?│ ?┊))))
+
+(if (require 'highlight-indent-guides nil 'noerror)
+    (progn
+      (setq highlight-indent-guides-method 'character)
+      (setq highlight-indent-guides-auto-enabled nil)
+      (set-face-background 'highlight-indent-guides-odd-face "darkgray")
+      (set-face-background 'highlight-indent-guides-even-face "dimgray")
+      (set-face-foreground 'highlight-indent-guides-character-face "dimgray")
+      ))
+
 ;; misc {{{
 
 (add-hook 'buffer-list-update-hook
