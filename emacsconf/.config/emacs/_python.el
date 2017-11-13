@@ -1,4 +1,4 @@
-(require 'highlight-indent-guides)
+(require 'highlight-indent-guides nil 'noerror)
 
 (setq python-check-command "pyflakes")
 (setq python-indent-offset 4)

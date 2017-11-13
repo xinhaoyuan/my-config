@@ -122,8 +122,9 @@ preexec_date() {
         echo -ne "\033[${C}A$fg_bold[green][${DATE}]$reset_color\033[${C}B\r"
         # export TIME_PREEXEC=`date +%s`
     else
-        C=$(($COLUMNS-20))
-        echo -e "\033[1A\033[${C}C [${DATE}]"
+        # similar to above, but don't count the pwd in
+        C=$(( ( ${#1} + 19 ) / $COLUMNS + 1 ))
+        echo -ne "\033[${C}A$fg_bold[green][${DATE}]$reset_color\033[${C}B\r"
     fi
 }
 
@@ -146,9 +147,9 @@ add-zsh-hook precmd precmd_date
 
 set_prompt() {
   if [[ "$MY_PROMPT_MODE" = "1" ]]; then
-    PROMPT='%{$fg_bold[cyan]%}%~%{$reset_color%}
-${ret_status}%{$fg_bold[green]%}%p[${SSH_TTY:+%n@%m:}%j]%{$fg_bold[blue]%}$(LSPACE $(git_prompt_info))%{$fg_bold[blue]%} % %{$reset_color%}'
-    RPROMPT='${DATE_PRECMD}'
+    PROMPT='${ret_status}%{$fg_bold[green]%}:${SSH_TTY:+%n@%m:}%j%{$fg_bold[blue]%} %{$fg_bold[cyan]%}%~%{$fg_bold[blue]%}$(LSPACE $(git_prompt_info))%{$reset_color%}
+ %{$fg_bold[green]%}${DATE_PRECMD} %{$reset_color%}'
+    RPROMPT=''
   else
     RPROMPT=' %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%} ${ret_status}%{$fg_bold[green]%}%p:${SSH_TTY:+%n@%m:}%j%{$reset_color%}'
     PROMPT=' %{$fg_bold[green]%}${DATE_PRECMD} %{$fg_bold[cyan]%}%c%{$reset_color%} '
