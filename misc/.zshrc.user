@@ -172,4 +172,4 @@ change_prompt() {
 }
 zle -N change_prompt
 
-bindkey "^[[1;3P" change_prompt
+bindkey "^P" change_prompt
