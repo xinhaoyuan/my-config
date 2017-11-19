@@ -27,7 +27,7 @@ sudo apt-get install stow tmux git zsh emacs build-essential consolekit xdotool 
 
 For building awesome git, extra development libs are needed
 
-`CMAKE_ARGS="-DCMAKE_INSTALL_PREFIX=/usr" make package` 
+`CMAKE_ARGS="-DCMAKE_INSTALL_PREFIX=/usr" make package`
 
 ## Mac
 brew
