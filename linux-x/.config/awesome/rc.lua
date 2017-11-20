@@ -20,8 +20,9 @@ local kg = keygrabber
 -- 3rd party libs
 local cfg = require("my-config")
 local ut = require("my-utils")
+local focus = require("my-focus")
+local cf = require("cyclefocus-kai")
 local af = require("my-autofocus")
-local cf = require("cyclefocus")
 -- local sw = require("awesome-switcher-preview")
 local ch = require("conky-hud")
 
@@ -120,7 +121,7 @@ af.find_alternative_focus = function(prev, s)
       return c.valid and c:isvisible() and (f == nil or is_floating(c) == f)
    end
 
-   return cf.find_first_in_history(filters, true)
+   return focus.match_in_history(filters, true)
 end
 
 local my_focus_by_direction = function(dir)
@@ -197,14 +198,14 @@ local global_keys = aw.util.table.join(
    aw.key({ "Mod4" }, "[", function () al.inc(layouts, -1) end),
    aw.key({ "Mod4" }, "]", function () al.inc(layouts, 1) end),
 
-   aw.key({ "Mod1" }, "Tab",
+   aw.key({ "Mod4" }, "Tab",
       function ()
          cf.cycle(
             1,
             {
                initiating_client = client.focus,
                keys = { "Tab" },
-               modifier = "Alt_L",
+               modifier = "Super_L",
                cycle_filters = {
                   -- cf.filters.same_screen, cf.filters.common_tag
                   function (c, src_c)
@@ -278,7 +279,7 @@ local client_keys = aw.util.table.join(
             end
          end
 
-         new_focus = cf.find_first_in_history(
+         new_focus = focus.match_in_history(
             {
                function (c)
                   return cf.filters.same_screen(c, src_c)

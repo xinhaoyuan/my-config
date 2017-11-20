@@ -14,10 +14,10 @@
 local client = client
 local aclient = require("awful.client")
 local timer = require("gears.timer")
-local cf = require("cyclefocus")
+local focus = require("my-focus")
 
 local find_alternative_focus = function (prev, s)
-   return cf.find_first_in_history(
+   return focus.match_in_history(
       {
          function (c)
             return c.screen == s and aclient.focus.filter(c)
