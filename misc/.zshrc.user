@@ -172,4 +172,6 @@ change_prompt() {
 }
 zle -N change_prompt
 
+alias pop_path=$'PATH=$(echo "$PATH" | sed -e \'s|[^:]*:||\')'
+
 bindkey "^P" change_prompt
