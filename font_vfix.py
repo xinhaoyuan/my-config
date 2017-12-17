@@ -12,6 +12,8 @@ def main():
     parser.add_argument("-r", "--rename", dest = "rename", action = "store",
                         type = str,
                         help = "rename the font family name")
+    parser.add_argument("--hack-fix-win-metrics", dest = "hack_fix_win", action = "store_true",
+                        help = "set winascent and windescent to original ascent and descent")
     parser.add_argument("fonts", metavar = "font", type = str, nargs = "+", help = "list of font files")
     args = parser.parse_args()
 
@@ -38,11 +40,11 @@ def main():
                 font.hhea_descent = font.hhea_descent + args.adjust
                 font.os2_typoascent = font.os2_typoascent + args.adjust
                 font.os2_typodescent = font.os2_typodescent + args.adjust
-                # Is this really true?
-                font.os2_winascent = font.os2_winascent - args.adjust
-                font.os2_windescent = font.os2_windescent + args.adjust
                 font.ascent = font.ascent + args.adjust
                 font.descent = font.descent - args.adjust # this is negated
+                if args.hack_fix_win:
+                    font.os2_winascent = font.ascent
+                    font.os2_windescent = font.descent
                 font.generate(file_path)
                 font.close()
                 sys.stdout.write("Done.")
