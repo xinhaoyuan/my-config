@@ -14,6 +14,9 @@ def main():
                         help = "rename the font family name")
     parser.add_argument("--hack-fix-win-metrics", dest = "hack_fix_win", action = "store_true",
                         help = "set winascent and windescent to original ascent and descent")
+    parser.add_argument("-l", "--line-gap", dest = "line_gap", action = "store",
+                        type = int,
+                        help = "set the line gap")
     parser.add_argument("fonts", metavar = "font", type = str, nargs = "+", help = "list of font files")
     args = parser.parse_args()
 
@@ -45,18 +48,26 @@ def main():
                 if args.hack_fix_win:
                     font.os2_winascent = font.ascent
                     font.os2_windescent = font.descent
+                else:
+                    font.os2_winascent = font.os2_winascent + args.adjust
+                    font.os2_windescent = font.os2_windescent - args.adjust
+                if args.line_gap is not None:
+                    font.hhea_linegap = args.line_gap
+                    font.os2_typolinegap = args.line_gap
                 font.generate(file_path)
                 font.close()
                 sys.stdout.write("Done.")
             else:
                 sys.stdout.write("Inspecting \"{0}\": ".format(file_name))
                 sys.stdout.write(
-                    "{0};{1};{2};{3}, {4}".format(
+                    "name={0};ascent/descent=(hhea){1};(os2_typo){2};(os2_win){3};{4};leading={5}".format(
                         (font.fontname, font.familyname, font.fullname),
                         (font.hhea_ascent, font.hhea_descent),
                         (font.os2_typoascent, font.os2_typodescent),
                         (font.os2_winascent, font.os2_windescent),
-                        (font.ascent, font.descent)))
+                        (font.ascent, font.descent),
+                        (font.hhea_linegap, font.os2_typolinegap)
+                    ))
         except Exception as x:
             print("Got exception {0}".format(x))
         finally:
