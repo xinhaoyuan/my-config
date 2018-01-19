@@ -1,7 +1,8 @@
 #!/bin/bash
 
 LOCAL=`cd $(dirname "$0"); pwd`
-PORT=8080
+[ -z "$PORT" ] && PORT=8080
+[ -z "$ADDR" ] && ADDR="127.0.0.1"
 TRY=0
 
 if [ ! -f "${LOCAL}/fs.php" ]; then
@@ -14,8 +15,8 @@ if [[ "$1" != "np" ]]; then
 fi
 
 while true; do
-    echo "try :${PORT}/?ac=${FS_ACCESS_CODE}"
-    php -S 0.0.0.0:${PORT} "${LOCAL}/fs.php" && break
+    echo "try ${ADDR}:${PORT}/?ac=${FS_ACCESS_CODE}"
+    php -S ${ADDR}:${PORT} "${LOCAL}/fs.php" && break
     let PORT=$PORT+1
     let TRY=$TRY+1
     if [[ $TRY -ge 10 ]]; then
@@ -23,6 +24,3 @@ while true; do
         exit 1
     fi
 done
-      
-      
-
