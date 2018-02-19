@@ -5,4 +5,5 @@
 (add-hook 'python-mode-hook
           (lambda ()
             (highlight-indent-guides-mode)
+            (turn-on-linum-mode)
             (setq electric-indent-chars (delq ?: electric-indent-chars))))

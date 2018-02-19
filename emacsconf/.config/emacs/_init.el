@@ -129,7 +129,7 @@
       (defun turn-on-linum-mode () ""
              (nlinum-mode 1))
       ))
-;; display line number for C/C++/JAVA and scheme
+
 (add-hook 'c-mode-common-hook 'turn-on-linum-mode)
 (add-hook 'scheme-mode-hook   'turn-on-linum-mode)
 
