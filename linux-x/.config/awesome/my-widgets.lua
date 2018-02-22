@@ -71,7 +71,7 @@ aw.screen.connect_for_each_screen(function (scr)
          aw.widget.tasklist.filter.currenttags,
          my_task_list.buttons,
          {
-            font = "Sans " .. (10 * cfg.font_scale_factor)
+            font = cfg.fontname_text .. " " .. (10 * cfg.font_scale_factor)
          },
          function (w, b, l, d, objects)
             -- Reorder the clients so that floating client are on the right side
@@ -95,7 +95,7 @@ aw.screen.connect_for_each_screen(function (scr)
       my_tag_list[s] = aw.widget.taglist(
          s, function (t) return cfg.tag_filter(t.name) end, my_tag_list.buttons,
          {
-            font = "Sans " .. (10 * cfg.font_scale_factor)
+            font = cfg.fontname_text .. " " .. (10 * cfg.font_scale_factor)
          }
       )
 
@@ -110,7 +110,7 @@ aw.screen.connect_for_each_screen(function (scr)
 
       local wc_button = wi.widget{
          markup = '☯',
-         font = "Sans " .. (12 * cfg.font_scale_factor),
+         font = cfg.fontname_text .. " " .. (12 * cfg.font_scale_factor),
          widget = wi.widget.textbox
       }
 
@@ -149,7 +149,7 @@ aw.screen.connect_for_each_screen(function (scr)
       local right_layout = wi.layout.fixed.horizontal()
       right_layout:add(my_tray)
       local clock = wi.widget.textclock.new(" %m/%d/%y %a %H:%M ")
-      clock:set_font("Terminus " .. (10 * cfg.font_scale_factor))
+      clock:set_font(cfg.fontname_mono .. " " .. (10 * cfg.font_scale_factor))
       right_layout:add(clock)
       right_layout:add(wc_button_container[s])
 

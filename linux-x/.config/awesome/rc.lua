@@ -28,7 +28,7 @@ local af = require("my-autofocus")
 local ch = require("conky-hud")
 
 local HOME_DIR = os.getenv("HOME")
-na.config.defaults.font = "Sans " .. (10 * cfg.font_scale_factor)
+na.config.defaults.font = cfg.fontname_text .. " " .. (10 * cfg.font_scale_factor)
 cf.naughty_preset.position = "center_middle"
 
 awesome.connect_signal(
