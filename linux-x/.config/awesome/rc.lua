@@ -16,6 +16,7 @@ local na = require("naughty")
 local be = require("beautiful")
 local wi = require("wibox")
 local gtimer = require("gears.timer")
+local gshape = require("gears.shape")
 local kg = keygrabber
 -- 3rd party libs
 local cfg = require("my-config")
@@ -47,6 +48,12 @@ end
 
 aw.spawn.with_shell(HOME_DIR .. "/.xdesktoprc.awesome")
 be.init("/usr/share/awesome/themes/default/theme.lua")
+be.tasklist_shape_focus = function(cr, w, h)
+   return gshape.partially_rounded_rect(
+      cr, w, h,
+      false, false, true, true,
+      5 * cfg.widget_scale_factor)
+end
 
 -- layouts
 
