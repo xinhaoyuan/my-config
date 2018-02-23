@@ -1,8 +1,8 @@
-local aw = require("awful")
+local aw  = require("awful")
 local awc = require("awful.widget.common")
-local be = require("beautiful")
-local wi = require("wibox")
-local tm = require("gears.timer")
+local be  = require("beautiful")
+local wi  = require("wibox")
+local tm  = require("gears.timer")
 local shp = require("gears.shape")
 local cfg = require("my-config")
 
@@ -66,14 +66,14 @@ local current_screen = mouse.screen.index
 aw.screen.connect_for_each_screen(function (scr)
       s = scr.index
 
-      my_task_list[s] = aw.widget.tasklist.new(
-         s,
-         aw.widget.tasklist.filter.currenttags,
-         my_task_list.buttons,
-         {
+      my_task_list[s] = aw.widget.tasklist {
+         screen = s,
+         filter = aw.widget.tasklist.filter.currenttags,
+         buttons = my_task_list.buttons,
+         style = {
             font = cfg.fontname_text .. " " .. (10 * cfg.font_scale_factor)
          },
-         function (w, b, l, d, objects)
+         update_function = function (w, b, l, d, objects, args)
             -- Reorder the clients so that floating client are on the right side
             fl_clients = {}
             clients = {}
@@ -88,9 +88,10 @@ aw.screen.connect_for_each_screen(function (scr)
             for i, obj in ipairs(fl_clients) do
                clients[#clients + 1] = obj
             end
-            awc.list_update(w, b, l, d, clients)
-         end
-      )
+            awc.list_update(w, b, l, d, clients, args)
+         end,
+         widget_template = cfg.tasklist_template,
+      }
 
       my_tag_list[s] = aw.widget.taglist(
          s, function (t) return cfg.tag_filter(t.name) end, my_tag_list.buttons,
@@ -148,7 +149,7 @@ aw.screen.connect_for_each_screen(function (scr)
 
       local right_layout = wi.layout.fixed.horizontal()
       right_layout:add(my_tray)
-      local clock = wi.widget.textclock.new(" %m/%d/%y %a %H:%M ")
+      local clock = wi.widget.textclock { format = " %m/%d/%y %a %H:%M " }
       clock:set_font(cfg.fontname_mono .. " " .. (10 * cfg.font_scale_factor))
       right_layout:add(clock)
       right_layout:add(wc_button_container[s])
