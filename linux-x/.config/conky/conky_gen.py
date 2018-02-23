@@ -105,7 +105,7 @@ def gen_details(options):
     lines.extend([
         # Gap between borders of screen and text
         "gap_x {0}".format(10 * options["scale-factor"]),
-        "gap_y {0}".format(10 * options["scale-factor"] + 20 * options["scale-factor"]),
+        "gap_y {0}".format(10 * options["scale-factor"] + 16 * options["scale-factor"]),
         # Add spaces to keep things from moving about?  This only affects certain objects.
         "use_spacer left",
         # Subtract file system buffers from used memory?
@@ -163,8 +163,8 @@ def main(args):
         screen_width = 1920
     options = { "scale-factor" : 2 if hidpi else 1,
                 "screen-width" : screen_width,
-                "font" : "Input:size=12" if hidpi else "Terminus:size=10",
-                "mpd" : True, "mpd_font" : "Vera Sans YuanTi Mono:size=10" }
+                "font" : "Input:size=10" if hidpi else "Terminus:size=10",
+                "mpd" : True, "mpd_font" : "Vera Sans YuanTi Mono:size=9" }
 
     if args[0] == "details":
         lines = gen_details(options)

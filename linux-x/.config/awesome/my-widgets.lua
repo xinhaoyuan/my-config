@@ -4,6 +4,7 @@ local be  = require("beautiful")
 local wi  = require("wibox")
 local tm  = require("gears.timer")
 local shp = require("gears.shape")
+local gmath = require("gears.math")
 local cfg = require("my-config")
 
 local my_wibar = {}
@@ -12,9 +13,9 @@ local my_task_list = {}
 local my_tray = wi.widget.systray()
 
 -- dummy bar for conky
-aw.wibar.new({ position = "top", height = 20 * cfg.widget_scale_factor, opacity = 0 })
+aw.wibar.new({ position = "top", height = cfg.bar_height * cfg.widget_scale_factor, opacity = 0 })
 
-my_tray:set_base_size(20 * cfg.widget_scale_factor)
+my_tray:set_base_size(cfg.bar_height * cfg.widget_scale_factor)
 
 my_tag_list.buttons = aw.util.table.join(
    aw.button({ }, 1, aw.tag.viewonly),
@@ -71,7 +72,7 @@ aw.screen.connect_for_each_screen(function (scr)
          filter = aw.widget.tasklist.filter.currenttags,
          buttons = my_task_list.buttons,
          style = {
-            font = cfg.fontname_text .. " " .. (10 * cfg.font_scale_factor)
+            font = cfg.fontname_text .. " " .. (cfg.bar_fontsize * cfg.font_scale_factor)
          },
          update_function = function (w, b, l, d, objects, args)
             -- Reorder the clients so that floating client are on the right side
@@ -96,7 +97,7 @@ aw.screen.connect_for_each_screen(function (scr)
       my_tag_list[s] = aw.widget.taglist(
          s, function (t) return cfg.tag_filter(t.name) end, my_tag_list.buttons,
          {
-            font = cfg.fontname_text .. " " .. (10 * cfg.font_scale_factor)
+            font = cfg.fontname_text .. " " .. (cfg.bar_fontsize * cfg.font_scale_factor)
          }
       )
 
@@ -104,14 +105,14 @@ aw.screen.connect_for_each_screen(function (scr)
             screen = s,
             fg = be.fg_normal,
             bg = be.bg_normal,
-            height = 20 * cfg.widget_scale_factor,
+            height = cfg.bar_height * cfg.widget_scale_factor,
             position = "bottom",
             border_width = 0,
       })
 
       local wc_button = wi.widget{
          markup = '☯',
-         font = cfg.fontname_text .. " " .. (12 * cfg.font_scale_factor),
+         font = cfg.fontname_text .. " " .. (gmath.round(cfg.bar_fontsize * 1.2) * cfg.font_scale_factor),
          widget = wi.widget.textbox
       }
 
@@ -150,7 +151,7 @@ aw.screen.connect_for_each_screen(function (scr)
       local right_layout = wi.layout.fixed.horizontal()
       right_layout:add(my_tray)
       local clock = wi.widget.textclock(" %m/%d/%y %a %H:%M ")
-      clock:set_font(cfg.fontname_mono .. " " .. (10 * cfg.font_scale_factor))
+      clock:set_font(cfg.fontname_mono .. " " .. (cfg.bar_fontsize * cfg.font_scale_factor))
       right_layout:add(clock)
       right_layout:add(wc_button_container[s])
 
