@@ -76,3 +76,7 @@ tic -o $HOME/.terminfo /tmp/screen.terminfo
 Optional packages (one per line in .extra-packages):
 
 linux-x
+
+# GMail Setting
+
+`surf -c $HOME/.config/conky/gm-cookies.txt https://mail.google.com/mail`
