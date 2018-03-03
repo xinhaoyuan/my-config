@@ -11,6 +11,7 @@
 (load "_tmux.el")
 (load "_markdown.el")
 (load "_csharp.el")
+(load "_fstar.el")
 (load "_boogie.el")
 (load "simple-indent-mode.el")
 
@@ -397,6 +398,7 @@
 (global-unset-key (kbd "C-z"))
 (define-prefix-command 'my-prefix)
 (global-set-key (kbd "C-z") 'my-prefix)
+(global-set-key (kbd "M-q") 'my-prefix)
 (define-key my-prefix "1" 'my-tmux-zoom)
 (define-key my-prefix "2" 'my-tmux-split-v)
 (define-key my-prefix "3" 'my-tmux-split-h)
