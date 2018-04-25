@@ -396,6 +396,7 @@
 (global-set-key (kbd "<f6>") 'calendar)
 
 (global-unset-key (kbd "C-z"))
+(global-unset-key (kbd "M-q"))
 (define-prefix-command 'my-prefix)
 (global-set-key (kbd "C-z") 'my-prefix)
 (global-set-key (kbd "M-q") 'my-prefix)
