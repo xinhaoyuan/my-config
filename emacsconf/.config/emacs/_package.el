@@ -35,6 +35,6 @@ Return a list of installed packages or nil for every skipped package."
          'markdown-mode 'csharp-mode 'omnisharp      ;; Extra modes
          'irony 'company-irony                       ;; C/C++ completion
          'boogie-friends                             ;; Boogie & dafny
-         'sr-speedbar 'helm                          ;; Misc
+         'sr-speedbar 'helm 'backward-forward        ;; Misc
          ))
       ))

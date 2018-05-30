@@ -466,6 +466,13 @@
 (require 'sr-speedbar)
 (global-set-key (kbd "C-z s") 'sr-speedbar-toggle)
 
+(if (require 'backward-forward nil 'noerror)
+    (progn
+      (backward-forward-mode t)
+      (define-key backward-forward-mode-map (kbd "<C-left>") nil)
+      (define-key backward-forward-mode-map (kbd "<C-right>") nil)
+      ))
+
 (defun my-move-up ()
   (interactive)
   (windmove-up)
