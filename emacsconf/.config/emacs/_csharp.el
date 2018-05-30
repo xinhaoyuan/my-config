@@ -9,6 +9,7 @@
                   ))
       (define-key omnisharp-mode-map (kbd "C-c ?") 'omnisharp-go-to-definition)
       (define-key omnisharp-mode-map (kbd "C-c /") 'omnisharp-find-usages)
+      (define-key omnisharp-mode-map (kbd "C-c C-s") 'omnisharp-helm-find-symbols)
       (if (require 'backward-forward nil 'noerror)
           (progn
             (define-key omnisharp-mode-map (kbd "C-c <left>") 'backward-forward-previous-location)
