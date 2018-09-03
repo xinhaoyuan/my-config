@@ -136,6 +136,7 @@
 
 (add-hook 'c-mode-common-hook 'turn-on-linum-mode)
 (add-hook 'scheme-mode-hook   'turn-on-linum-mode)
+(add-hook 'erlang-mode-hook   'turn-on-linum-mode)
 
 (require 'gas-mode)
 (add-to-list 'auto-mode-alist '("\\.S\\'" . gas-mode))

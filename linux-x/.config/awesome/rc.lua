@@ -252,7 +252,7 @@ local global_keys = aw.util.table.join(
    aw.key({ "Mod4" }, "F1", function () ch.toggle_conky() end),
    aw.key({ "Mod4" }, "F2", function () spawn("pcmanfm") end),
    aw.key({ "Mod4" }, "F3", function () spawn("zim") end),
-   aw.key({ "Mod4" }, "grave", function() ch.raise_conky() end, function() ch.lower_conky_delayed() end),
+   -- aw.key({ "Mod4" }, "grave", function() ch.raise_conky() end, function() ch.lower_conky_delayed() end),
    -- disabled because of conflict with IME
    -- aw.key({ }, "Super_L", win_pressed),
 
@@ -260,12 +260,12 @@ local global_keys = aw.util.table.join(
 )
 
 local client_keys = aw.util.table.join(
-   aw.key({ "Mod4" }, "Tab", function(src_c)
+   aw.key({ "Mod4" }, "grave", function(src_c)
          local f = is_floating(src_c)
          local new_focus = nil
 
          for _, c in ipairs(client.get(src_c.screen)) do
-            if c:isvisible() and (not aw.client.focus.filter or aw.client.focus.filter(c)) then
+            if c:isvisible() and (not aw.client.focus.filter or aw.client.focus.filter(c) ~= nil) then
                if not is_floating(c) then
                   if f then
                      c:raise()

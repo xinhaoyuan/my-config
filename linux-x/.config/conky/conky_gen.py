@@ -27,9 +27,9 @@ def gen_bar(options):
         "default_shade_color black",
         "default_outline_color black",
         "alignment top_left",
-        "minimum_size  {0} {1}".format(options["screen-width"], 20 * options["scale-factor"]),
+        "minimum_size  {0} {1}".format(options["screen-width"], 16 * options["scale-factor"]),
         "maximum_width {0}".format(options["screen-width"]),
-        "maximum_height {0}".format(20 * options["scale-factor"]),
+        "maximum_height {0}".format(16 * options["scale-factor"]),
         "border_inner_margin 0",
         "border_outer_margin 0",
         "border_width 0",
@@ -160,10 +160,10 @@ def main(args):
     try:
         screen_width = int(subprocess.check_output("xrandr | grep -o -e 'connected primary [0-9]*' | awk '{ printf $3 }'", shell = True))
     except:
-        screen_width = 1920
+	screen_width = 1920
     options = { "scale-factor" : 2 if hidpi else 1,
                 "screen-width" : screen_width,
-                "font" : "Input:size=10" if hidpi else "Terminus:size=10",
+                "font" : "Input:size=9" if hidpi else "Terminus:size=10",
                 "mpd" : True, "mpd_font" : "Vera Sans YuanTi Mono:size=9" }
 
     if args[0] == "details":
