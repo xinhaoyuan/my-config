@@ -402,5 +402,10 @@ ar.rules = {
    {
       rule = { class = "Eclipse" },
       properties = { floating = true }
+   },
+   {
+      -- for Erlang ET
+      rule = { name = "et_wx_contents_viewer .*" },
+      properties = { floating = true }
    }
 }
