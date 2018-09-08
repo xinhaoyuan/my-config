@@ -62,7 +62,7 @@ To change default shell to zsh:
 mkpasswd -c | sed 's/bash/zsh/g' >> /etc/passwd
 
 To fix tmux highlighting:
-
+```
 mkdir $HOME/.terminfo/
 screen_terminfo="screen-256color"
 infocmp "$screen_terminfo" | sed \
@@ -72,7 +72,7 @@ infocmp "$screen_terminfo" | sed \
           -e 's/rmso=[^,]*,/rmso=\\E[27m,/' \
           -e '$s/$/ sitm=\\E[3m, ritm=\\E[23m,/' > /tmp/screen.terminfo
 tic -o $HOME/.terminfo /tmp/screen.terminfo
-
+```
 Optional packages (one per line in .extra-packages):
 
 linux-x
@@ -80,3 +80,7 @@ linux-x
 # GMail Setting
 
 `surf -c $HOME/.config/conky/gm-cookies.txt https://mail.google.com/mail`
+
+# HiDPI
+
+In .xsessionrc, set variable HIDPI to non-empty value.
