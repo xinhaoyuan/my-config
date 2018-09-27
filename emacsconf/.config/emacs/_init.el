@@ -100,6 +100,9 @@
 (setq enable-recursive-minibuffers t)
 (setq default-tab-width 8)
 (global-set-key (kbd "C-x C-b") 'electric-buffer-list)
+(add-hook 'electric-buffer-menu-mode-hook
+          '(lambda ()
+             (setq truncate-lines nil)))
 
 ;; Reverse colors for the border to have nicer line
 (set-face-inverse-video-p 'vertical-border nil)
