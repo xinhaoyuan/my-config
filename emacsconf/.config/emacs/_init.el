@@ -125,16 +125,18 @@
                 )))
 (if (require 'nlinum nil 'noerror)
     (progn
-      (setq nlinum-format-function
-            (lambda (line width)
-              (let ((str (format "%d " line)))
-                (when (< (length str) width)
-                  ;; Left pad to try and right-align the line-numbers.
-                  (setq str (concat (make-string (- width (length str)) ?\ ) str)))
-                (put-text-property 0 width 'face 'linum str)
-                str)))
+      ;;;; Deprecated since nlinum 1.7
+      ;; (setq nlinum-format-function
+      ;;       (lambda (line width)
+      ;;         (let ((str (format "%d " line)))
+      ;;           (when (< (length str) width)
+      ;;             ;; Left pad to try and right-align the line-numbers.
+      ;;             (setq str (concat (make-string (- width (length str)) ?\ ) str)))
+      ;;           (put-text-property 0 width 'face 'linum str)
+      ;;           str)))
+      (setq nlinum-format "%d ")
       (setq nlinum-highlight-current-line t)
-      (set-face-underline 'nlinum-current-line t)
+      (set-face-inverse-video 'nlinum-current-line t)
       (defun turn-on-linum-mode () ""
              (nlinum-mode 1))
       ))
