@@ -133,6 +133,8 @@
                   (setq str (concat (make-string (- width (length str)) ?\ ) str)))
                 (put-text-property 0 width 'face 'linum str)
                 str)))
+      (setq nlinum-highlight-current-line t)
+      (set-face-underline 'nlinum-current-line t)
       (defun turn-on-linum-mode () ""
              (nlinum-mode 1))
       ))
