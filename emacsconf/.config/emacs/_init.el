@@ -135,8 +135,6 @@
       ;;           (put-text-property 0 width 'face 'linum str)
       ;;           str)))
       (setq nlinum-format "%d ")
-      (setq nlinum-highlight-current-line t)
-      (set-face-inverse-video 'nlinum-current-line t)
       (defun turn-on-linum-mode () ""
              (nlinum-mode 1))
       ))
@@ -438,7 +436,7 @@
 (define-key my-prefix (kbd "/") 'company-complete)
 (define-key my-prefix (kbd "f") 'toggle-big-font)
 (define-key my-prefix (kbd "<f11>") 'toggle-fullscreen)
-
+(define-key my-prefix (kbd "h") 'global-hl-line-mode)
 (define-key my-prefix (kbd "C-q") 'visual-line-mode)
 (define-key my-prefix (kbd "C-f") 'flyspell-mode)
 (define-key my-prefix (kbd "C-l") 'nlinum-mode)
