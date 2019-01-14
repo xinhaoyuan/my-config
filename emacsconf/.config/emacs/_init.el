@@ -468,9 +468,10 @@
 (global-set-key (kbd "C-x 2") 'vsplit-last-buffer)
 (global-set-key (kbd "C-x 3") 'hsplit-last-buffer)
 
-(require 'helm)
-(require 'sr-speedbar)
-(global-set-key (kbd "C-z s") 'sr-speedbar-toggle)
+(require 'helm nil 'noerror)
+(if (require 'sr-speedbar 'nil 'noerror)
+    (global-set-key (kbd "C-z s") 'sr-speedbar-toggle)
+  )
 
 (if (require 'backward-forward nil 'noerror)
     (progn
