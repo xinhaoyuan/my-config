@@ -83,7 +83,20 @@
 (defun toggle-trailing-whitespace () (interactive)
   (if show-trailing-whitespace (setq-local show-trailing-whitespace nil) (setq-local show-trailing-whitespace t))
   )
-(set-face-background 'trailing-whitespace (face-background 'fringe))
+
+(defun color-blend (c1 c2 ratio)
+  (pcase (let ((c1-values (if (stringp c1) (color-values c1) c1))
+	       (c2-values (if (stringp c2) (color-values c2) c2)))
+	   (cl-mapcar (lambda (v1 v2) (round (+ (* v1 ratio) (* v2 (- 1.0 ratio))))) c1-values c2-values))
+    (`(,r ,g ,b) (format "#%02x%02x%02x"
+			 (ash r -8)
+			 (ash g -8)
+			 (ash b -8)))
+    ))
+
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (set-face-background 'trailing-whitespace (color-blend (face-background 'default) (face-background 'fringe) 0.5))))
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq next-line-add-newlines nil)
 (column-number-mode 1)
@@ -445,12 +458,16 @@
 
 (define-key my-prefix (kbd "v") 'set-variable)
 
+(define-key my-prefix (kbd "o c") (lambda () (interactive) (find-file my-configure-dir)))
+(define-key my-prefix (kbd "o o") (lambda () (interactive) (find-file my-org-dir)))
+
 (global-unset-key (kbd "C-x C-c"))
 (global-set-key (kbd "C-x C-c") 'my-exit)
 (global-set-key (kbd "M-<up>") 'scroll-down)
 (global-set-key (kbd "M-<down>") 'scroll-up)
 (global-unset-key (kbd "C-SPC"))
 (global-set-key (kbd "C-x c") 'kill-this-buffer)
+
 
 (defun vsplit-last-buffer ()
   (interactive)

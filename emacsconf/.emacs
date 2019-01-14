@@ -6,6 +6,8 @@
 (package-initialize)
 
 (defcustom my-configure-dir (concat (getenv "HOME") "/.config/emacs") "")
+(defcustom my-org-dir (concat (getenv "HOME") "/org") "")
+
 (add-to-list 'load-path my-configure-dir)
 (load "_init.el")
 
