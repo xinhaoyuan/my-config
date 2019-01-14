@@ -8,15 +8,17 @@
   (list "WenQuanYi Zen Hei"
 	"STHeiti"
 	"Vera Sans YuanTi Mono"
+        "SimHei"
 	"SimSun"
 	"UniSun")
   "The list of possible fonts to display CJK characters")
 
+(font-family-list)
 ;; toggle small/big fonts
-(defcustom my-font-name "Consolas" "undocumented")
+(defcustom my-font-name "Hack" "undocumented")
 (defcustom my-font-toggle-flag 0 "undocumented")
-(defcustom my-font-big-size 18 "undocumented")
-(defcustom my-font-small-size 11 "undocumented")
+(defcustom my-font-big-size 16 "undocumented")
+(defcustom my-font-small-size 9 "undocumented")
 (defcustom my-font-big (concat my-font-name "-" (number-to-string my-font-big-size)) "undocumented")
 (defcustom my-font-small (concat my-font-name "-" (number-to-string my-font-small-size)) "undocumented")
 (defun toggle-big-font ()
