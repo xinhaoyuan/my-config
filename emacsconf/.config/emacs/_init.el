@@ -13,7 +13,7 @@
 (load "_csharp.el")
 (load "_fstar.el")
 (load "_boogie.el")
-(load "simple-indent-mode.el")
+(autoload 'simple-indent-mode "simple-indent-mode.el" "simple-indent-mode" t)
 
 ;; coq {{{
 (setq auto-mode-alist (cons '("\\.v$" . coq-mode) auto-mode-alist))
