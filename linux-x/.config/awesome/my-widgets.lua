@@ -5,6 +5,7 @@ local wi  = require("wibox")
 local tm  = require("gears.timer")
 local shp = require("gears.shape")
 local gmath = require("gears.math")
+local vicious = require("vicious")
 local cfg = require("my-config")
 
 local my_wibar = {}
@@ -150,6 +151,15 @@ aw.screen.connect_for_each_screen(function (scr)
 
       local right_layout = wi.layout.fixed.horizontal()
       right_layout:add(my_tray)
+      local volume_widget = wi.widget.textbox()
+      volume_widget:set_font(cfg.fontname_mono .. " " .. (cfg.bar_fontsize * cfg.font_scale_factor))
+      vicious.register(volume_widget, vicious.widgets.volume,
+                       function (widget, args)
+                          local label = {["♫"] = "O", ["♩"] = "M"}
+                          return ("V[%d%% %s]"):format(
+                             args[1], label[args[2]])
+                       end, 2, "Master")
+      right_layout:add(volume_widget)
       local clock = wi.widget.textclock(" %m/%d/%y %a %H:%M ")
       clock:set_font(cfg.fontname_mono .. " " .. (cfg.bar_fontsize * cfg.font_scale_factor))
       right_layout:add(clock)

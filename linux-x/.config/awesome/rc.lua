@@ -21,14 +21,14 @@ local kg = keygrabber
 local cfg = require("my-config")
 local ut = require("my-utils")
 local focus = require("my-focus")
-local cf = require("cyclefocus-kai")
+local cf = require("cyclefocus-orig")
 local af = require("my-autofocus")
 -- local sw = require("awesome-switcher-preview")
 local ch = require("conky-hud")
 
 local HOME_DIR = os.getenv("HOME")
 na.config.defaults.font = cfg.fontname_text .. " " .. (10 * cfg.font_scale_factor)
-cf.naughty_preset.position = "center_middle"
+-- cf.naughty_preset.position = "bottom_right"
 
 awesome.connect_signal(
    "debug::error",
