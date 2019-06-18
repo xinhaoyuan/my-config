@@ -4,9 +4,10 @@ pkill conky
 
 . $HOME/.xdesktoprc.common
 
-conky-gen
+# conky-gen
 
-conky -c $HOME/.config/conky/bar -d
-conky -c $HOME/.config/conky/details -d
+# conky -c $HOME/.config/conky/bar -d
+# conky -c $HOME/.config/conky/details -d
 
+synapse -s &
 touch $HOME/.xsession-init-guard

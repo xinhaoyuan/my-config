@@ -40,11 +40,25 @@
       <family>DejaVu Sans</family>
       <!-- <family>AR PL UMing CN</family> -->
       <!-- <family>AR PL UMing HK</family> -->
+      <family>SL-Simplified</family>
+      <!-- <family>Noto Sans CJK SC</family> -->
       <family>Vera Sans YuanTi</family>
       <family>Microsoft YaHei</family>
       <family>SimSun</family>
     </prefer>
   </alias>
+
+  <!-- <match target="pattern"> -->
+  <!--   <test name="lang" compare="contains"> -->
+  <!--     <string>zh-cn</string> -->
+  <!--   </test> -->
+  <!--   <test name="family"> -->
+  <!--     <string>sans-serif</string> -->
+  <!--   </test> -->
+  <!--   <edit name="family" mode="prepend" binding="strong"> -->
+  <!--     <string>Noto Sans CJK SC</string> -->
+  <!--   </edit> -->
+  <!-- </match> -->
 
   <!-- For strange behavior that fontconfig ignore the prefer order -->
   <match>
@@ -82,6 +96,7 @@
       <family>DejaVu Sans Mono</family>
       <!-- <family>AR PL UMing CN</family> -->
       <!-- <family>AR PL UMing HK</family>       -->
+      <family>SL-Simplified</family>
       <family>Vera Sans YuanTi Mono</family>
       <family>SimSun</family>
     </prefer>

@@ -17,14 +17,14 @@ end
 local config = {
    hidpi = hidpi,
    widget_scale_factor = hidpi and 2 or 1,
-   fontname_text = "Input",
-   fontname_mono = "Input",
+   font_normal = hidpi and "Input 10" or "Terminus 10",
+   font_mono = hidpi and "Input 10" or "Terminus 10",
    bar_fontsize = 9,
    bar_height = 16,
-   font_scale_factor = 1,
    tag_filter = function (name)
       return name ~= "STICKY"
    end,
+   cmd_terminal = "urxvt",
 }
 
 config.tasklist_template = {

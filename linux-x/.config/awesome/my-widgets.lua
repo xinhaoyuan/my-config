@@ -13,8 +13,8 @@ local my_tag_list = {}
 local my_task_list = {}
 local my_tray = wi.widget.systray()
 
--- dummy bar for conky
-aw.wibar.new({ position = "top", height = cfg.bar_height * cfg.widget_scale_factor, opacity = 0 })
+-- -- dummy bar for conky
+-- aw.wibar.new({ position = "top", height = cfg.bar_height * cfg.widget_scale_factor, opacity = 0 })
 
 my_tray:set_base_size(cfg.bar_height * cfg.widget_scale_factor)
 
@@ -73,7 +73,7 @@ aw.screen.connect_for_each_screen(function (scr)
          filter = aw.widget.tasklist.filter.currenttags,
          buttons = my_task_list.buttons,
          style = {
-            font = cfg.fontname_text .. " " .. (cfg.bar_fontsize * cfg.font_scale_factor)
+            font = cfg.font_normal
          },
          update_function = function (w, b, l, d, objects, args)
             -- Reorder the clients so that floating client are on the right side
@@ -98,7 +98,7 @@ aw.screen.connect_for_each_screen(function (scr)
       my_tag_list[s] = aw.widget.taglist(
          s, function (t) return cfg.tag_filter(t.name) end, my_tag_list.buttons,
          {
-            font = cfg.fontname_text .. " " .. (cfg.bar_fontsize * cfg.font_scale_factor)
+            font = cfg.font_normal
          }
       )
 
@@ -113,7 +113,7 @@ aw.screen.connect_for_each_screen(function (scr)
 
       local wc_button = wi.widget{
          markup = '☯',
-         font = cfg.fontname_text .. " " .. (gmath.round(cfg.bar_fontsize * 1.2) * cfg.font_scale_factor),
+         font = cfg.font_normal,
          widget = wi.widget.textbox
       }
 
@@ -152,7 +152,7 @@ aw.screen.connect_for_each_screen(function (scr)
       local right_layout = wi.layout.fixed.horizontal()
       right_layout:add(my_tray)
       local volume_widget = wi.widget.textbox()
-      volume_widget:set_font(cfg.fontname_mono .. " " .. (cfg.bar_fontsize * cfg.font_scale_factor))
+      volume_widget:set_font(cfg.font_mono)
       vicious.register(volume_widget, vicious.widgets.volume,
                        function (widget, args)
                           local label = {["♫"] = "O", ["♩"] = "M"}
@@ -161,7 +161,7 @@ aw.screen.connect_for_each_screen(function (scr)
                        end, 2, "Master")
       right_layout:add(volume_widget)
       local clock = wi.widget.textclock(" %m/%d/%y %a %H:%M ")
-      clock:set_font(cfg.fontname_mono .. " " .. (cfg.bar_fontsize * cfg.font_scale_factor))
+      clock:set_font(cfg.font_mono)
       right_layout:add(clock)
       right_layout:add(wc_button_container[s])
 

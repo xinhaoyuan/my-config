@@ -4,7 +4,7 @@
 nitrogen --restore
 if [ -n $HOME/.xsession-init-guard ]; then
     fcitx
-    compton &
+    compton --vsync opengl &
     xscreensaver -no-splash &
     # wicd-gtk -t &
     nm-applet &
