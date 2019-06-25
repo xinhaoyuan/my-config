@@ -16,29 +16,27 @@ function do_arrange(p, priv)
    for i, c in ipairs(cls) do
       if c.floating then
          print("Ignore client " .. tostring(c))
-         goto continue
-      end
-
-      local region
-      if c.machi_region == nil then
-         c.machi_region = 1
-         region = 1
-      elseif c.machi_region > #regions then
-         region = 1
       else
-         region = c.machi_region  
+         local region
+         if c.machi_region == nil then
+            c.machi_region = 1
+            region = 1
+         elseif c.machi_region > #regions then
+            region = 1
+         else
+            region = c.machi_region  
+         end
+
+         p.geometries[c] = {
+            x = regions[region].x,
+            y = regions[region].y,
+            width = regions[region].width,
+            height = regions[region].height,
+         }
+
+         print("Put client " .. tostring(c) .. " to region " .. region)
+
       end
-
-      p.geometries[c] = {
-         x = regions[region].x,
-         y = regions[region].y,
-         width = regions[region].width,
-         height = regions[region].height,
-      }
-
-      print("Put client " .. tostring(c) .. " to region " .. region)
-
-      ::continue::
    end
 end
 
