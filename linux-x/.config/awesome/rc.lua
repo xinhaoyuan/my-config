@@ -22,6 +22,7 @@ awesome.connect_signal(
 
 local capi = {
    keygrabber = keygrabber,
+   client = client,
 }
 local awful            = require("awful")
 local awful_rule       = require("awful.rules")
@@ -78,21 +79,21 @@ autofocus.find_alternative_focus = function(prev, s)
 end
 
 local my_focus_by_direction = function(dir)
-   local old_c = client.focus
+   local old_c = capi.client.focus
 
    if old_c ~= nil and old_c.screen ~= awful.screen.focused() then
       awful.screen.focus(old_c.screen.index)
    end
 
    awful.client.focus.bydirection(dir);
-   local new_c = client.focus
+   local new_c = capi.client.focus
 
    if new_c == old_c then
       awful.screen.focus_bydirection(dir)
    end
 
-   if client.focus ~= nil then
-      client.focus:raise()
+   if capi.client.focus ~= nil then
+      capi.client.focus:raise()
    end
 end
 
@@ -145,7 +146,7 @@ local global_keys = table_join(
    awful.key({ "Mod4" }, "t",               function () spawn(config.cmd_terminal) end),
    awful.key({ "Mod4" }, "e",               function () spawn(config.cmd_file_manager) end),
    awful.key({ "Mod4", "Control" }, "m",    function ()
-         for _, c in pairs(client.get()) do c.minimized = false end
+         for _, c in pairs(capi.client.get()) do c.minimized = false end
    end),
    awful.key({ "Mod4", "Control" }, "Escape", awesome.quit)
 )
@@ -155,7 +156,7 @@ local client_keys = table_join(
          local f = is_floating(src_c)
          local new_focus = nil
 
-         for _, c in ipairs(client.get(src_c.screen)) do
+         for _, c in ipairs(capi.client.get(src_c.screen)) do
             if c:isvisible() and (not awful.client.focus.filter or awful.client.focus.filter(c) ~= nil) then
                if not is_floating(c) then
                   if f then
@@ -179,9 +180,9 @@ local client_keys = table_join(
          )
 
          if new_focus then
-            client.focus = new_focus
+            capi.client.focus = new_focus
          end
-         client.focus:raise()
+         capi.client.focus:raise()
    end),
 
    awful.key({ "Mod4" }, "1", function (c) set_machi_region(c, 1) end),
@@ -234,7 +235,7 @@ local client_keys = table_join(
 )
 
 local client_buttons = awful.util.table.join(
-   awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
+   awful.button({ }, 1, function (c) capi.client.focus = c; c:raise() end),
    awful.button({ "Mod4" }, 1, awful.mouse.client.move),
    awful.button({ "Mod4" }, 3, awful.mouse.client.resize)
 )
@@ -278,16 +279,40 @@ root.keys(global_keys)
 
 -- rules
 
-client.connect_signal(
+-- change border color based on focus
+capi.client.connect_signal(
    "focus",
    function (c)
       c.border_color = beautiful.border_focus
    end
 )
-client.connect_signal(
+capi.client.connect_signal(
    "unfocus",
    function (c)
       c.border_color = beautiful.border_normal
+   end
+)
+
+-- remove border for maximized windows
+capi.client.connect_signal(
+   "manage",
+   function (c)
+      if c.maximized then
+         c.border_width = 0
+      elseif not c.borderless then
+         c.border_width = config.border_width * config.widget_scale_factor
+      end
+   end
+)
+
+capi.client.connect_signal(
+   "property::maximized",
+   function (c)
+      if c.maximized then
+         c.border_width = 0
+      elseif not c.borderless then
+         c.border_width = config.border_width * config.widget_scale_factor
+      end
    end
 )
 
@@ -299,10 +324,11 @@ awful_rule.rules = {
          size_hints_honor = false,
          keys = client_keys,
          buttons = client_buttons,
-         border_width = 2 * config.widget_scale_factor,
+         borderless = false,
          border_color = beautiful.border_normal,
          screen = function(c) return awesome.startup and c.screen or awful.screen.focused() end,
          floating = true,
+         tag = "1",
       }
    },
    {
@@ -321,6 +347,7 @@ awful_rule.rules = {
       rule = { class = "Synapse" },
       properties = {
          border_width = 0,
+         borderless = true
       },
    },
    -- {
@@ -437,7 +464,11 @@ local layouts = {
 awful.screen.connect_for_each_screen(
    function (s)
       awful.tag(tag_list, s, layouts[1])
+      -- 1 is the hidden tag
+      s.tags[2]:view_only()
    end
 )
+
+
 
 require("my-widgets")

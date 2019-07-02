@@ -16,6 +16,7 @@ end
 
 local config = {
    hidpi = hidpi,
+   border_width = 2,
    widget_scale_factor = hidpi and 2 or 1,
    font_normal = hidpi and "Input 10" or "Terminus 10",
    font_mono = hidpi and "Input 10" or "Terminus 10",
