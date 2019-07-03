@@ -10,6 +10,10 @@ if [[ ! ":$PATH:" =~ ":$HOME/bin:" ]]; then
    export PATH="$HOME/bin:$PATH"
 fi
 
+if [[ ! ":$PATH:" =~ ":$HOME/.local/bin:" ]]; then
+   export PATH="$HOME/.local/bin:$PATH"
+fi
+
 if [[ -z "$SHELL" ]]; then
     export SHELL=`command -v zsh`
 fi
@@ -20,6 +24,7 @@ alias e-reset="emacsclient --alternate-editor=true -e '(kill-emacs)'"
 alias g="git"
 alias s="sudo"
 alias o="open"
+alias x="tmux new -As"
 alias xclip="xclip -selection clipboard"
 alias emacs="emacs -nw"
 alias lt="ll --sort=time -r"
