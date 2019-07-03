@@ -1,4 +1,4 @@
--- the basic layout engine
+-- Machi, a static and yet configurable layout
 
 local capi = {
    beautiful = require("beautiful"),
@@ -59,27 +59,19 @@ function do_arrange(p, priv)
    end
 end
 
-function create_layout(name, regions, data)
+function create_layout(name, regions)
    local priv = {}
 
    local function set_regions(regions)
-      priv.compute_regions = nil
-      priv.regions = nil
-
-      if type(regions) == "function" then
-         priv.compute_regions = regions
-      elseif type(regions) == "table" then
-         priv.regions = regions
-      end
+      priv.regions = regions
    end
 
    set_regions(regions)
-   priv.data = data
 
    return {
       name = "machi[" .. name .. "]",
       arrange = function (p) do_arrange(p, priv) end,
-      get_region_count = function () return priv.last_region_count end,
+      get_region_count = function () return #priv.regions end,
       set_regions = set_regions,
    }
 end
@@ -95,7 +87,10 @@ end
 function cycle_region(c)
    layout = capi.layout.get(c.screen)
    count = layout.get_region_count and layout.get_region_count()
-   if type(count) ~= "number" then count = 1 end
+   if type(count) ~= "number" or count < 1 then
+      c.float = true
+      return
+   end
    current_region = c.machi_region or 1
    print(tostring(count) .. " - " .. tostring(current_region))
    if not capi.utils.is_tiling(c) then
@@ -137,6 +132,7 @@ function interactive_layout_edit()
    local kg
    local closed_areas = {}
    local open_areas = {init_area}
+   local history = {} -- {closed_area size, open_areas size, removed open areas, cmd, max_depth}
    print("interactive layout editing starts")
    local split = nil
    local ratio_lu = nil
@@ -163,6 +159,7 @@ function interactive_layout_edit()
 
       for i, a in ipairs(closed_areas) do
          local gap = capi.config.border_gap * capi.config.widget_scale_factor
+         -- local gap = capi.beautiful.useless_gap
          local sa = shrink_area_with_gap(a, gap)
          cr:set_source(capi.gears.color(closed_color .. "77"))
          cr:rectangle(sa.x, sa.y, sa.width, sa.height)
@@ -180,6 +177,7 @@ function interactive_layout_edit()
 
       for i, a in ipairs(open_areas) do
          local gap = capi.config.border_gap * capi.config.widget_scale_factor
+         -- local gap = capi.beautiful.useless_gap
          local sa = shrink_area_with_gap(a, gap)
          cr:set_source(capi.gears.color((i == #open_areas and active_color or open_color) .. "77") )
          cr:rectangle(sa.x, sa.y, sa.width, sa.height)
@@ -202,7 +200,42 @@ function interactive_layout_edit()
       cr:stroke()
    end
 
-   local function refresh_areas()
+   local function push_history()
+      history[#history + 1] = {#closed_areas, #open_areas, {}, current_cmd, max_depth}
+   end
+
+   local function pop_history()
+      if #history == 0 then return end
+      for i = history[#history][1] + 1, #closed_areas do
+         table.remove(closed_areas, #closed_areas)
+      end
+
+      for i = history[#history][2] + 1, #open_areas do
+         table.remove(open_areas, #open_areas)
+      end
+
+      for i = 1, #history[#history][3] do
+         open_areas[history[#history][2] - i + 1] = history[#history][3][i]
+      end
+
+      current_cmd = history[#history][4]
+      max_depth = history[#history][5]
+
+      table.remove(history, #history)
+   end
+
+   local function pop_open_area()
+      local a = open_areas[#open_areas]
+      table.remove(open_areas, #open_areas)
+      local idx = history[#history][2] - #open_areas
+      -- only save when the position has been firstly poped
+      if idx > #history[#history][3] then
+         history[#history][3][#history[#history][3] + 1] = a
+      end
+      return a
+   end
+
+   local function refresh()
       print("closed areas:")
       for i, a in ipairs(closed_areas) do
          print("  " .. _area_tostring(a))
@@ -214,7 +247,7 @@ function interactive_layout_edit()
       infobox.bgimage = draw_info
    end
 
-   local function handle_split(key, alt)
+   local function handle_split(method, alt)
       if ratio_lu == nil then ratio_lu = 1 end
       if ratio_rd == nil then ratio_rd = 1 end
 
@@ -224,13 +257,12 @@ function interactive_layout_edit()
          ratio_rd = tmp
       end
 
-      local a = open_areas[#open_areas]
-      table.remove(open_areas, #open_areas)
+      local a = pop_open_area()
       local lu, rd
 
-      print("split " .. key .. " " .. tostring(alt) .. " " .. _area_tostring(a))
+      print("split " .. method .. " " .. tostring(alt) .. " " .. _area_tostring(a))
 
-      if key == "h" then
+      if method == "h" then
          lu = {
             x = a.x, y = a.y,
             width = a.width / (ratio_lu + ratio_rd) * ratio_lu, height = a.height,
@@ -243,7 +275,7 @@ function interactive_layout_edit()
             depth = a.depth + 1,
             br = a.br, bu = a.bu, bd = a.bd,
          }
-      elseif key == "v" then
+      elseif method == "v" then
          lu = {
             x = a.x, y = a.y,
             width = a.width, height = a.height / (ratio_lu + ratio_rd) * ratio_lu,
@@ -263,7 +295,7 @@ function interactive_layout_edit()
       ratio_lu = nil
       ratio_rd = nil
 
-      refresh_areas()
+      refresh()
    end
 
    local function cleanup()
@@ -271,12 +303,11 @@ function interactive_layout_edit()
    end
 
    local function push_area()
-      closed_areas[#closed_areas + 1] = open_areas[#open_areas]
-      table.remove(open_areas, #open_areas)
+      closed_areas[#closed_areas + 1] = pop_open_area()
       infobox.bgimage = draw_info
    end
 
-   refresh_areas()
+   refresh()
 
    kg = keygrabber.run(function (mod, key, event)
          if event == "release" then
@@ -287,19 +318,24 @@ function interactive_layout_edit()
          local to_apply = false
 
          if key == "h" then
+            push_history()
             current_cmd = current_cmd .. "h"
             handle_split("h", false)
          elseif key == "H" then
+            push_history()
             current_cmd = current_cmd .. "H"
             handle_split("h", true)
          elseif key == "v" then
+            push_history()
             current_cmd = current_cmd .. "v"
             handle_split("v", false)
          elseif key == "V" then
+            push_history()
             current_cmd = current_cmd .. "V"
             handle_split("v", true)
-         elseif key == " " then
-            current_cmd = current_cmd .. "_"
+         elseif key == " " or key == "." then
+            push_history()
+            current_cmd = current_cmd .. "."
             if ratio_lu ~= nil then
                max_depth = ratio_lu
                ratio_lu = nil
@@ -318,6 +354,7 @@ function interactive_layout_edit()
             to_exit = true
             to_apply = true
          elseif tonumber(key) ~= nil then
+            push_history()
             current_cmd = current_cmd .. key
             local v = tonumber(key)
             if v > 0 then
@@ -327,6 +364,9 @@ function interactive_layout_edit()
                   ratio_rd = v
                end
             end
+         elseif key == "BackSpace" then
+            pop_history()
+            refresh()
          elseif key == "Escape" then
             to_exit = true
          end
@@ -346,6 +386,7 @@ function interactive_layout_edit()
                layout = capi.layout.get(screen)
                if layout.set_regions then
                   local gap = capi.config.border_gap * capi.config.widget_scale_factor
+                  -- local gap = capi.beautiful.useless_gap
                   local areas_with_gap = {}
                   for _, a in ipairs(closed_areas) do
                      areas_with_gap[#areas_with_gap + 1] = shrink_area_with_gap(a, gap)

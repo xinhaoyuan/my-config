@@ -290,7 +290,7 @@ awful_rule.rules = {
    {
       rule = { type = "normal" },
       properties = {
-         placement = awful.placement.no_overlap+awful.placement.no_offscreen,
+         placement = awful.placement.centered + awful.placement.no_overlap + awful.placement.no_offscreen,
       }
    },
    {
@@ -362,57 +362,7 @@ awful_rule.rules = {
 --    end
 -- end
 local layouts = {
-   machi.create_layout(
-      "default",
-      function (p, priv)
-         local regions = priv.regions_cache
-         if regions == nil then
-            regions = {{}, {}, {}}
-         end
-
-         local wa = p.workarea
-         local gap = config.border_gap * config.widget_scale_factor
-
-         if regions.cache_x == wa.x
-            and regions.cache_y == wa.y
-            and regions.cache_width == wa.width
-            and regions.cache_height == wa.height
-         then
-            return regions
-         end
-
-         regions.cache_x = wa.x
-         regions.cache_y = wa.y
-         regions.cache_width = wa.width
-         regions.cache_height = wa.height
-
-         local hsplit = math.floor(wa.width * 0.75)
-         local vsplit = math.floor(wa.height * 0.75)
-
-         regions[1] = {
-            x = wa.x,
-            y = wa.y,
-            width = hsplit - gap / 2,
-            height = vsplit - gap / 2,
-         }
-
-         regions[2] = {
-            x = wa.x + hsplit + gap / 2,
-            y = wa.y,
-            width = wa.width - hsplit - gap / 2, 
-            height = wa.height,
-         }
-
-         regions[3] = {
-            x = wa.x,
-            y = wa.y + vsplit + gap / 2,
-            width = hsplit - gap / 2,
-            height = wa.height - vsplit - gap / 2,
-         }
-
-         return regions
-      end
-   )
+   machi.create_layout("default", {})
 }
 
 -- initialize for each screen
