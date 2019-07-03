@@ -1,12 +1,13 @@
 local aw  = require("awful")
 local awc = require("awful.widget.common")
-local be  = require("beautiful")
+local beautiful = require("beautiful")
 local wi  = require("wibox")
 local tm  = require("gears.timer")
 local shp = require("gears.shape")
 local gmath = require("gears.math")
 local vicious = require("vicious")
-local cfg = require("my-config")
+local config = require("my-config")
+local dpi = require("beautiful.xresources").apply_dpi
 
 local my_wibar = {}
 local my_tag_list = {}
@@ -14,9 +15,9 @@ local my_task_list = {}
 local my_tray = wi.widget.systray()
 
 -- -- dummy bar for conky
--- aw.wibar.new({ position = "top", height = cfg.bar_height * cfg.widget_scale_factor, opacity = 0 })
+-- aw.wibar.new({ position = "top", height = config.bar_height * config.widget_scale_factor, opacity = 0 })
 
-my_tray:set_base_size(cfg.bar_height * cfg.widget_scale_factor)
+my_tray:set_base_size(dpi(config.bar_height))
 
 my_tag_list.buttons = aw.util.table.join(
    aw.button({ }, 1, aw.tag.viewonly),
@@ -73,15 +74,14 @@ aw.screen.connect_for_each_screen(function (scr)
          filter = aw.widget.tasklist.filter.currenttags,
          buttons = my_task_list.buttons,
          style = {
-            font = cfg.font_normal
+            font = beautiful.font
          },
          update_function = function (w, b, l, d, objects, args)
             -- Reorder the clients so that floating client are on the right side
             fl_clients = {}
             clients = {}
             for i, obj in ipairs(objects) do
-               if obj.floating
-               or obj.maximized or obj.maximized_horizontal or obj.maximized_vertical then
+               if obj.floating or obj.maximized or obj.maximized_horizontal or obj.maximized_vertical then
                   fl_clients[#fl_clients + 1] = obj
                else
                   clients[#clients + 1] = obj
@@ -92,39 +92,39 @@ aw.screen.connect_for_each_screen(function (scr)
             end
             awc.list_update(w, b, l, d, clients, args)
          end,
-         widget_template = cfg.tasklist_template,
+         widget_template = config.tasklist_template,
       }
 
       my_tag_list[s] = aw.widget.taglist(
-         s, function (t) return cfg.tag_filter(t.name) end, my_tag_list.buttons,
+         s, function (t) return config.tag_filter(t.name) end, my_tag_list.buttons,
          {
-            font = cfg.font_normal
+            font = beautiful.font
          }
       )
 
       my_wibar[s] = aw.wibar({
             screen = s,
-            fg = be.fg_normal,
-            bg = be.bg_normal,
-            height = cfg.bar_height * cfg.widget_scale_factor,
+            fg = beautiful.fg_normal,
+            bg = beautiful.bg_normal,
+            height = dpi(config.bar_height),
             position = "bottom",
             border_width = 0,
       })
 
       local wc_button = wi.widget{
          markup = '☯',
-         font = cfg.font_normal,
+         font = beautiful.font,
          widget = wi.widget.textbox
       }
 
       wc_button_container[s] = wi.widget {
          {
             wc_button,
-            left = 5 * cfg.widget_scale_factor,
-            right = 5 * cfg.widget_scale_factor,
+            left = dpi(5),
+            right = dpi(5),
             widget = wi.container.margin
          },
-         bg = (s == current_screen and be.bg_focus or be.bg_normal),
+         bg = (s == current_screen and beautiful.bg_focus or beautiful.bg_normal),
          widget = wi.container.background
       }
 
@@ -152,7 +152,7 @@ aw.screen.connect_for_each_screen(function (scr)
       local right_layout = wi.layout.fixed.horizontal()
       right_layout:add(my_tray)
       local volume_widget = wi.widget.textbox()
-      volume_widget:set_font(cfg.font_mono)
+      volume_widget:set_font(beautiful.mono_font)
       vicious.register(volume_widget, vicious.widgets.volume,
                        function (widget, args)
                           local label = {["♫"] = "O", ["♩"] = "M"}
@@ -161,7 +161,7 @@ aw.screen.connect_for_each_screen(function (scr)
                        end, 2, "Master")
       right_layout:add(volume_widget)
       local clock = wi.widget.textclock(" %m/%d/%y %a %H:%M ")
-      clock:set_font(cfg.font_mono)
+      clock:set_font(beautiful.mono_font)
       right_layout:add(clock)
       right_layout:add(wc_button_container[s])
 
@@ -179,8 +179,8 @@ tm {
    callback = function()
       local nscreen = mouse.screen.index
       if nscreen ~= current_screen then
-         wc_button_container[current_screen]:set_bg(be.bg_normal)
-         wc_button_container[nscreen]:set_bg(be.bg_focus)
+         wc_button_container[current_screen]:set_bg(beautiful.bg_normal)
+         wc_button_container[nscreen]:set_bg(beautiful.bg_focus)
          -- switch active screen
          current_screen = nscreen
       end

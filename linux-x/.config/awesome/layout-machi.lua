@@ -12,7 +12,7 @@ local capi = {
    gears = require("gears"),
 }
 
-local gap = capi.beautiful.useless_gap
+local gap = capi.beautiful.useless_gap or 0
 local label_font_family = capi.beautiful.get_font(capi.beautiful.font):get_family()
 -- colors are in rgba
 local border_color = "#ffffffc0"

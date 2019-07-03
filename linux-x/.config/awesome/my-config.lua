@@ -1,9 +1,10 @@
 local be = require("beautiful")
 local gshape = require("gears.shape")
 local wi = require("wibox")
-local hidpi = os.getenv("HIDPI") and #os.getenv("HIDPI") > 0
+local dpi   = require("beautiful.xresources").apply_dpi
 
-be.init("/usr/share/awesome/themes/default/theme.lua")
+be.init("~/.config/awesome/theme.lua")
+
 be.tasklist_shape = function(cr, w, h)
    offset = h / 4
    cr:move_to(0, 0)
@@ -15,18 +16,12 @@ end
 -- be.tasklist_shape_focus = gshape.powerline
 
 local config = {
-   hidpi = hidpi,
-   border_width = 2,
-   border_gap = 10,
-   widget_scale_factor = hidpi and 2 or 1,
-   font_normal = hidpi and "Input 10" or "Terminus 10",
-   font_mono = hidpi and "Input 10" or "Terminus 10",
-   bar_fontsize = 9,
-   bar_height = 16,
    tag_filter = function (name)
       return name ~= "STICKY"
    end,
+   bar_height = 16,
    cmd_terminal = "urxvt",
+   cmd_file_manager = "pcmanfm",
 }
 
 config.tasklist_template = {
@@ -38,7 +33,7 @@ config.tasklist_template = {
                widget = wi.widget.imagebox,
             },
             id = "icon_margin_role",
-            margins = 2 * config.widget_scale_factor,
+            margins = dpi(2),
             widget  = wi.container.margin,
          },
          {
@@ -48,9 +43,10 @@ config.tasklist_template = {
          layout = wi.layout.fixed.horizontal,
       },
       id = "text_margin_role",
-      left  = 5 * config.widget_scale_factor,
-      right = 5 * config.widget_scale_factor,
+      left  = dpi(5),
+      right = dpi(5),
       widget = wi.container.margin
+
    },
    id     = "background_role",
    widget = wi.container.background,

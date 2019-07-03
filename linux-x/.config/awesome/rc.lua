@@ -43,9 +43,6 @@ local HOME_DIR = os.getenv("HOME")
 -- Define the tag list upfront for keybindings
 local tag_list = { "STICKY", "1", "2", "3", "4" }
 
-naughty.config.defaults.font = config.font_normal
--- cf.naughty_preset.position = "bottom_right"
-
 -- helper functions
 
 local spawn = function(cmd, to_notify)
@@ -263,7 +260,7 @@ capi.client.connect_signal(
 -- remove border for maximized windows
 function reset_border(c)
    if not c.borderless and c.floating and not c.maximized then
-      c.border_width = config.border_width * config.widget_scale_factor
+      c.border_width = beautiful.border_width
    else
       c.border_width = 0
    end
