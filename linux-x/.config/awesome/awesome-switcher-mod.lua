@@ -440,7 +440,9 @@ function _M.showPreview()
    _M.preview_live_timer:start()
 
    _M.preview()
-   _M.preview_wbox.visible = true
+   if _M.preview_box then
+      _M.preview_wbox.visible = true
+   end
 
    _M.clientOpacity()
 end

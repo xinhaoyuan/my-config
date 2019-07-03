@@ -125,6 +125,7 @@ local global_keys = table_join(
       function ()
          switcher.switch(-1, "Mod1", "Alt_L", "Shift", "Tab")
    end),
+   awful.key({ "Mod4" }, "/",               function () machi.interactive_layout_edit() end),
    awful.key({ "Mod4" }, "[",               function () awful_layout.inc(layouts, -1) end),
    awful.key({ "Mod4" }, "]",               function () awful_layout.inc(layouts, 1) end),
    awful.key({ "Mod4" }, "w",               function () my_focus_by_direction("up") end),
