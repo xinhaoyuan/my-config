@@ -35,3 +35,21 @@ function table.tostring( tbl )
    end
    return "{" .. table.concat( result, "," ) .. "}"
 end
+
+function is_tiling(c)
+   return
+      not (c.tomb_floating or c.floating or c.maximized_horizontal or c.maximized_vertical or c.maximized or c.fullscreen)
+end
+
+function set_tiling(c)
+   c.floating = false
+   c.maximized = false
+   c.maximized_vertical = false
+   c.maximized_horizontal = false
+   c.fullscreen = false
+end
+
+return {
+   is_tiling = is_tiling,
+   set_tiling = set_tiling,
+}

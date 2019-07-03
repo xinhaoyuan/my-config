@@ -50,14 +50,6 @@ end
 
 table_join = awful.util.table.join
 
-local is_floating = function (c)
-   return
-      c.tomb_floating or c.floating
-      or c.maximized_horizontal or c.maximized_vertical or c.maximized or c.fullscreen
-      or #awful_layout.parameters(nil, c.screen).clients <= 1
-      or c.type == "dialog"
-end
-
 autofocus.find_alternative_focus = function(prev, s)
    local f = nil
    local pid = nil

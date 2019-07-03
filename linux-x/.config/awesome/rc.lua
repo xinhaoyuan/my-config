@@ -97,14 +97,6 @@ local my_focus_by_direction = function(dir)
    end
 end
 
-local set_machi_region = function (c, r)
-   c.floating = false
-   c.maximized = false
-   c.fullscreen = false
-   c.machi_region = r
-   awful_layout.arrange(c.screen)
-end
-
 local manage_mode_enter = function ()
    
 end
@@ -152,43 +144,7 @@ local global_keys = table_join(
 )
 
 local client_keys = table_join(
-   awful.key({ "Mod4" }, "grave", function(src_c)
-         local f = is_floating(src_c)
-         local new_focus = nil
-
-         for _, c in ipairs(capi.client.get(src_c.screen)) do
-            if c:isvisible() and (not awful.client.focus.filter or awful.client.focus.filter(c) ~= nil) then
-               if not is_floating(c) then
-                  if f then
-                     c:raise()
-                  else
-                     c:lower()
-                  end
-               else
-               end
-            end
-         end
-
-         new_focus = focus.match_in_history(
-            {
-               function (c)
-                  return cf.filters.same_screen(c, src_c)
-                     and cf.filters.common_tag(c, src_c)
-                     and is_floating(c) ~= f
-               end
-            }
-         )
-
-         if new_focus then
-            capi.client.focus = new_focus
-         end
-         capi.client.focus:raise()
-   end),
-
-   awful.key({ "Mod4" }, "1", function (c) set_machi_region(c, 1) end),
-   awful.key({ "Mod4" }, "2", function (c) set_machi_region(c, 2) end),
-   awful.key({ "Mod4" }, "3", function (c) set_machi_region(c, 3) end),
-   awful.key({ "Mod4" }, "4", function (c) set_machi_region(c, 4) end),
+   awful.key({ "Mod4" }, "1", function (c) machi.cycle_region(c) end),
 
    awful.key({ "Mod4" }, "Up", function (c)
          if c.fullscreen then
@@ -212,13 +168,6 @@ local client_keys = table_join(
          c.fullscreen = not c.fullscreen
    end),
    
-   awful.key({ "Mod4" }, "Left", function (c)
-         if c.fullscreen then
-         elseif not is_floating(c) then
-            c:swap(awful.client.getmaster())
-         end
-   end),
-
    awful.key({ "Mod4" }, "Right", function (c)
          if c.fullscreen then
          else
@@ -294,27 +243,17 @@ capi.client.connect_signal(
 )
 
 -- remove border for maximized windows
-capi.client.connect_signal(
-   "manage",
-   function (c)
-      if c.maximized then
-         c.border_width = 0
-      elseif not c.borderless then
-         c.border_width = config.border_width * config.widget_scale_factor
-      end
+function reset_border(c)
+   if not c.borderless and c.floating and not c.maximized then
+      c.border_width = config.border_width * config.widget_scale_factor
+   else
+      c.border_width = 0
    end
-)
+end
 
-capi.client.connect_signal(
-   "property::maximized",
-   function (c)
-      if c.maximized then
-         c.border_width = 0
-      elseif not c.borderless then
-         c.border_width = config.border_width * config.widget_scale_factor
-      end
-   end
-)
+capi.client.connect_signal("manage", reset_border)
+capi.client.connect_signal("property::maximized", reset_border)
+capi.client.connect_signal("property::floating", reset_border)
 
 awful_rule.rules = {
    {
@@ -416,6 +355,7 @@ local layouts = {
          end
 
          local wa = p.workarea
+         local gap = config.border_gap * config.widget_scale_factor
 
          if regions.cache_x == wa.x
             and regions.cache_y == wa.y
@@ -436,22 +376,22 @@ local layouts = {
          regions[1] = {
             x = wa.x,
             y = wa.y,
-            width = hsplit,
-            height = vsplit,
+            width = hsplit - gap / 2,
+            height = vsplit - gap / 2,
          }
 
          regions[2] = {
-            x = wa.x + hsplit,
+            x = wa.x + hsplit + gap / 2,
             y = wa.y,
-            width = wa.width - hsplit, 
+            width = wa.width - hsplit - gap / 2, 
             height = wa.height,
          }
 
          regions[3] = {
             x = wa.x,
-            y = wa.y + vsplit,
-            width = hsplit,
-            height = wa.height - vsplit,
+            y = wa.y + vsplit + gap / 2,
+            width = hsplit - gap / 2,
+            height = wa.height - vsplit - gap / 2,
          }
 
          return regions
@@ -468,7 +408,5 @@ awful.screen.connect_for_each_screen(
       s.tags[2]:view_only()
    end
 )
-
-
 
 require("my-widgets")
