@@ -10,8 +10,15 @@ local capi = {
    keygrabber = require("awful.keygrabber"),
    naughty = require("naughty"),
    gears = require("gears"),
-   config = require("my-config"),
 }
+
+local gap = capi.beautiful.useless_gap
+local label_font_family = capi.beautiful.get_font(capi.beautiful.font):get_family()
+-- colors are in rgba
+local border_color = "#ffffffc0"
+local active_color = "#6c7ea780"
+local open_color   = "#ffffff80"
+local closed_color = "#00000080"
 
 function region(x, y, w, h)
    return {x = x, y = y, width = w, height = h}
@@ -92,7 +99,6 @@ function cycle_region(c)
       return
    end
    current_region = c.machi_region or 1
-   print(tostring(count) .. " - " .. tostring(current_region))
    if not capi.utils.is_tiling(c) then
       capi.utils.set_tiling(c)
    elseif current_region >= count then
@@ -112,10 +118,6 @@ function shrink_area_with_gap(a, gap)
             width = a.width - (a.bl and 0 or gap / 2) - (a.br and 0 or gap / 2),
             height = a.height - (a.bu and 0 or gap / 2) - (a.bd and 0 or gap / 2) }
 end
-
-local active_color = "#0000ff"
-local open_color = "#ffffff"
-local closed_color = "#000000"
 
 function interactive_layout_edit()
    local screen = capi.screen.focused()
@@ -158,14 +160,15 @@ function interactive_layout_edit()
       local msg, ext
 
       for i, a in ipairs(closed_areas) do
-         local gap = capi.config.border_gap * capi.config.widget_scale_factor
-         -- local gap = capi.beautiful.useless_gap
          local sa = shrink_area_with_gap(a, gap)
-         cr:set_source(capi.gears.color(closed_color .. "77"))
+         cr:set_source(capi.gears.color(closed_color))
          cr:rectangle(sa.x, sa.y, sa.width, sa.height)
          cr:fill()
+         cr:set_source(capi.gears.color(border_color))
+         cr:rectangle(sa.x, sa.y, sa.width, sa.height)
+         cr:stroke()
 
-         cr:select_font_face("Sans", "normal", "normal")
+         cr:select_font_face(label_font_family, "normal", "normal")
          cr:set_font_size(30)
          cr:set_font_face(cr:get_font_face())
          msg = tostring(i)
@@ -176,15 +179,17 @@ function interactive_layout_edit()
       end
 
       for i, a in ipairs(open_areas) do
-         local gap = capi.config.border_gap * capi.config.widget_scale_factor
-         -- local gap = capi.beautiful.useless_gap
          local sa = shrink_area_with_gap(a, gap)
-         cr:set_source(capi.gears.color((i == #open_areas and active_color or open_color) .. "77") )
+         cr:set_source(capi.gears.color(i == #open_areas and active_color or open_color) )
          cr:rectangle(sa.x, sa.y, sa.width, sa.height)
          cr:fill()
+
+         cr:set_source(capi.gears.color(border_color))
+         cr:rectangle(sa.x, sa.y, sa.width, sa.height)
+         cr:stroke()
       end
 
-      cr:select_font_face("Sans", "normal", "normal")
+      cr:select_font_face(label_font_family, "normal", "normal")
       cr:set_font_size(60)
       cr:set_font_face(cr:get_font_face())
       msg = current_cmd
@@ -348,6 +353,7 @@ function interactive_layout_edit()
                end
             end
          elseif key == "Return" then
+            push_history()
             while #open_areas > 0 do
                push_area()
             end
@@ -385,8 +391,6 @@ function interactive_layout_edit()
             if to_apply then
                layout = capi.layout.get(screen)
                if layout.set_regions then
-                  local gap = capi.config.border_gap * capi.config.widget_scale_factor
-                  -- local gap = capi.beautiful.useless_gap
                   local areas_with_gap = {}
                   for _, a in ipairs(closed_areas) do
                      areas_with_gap[#areas_with_gap + 1] = shrink_area_with_gap(a, gap)
