@@ -40,6 +40,9 @@ local switcher         = require("awesome-switcher-mod")
 
 local HOME_DIR = os.getenv("HOME")
 
+-- Define the tag list upfront for keybindings
+local tag_list = { "STICKY", "1", "2", "3", "4" }
+
 naughty.config.defaults.font = config.font_normal
 -- cf.naughty_preset.position = "bottom_right"
 
@@ -113,8 +116,7 @@ spawn_with_shell(HOME_DIR .. "/.xdesktoprc.awesome", false)
 -- keys
 
 -- base keys and buttons
-local global_keys = table_join(
-   awful.key({ "Mod4" }, "Tab", manage_mode_enter),
+local global_keys = table_join(   
    awful.key({ "Mod1" }, "Tab",
       function ()
          switcher.switch( 1, "Mod1", "Alt_L", "Shift", "Tab")
@@ -143,8 +145,23 @@ local global_keys = table_join(
    awful.key({ "Mod4", "Control" }, "Escape", awesome.quit)
 )
 
+-- tag 1 is hidden
+for i = 2, #tag_list do
+   global_keys =
+      table_join(
+         awful.key({ "Mod4" }, tostring(i - 1), function () awful.screen.focused().tags[i]:view_only() end),
+         awful.key({ "Mod4", "Shift" }, tostring(i - 1), function () awful.tag.viewtoggle(awful.screen.focused().tags[i]) end),
+         awful.key({ "Mod4", "Mod1" }, tostring(i - 1), function ()
+               local c = client.focus
+               if c == nil then return end
+               awful.client.toggletag(c.screen.tags[i], c)
+         end),
+         global_keys)
+end        
+                            
+
 local client_keys = table_join(
-   awful.key({ "Mod4" }, "1", function (c) machi.cycle_region(c) end),
+   awful.key({ "Mod4" }, "Tab", function (c) machi.cycle_region(c) end),
 
    awful.key({ "Mod4" }, "Up", function (c)
          if c.fullscreen then
@@ -267,7 +284,6 @@ awful_rule.rules = {
          border_color = beautiful.border_normal,
          screen = function(c) return awesome.startup and c.screen or awful.screen.focused() end,
          floating = true,
-         tag = "1",
       }
    },
    {
@@ -315,7 +331,6 @@ awful_rule.rules = {
 
 -- tags and layouts
 
-local tag_list = { "STICKY", "1" }
 -- local keys_switch_tags = {}
 -- local tag_index = 0
 -- for i, t in ipairs(tag_list) do
