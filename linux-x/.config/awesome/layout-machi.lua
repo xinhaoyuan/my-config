@@ -19,6 +19,7 @@ local border_color = "#ffffffc0"
 local active_color = "#6c7ea780"
 local open_color   = "#ffffff80"
 local closed_color = "#00000080"
+local init_max_depth = 2
 
 function region(x, y, w, h)
    return {x = x, y = y, width = w, height = h}
@@ -28,16 +29,6 @@ function do_arrange(p, priv)
    local wa = p.workarea
    local cls = p.clients
    local regions = priv.regions
-
-   if regions == nil then
-      regions = priv.compute_regions(p, priv)
-   end
-
-   if regions == nil or #regions == 0 then
-      return
-   end
-
-   priv.last_region_count = #regions
 
    for i, c in ipairs(cls) do
       if c.floating then
@@ -73,6 +64,10 @@ function create_layout(name, regions)
       priv.regions = regions
    end
 
+   local function get_regions()
+      return priv.regions
+   end
+
    set_regions(regions)
 
    return {
@@ -80,6 +75,7 @@ function create_layout(name, regions)
       arrange = function (p) do_arrange(p, priv) end,
       get_region_count = function () return #priv.regions end,
       set_regions = set_regions,
+      get_regions = get_regions,
    }
 end
 
@@ -91,17 +87,43 @@ function set_region(c, r)
    capi.layout.arrange(c.screen)
 end
 
+function min(a, b)
+   if a < b then return a else return b end
+end
+
+function max(a, b)
+   if a < b then return b else return a end
+end
+
 function cycle_region(c)
    layout = capi.layout.get(c.screen)
-   count = layout.get_region_count and layout.get_region_count()
-   if type(count) ~= "number" or count < 1 then
+   regions = layout.get_regions and layout.get_regions()
+   if type(regions) ~= "table" or #regions < 1 then
       c.float = true
       return
    end
    current_region = c.machi_region or 1
    if not capi.utils.is_tiling(c) then
+      -- find out which region has the most intersection, calculated by a cap b / a cup b 
+      local choice = 1
+      local choice_ratio = nil
+      local c_area = c.width * c.height
+      for i, a in ipairs(regions) do
+         local x_cap = max(0, min(c.x + c.width, a.x + a.width) - max(c.x, a.x))
+         local y_cap = max(0, min(c.y + c.height, a.y + a.height) - max(c.y, a.y))
+         local cap = x_cap * y_cap
+         local cup = c_area + a.width * a.height - cap
+         if cup > 0 then
+            local itx_ratio = cap / cup
+            if choice_ratio == nil or choice_ratio < itx_ratio then
+               choice_ratio = itx_ratio
+               choice = i
+            end
+         end
+      end
+      c.machi_region = choice
       capi.utils.set_tiling(c)
-   elseif current_region >= count then
+   elseif current_region >= #regions then
       c.machi_region = 1
    else
       c.machi_region = current_region + 1
@@ -139,7 +161,7 @@ function interactive_layout_edit()
    local split = nil
    local ratio_lu = nil
    local ratio_rd = nil
-   local max_depth = 2
+   local max_depth = init_max_depth
    local infobox = capi.wibox({
          x = screen.workarea.x,
          y = screen.workarea.y,
@@ -161,11 +183,14 @@ function interactive_layout_edit()
 
       for i, a in ipairs(closed_areas) do
          local sa = shrink_area_with_gap(a, gap)
+         cr:rectangle(sa.x, sa.y, sa.width, sa.height)
+         cr:clip()
          cr:set_source(capi.gears.color(closed_color))
          cr:rectangle(sa.x, sa.y, sa.width, sa.height)
          cr:fill()
          cr:set_source(capi.gears.color(border_color))
          cr:rectangle(sa.x, sa.y, sa.width, sa.height)
+         cr:set_line_width(10.0)
          cr:stroke()
 
          cr:select_font_face(label_font_family, "normal", "normal")
@@ -176,17 +201,22 @@ function interactive_layout_edit()
          cr:set_source_rgba(1, 1, 1, 1)
          cr:move_to(sa.x + sa.width / 2 - ext.width / 2 - ext.x_bearing, sa.y + sa.height / 2 - ext.height / 2 - ext.y_bearing)
          cr:show_text(msg)
+         cr:reset_clip()
       end
 
       for i, a in ipairs(open_areas) do
          local sa = shrink_area_with_gap(a, gap)
+         cr:rectangle(sa.x, sa.y, sa.width, sa.height)
+         cr:clip()
          cr:set_source(capi.gears.color(i == #open_areas and active_color or open_color) )
          cr:rectangle(sa.x, sa.y, sa.width, sa.height)
          cr:fill()
 
          cr:set_source(capi.gears.color(border_color))
          cr:rectangle(sa.x, sa.y, sa.width, sa.height)
+         cr:set_line_width(10.0)
          cr:stroke()
+         cr:reset_clip()
       end
 
       cr:select_font_face(label_font_family, "normal", "normal")
