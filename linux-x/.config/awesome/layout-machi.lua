@@ -384,90 +384,94 @@ function interactive_layout_edit()
          local to_exit = false
          local to_apply = false
 
-         if key == "h" then
-            push_history()
-            current_cmd = current_cmd .. "h"
-            handle_split("h", false)
-         elseif key == "H" then
-            push_history()
-            current_cmd = current_cmd .. "H"
-            handle_split("h", true)
-         elseif key == "v" then
-            push_history()
-            current_cmd = current_cmd .. "v"
-            handle_split("v", false)
-         elseif key == "V" then
-            push_history()
-            current_cmd = current_cmd .. "V"
-            handle_split("v", true)
-         elseif key == "w" then
-            push_history()
-            current_cmd = current_cmd .. "w"
-            handle_split("w", false)
-         elseif key == "W" then
-            push_history()
-            current_cmd = current_cmd .. "W"
-            handle_split("w", false)
-         elseif key == "s" or key == "S" then
-            if #open_areas < 2 then
-            else
-               push_history()
-               current_cmd = current_cmd .. "s"
-               a1 = pop_open_area()
-               a2 = pop_open_area()
-               open_areas[#open_areas + 1] = a1
-               open_areas[#open_areas + 1] = a2
-            end
-         elseif key == " " or key == "." then
-            push_history()
-            current_cmd = current_cmd .. "."
-            if num_1 ~= nil then
-               max_depth = num_1
-               num_1 = nil
-               num_2 = nil
-            else
-               push_area()
-               if #open_areas == 0 then
-                  to_exit = true
-                  to_apply = true
-               end
-            end
-         elseif key == "Return" then
-            push_history()
-            while #open_areas > 0 do
-               push_area()
-            end
-            to_exit = true
-            to_apply = true
-         elseif tonumber(key) ~= nil then
-            local v = tonumber(key)
-            if v > 0 then
-               if num_1 == nil then
-                  push_history()
-                  current_cmd = current_cmd .. key
-                  num_1 = v
-               elseif num_2 == nil then
-                  push_history()
-                  current_cmd = current_cmd .. key
-                  num_2 = v
-               end
-            end
-         elseif key == "BackSpace" then
+         if key == "BackSpace" then
             pop_history()
          elseif key == "Escape" then
             to_exit = true
-         end
+         elseif #open_areas > 0 then
+            if key == "h" then
+               push_history()
+               current_cmd = current_cmd .. "h"
+               handle_split("h", false)
+            elseif key == "H" then
+               push_history()
+               current_cmd = current_cmd .. "H"
+               handle_split("h", true)
+            elseif key == "v" then
+               push_history()
+               current_cmd = current_cmd .. "v"
+               handle_split("v", false)
+            elseif key == "V" then
+               push_history()
+               current_cmd = current_cmd .. "V"
+               handle_split("v", true)
+            elseif key == "w" then
+               push_history()
+               current_cmd = current_cmd .. "w"
+               handle_split("w", false)
+            elseif key == "W" then
+               push_history()
+               current_cmd = current_cmd .. "W"
+               handle_split("w", false)
+            elseif key == "s" or key == "S" then
+               if #open_areas < 2
+               or current_cmd:sub(#current_cmd, #current_cmd) == "s" then
+               else
+                  push_history()
+                  current_cmd = current_cmd .. "s"
+                  a1 = pop_open_area()
+                  a2 = pop_open_area()
+                  open_areas[#open_areas + 1] = a1
+                  open_areas[#open_areas + 1] = a2
+                  num_1 = nil
+                  num_2 = nil
+               end
+            elseif key == " " or key == "." then
+               push_history()
+               current_cmd = current_cmd .. "."
+               if num_1 ~= nil then
+                  max_depth = num_1
+                  num_1 = nil
+                  num_2 = nil
+               else
+                  push_area()
+               end
+            elseif key == "Return" then
+               push_history()
+               while #open_areas > 0 do
+                  push_area()
+               end
+            elseif tonumber(key) ~= nil then
+               local v = tonumber(key)
+               if v > 0 then
+                  if num_1 == nil then
+                     push_history()
+                     current_cmd = current_cmd .. key
+                     num_1 = v
+                  elseif num_2 == nil then
+                     push_history()
+                     current_cmd = current_cmd .. key
+                     num_2 = v
+                  end
+               end
+            end
 
-         while #open_areas > 0 and open_areas[#open_areas].depth >= max_depth do
-            push_area()
+            while #open_areas > 0 and open_areas[#open_areas].depth >= max_depth do
+               push_area()
+            end
+
+            if #open_areas == 0 then
+               current_cmd = current_cmd .. " (enter to save)"
+            end
+         else
+            if key == "Return" then
+               current_cmd = "Saved!"
+               to_exit = true
+               to_apply = true
+            end
          end
 
          refresh()
-
-         if #open_areas == 0 then
-            to_exit = true
-            to_apply = true
-         end
 
          if to_exit then
             print("interactive layout editing ends")
