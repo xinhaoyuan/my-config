@@ -1,4 +1,4 @@
--- Machi, a static and yet configurable layout
+-- Machi, a static layout with an interactive configurator
 
 local api = {
    beautiful  = require("beautiful"),
@@ -187,7 +187,7 @@ function interactive_layout_edit()
          ontop = true
    })
    infobox.visible = true
-   local current_cmd = ""
+   local current_info = ""
 
    local function draw_info(context, cr, width, height)
       cr:set_source_rgba(0, 0, 0, 0)
@@ -247,7 +247,7 @@ function interactive_layout_edit()
       cr:select_font_face(label_font_family, "normal", "normal")
       cr:set_font_size(info_size)
       cr:set_font_face(cr:get_font_face())
-      msg = current_cmd
+      msg = current_info
       ext = cr:text_extents(msg)
       cr:move_to(width / 2 - ext.width / 2 - ext.x_bearing, height / 2 - ext.height / 2 - ext.y_bearing)
       cr:text_path(msg)
@@ -261,7 +261,7 @@ function interactive_layout_edit()
    end
 
    local function push_history()
-      history[#history + 1] = {#closed_areas, #open_areas, {}, current_cmd, max_depth, num_1, num_2}
+      history[#history + 1] = {#closed_areas, #open_areas, {}, current_info, max_depth, num_1, num_2}
    end
 
    local function pop_history()
@@ -278,7 +278,7 @@ function interactive_layout_edit()
          open_areas[history[#history][2] - i + 1] = history[#history][3][i]
       end
 
-      current_cmd = history[#history][4]
+      current_info = history[#history][4]
       max_depth = history[#history][5]
       num_1 = history[#history][6]
       num_2 = history[#history][7]
@@ -407,15 +407,15 @@ function interactive_layout_edit()
          elseif #open_areas > 0 then
             if key == "h" or key == "H" then
                push_history()
-               current_cmd = current_cmd .. key
+               current_info = current_info .. key
                handle_split("h", key == "H")
             elseif key == "v" or key == "V" then
                push_history()
-               current_cmd = current_cmd .. key
+               current_info = current_info .. key
                handle_split("v", key == "V")
             elseif key == "w" or key == "W" then
                push_history()
-               current_cmd = current_cmd .. key
+               current_info = current_info .. key
                if num_1 == nil and num_2 == nil then
                   push_area()
                else
@@ -423,12 +423,12 @@ function interactive_layout_edit()
                end
             elseif key == "p" or key == "P" then
                push_history()
-               current_cmd = current_cmd .. key
+               current_info = current_info .. key
                handle_split("p", key == "P")
             elseif key == "s" or key == "S" then
                if #open_areas > 0 then
                   push_history()
-                  current_cmd = current_cmd .. "s"
+                  current_info = current_info .. "s"
                   local top = pop_open_area()
                   local t = {}
                   while #open_areas > 0 and open_areas[#open_areas].depth == top.depth do
@@ -443,7 +443,7 @@ function interactive_layout_edit()
                end
             elseif key == " " or key == "-" then
                push_history()
-               current_cmd = current_cmd .. "-"
+               current_info = current_info .. "-"
                if num_1 ~= nil then
                   max_depth = num_1
                   num_1 = nil
@@ -460,11 +460,11 @@ function interactive_layout_edit()
                local v = tonumber(key)
                if num_1 == nil then
                   push_history()
-                  current_cmd = current_cmd .. key
+                  current_info = current_info .. key
                   num_1 = v
                elseif num_2 == nil then
                   push_history()
-                  current_cmd = current_cmd .. key
+                  current_info = current_info .. key
                   num_2 = v
                end
             end
@@ -474,11 +474,11 @@ function interactive_layout_edit()
             end
 
             if #open_areas == 0 then
-               current_cmd = current_cmd .. " (enter to save)"
+               current_info = current_info .. " (enter to save)"
             end
          else
             if key == "Return" then
-               current_cmd = "Saved!"
+               current_info = "Saved!"
                to_exit = true
                to_apply = true
             end
