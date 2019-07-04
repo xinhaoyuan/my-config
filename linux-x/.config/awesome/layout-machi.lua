@@ -13,7 +13,8 @@ local capi = {
 }
 
 local gap = capi.beautiful.useless_gap or 0
-local label_font_family = capi.beautiful.get_font(capi.beautiful.font):get_family()
+local label_font_family = capi.beautiful.get_font(
+   capi.beautiful.mono_font or capi.beautiful.font):get_family()
 -- colors are in rgba
 local border_color = "#ffffffc0"
 local active_color = "#6c7ea780"
@@ -414,21 +415,24 @@ function interactive_layout_edit()
                current_cmd = current_cmd .. "W"
                handle_split("w", false)
             elseif key == "s" or key == "S" then
-               if #open_areas < 2
-               or current_cmd:sub(#current_cmd, #current_cmd) == "s" then
-               else
+               if #open_areas > 0 then
                   push_history()
                   current_cmd = current_cmd .. "s"
-                  a1 = pop_open_area()
-                  a2 = pop_open_area()
-                  open_areas[#open_areas + 1] = a1
-                  open_areas[#open_areas + 1] = a2
+                  local top = pop_open_area()
+                  local t = {}
+                  while #open_areas > 0 and open_areas[#open_areas].depth == top.depth do
+                     t[#t + 1] = pop_open_area()
+                  end
+                  open_areas[#open_areas + 1] = top
+                  for i = #t, 1, -1 do
+                     open_areas[#open_areas + 1] = t[i]
+                  end
                   num_1 = nil
                   num_2 = nil
                end
-            elseif key == " " or key == "." then
+            elseif key == " " or key == "-" then
                push_history()
-               current_cmd = current_cmd .. "."
+               current_cmd = current_cmd .. "-"
                if num_1 ~= nil then
                   max_depth = num_1
                   num_1 = nil
