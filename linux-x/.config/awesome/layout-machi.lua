@@ -1,23 +1,23 @@
 -- Machi, a static and yet configurable layout
 
-local capi = {
-   beautiful = require("beautiful"),
-   wibox = require("wibox"),
-   awful = require("awful"),
-   screen = require("awful.screen"),
-   layout = require("awful.layout"),
-   utils = require("my-utils"),
+local api = {
+   beautiful  = require("beautiful"),
+   wibox      = require("wibox"),
+   awful      = require("awful"),
+   screen     = require("awful.screen"),
+   layout     = require("awful.layout"),
+   utils      = require("my-utils"),
    keygrabber = require("awful.keygrabber"),
-   naughty = require("naughty"),
-   gears = require("gears"),
-   dpi = require("beautiful.xresources").apply_dpi,
+   naughty    = require("naughty"),
+   gears      = require("gears"),
+   dpi        = require("beautiful.xresources").apply_dpi,
 }
 
-local gap = capi.beautiful.useless_gap or 0
-local label_font_family = capi.beautiful.get_font(
-   capi.beautiful.mono_font or capi.beautiful.font):get_family()
-local label_size = capi.dpi(30)
-local info_size = capi.dpi(60)
+local gap = api.beautiful.useless_gap or 0
+local label_font_family = api.beautiful.get_font(
+   api.beautiful.mono_font or api.beautiful.font):get_family()
+local label_size = api.dpi(30)
+local info_size = api.dpi(60)
 -- colors are in rgba
 local border_color = "#ffffffc0"
 local active_color = "#6c7ea780"
@@ -88,7 +88,7 @@ function set_region(c, r)
    c.maximized = false
    c.fullscreen = false
    c.machi_region = r
-   capi.layout.arrange(c.screen)
+   api.layout.arrange(c.screen)
 end
 
 function min(a, b)
@@ -127,23 +127,23 @@ function fit_region(c, regions)
 end
 
 function cycle_region(c)
-   layout = capi.layout.get(c.screen)
+   layout = api.layout.get(c.screen)
    regions = layout.get_regions and layout.get_regions()
    if type(regions) ~= "table" or #regions < 1 then
       c.float = true
       return
    end
    current_region = c.machi_region or 1
-   if not capi.utils.is_tiling(c) then
+   if not api.utils.is_tiling(c) then
       -- find out which region has the most intersection, calculated by a cap b / a cup b 
       c.machi_region = fit_region(c, regions)
-      capi.utils.set_tiling(c)
+      api.utils.set_tiling(c)
    elseif current_region >= #regions then
       c.machi_region = 1
    else
       c.machi_region = current_region + 1
    end
-   capi.layout.arrange(c.screen)
+   api.layout.arrange(c.screen)
 end
 
 function _area_tostring(wa)
@@ -157,7 +157,7 @@ function shrink_area_with_gap(a, gap)
 end
 
 function interactive_layout_edit()
-   local screen = capi.screen.focused()
+   local screen = api.screen.focused()
    local init_area = {
       x = screen.workarea.x,
       y = screen.workarea.y,
@@ -177,7 +177,7 @@ function interactive_layout_edit()
    local num_1 = nil
    local num_2 = nil
    local max_depth = init_max_depth
-   local infobox = capi.wibox({
+   local infobox = api.wibox({
          x = screen.workarea.x,
          y = screen.workarea.y,
          width = screen.workarea.width,
@@ -200,10 +200,10 @@ function interactive_layout_edit()
          local sa = shrink_area_with_gap(a, gap)
          cr:rectangle(sa.x, sa.y, sa.width, sa.height)
          cr:clip()
-         cr:set_source(capi.gears.color(closed_color))
+         cr:set_source(api.gears.color(closed_color))
          cr:rectangle(sa.x, sa.y, sa.width, sa.height)
          cr:fill()
-         cr:set_source(capi.gears.color(border_color))
+         cr:set_source(api.gears.color(border_color))
          cr:rectangle(sa.x, sa.y, sa.width, sa.height)
          cr:set_line_width(10.0)
          cr:stroke()
@@ -224,14 +224,14 @@ function interactive_layout_edit()
          cr:rectangle(sa.x, sa.y, sa.width, sa.height)
          cr:clip()
          if i == #open_areas then
-            cr:set_source(capi.gears.color(active_color))
+            cr:set_source(api.gears.color(active_color))
          else
-            cr:set_source(capi.gears.color(open_color))
+            cr:set_source(api.gears.color(open_color))
          end
          cr:rectangle(sa.x, sa.y, sa.width, sa.height)
          cr:fill()
 
-         cr:set_source(capi.gears.color(border_color))
+         cr:set_source(api.gears.color(border_color))
          cr:rectangle(sa.x, sa.y, sa.width, sa.height)
          cr:set_line_width(10.0)
          if i ~= #open_areas then
@@ -489,16 +489,16 @@ function interactive_layout_edit()
          if to_exit then
             print("interactive layout editing ends")
             if to_apply then
-               layout = capi.layout.get(screen)
+               layout = api.layout.get(screen)
                if layout.set_regions then
                   local areas_with_gap = {}
                   for _, a in ipairs(closed_areas) do
                      areas_with_gap[#areas_with_gap + 1] = shrink_area_with_gap(a, gap)
                   end
                   layout.set_regions(areas_with_gap)
-                  capi.layout.arrange(screen)
+                  api.layout.arrange(screen)
                end
-               capi.gears.timer{
+               api.gears.timer{
                   timeout = 1,
                   autostart = true,
                   singleshot = true,
