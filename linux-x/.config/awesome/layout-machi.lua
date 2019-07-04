@@ -236,7 +236,7 @@ function interactive_layout_edit()
    end
 
    local function push_history()
-      history[#history + 1] = {#closed_areas, #open_areas, {}, current_cmd, max_depth}
+      history[#history + 1] = {#closed_areas, #open_areas, {}, current_cmd, max_depth, ratio_lu, ratio_rd}
    end
 
    local function pop_history()
@@ -255,6 +255,8 @@ function interactive_layout_edit()
 
       current_cmd = history[#history][4]
       max_depth = history[#history][5]
+      ratio_lu = history[#history][6]
+      ratio_rd = history[#history][7]
 
       table.remove(history, #history)
    end
@@ -302,35 +304,54 @@ function interactive_layout_edit()
             x = a.x, y = a.y,
             width = a.width / (ratio_lu + ratio_rd) * ratio_lu, height = a.height,
             depth = a.depth + 1,
-            bl = a.bl, bu = a.bu, bd = a.bd,
+            bl = a.bl, br = false, bu = a.bu, bd = a.bd,
          }
          rd = {
             x = a.x + lu.width, y = a.y,
             width = a.width - lu.width, height = a.height,
             depth = a.depth + 1,
-            br = a.br, bu = a.bu, bd = a.bd,
+            bl = false, br = a.br, bu = a.bu, bd = a.bd,
          }
+         open_areas[#open_areas + 1] = rd
+         open_areas[#open_areas + 1] = lu
       elseif method == "v" then
          lu = {
             x = a.x, y = a.y,
             width = a.width, height = a.height / (ratio_lu + ratio_rd) * ratio_lu,
             depth = a.depth + 1,
-            bl = a.bl, br = a.br, bu = a.bu,
+            bl = a.bl, br = a.br, bu = a.bu, bd = false
          }
          rd = {
             x = a.x, y = a.y + lu.height,
             width = a.width, height = a.height - lu.height,
             depth = a.depth + 1,
-            bl = a.bl, br = a.br, bd = a.bd,
+            bl = a.bl, br = a.br, bu = false, bd = a.bd,
          }
+         open_areas[#open_areas + 1] = rd
+         open_areas[#open_areas + 1] = lu
+      elseif method == "w" then
+         local x_interval = a.width / ratio_lu
+         local y_interval = a.height / ratio_rd
+         for y = ratio_rd, 1, -1 do
+            for x = ratio_lu, 1, -1 do
+               local r = {
+                  x = a.x + x_interval * (x - 1),
+                  y = a.y + y_interval * (y - 1),
+                  width = x_interval,
+                  height = y_interval,
+                  depth = a.depth + 1
+               }
+               if x == 1 then r.bl = a.bl else r.bl = false end
+               if x == ratio_lu then r.br = a.br else r.br = false end
+               if y == 1 then r.bu = a.bu else r.bu = false end
+               if y == ratio_rd then r.bd = a.bd else r.bd = false end
+               open_areas[#open_areas + 1] = r
+            end
+         end
       end
-      open_areas[#open_areas + 1] = rd
-      open_areas[#open_areas + 1] = lu
 
       ratio_lu = nil
       ratio_rd = nil
-
-      refresh()
    end
 
    local function cleanup()
@@ -368,6 +389,14 @@ function interactive_layout_edit()
             push_history()
             current_cmd = current_cmd .. "V"
             handle_split("v", true)
+         elseif key == "w" then
+            push_history()
+            current_cmd = current_cmd .. "w"
+            handle_split("w", false)
+         elseif key == "W" then
+            push_history()
+            current_cmd = current_cmd .. "W"
+            handle_split("w", false)
          elseif key == " " or key == "." then
             push_history()
             current_cmd = current_cmd .. "."
@@ -402,7 +431,6 @@ function interactive_layout_edit()
             end
          elseif key == "BackSpace" then
             pop_history()
-            refresh()
          elseif key == "Escape" then
             to_exit = true
          end
@@ -410,6 +438,8 @@ function interactive_layout_edit()
          while #open_areas > 0 and open_areas[#open_areas].depth >= max_depth do
             push_area()
          end
+
+         refresh()
 
          if #open_areas == 0 then
             to_exit = true
