@@ -10,15 +10,18 @@ local capi = {
    keygrabber = require("awful.keygrabber"),
    naughty = require("naughty"),
    gears = require("gears"),
+   dpi = require("beautiful.xresources").apply_dpi,
 }
 
 local gap = capi.beautiful.useless_gap or 0
 local label_font_family = capi.beautiful.get_font(
    capi.beautiful.mono_font or capi.beautiful.font):get_family()
+local label_size = capi.dpi(30)
+local info_size = capi.dpi(60)
 -- colors are in rgba
 local border_color = "#ffffffc0"
 local active_color = "#6c7ea780"
-local open_color   = "#ffffff80"
+local open_color   = "#00000080"
 local closed_color = "#00000080"
 local init_max_depth = 2
 
@@ -206,7 +209,7 @@ function interactive_layout_edit()
          cr:stroke()
 
          cr:select_font_face(label_font_family, "normal", "normal")
-         cr:set_font_size(30)
+         cr:set_font_size(label_size)
          cr:set_font_face(cr:get_font_face())
          msg = tostring(i)
          ext = cr:text_extents(msg)
@@ -220,19 +223,29 @@ function interactive_layout_edit()
          local sa = shrink_area_with_gap(a, gap)
          cr:rectangle(sa.x, sa.y, sa.width, sa.height)
          cr:clip()
-         cr:set_source(capi.gears.color(i == #open_areas and active_color or open_color) )
+         if i == #open_areas then
+            cr:set_source(capi.gears.color(active_color))
+         else
+            cr:set_source(capi.gears.color(open_color))
+         end
          cr:rectangle(sa.x, sa.y, sa.width, sa.height)
          cr:fill()
 
          cr:set_source(capi.gears.color(border_color))
          cr:rectangle(sa.x, sa.y, sa.width, sa.height)
          cr:set_line_width(10.0)
-         cr:stroke()
+         if i ~= #open_areas then
+            cr:set_dash({5, 5}, 0)
+            cr:stroke()
+            cr:set_dash({}, 0)
+         else
+            cr:stroke()
+         end
          cr:reset_clip()
       end
 
       cr:select_font_face(label_font_family, "normal", "normal")
-      cr:set_font_size(60)
+      cr:set_font_size(info_size)
       cr:set_font_face(cr:get_font_face())
       msg = current_cmd
       ext = cr:text_extents(msg)
@@ -360,6 +373,8 @@ function interactive_layout_edit()
                open_areas[#open_areas + 1] = r
             end
          end
+      elseif method == "P" then
+         -- XXX
       end
 
       num_1 = nil
@@ -390,30 +405,26 @@ function interactive_layout_edit()
          elseif key == "Escape" then
             to_exit = true
          elseif #open_areas > 0 then
-            if key == "h" then
+            if key == "h" or key == "H" then
                push_history()
-               current_cmd = current_cmd .. "h"
-               handle_split("h", false)
-            elseif key == "H" then
+               current_cmd = current_cmd .. key
+               handle_split("h", key == "H")
+            elseif key == "v" or key == "V" then
                push_history()
-               current_cmd = current_cmd .. "H"
-               handle_split("h", true)
-            elseif key == "v" then
+               current_cmd = current_cmd .. key
+               handle_split("v", key == "V")
+            elseif key == "w" or key == "W" then
                push_history()
-               current_cmd = current_cmd .. "v"
-               handle_split("v", false)
-            elseif key == "V" then
+               current_cmd = current_cmd .. key
+               if num_1 == nil and num_2 == nil then
+                  push_area()
+               else
+                  handle_split("w", key == "W")
+               end
+            elseif key == "p" or key == "P" then
                push_history()
-               current_cmd = current_cmd .. "V"
-               handle_split("v", true)
-            elseif key == "w" then
-               push_history()
-               current_cmd = current_cmd .. "w"
-               handle_split("w", false)
-            elseif key == "W" then
-               push_history()
-               current_cmd = current_cmd .. "W"
-               handle_split("w", false)
+               current_cmd = current_cmd .. key
+               handle_split("p", key == "P")
             elseif key == "s" or key == "S" then
                if #open_areas > 0 then
                   push_history()
@@ -447,16 +458,14 @@ function interactive_layout_edit()
                end
             elseif tonumber(key) ~= nil then
                local v = tonumber(key)
-               if v > 0 then
-                  if num_1 == nil then
-                     push_history()
-                     current_cmd = current_cmd .. key
-                     num_1 = v
-                  elseif num_2 == nil then
-                     push_history()
-                     current_cmd = current_cmd .. key
-                     num_2 = v
-                  end
+               if num_1 == nil then
+                  push_history()
+                  current_cmd = current_cmd .. key
+                  num_1 = v
+               elseif num_2 == nil then
+                  push_history()
+                  current_cmd = current_cmd .. key
+                  num_2 = v
                end
             end
 
