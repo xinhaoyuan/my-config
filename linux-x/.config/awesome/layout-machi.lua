@@ -95,6 +95,33 @@ function max(a, b)
    if a < b then return b else return a end
 end
 
+-- find the best region for the area
+function fit_region(c, regions)
+   local choice = 1
+   local choice_value = nil
+   local c_area = c.width * c.height
+   for i, a in ipairs(regions) do
+      local x_cap = max(0, min(c.x + c.width, a.x + a.width) - max(c.x, a.x))
+      local y_cap = max(0, min(c.y + c.height, a.y + a.height) - max(c.y, a.y))
+      local cap = x_cap * y_cap
+      -- -- a cap b / a cup b
+      -- local cup = c_area + a.width * a.height - cap
+      -- if cup > 0 then
+      --    local itx_ratio = cap / cup
+      --    if choice_value == nil or choice_value < itx_ratio then
+      --       choice_value = itx_ratio
+      --       choice = i
+      --    end
+      -- end
+      -- a cap b
+      if choice_value == nil or choice_value < cap then
+         choice = i
+         choice_value = cap
+      end
+   end
+   return choice
+end
+
 function cycle_region(c)
    layout = capi.layout.get(c.screen)
    regions = layout.get_regions and layout.get_regions()
@@ -105,23 +132,7 @@ function cycle_region(c)
    current_region = c.machi_region or 1
    if not capi.utils.is_tiling(c) then
       -- find out which region has the most intersection, calculated by a cap b / a cup b 
-      local choice = 1
-      local choice_ratio = nil
-      local c_area = c.width * c.height
-      for i, a in ipairs(regions) do
-         local x_cap = max(0, min(c.x + c.width, a.x + a.width) - max(c.x, a.x))
-         local y_cap = max(0, min(c.y + c.height, a.y + a.height) - max(c.y, a.y))
-         local cap = x_cap * y_cap
-         local cup = c_area + a.width * a.height - cap
-         if cup > 0 then
-            local itx_ratio = cap / cup
-            if choice_ratio == nil or choice_ratio < itx_ratio then
-               choice_ratio = itx_ratio
-               choice = i
-            end
-         end
-      end
-      c.machi_region = choice
+      c.machi_region = fit_region(c, regions)
       capi.utils.set_tiling(c)
    elseif current_region >= #regions then
       c.machi_region = 1

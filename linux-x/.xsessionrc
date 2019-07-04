@@ -1,5 +1,5 @@
 export PATH="$HOME/bin:/usr/local/sbin:/usr/local/bin:$PATH"
-export HIDPI=""
+export HIDPI="1"
 
 rm $HOME/.xsession-init-guard
 
