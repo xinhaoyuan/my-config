@@ -170,8 +170,8 @@ function interactive_layout_edit()
    local history = {} -- {closed_area size, open_areas size, removed open areas, cmd, max_depth}
    print("interactive layout editing starts")
    local split = nil
-   local ratio_lu = nil
-   local ratio_rd = nil
+   local num_1 = nil
+   local num_2 = nil
    local max_depth = init_max_depth
    local infobox = capi.wibox({
          x = screen.workarea.x,
@@ -247,7 +247,7 @@ function interactive_layout_edit()
    end
 
    local function push_history()
-      history[#history + 1] = {#closed_areas, #open_areas, {}, current_cmd, max_depth, ratio_lu, ratio_rd}
+      history[#history + 1] = {#closed_areas, #open_areas, {}, current_cmd, max_depth, num_1, num_2}
    end
 
    local function pop_history()
@@ -266,8 +266,8 @@ function interactive_layout_edit()
 
       current_cmd = history[#history][4]
       max_depth = history[#history][5]
-      ratio_lu = history[#history][6]
-      ratio_rd = history[#history][7]
+      num_1 = history[#history][6]
+      num_2 = history[#history][7]
 
       table.remove(history, #history)
    end
@@ -296,13 +296,13 @@ function interactive_layout_edit()
    end
 
    local function handle_split(method, alt)
-      if ratio_lu == nil then ratio_lu = 1 end
-      if ratio_rd == nil then ratio_rd = 1 end
+      if num_1 == nil then num_1 = 1 end
+      if num_2 == nil then num_2 = 1 end
 
       if alt then
-         local tmp = ratio_lu
-         ratio_lu = ratio_rd
-         ratio_rd = tmp
+         local tmp = num_1
+         num_1 = num_2
+         num_2 = tmp
       end
 
       local a = pop_open_area()
@@ -313,7 +313,7 @@ function interactive_layout_edit()
       if method == "h" then
          lu = {
             x = a.x, y = a.y,
-            width = a.width / (ratio_lu + ratio_rd) * ratio_lu, height = a.height,
+            width = a.width / (num_1 + num_2) * num_1, height = a.height,
             depth = a.depth + 1,
             bl = a.bl, br = false, bu = a.bu, bd = a.bd,
          }
@@ -328,7 +328,7 @@ function interactive_layout_edit()
       elseif method == "v" then
          lu = {
             x = a.x, y = a.y,
-            width = a.width, height = a.height / (ratio_lu + ratio_rd) * ratio_lu,
+            width = a.width, height = a.height / (num_1 + num_2) * num_1,
             depth = a.depth + 1,
             bl = a.bl, br = a.br, bu = a.bu, bd = false
          }
@@ -341,10 +341,10 @@ function interactive_layout_edit()
          open_areas[#open_areas + 1] = rd
          open_areas[#open_areas + 1] = lu
       elseif method == "w" then
-         local x_interval = a.width / ratio_lu
-         local y_interval = a.height / ratio_rd
-         for y = ratio_rd, 1, -1 do
-            for x = ratio_lu, 1, -1 do
+         local x_interval = a.width / num_1
+         local y_interval = a.height / num_2
+         for y = num_2, 1, -1 do
+            for x = num_1, 1, -1 do
                local r = {
                   x = a.x + x_interval * (x - 1),
                   y = a.y + y_interval * (y - 1),
@@ -353,16 +353,16 @@ function interactive_layout_edit()
                   depth = a.depth + 1
                }
                if x == 1 then r.bl = a.bl else r.bl = false end
-               if x == ratio_lu then r.br = a.br else r.br = false end
+               if x == num_1 then r.br = a.br else r.br = false end
                if y == 1 then r.bu = a.bu else r.bu = false end
-               if y == ratio_rd then r.bd = a.bd else r.bd = false end
+               if y == num_2 then r.bd = a.bd else r.bd = false end
                open_areas[#open_areas + 1] = r
             end
          end
       end
 
-      ratio_lu = nil
-      ratio_rd = nil
+      num_1 = nil
+      num_2 = nil
    end
 
    local function cleanup()
@@ -408,13 +408,23 @@ function interactive_layout_edit()
             push_history()
             current_cmd = current_cmd .. "W"
             handle_split("w", false)
+         elseif key == "s" or key == "S" then
+            if #open_areas < 2 then
+            else
+               push_history()
+               current_cmd = current_cmd .. "s"
+               a1 = pop_open_area()
+               a2 = pop_open_area()
+               open_areas[#open_areas + 1] = a1
+               open_areas[#open_areas + 1] = a2
+            end
          elseif key == " " or key == "." then
             push_history()
             current_cmd = current_cmd .. "."
-            if ratio_lu ~= nil then
-               max_depth = ratio_lu
-               ratio_lu = nil
-               ratio_rd = nil
+            if num_1 ~= nil then
+               max_depth = num_1
+               num_1 = nil
+               num_2 = nil
             else
                push_area()
                if #open_areas == 0 then
@@ -430,14 +440,16 @@ function interactive_layout_edit()
             to_exit = true
             to_apply = true
          elseif tonumber(key) ~= nil then
-            push_history()
-            current_cmd = current_cmd .. key
             local v = tonumber(key)
             if v > 0 then
-               if ratio_lu == nil then
-                  ratio_lu = v
-               elseif ratio_rd == nil then
-                  ratio_rd = v
+               if num_1 == nil then
+                  push_history()
+                  current_cmd = current_cmd .. key
+                  num_1 = v
+               elseif num_2 == nil then
+                  push_history()
+                  current_cmd = current_cmd .. key
+                  num_2 = v
                end
             end
          elseif key == "BackSpace" then
