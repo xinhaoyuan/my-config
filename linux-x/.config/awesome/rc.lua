@@ -344,15 +344,6 @@ awful_rule.rules = {
    --       tag = "STICKY"
    --    }
    -- },
-   -- {
-   --    rule = { class = "Eclipse" },
-   --    properties = { floating = true }
-   -- },
-   -- {
-   --    -- for Erlang ET
-   --    rule = { name = "et_wx_contents_viewer .*" },
-   --    properties = { floating = true }
-   -- }
 }
 
 -- tags and layouts
