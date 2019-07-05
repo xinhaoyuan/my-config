@@ -20,8 +20,6 @@ local mono_font = beautiful.mono_font or beautiful.font
 -- -- dummy bar for conky
 -- aw.wibar.new({ position = "top", height = config.bar_height * config.widget_scale_factor, opacity = 0 })
 
-my_tray:set_base_size(config.bar_height)
-
 my_tag_list.buttons = aw.util.table.join(
    aw.button({ }, 1, aw.tag.viewonly),
    aw.button({ "Mod4" }, 1, aw.client.movetotag),
@@ -156,7 +154,15 @@ aw.screen.connect_for_each_screen(function (scr)
          spacing_widget = { color = beautiful.bg_normal, widget = wi.widget.separator },
          layout         = wi.layout.fixed.horizontal
       }
-      right_layout:add(my_tray)
+
+      my_tray:set_base_size(config.bar_height - dpi(4))
+      local tray_layout = wi.widget {
+         { forced_width = 0, forced_height = dpi(2), color = beautiful.bg_normal, widget = wi.widget.separator },
+         my_tray,
+         { forced_width = 0, forced_height = dpi(2), color = beautiful.bg_normal, widget = wi.widget.separator },
+         layout = wi.layout.align.vertical,
+      }
+      right_layout:add(tray_layout)
       -- local volume_widget = wi.widget.textbox()
       -- volume_widget:set_font(mono_font)
       -- vicious.register(volume_widget, vicious.widgets.volume,
@@ -166,8 +172,8 @@ aw.screen.connect_for_each_screen(function (scr)
       --                        args[1], label[args[2]])
       --                  end, 2, "Master")
       -- right_layout:add(volume_widget)
-      volumearc_widget:set_forced_height(config.bar_height)
-      volumearc_widget:set_forced_width(config.bar_height)
+      volumearc_widget:set_forced_height(config.bar_height - dpi(4))
+      volumearc_widget:set_forced_width(config.bar_height - dpi(4))
       right_layout:add(volumearc_widget)
       local clock = wi.widget.textclock(" %m/%d/%y %a %H:%M ")
       clock:set_font(mono_font)

@@ -32,6 +32,7 @@ local awful_keygrabber = require("awful.keygrabber")
 local naughty          = require("naughty")
 local beautiful        = require("beautiful")
 local wibox            = require("wibox")
+local mouse            = mouse
 local gears_timer      = require("gears.timer")
 local config           = require("my-config")
 local focus            = require("my-focus")
@@ -210,27 +211,17 @@ local client_buttons = awful.util.table.join(
 
 -- back to floating before moving
 
-function before_mouse_move_or_resize(c)
-   c:emit_signal("request::activate", "move_or_resize", {raise=false})
-   c:raise()
-   if not c.floating and not c.maximized then
-      local x = c.x
-      local y = c.y
-      local width = c.width
-      local height = c.height
-      c.floating = true
-      c.x = x
-      c.y = y
-      c.width = width
-      c.height = height
-   end
-end
+awful.mouse.resize.add_enter_callback(
+   function (c)
+      c:emit_signal("request::activate", "mouse.move", {raise=false})
+      c:raise()
+   end, 'mouse.move')
 
 awful.mouse.resize.add_enter_callback(
-   before_mouse_move_or_resize, 'mouse.move')
-
-awful.mouse.resize.add_enter_callback(
-   before_mouse_move_or_resize, 'mouse.resize')
+   function (c)
+      c:emit_signal("request::activate", "mouse.resize", {raise=false})
+      c:raise()
+   end, 'mouse.resize')
 
 -- --- super key handling (still broken)
 
