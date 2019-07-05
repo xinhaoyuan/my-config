@@ -3,6 +3,6 @@ local dpi   = require("beautiful.xresources").apply_dpi
 
 theme.font = "Sans 9"
 theme.mono_font = "Input 9"
-theme.useless_gap = dpi(4)
+theme.useless_gap = dpi(8)
 
 return theme
