@@ -1,0 +1,3 @@
+[submodule "linux-x/.config/awesome/layout-machi"]
+	path = linux-x/.config/awesome/layout-machi
+	url = https://github.com/xinhaoyuan/layout-machi.git

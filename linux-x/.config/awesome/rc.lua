@@ -1,6 +1,7 @@
 -- awesome v4 config
 -- Author: Xinhao Yuan (xinhaoyuan@gmail.com)
 
+
 -- Remember certain information after client is detached but before the object is gone.
 -- Need to do this before everything, so that signal handler fires before standard ones.
 client.connect_signal(
@@ -35,7 +36,7 @@ local gears_timer      = require("gears.timer")
 local config           = require("my-config")
 local focus            = require("my-focus")
 local autofocus        = require("my-autofocus")
-local machi            = require("layout-machi")
+local machi            = {layout = require("layout-machi.layout"), editor = require("layout-machi.editor")}
 local switcher         = require("awesome-switcher-mod")
 
 local HOME_DIR = os.getenv("HOME")
@@ -112,6 +113,8 @@ spawn_with_shell(HOME_DIR .. "/.xdesktoprc.awesome", false)
 
 -- keys
 
+local machi_editor_data = machi.editor.restore_data({ history_file = ".machi-history", gap = beautiful.useless_gap })
+
 -- base keys and buttons
 local global_keys = table_join(   
    awful.key({ "Mod1" }, "Tab",
@@ -122,7 +125,7 @@ local global_keys = table_join(
       function ()
          switcher.switch(-1, "Mod1", "Alt_L", "Shift", "Tab")
    end),
-   awful.key({ "Mod4" }, "/",               function () machi.interactive_layout_edit() end),
+   awful.key({ "Mod4" }, "/",               function () machi.editor.start_editor(machi_editor_data) end),
    awful.key({ "Mod4" }, "[",               function () awful_layout.inc(layouts, -1) end),
    awful.key({ "Mod4" }, "]",               function () awful_layout.inc(layouts, 1) end),
    awful.key({ "Mod4" }, "w",               function () my_focus_by_direction("up") end),
@@ -159,7 +162,7 @@ end
                             
 
 local client_keys = table_join(
-   awful.key({ "Mod4" }, "Tab", function (c) machi.cycle_region(c) end),
+   awful.key({ "Mod4" }, "Tab", function (c) machi.editor.cycle_region(c) end),
 
    awful.key({ "Mod4" }, "Up", function (c)
          if c.fullscreen then
@@ -203,6 +206,28 @@ local client_buttons = awful.util.table.join(
    awful.button({ "Mod4" }, 1, awful.mouse.client.move),
    awful.button({ "Mod4" }, 3, awful.mouse.client.resize)
 )
+
+-- back to floating before moving
+
+function set_floating_while_keep_geometry(c)
+   if not c.floating and not c.maximized then
+      local x = c.x
+      local y = c.y
+      local width = c.width
+      local height = c.height
+      c.floating = true
+      c.x = x
+      c.y = y
+      c.width = width
+      c.height = height
+   end
+end
+
+awful.mouse.resize.add_enter_callback(
+   set_floating_while_keep_geometry, 'mouse.move')
+
+awful.mouse.resize.add_enter_callback(
+   set_floating_while_keep_geometry, 'mouse.resize')
 
 -- --- super key handling (still broken)
 
@@ -359,15 +384,17 @@ awful_rule.rules = {
 --    end
 -- end
 local layouts = {
-   machi.create_layout("default", {})
+   machi.layout.create_layout("default", {})
 }
 
 -- initialize for each screen
 
 awful.screen.connect_for_each_screen(
    function (s)
-      awful.tag(tag_list, s, layouts[1])
-      -- 1 is the hidden tag
+      for i, t in ipairs(tag_list) do
+         awful.tag.add(t, { layout = layouts[1], gap = 0 })
+         -- 1 is the hidden tag
+      end
       s.tags[2]:view_only()
    end
 )
