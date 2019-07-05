@@ -20,7 +20,7 @@ local mono_font = beautiful.mono_font or beautiful.font
 -- -- dummy bar for conky
 -- aw.wibar.new({ position = "top", height = config.bar_height * config.widget_scale_factor, opacity = 0 })
 
-my_tray:set_base_size(dpi(config.bar_height))
+my_tray:set_base_size(config.bar_height)
 
 my_tag_list.buttons = aw.util.table.join(
    aw.button({ }, 1, aw.tag.viewonly),
@@ -109,7 +109,7 @@ aw.screen.connect_for_each_screen(function (scr)
             screen = s,
             fg = beautiful.fg_normal,
             bg = beautiful.bg_normal,
-            height = dpi(config.bar_height),
+            height = config.bar_height,
             position = "bottom",
             border_width = 0,
       })
@@ -166,6 +166,8 @@ aw.screen.connect_for_each_screen(function (scr)
       --                        args[1], label[args[2]])
       --                  end, 2, "Master")
       -- right_layout:add(volume_widget)
+      volumearc_widget:set_forced_height(config.bar_height)
+      volumearc_widget:set_forced_width(config.bar_height)
       right_layout:add(volumearc_widget)
       local clock = wi.widget.textclock(" %m/%d/%y %a %H:%M ")
       clock:set_font(mono_font)
@@ -173,8 +175,6 @@ aw.screen.connect_for_each_screen(function (scr)
       calendar_widget:attach(clock)
       right_layout:add(clock)
       right_layout:add(wc_button_container[s])
-
-      
 
       local layout = wi.layout.align.horizontal()
       layout:set_left(left_layout)
