@@ -113,7 +113,7 @@ spawn_with_shell(HOME_DIR .. "/.xdesktoprc.awesome", false)
 
 -- keys
 
-local machi_editor_data = machi.editor.restore_data({ history_file = ".machi-history", gap = beautiful.useless_gap })
+local machi_editor_data = machi.editor.restore_data({ history_file = ".machi-history", history_save_max = 20, gap = beautiful.useless_gap })
 
 -- base keys and buttons
 local global_keys = table_join(   
@@ -377,14 +377,15 @@ awful_rule.rules = {
 --       )
 --    end
 -- end
-local layouts = {
-   machi.layout.create_layout("default", {})
-}
 
 -- initialize for each screen
 
 awful.screen.connect_for_each_screen(
    function (s)
+      local layouts = {
+         machi.layout.create_layout("default", {})
+      }
+
       for i, t in ipairs(tag_list) do
          awful.tag.add(t, { layout = layouts[1], gap = 0 })
          -- 1 is the hidden tag

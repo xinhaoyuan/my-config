@@ -7,6 +7,8 @@ local shp = require("gears.shape")
 local gmath = require("gears.math")
 local vicious = require("vicious")
 local config = require("my-config")
+local volumearc_widget = require("awesome-wm-widgets.volumearc-widget.volumearc")
+local calendar = require("calendar.calendar")
 local dpi = require("beautiful.xresources").apply_dpi
 
 local my_wibar = {}
@@ -149,22 +151,30 @@ aw.screen.connect_for_each_screen(function (scr)
 
       local left_layout = wi.layout.fixed.horizontal()
       left_layout:add(my_tag_list[s])
-
-      local right_layout = wi.layout.fixed.horizontal()
+      local right_layout = wi.widget {
+         spacing        = dpi(5),
+         spacing_widget = { color = beautiful.bg_normal, widget = wi.widget.separator },
+         layout         = wi.layout.fixed.horizontal
+      }
       right_layout:add(my_tray)
-      local volume_widget = wi.widget.textbox()
-      volume_widget:set_font(mono_font)
-      vicious.register(volume_widget, vicious.widgets.volume,
-                       function (widget, args)
-                          local label = {["♫"] = "O", ["♩"] = "M"}
-                          return ("V[%d%% %s]"):format(
-                             args[1], label[args[2]])
-                       end, 2, "Master")
-      right_layout:add(volume_widget)
+      -- local volume_widget = wi.widget.textbox()
+      -- volume_widget:set_font(mono_font)
+      -- vicious.register(volume_widget, vicious.widgets.volume,
+      --                  function (widget, args)
+      --                     local label = {["♫"] = "O", ["♩"] = "M"}
+      --                     return ("V[%d%% %s]"):format(
+      --                        args[1], label[args[2]])
+      --                  end, 2, "Master")
+      -- right_layout:add(volume_widget)
+      right_layout:add(volumearc_widget)
       local clock = wi.widget.textclock(" %m/%d/%y %a %H:%M ")
       clock:set_font(mono_font)
+      calendar_widget = calendar({ fdow = 7, position = "bottom_right" })
+      calendar_widget:attach(clock)
       right_layout:add(clock)
       right_layout:add(wc_button_container[s])
+
+      
 
       local layout = wi.layout.align.horizontal()
       layout:set_left(left_layout)
