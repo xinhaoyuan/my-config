@@ -140,6 +140,7 @@ local global_keys = table_join(
    awful.key({ "Mod4" }, "Return",          function () spawn(config.cmd_terminal) end),
    awful.key({ "Mod4" }, "t",               function () spawn(config.cmd_terminal) end),
    awful.key({ "Mod4" }, "e",               function () spawn(config.cmd_file_manager) end),
+   awful.key({ "Mod4" }, "\\",              function () spawn("rofi show -combi-modi window,drun -show combi -modi combi") end),
    awful.key({ "Mod4", "Control" }, "m",    function ()
          for _, c in pairs(capi.client.get()) do c.minimized = false end
    end),
@@ -209,7 +210,9 @@ local client_buttons = awful.util.table.join(
 
 -- back to floating before moving
 
-function set_floating_while_keep_geometry(c)
+function before_mouse_move_or_resize(c)
+   c:emit_signal("request::activate", "move_or_resize", {raise=false})
+   c:raise()
    if not c.floating and not c.maximized then
       local x = c.x
       local y = c.y
@@ -224,10 +227,10 @@ function set_floating_while_keep_geometry(c)
 end
 
 awful.mouse.resize.add_enter_callback(
-   set_floating_while_keep_geometry, 'mouse.move')
+   before_mouse_move_or_resize, 'mouse.move')
 
 awful.mouse.resize.add_enter_callback(
-   set_floating_while_keep_geometry, 'mouse.resize')
+   before_mouse_move_or_resize, 'mouse.resize')
 
 -- --- super key handling (still broken)
 
