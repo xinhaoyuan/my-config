@@ -114,7 +114,7 @@ spawn_with_shell(HOME_DIR .. "/.xdesktoprc.awesome", false)
 
 -- keys
 
-local machi_editor = machi.editor.create(machi.editor.restore_data({ history_file = ".machi-history", history_save_max = 20, gap = beautiful.useless_gap }))
+local machi_editor = machi.editor.create()
 
 -- base keys and buttons
 local global_keys = table_join(
@@ -382,7 +382,7 @@ awful.screen.connect_for_each_screen(
       s:connect_signal(
          "property::workarea",
          function (s)
-            print("fix machi layout according to new workarea")
+            -- fix machi layout according to the new workarea
             if machi_layout.cmd then
                machi_editor.set_by_cmd(machi_layout, s, machi_layout.cmd)
             end
