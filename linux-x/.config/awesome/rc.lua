@@ -100,7 +100,7 @@ local my_focus_by_direction = function(dir)
 end
 
 local manage_mode_enter = function ()
-   
+
 end
 
 -- Alt-Tab switcher
@@ -114,10 +114,10 @@ spawn_with_shell(HOME_DIR .. "/.xdesktoprc.awesome", false)
 
 -- keys
 
-local machi_editor_data = machi.editor.restore_data({ history_file = ".machi-history", history_save_max = 20, gap = beautiful.useless_gap })
+local machi_editor = machi.editor.create(machi.editor.restore_data({ history_file = ".machi-history", history_save_max = 20, gap = beautiful.useless_gap }))
 
 -- base keys and buttons
-local global_keys = table_join(   
+local global_keys = table_join(
    awful.key({ "Mod1" }, "Tab",
       function ()
          switcher.switch( 1, "Mod1", "Alt_L", "Shift", "Tab")
@@ -126,7 +126,7 @@ local global_keys = table_join(
       function ()
          switcher.switch(-1, "Mod1", "Alt_L", "Shift", "Tab")
    end),
-   awful.key({ "Mod4" }, "/",               function () machi.editor.start_editor(machi_editor_data) end),
+   awful.key({ "Mod4" }, "/",               function () machi_editor.start_interactive() end),
    awful.key({ "Mod4" }, "[",               function () awful_layout.inc(layouts, -1) end),
    awful.key({ "Mod4" }, "]",               function () awful_layout.inc(layouts, 1) end),
    awful.key({ "Mod4" }, "w",               function () my_focus_by_direction("up") end),
@@ -160,8 +160,8 @@ for i = 2, #tag_list do
                awful.client.toggletag(c.screen.tags[i], c)
          end),
          global_keys)
-end        
-                            
+end
+
 
 local client_keys = table_join(
    awful.key({ "Mod4" }, "Tab", function (c) machi.editor.cycle_region(c) end),
@@ -187,7 +187,7 @@ local client_keys = table_join(
    awful.key({ "Mod4" }, "f", function (c)
          c.fullscreen = not c.fullscreen
    end),
-   
+
    awful.key({ "Mod4" }, "Right", function (c)
          if c.fullscreen then
          else
@@ -345,7 +345,7 @@ awful_rule.rules = {
 --    if config.tag_filter(t) then
 --       tag_index = tag_index + 1
 --       if tag_index >= 10 then break end
-      
+
 --       keys_switch_tags = table_join(
 --          keys_switch_tags,
 --          awful.key({ "Mod4" }, tostring(tag_index), function ()
@@ -373,9 +373,21 @@ awful_rule.rules = {
 
 awful.screen.connect_for_each_screen(
    function (s)
+      local machi_layout = machi.layout.create()
+      machi_editor.try_restore_last(machi_layout, s)
       local layouts = {
-         machi.layout.create_layout("default", {})
+         machi_layout
       }
+
+      s:connect_signal(
+         "property::workarea",
+         function (s)
+            print("fix machi layout according to new workarea")
+            if machi_layout.cmd then
+               machi_editor.set_by_cmd(machi_layout, s, machi_layout.cmd)
+            end
+         end
+      )
 
       for i, t in ipairs(tag_list) do
          awful.tag.add(t, { layout = layouts[1], gap = 0 })
