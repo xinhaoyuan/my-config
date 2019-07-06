@@ -164,7 +164,7 @@ end
 
 
 local client_keys = table_join(
-   awful.key({ "Mod4" }, "Tab", function (c) machi.editor.cycle_region(c) end),
+   awful.key({ "Mod4" }, "Tab", function (c) machi.editor.fit_region(c) end),
 
    awful.key({ "Mod4" }, "Up", function (c)
          if c.fullscreen then
