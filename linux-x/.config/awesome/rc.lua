@@ -37,7 +37,10 @@ local gears_timer      = require("gears.timer")
 local config           = require("my-config")
 local focus            = require("my-focus")
 local autofocus        = require("my-autofocus")
-local machi            = {layout = require("layout-machi.layout"), editor = require("layout-machi.editor")}
+local machi            = {
+   layout              = require("layout-machi.layout"),
+   editor              = require("layout-machi.editor"),
+   switcher            = require("layout-machi.switcher")}
 local switcher         = require("awesome-switcher-mod")
 
 local HOME_DIR = os.getenv("HOME")
@@ -164,7 +167,7 @@ end
 
 
 local client_keys = table_join(
-   awful.key({ "Mod4" }, "Tab", function (c) machi.editor.fit_region(c) end),
+   awful.key({ "Mod4" }, "Tab", function (c) if not machi.editor.fit_region(c) then machi.switcher.start(c) end end),
 
    awful.key({ "Mod4" }, "Up", function (c)
          if c.fullscreen then
@@ -312,7 +315,7 @@ awful_rule.rules = {
    {
       rule = { class = "URxvt" },
       properties = {
-         opacity = 0.85,
+         opacity = 0.9,
       },
    },
    {
