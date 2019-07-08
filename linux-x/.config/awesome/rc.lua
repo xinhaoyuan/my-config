@@ -159,7 +159,7 @@ for i = 2, #tag_list do
       table_join(
          awful.key({ "Mod4" }, tostring(i - 1), function () awful.screen.focused().tags[i]:view_only() end),
          awful.key({ "Mod4", "Shift" }, tostring(i - 1), function () awful.tag.viewtoggle(awful.screen.focused().tags[i]) end),
-         awful.key({ "Mod4", "Mod1" }, tostring(i - 1), function ()
+         awful.key({ "Mod4", "Control" }, tostring(i - 1), function ()
                local c = client.focus
                if c == nil then return end
                awful.client.toggletag(c.screen.tags[i], c)
