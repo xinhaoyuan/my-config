@@ -1,9 +1,18 @@
 export PATH="$HOME/bin:/usr/local/sbin:/usr/local/bin:$PATH"
-export HIDPI="1"
+
+$HOME/bin/set_dpi.py
+
+export HIDPI_SCALE="$(xrdb -query | grep 'hidpi.scaling:' | sed 's/hidpi.scaling:\s\+//g')"
+
+if [ "$(echo "$HIDPI_SCALE > 1.0" | bc -l)" = "1" ]; then
+    export HIDPI="1"
+else
+    export HIDPI=""
+fi
+
+echo HIDPI: $HIDPI $HIDPI_SCALE
 
 rm $HOME/.xsession-init-guard
-
-xset +fp $HOME/.fonts/tamsyn-font-1.11
 
 if [ -e "$HOME/.xsessionrc-layout" ]; then
     . $HOME/.xsessionrc-layout

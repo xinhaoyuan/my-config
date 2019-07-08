@@ -1,6 +1,6 @@
 .PHONY: all clean
 
-BIN := xinq osd-box-sel
+BIN := # xinq osd-box-sel
 
 all: ${BIN}
 
