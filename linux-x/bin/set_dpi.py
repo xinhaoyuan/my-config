@@ -4,28 +4,34 @@ import subprocess as sp
 import re
 import math
 import sys
+import argparse
 
-dpi = None
-dpy_info = sp.check_output("xrandr | grep ' connected '", shell = True).decode("utf-8")
-for line in dpy_info.split('\n'):
-    if "primary" in line:
-        m = re.search("([0-9]+)mm x ([0-9]+)mm", line)
-        if not m:
-            continue
-        dev_width = int(m.group(1))
-        dev_height = int(m.group(2))
+parser = argparse.ArgumentParser()
+parser.add_argument("--dpi", type = int)
+args = parser.parse_args()
 
-        m = re.search("([0-9]+)x([0-9]+)\\+[0-9]+\\+[0-9]+", line)
-        if not m:
-            continue
-        res_width = int(m.group(1))
-        res_height = int(m.group(2))
+dpi = args.dpi
+if dpi is None:
+    dpy_info = sp.check_output("xrandr | grep ' connected '", shell = True).decode("utf-8")
+    for line in dpy_info.split('\n'):
+        if "primary" in line:
+            m = re.search("([0-9]+)mm x ([0-9]+)mm", line)
+            if not m:
+                continue
+            dev_width = int(m.group(1))
+            dev_height = int(m.group(2))
 
-        sys.stderr.write(
-            "Info: {} {} {} {}\n".format(dev_width, dev_height, res_width, res_height))
+            m = re.search("([0-9]+)x([0-9]+)\\+[0-9]+\\+[0-9]+", line)
+            if not m:
+                continue
+            res_width = int(m.group(1))
+            res_height = int(m.group(2))
 
-        dpi_w = res_width / (dev_width / 25.4)
-        dpi = math.floor(dpi_w / 96) * 96
+            sys.stderr.write(
+                "Info: {} {} {} {}\n".format(dev_width, dev_height, res_width, res_height))
+
+            dpi_w = res_width / (dev_width / 25.4)
+            dpi = math.floor(dpi_w / 48) * 48
 
 if dpi is not None:
     scaling = dpi / 96.0
