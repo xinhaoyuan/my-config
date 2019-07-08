@@ -393,7 +393,7 @@ awful.screen.connect_for_each_screen(
       )
 
       for i, t in ipairs(tag_list) do
-         awful.tag.add(t, { layout = layouts[1], gap = 0 })
+         awful.tag.add(t, { screen = s, layout = layouts[1], gap = 0 })
          -- 1 is the hidden tag
       end
       s.tags[2]:view_only()
