@@ -379,19 +379,25 @@ awful_rule.rules = {
 awful.screen.connect_for_each_screen(
    function (s)
       -- generate screen name
-      local info_array = {}
-      for _, info in ipairs(s.outputs) do
-         info_array[#info_array + 1] = info.name
-      end
-      table.sort(info_array)
-      local approx_id = ""
-      for i, info in ipairs(info_array) do
-         if i == 1 then
-            approx_id = info
-         else
-            approx_id = approx_id .. "+" .. info
-         end
-      end
+      -- local info_array = {}
+      -- print("!!! " .. tostring(#s.outputs))
+      -- for _, info in ipairs(s.outputs) do
+      --    print("!!! " .. tostring(#info))
+      --    for k, v in pairs(info.name) do
+      --       print(tostring(k) .. ":" .. tostring("v"))
+      --    end
+      --    info_array[#info_array + 1] = info.name
+      -- end
+      -- table.sort(info_array)
+      -- local approx_id = ""
+      -- for i, info in ipairs(info_array) do
+      --    if i == 1 then
+      --       approx_id = info
+      --    else
+      --       approx_id = approx_id .. "+" .. info
+      --    end
+      -- end
+      local approx_id = tostring(s.geometry.width) .. "x" .. tostring(s.geometry.height) .. "+" .. tostring(s.geometry.x) .. "+" .. tostring(s.geometry.y)
 
       print("connect screen " .. approx_id)
 
@@ -401,8 +407,8 @@ awful.screen.connect_for_each_screen(
             -- fix machi layout according to the new workarea
             for _, t in ipairs(s.tags) do
                local layout = t.machi_layout
-               if layout ~= nil and layout.cmd ~= nil then
-                  machi_editor.set_by_cmd(layout, s, layout.cmd)
+               if layout ~= nil then
+                  machi_editor.refresh_layout(layout, s)
                end
             end
          end
