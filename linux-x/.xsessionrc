@@ -1,6 +1,6 @@
 export PATH="$HOME/bin:/usr/local/sbin:/usr/local/bin:$PATH"
 
-$HOME/bin/set_dpi.py
+$HOME/bin/set_dpi.py --fallback-dpi 144 --min-dpi 96 --max-dpi 192
 
 export HIDPI_SCALE="$(xrdb -query | grep 'hidpi.scaling:' | sed 's/hidpi.scaling:\s\+//g')"
 

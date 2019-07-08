@@ -6,6 +6,7 @@ if [ -n $HOME/.xsession-init-guard ]; then
     fcitx
     compton --config $HOME/.config/compton/compton.conf &
     xscreensaver -no-splash &
+    cbatticon &
     # wicd-gtk -t &
     nm-applet &
 fi
