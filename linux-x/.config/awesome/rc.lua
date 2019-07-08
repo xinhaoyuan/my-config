@@ -115,9 +115,11 @@ switcher.settings.cycle_raise_client = true  -- raise clients on cycle
 
 spawn_with_shell(HOME_DIR .. "/.xdesktoprc.awesome", false)
 
--- keys
+-- global objects
 
-local machi_editor = machi.editor.create()
+machi_editor = machi.editor.create()
+
+-- keys
 
 -- base keys and buttons
 local global_keys = table_join(
@@ -130,8 +132,8 @@ local global_keys = table_join(
          switcher.switch(-1, "Mod1", "Alt_L", "Shift", "Tab")
    end),
    awful.key({ "Mod4" }, "/",               function () machi_editor.start_interactive() end),
-   awful.key({ "Mod4" }, "[",               function () awful_layout.inc(layouts, -1) end),
-   awful.key({ "Mod4" }, "]",               function () awful_layout.inc(layouts, 1) end),
+   -- awful.key({ "Mod4" }, "[",               function () awful_layout.inc(layouts, -1) end),
+   -- awful.key({ "Mod4" }, "]",               function () awful_layout.inc(layouts, 1) end),
    awful.key({ "Mod4" }, "w",               function () my_focus_by_direction("up") end),
    awful.key({ "Mod4" }, "a",               function () my_focus_by_direction("left") end),
    awful.key({ "Mod4" }, "s",               function () my_focus_by_direction("down") end),
@@ -376,26 +378,44 @@ awful_rule.rules = {
 
 awful.screen.connect_for_each_screen(
    function (s)
-      local machi_layout = machi.layout.create()
-      machi_editor.try_restore_last(machi_layout, s)
-      local layouts = {
-         machi_layout
-      }
+      -- generate screen name
+      local info_array = {}
+      for _, info in ipairs(s.outputs) do
+         info_array[#info_array + 1] = info.name
+      end
+      table.sort(info_array)
+      local approx_id = ""
+      for i, info in ipairs(info_array) do
+         if i == 1 then
+            approx_id = info
+         else
+            approx_id = approx_id .. "+" .. info
+         end
+      end
+
+      print("connect screen " .. approx_id)
 
       s:connect_signal(
          "property::workarea",
          function (s)
             -- fix machi layout according to the new workarea
-            if machi_layout.cmd then
-               machi_editor.set_by_cmd(machi_layout, s, machi_layout.cmd)
+            for _, t in ipairs(s.tags) do
+               local layout = t.machi_layout
+               if layout ~= nil and layout.cmd ~= nil then
+                  machi_editor.set_by_cmd(layout, s, layout.cmd)
+               end
             end
          end
       )
 
       for i, t in ipairs(tag_list) do
-         awful.tag.add(t, { screen = s, layout = layouts[1], gap = 0 })
-         -- 1 is the hidden tag
+         local layout = machi.layout.create(approx_id .. "+" .. t)
+         machi_editor.try_restore_last(layout, s)
+
+         local tag = awful.tag.add(t, { screen = s, layout = layout, gap = 0 })
+         tag.machi_layout = layout
       end
+      -- 1 is the hidden tag
       s.tags[2]:view_only()
    end
 )
