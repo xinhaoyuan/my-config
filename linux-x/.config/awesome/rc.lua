@@ -42,6 +42,7 @@ local machi            = {
    editor              = require("layout-machi.editor"),
    switcher            = require("layout-machi.switcher")}
 local switcher         = require("awesome-switcher-mod")
+local utils            = require("my-utils")
 
 local HOME_DIR = os.getenv("HOME")
 
@@ -401,22 +402,21 @@ awful.screen.connect_for_each_screen(
 
       print("connect screen " .. approx_id)
 
-      s:connect_signal(
-         "property::workarea",
-         function (s)
-            -- fix machi layout according to the new workarea
-            for _, t in ipairs(s.tags) do
-               local layout = t.machi_layout
-               if layout ~= nil then
-                  machi_editor.refresh_layout(layout, s)
-               end
-            end
-         end
-      )
+      -- s:connect_signal(
+      --    "property::workarea",
+      --    function (s)
+      --       -- fix machi layout according to the new workarea
+      --       for _, t in ipairs(s.tags) do
+      --          local layout = t.machi_layout
+      --          if layout ~= nil then
+      --             machi_editor.refresh_layout(layout, s)
+      --          end
+      --       end
+      --    end
+      -- )
 
       for i, t in ipairs(tag_list) do
-         local layout = machi.layout.create(approx_id .. "+" .. t)
-         machi_editor.try_restore_last(layout, s)
+         local layout = machi.layout.create(approx_id .. "+" .. t, machi_editor)
 
          local tag = awful.tag.add(t, { screen = s, layout = layout, gap = 0 })
          tag.machi_layout = layout
