@@ -130,7 +130,7 @@ aw.screen.connect_for_each_screen(function (scr)
          widget = wi.container.background
       }
 
-      wc_button:connect_signal(
+      wc_button_container[s]:connect_signal(
          "button::press",
          function (_, _, _, b)
             local c = client.focus
