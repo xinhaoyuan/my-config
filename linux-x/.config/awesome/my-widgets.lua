@@ -149,6 +149,7 @@ aw.screen.connect_for_each_screen(function (scr)
       )
 
       local left_layout = wi.layout.fixed.horizontal()
+      left_layout:add(aw.widget.layoutbox(s))
       left_layout:add(my_tag_list[s])
       local right_layout = wi.widget {
          spacing        = dpi(5),
