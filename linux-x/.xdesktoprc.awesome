@@ -8,6 +8,3 @@ pkill conky
 
 # conky -c $HOME/.config/conky/bar -d
 # conky -c $HOME/.config/conky/details -d
-
-synapse -s &
-touch $HOME/.xsession-init-guard

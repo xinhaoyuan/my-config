@@ -2,11 +2,14 @@
 
 # will be executed after the window manager is ready
 nitrogen --restore
-if [ -n $HOME/.xsession-init-guard ]; then
+if [ ! -e $HOME/.xsession-init-guard ]; then
     fcitx
     compton --config $HOME/.config/compton/compton.conf &
     xscreensaver -no-splash &
     cbatticon -n &
     # wicd-gtk -t &
     nm-applet &
+    synapse -s &
 fi
+
+touch $HOME/.xsession-init-guard
