@@ -300,12 +300,7 @@ awful_rule.rules = {
          border_color = beautiful.border_normal,
          screen = function(c) return awesome.startup and c.screen or awful.screen.focused() end,
          floating = true,
-      }
-   },
-   {
-      rule = { type = "normal" },
-      properties = {
-         placement = awful.placement.centered + awful.placement.no_overlap + awful.placement.no_offscreen,
+         placement = awful.placement.centered,
       }
    },
    {
