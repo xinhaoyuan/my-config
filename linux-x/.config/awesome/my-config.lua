@@ -19,7 +19,6 @@ local config = {
    tag_filter = function (name)
       return name ~= "STICKY"
    end,
-   bar_height = dpi(20),
    cmd_terminal = "urxvt",
    cmd_file_manager = "pcmanfm",
 }

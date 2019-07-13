@@ -37,10 +37,7 @@ local gears_timer      = require("gears.timer")
 local config           = require("my-config")
 local focus            = require("my-focus")
 local autofocus        = require("my-autofocus")
-local machi            = {
-   layout              = require("layout-machi.layout"),
-   editor              = require("layout-machi.editor"),
-   switcher            = require("layout-machi.switcher")}
+local machi            = require("layout-machi")
 local switcher         = require("awesome-switcher-mod")
 local utils            = require("my-utils")
 
@@ -116,10 +113,6 @@ switcher.settings.cycle_raise_client = true  -- raise clients on cycle
 
 spawn_with_shell(HOME_DIR .. "/.xdesktoprc.awesome", false)
 
--- global objects
-
-machi_editor = machi.editor.create()
-
 -- keys
 
 -- base keys and buttons
@@ -132,7 +125,7 @@ local global_keys = table_join(
       function ()
          switcher.switch(-1, "Mod1", "Alt_L", "Shift", "Tab")
    end),
-   awful.key({ "Mod4" }, "/",               function () machi_editor.start_interactive() end),
+   awful.key({ "Mod4" }, "/",               function () machi.default_editor.start_interactive() end),
    -- awful.key({ "Mod4" }, "[",               function () awful_layout.inc(layouts, -1) end),
    -- awful.key({ "Mod4" }, "]",               function () awful_layout.inc(layouts, 1) end),
    awful.key({ "Mod4" }, "w",               function () my_focus_by_direction("up") end),
@@ -151,6 +144,7 @@ local global_keys = table_join(
    awful.key({ "Mod4", "Control" }, "m",    function ()
          for _, c in pairs(capi.client.get()) do c.minimized = false end
    end),
+   awful.key({ "Mod4", "Control" }, "r", awesome.restart),
    awful.key({ "Mod4", "Control" }, "Escape", awesome.quit)
 )
 
@@ -167,7 +161,6 @@ for i = 2, #tag_list do
          end),
          global_keys)
 end
-
 
 local client_keys = table_join(
    awful.key({ "Mod4" }, "Tab", function (c) if not machi.editor.fit_region(c) then machi.switcher.start(c) end end),
@@ -402,24 +395,10 @@ awful.screen.connect_for_each_screen(
 
       print("connect screen " .. approx_id)
 
-      -- s:connect_signal(
-      --    "property::workarea",
-      --    function (s)
-      --       -- fix machi layout according to the new workarea
-      --       for _, t in ipairs(s.tags) do
-      --          local layout = t.machi_layout
-      --          if layout ~= nil then
-      --             machi_editor.refresh_layout(layout, s)
-      --          end
-      --       end
-      --    end
-      -- )
+      local layout = machi.layout.create(approx_id, machi.default_editor)
 
       for i, t in ipairs(tag_list) do
-         local layout = machi.layout.create(approx_id .. "+" .. t, machi_editor)
-
          local tag = awful.tag.add(t, { screen = s, layout = layout, gap = 0 })
-         tag.machi_layout = layout
       end
       -- 1 is the hidden tag
       s.tags[2]:view_only()

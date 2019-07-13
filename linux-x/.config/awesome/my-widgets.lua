@@ -108,7 +108,7 @@ aw.screen.connect_for_each_screen(function (scr)
             screen = s,
             fg = beautiful.fg_normal,
             bg = beautiful.bg_normal,
-            height = config.bar_height,
+            height = beautiful.bar_height,
             position = "bottom",
             border_width = 0,
       })
@@ -156,7 +156,7 @@ aw.screen.connect_for_each_screen(function (scr)
          layout         = wi.layout.fixed.horizontal
       }
 
-      my_tray:set_base_size(config.bar_height - dpi(4))
+      my_tray:set_base_size(beautiful.bar_height - dpi(4))
       local tray_layout = wi.widget {
          { forced_width = 0, forced_height = dpi(2), color = beautiful.bg_normal, widget = wi.widget.separator },
          my_tray,
@@ -173,8 +173,8 @@ aw.screen.connect_for_each_screen(function (scr)
       --                        args[1], label[args[2]])
       --                  end, 2, "Master")
       -- right_layout:add(volume_widget)
-      volumearc_widget:set_forced_height(config.bar_height - dpi(4))
-      volumearc_widget:set_forced_width(config.bar_height - dpi(4))
+      volumearc_widget:set_forced_height(beautiful.bar_height - dpi(4))
+      volumearc_widget:set_forced_width(beautiful.bar_height - dpi(4))
       right_layout:add(volumearc_widget)
       -- right_layout:add(battery_widget)
       local clock = wi.widget.textclock(" %m/%d/%y %a %H:%M ")
