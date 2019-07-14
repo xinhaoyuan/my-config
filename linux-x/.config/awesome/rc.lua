@@ -41,6 +41,8 @@ local machi            = require("layout-machi")
 local switcher         = require("awesome-switcher-mod")
 local utils            = require("my-utils")
 
+beautiful.layout_machi = machi.get_icon()
+
 local HOME_DIR = os.getenv("HOME")
 
 -- Define the tag list upfront for keybindings
@@ -386,14 +388,9 @@ awful.screen.connect_for_each_screen(
       --       approx_id = approx_id .. "+" .. info
       --    end
       -- end
-      local approx_id = tostring(s.geometry.width) .. "x" .. tostring(s.geometry.height) .. "+" .. tostring(s.geometry.x) .. "+" .. tostring(s.geometry.y)
-
-      print("connect screen " .. approx_id)
-
-      local layout = machi.layout.create(approx_id, machi.default_editor)
 
       for i, t in ipairs(tag_list) do
-         local tag = awful.tag.add(t, { screen = s, layout = layout, gap = 0 })
+         local tag = awful.tag.add(t, { screen = s, layout = machi.default_layout, gap = 0 })
       end
       -- 1 is the hidden tag
       s.tags[2]:view_only()
