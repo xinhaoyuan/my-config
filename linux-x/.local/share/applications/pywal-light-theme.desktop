@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=pywal-light-theme
+GenericName=Generate pywal light theme
+Comment=
+Exec=wal -i %F --saturate 0.6 -l
+Terminal=false
+StartupNotify=false
+# Icon=nomacs
+Type=Application
+Categories=Graphics;RasterGraphics;2DGraphics;
+MimeType=image/gif;image/jpeg;image/png;image/bmp;image/tiff;image/x-eps;image/x-ico;image/x-portable-bitmap;image/x-portable-graymap;image/x-portable-pixmap;image/x-xbitmap;image/x-xpixmap;
