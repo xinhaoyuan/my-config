@@ -2,7 +2,7 @@
 Name=pywal-dark-theme
 GenericName=Generate pywal dark theme
 Comment=
-Exec=wal -i %F --saturate 0.6
+Exec=wal -i %F
 Terminal=false
 StartupNotify=false
 # Icon=nomacs

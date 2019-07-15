@@ -18,7 +18,7 @@
 (defcustom my-font-name "Hack" "undocumented")
 (defcustom my-font-toggle-flag 0 "undocumented")
 (defcustom my-font-big-size 16 "undocumented")
-(defcustom my-font-small-size 9 "undocumented")
+(defcustom my-font-small-size 10 "undocumented")
 (defcustom my-font-big (concat my-font-name "-" (number-to-string my-font-big-size)) "undocumented")
 (defcustom my-font-small (concat my-font-name "-" (number-to-string my-font-small-size)) "undocumented")
 (defun toggle-big-font ()
@@ -68,31 +68,31 @@
 			'(width . 100)
 			'(height . 35)
 			
-			'(cursor-color	   . "#f0f0f0")
-			'(foreground-color . "#f0f0f0")
-			'(background-color . "#2d2d2d")
+			;; '(cursor-color	   . "#f0f0f0")
+			;; '(foreground-color . "#f0f0f0")
+			;; '(background-color . "#2d2d2d")
 			
 			(cons 'font my-font-small)
 			))
 		 (modify-frame-parameters f frame-alist)
 		 )
-	       (setq frame-background-mode 'dark)
 	       )
 	   ;; TTY
            ;; For rxvt-unicode-256color, the current theme detection does not work because COLORFGBG returns "default".
            ;; We have to use the xterm way but modified to make it fast
-           (if (string= "rxvt-unicode-256color" (getenv "TERM"))
+           (if (string-prefix-p "rxvt" (getenv "TERM"))
                (progn
                  ;; for xterm-query
                  (load "term/xterm.el")
                  (flet ((my-xterm-maybe-set-dark-background-mode
                          (redc greenc bluec)
-                         (message "%d %d %d" redc greenc bluec)
                          ;; Use the heuristic in `frame-set-background-mode' to decide if a
                          ;; frame is dark.
                          (if (< (+ redc greenc bluec) (* .6 (+ 65535 65535 65535)))
                              (setq frame-background-mode 'dark)
-                           (setq frame-background-mode 'light))
+                           (setq frame-background-mode 'light)
+                           )
+                         (frame-set-background-mode f)
                          )
                         (my-xterm--report-background-handler
                          ()

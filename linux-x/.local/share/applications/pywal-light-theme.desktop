@@ -2,7 +2,7 @@
 Name=pywal-light-theme
 GenericName=Generate pywal light theme
 Comment=
-Exec=wal -i %F --saturate 0.6 -l
+Exec=wal -i %F -l
 Terminal=false
 StartupNotify=false
 # Icon=nomacs
