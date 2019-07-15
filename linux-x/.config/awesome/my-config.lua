@@ -20,7 +20,7 @@ local config = {
       return name ~= "STICKY"
    end,
    cmd_terminal = "urxvt",
-   cmd_file_manager = "pcmanfm",
+   cmd_file_manager = "thunar",
 }
 
 config.tasklist_template = {

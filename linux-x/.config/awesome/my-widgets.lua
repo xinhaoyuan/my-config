@@ -66,7 +66,7 @@ my_task_list.buttons = aw.util.table.join(
 )
 
 local wc_button_container = {}
-local current_screen = mouse.screen.index
+local current_screen = nil
 
 aw.screen.connect_for_each_screen(function (scr)
       s = scr.index
@@ -126,7 +126,6 @@ aw.screen.connect_for_each_screen(function (scr)
             right = dpi(5),
             widget = wi.container.margin
          },
-         bg = (s == current_screen and beautiful.bg_focus or beautiful.bg_normal),
          widget = wi.container.background
       }
 
@@ -199,8 +198,12 @@ tm {
    callback = function()
       local nscreen = mouse.screen.index
       if nscreen ~= current_screen then
-         wc_button_container[current_screen]:set_bg(beautiful.bg_normal)
+         if current_screen ~= nil then
+            wc_button_container[current_screen]:set_bg(beautiful.bg_normal)
+            wc_button_container[current_screen]:set_fg(beautiful.fg_normal)
+         end
          wc_button_container[nscreen]:set_bg(beautiful.bg_focus)
+         wc_button_container[nscreen]:set_fg(beautiful.fg_focus)
          -- switch active screen
          current_screen = nscreen
       end
