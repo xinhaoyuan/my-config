@@ -78,11 +78,48 @@
 		 )
 	       (setq frame-background-mode 'dark)
 	       )
-	   ;; console
-	   (progn
-	     (setq frame-background-mode 'dark)
+	   ;; TTY
+           ;; For rxvt-unicode-256color, the current theme detection does not work because COLORFGBG returns "default".
+           ;; We have to use the xterm way but modified to make it fast
+           (if (string= "rxvt-unicode-256color" (getenv "TERM"))
+               (progn
+                 ;; for xterm-query
+                 (load "term/xterm.el")
+                 (flet ((my-xterm-maybe-set-dark-background-mode
+                         (redc greenc bluec)
+                         (message "%d %d %d" redc greenc bluec)
+                         ;; Use the heuristic in `frame-set-background-mode' to decide if a
+                         ;; frame is dark.
+                         (if (< (+ redc greenc bluec) (* .6 (+ 65535 65535 65535)))
+                             (setq frame-background-mode 'dark)
+                           (setq frame-background-mode 'light))
+                         )
+                        (my-xterm--report-background-handler
+                         ()
+                         (let ((str "")
+                               chr)
+                           ;; The reply should be: \e ] 11 ; rgb: NUMBER1 / NUMBER2 / NUMBER3 \e \\
+                           (while (and (setq chr (read-event nil nil 0.02)) (not (equal chr ?\\)))
+                             (setq str (concat str (string chr))))
+                           (when (string-match
+                                  "rgb:\\([a-f0-9]+\\)/\\([a-f0-9]+\\)/\\([a-f0-9]+\\)" str)
+                             (let ((recompute-faces
+                                    (my-xterm-maybe-set-dark-background-mode
+                                     (string-to-number (match-string 1 str) 16)
+                                     (string-to-number (match-string 2 str) 16)
+                                     (string-to-number (match-string 3 str) 16))))
+
+                               ;; Recompute faces here in case the background mode was
+                               ;; set to dark.  We used to call
+                               ;; `tty-set-up-initial-frame-faces' only once, but that
+                               ;; caused the light background faces to be computed
+                               ;; incorrectly.  See:
+                               ;; http://permalink.gmane.org/gmane.emacs.devel/119627
+                               (when recompute-faces
+                                 (tty-set-up-initial-frame-faces)))))))
+                   (xterm--query "\e]11;?\e\\" '(("\e]11;" .  my-xterm--report-background-handler)))
+	           )))
 	     )
-	   )
 	 )))
   (add-hook 'after-make-frame-functions init-new-frame)
   )
