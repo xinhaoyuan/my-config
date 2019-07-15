@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# will be executed after the window manager is ready
-wal -R
 if [ ! -e $HOME/.xsession-init-guard ]; then
     fcitx
     compton --config $HOME/.config/compton/compton.conf &

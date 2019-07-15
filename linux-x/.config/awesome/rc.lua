@@ -21,11 +21,14 @@ awesome.connect_signal(
    end
 )
 
+local awful    = require("awful")
+local HOME_DIR = os.getenv("HOME")
+os.execute(HOME_DIR .. "/.xdesktoprc.awesome")
+
 local capi = {
    keygrabber = keygrabber,
    client = client,
 }
-local awful            = require("awful")
 local awful_rule       = require("awful.rules")
 local awful_layout     = require("awful.layout")
 local awful_keygrabber = require("awful.keygrabber")
@@ -42,8 +45,6 @@ local switcher         = require("awesome-switcher-mod")
 local utils            = require("my-utils")
 
 beautiful.layout_machi = machi.get_icon()
-
-local HOME_DIR = os.getenv("HOME")
 
 -- Define the tag list upfront for keybindings
 local tag_list = { "STICKY", "1", "2", "3", "4" }
@@ -110,10 +111,6 @@ end
 
 switcher.settings.preview_box = false        -- display preview-box
 switcher.settings.cycle_raise_client = true  -- raise clients on cycle
-
--- execute the initial script
-
-spawn_with_shell(HOME_DIR .. "/.xdesktoprc.awesome", false)
 
 -- keys
 
