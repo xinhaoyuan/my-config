@@ -1,3 +1,3 @@
-export PATH="$PATH:/snap/bin"
+. $HOME/.path_profile
 
 exec awesome

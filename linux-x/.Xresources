@@ -17,7 +17,7 @@ Xcursor.theme: Capitaine Cursors
 
 ! Emacs.font: fontset-song
 
-#include ".Xresources.d/dracula"
+! #include ".Xresources.d/Tomorrow"
 
 ! ========================================
 ! Rxut-unicode setups

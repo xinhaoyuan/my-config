@@ -1,0 +1,3 @@
+#!/bin/sh
+
+exec wal --iterative -i $HOME/Pictures/Wallpapers --saturate 0.6 "$@" 
