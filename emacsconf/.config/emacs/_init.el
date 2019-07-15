@@ -197,7 +197,7 @@
 
     (set-mark right)
     (push-mark left)
-    
+
     ))
 
 (defun delete-surrounding-blank ()
@@ -222,7 +222,7 @@
 
 (defun wrapped-thing-at-point ()
   (save-excursion
-    (let* ((pt (progn (while (and (char-before) (char-equal (char-before) ?\\)) (backward-char))  (point))) 
+    (let* ((pt (progn (while (and (char-before) (char-equal (char-before) ?\\)) (backward-char))  (point)))
            (before-r (string-reverse
                       (let ((end pt))
                         (forward-line 0)
@@ -250,7 +250,7 @@
 (defun open-wrapped-thing-at-point ()
   (interactive)
   (let* ((wrapped-thing (wrapped-thing-at-point))
-         (raw-file-name 
+         (raw-file-name
           (save-match-data
             (string-match "\\([^#?\\\\]*\\(\\\\.\\)*\\)+" wrapped-thing)
             (match-string 0 wrapped-thing)))
@@ -277,7 +277,7 @@
                           file-path))))
         (progn
           (find-file file-path)
-          
+
           (if raw-file-archor
               (let ((file-archor
                      (cond
@@ -369,11 +369,11 @@
               (dolist (window windows)
                 (if (window-live-p window)
                     (let ((frame (window-frame window)))
-                      (if (and (frame-live-p frame) (not (eq frame server-frame))) 
+                      (if (and (frame-live-p frame) (not (eq frame server-frame)))
                           (if (eq local-frame frame)
                               (setq is-remote nil)
                             (setq is-local nil))))))
-              ;; (message "%s %s %s" buffer is-local is-remote) 
+              ;; (message "%s %s %s" buffer is-local is-remote)
               (if is-local (kill-buffer buffer))
               ;; (if is-remote (cl-return-from BUFFER-LOOP))
               ))
@@ -393,6 +393,17 @@
   (interactive)
   (untabify (buffer-end -1) (buffer-end 1))
   )
+
+(defun toggle-background-mode ()
+  ""
+  (interactive)
+  (let ((f (selected-frame))
+        (b frame-background-mode))
+    (if (or (eq b nil) (eq b 'dark))
+        (setq frame-background-mode 'light)
+      (setq frame-background-mode 'dark))
+    (message "background mode is %s" frame-background-mode)
+    (frame-set-background-mode f)))
 
 ;; }}}
 
@@ -450,6 +461,7 @@
 (define-key my-prefix (kbd "f") 'toggle-big-font)
 (define-key my-prefix (kbd "<f11>") 'toggle-fullscreen)
 (define-key my-prefix (kbd "h") 'global-hl-line-mode)
+(define-key my-prefix (kbd "b") 'toggle-background-mode)
 (define-key my-prefix (kbd "C-q") 'visual-line-mode)
 (define-key my-prefix (kbd "C-f") 'flyspell-mode)
 (define-key my-prefix (kbd "C-l") 'nlinum-mode)
@@ -591,7 +603,7 @@
 
 (setq gdb-many-windows 't)
 (global-set-key (kbd "M-<f9>") 'gdb)
-(add-hook 'gdb-mode-hook 
+(add-hook 'gdb-mode-hook
           (lambda ()
             (let ((map gud-minor-mode-map))
               ;; Reset windows
@@ -608,14 +620,14 @@
               ;; Nextline
               (define-key map (kbd "<f8>") 'gud-next)
               (define-key map (kbd "<f7>") 'gud-step)
-              (define-key map (kbd "<f5>") 'gud-refresh) 
+              (define-key map (kbd "<f5>") 'gud-refresh)
               )))
 ;; }}}
 
 ;; enhence for lisp/scheme {{{
 ;; Lisp & Scheme mode
 (let ((map lisp-mode-shared-map))
-  (define-key map (kbd "<return>") 'newline-and-indent) 
+  (define-key map (kbd "<return>") 'newline-and-indent)
   (define-key map (kbd "RET") 'newline-and-indent)
   )
 ;; }}}
