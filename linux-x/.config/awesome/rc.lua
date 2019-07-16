@@ -43,8 +43,10 @@ local autofocus        = require("my-autofocus")
 local machi            = require("layout-machi")
 local switcher         = require("awesome-switcher-mod")
 local utils            = require("my-utils")
+local dpi              = require("beautiful.xresources").apply_dpi
 
 beautiful.layout_machi = machi.get_icon()
+machi.default_editor.set_gap(dpi(10), dpi(10))
 
 -- Define the tag list upfront for keybindings
 local tag_list = { "STICKY", "1", "2", "3", "4" }
