@@ -164,7 +164,12 @@ for i = 2, #tag_list do
 end
 
 local client_keys = table_join(
-   awful.key({ "Mod4" }, "Tab", function (c) if not machi.editor.fit_region(c) then machi.switcher.start(c) end end),
+   awful.key({ "Mod4" }, "Tab", function (c)
+         machi.editor.fit_region(c)
+         if not (c.floating or c.maximized or c.maximized_vertical or c.maximized_horizontal) then
+            machi.switcher.start(c)
+         end
+   end),
 
    awful.key({ "Mod4" }, "Up", function (c)
          if c.fullscreen then
