@@ -1,4 +1,4 @@
 . $HOME/.path_profile
 
-wal -R
+# wal -R
 exec awesome

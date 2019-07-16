@@ -1,6 +1,7 @@
 #!/bin/bash
 
 if [ ! -e $HOME/.xsession-init-guard ]; then
+    nitrogen --restore
     fcitx
     compton --config $HOME/.config/compton/compton.conf &
     xscreensaver -no-splash &
