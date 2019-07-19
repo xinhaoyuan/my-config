@@ -17,8 +17,6 @@ Xcursor.theme: Capitaine Cursors
 
 ! Emacs.font: fontset-song
 
-#include ".Xresources.d/ocean.light"
-
 ! ========================================
 ! Rxut-unicode setups
 ! Fonts and input method

@@ -1,0 +1,110 @@
+#!/usr/bin/env python3
+"""
+A utility to adjust current color themes
+"""
+
+import json
+import os, sys
+import colour
+import subprocess as sp
+import io
+import argparse
+
+DEFAULT_COLOR_JSON_PATH = os.path.join(os.environ["HOME"], ".cache/wal/colors.json")
+SPECIAL_COLORS = ["foreground", "background", "cursor"]
+
+def load_json(path):
+    if path == "":
+        path = DEFAULT_COLOR_JSON_PATH
+    with open(path, "r") as f:
+        json_data = json.load(f)
+    data = {}
+    for i in range(len(SPECIAL_COLORS)):
+        if SPECIAL_COLORS[i] in json_data["special"]:
+            data[SPECIAL_COLORS[i]] = json_data["special"][SPECIAL_COLORS[i]]
+    for i in range(16):
+        name = "color{}".format(i)
+        if name in json_data["colors"]:
+            data[name] = json_data["colors"][name]
+    return data
+
+def apply_color(data):
+    for i in range(len(SPECIAL_COLORS)):
+        if SPECIAL_COLORS[i] in data:
+            sys.stdout.write("\033]{};{}\007".format(10 + i, data[SPECIAL_COLORS[i]]))
+    for i in range(16):
+        name = "color{}".format(i)
+        if name in data:
+            sys.stdout.write("\033]4;{};{}\007".format(i, data[name]))
+
+def load_xresource(path):
+    data = { }
+    if path is None or path == "":
+        f = io.StringIO(sp.check_output(["xrdb","-query"]).decode("utf-8"))
+    else:
+        f = open(path, "r")
+    # The current parssing is very rough
+    for line in f:
+        kv = line.split(":", 1)
+        for kw in SPECIAL_COLORS:
+            if kw in kv[0] and kw not in data:
+                data[kw] = kv[1].strip()
+        for i in range(16):
+            kw = "color{}".format(i)
+            if kw in kv[0] and kw not in data:
+                data[kw] = kv[1].strip()
+    return data
+
+def print_format_table():
+    print("THIS IS A NORMAL TEXT")
+    for bg in range(40,48):
+        format = ";".join(["0", str(bg - 10), str(bg)])
+        sys.stdout.write('\x1b[%sm %s \x1b[0m' % (format, "██"))
+    sys.stdout.write("\n")
+    for bg in range(100,108):
+        format = ";".join(["0", str(bg - 10), str(bg)])
+        sys.stdout.write('\x1b[%sm %s \x1b[0m' % (format, "██"))
+    sys.stdout.write("\n")
+
+def adjust_brightness(data, amount):
+    colors = {}
+    for k in data:
+        colors[k] = colour.Color(data[k])
+        if k not in SPECIAL_COLORS:
+            colors[k].luminance = min(1, max(0, colors[k].luminance + amount))
+    for k in colors:
+        colors[k] = colors[k].hex_l
+    return colors
+
+def write_output(data, path):
+    with open(path, "w") as f:
+        for kw in SPECIAL_COLORS:
+            if kw in data:
+                f.write("*{}: {}\n".format(kw, data[kw]))
+        for i in range(16):
+            kw = "color{}".format(i)
+            if kw in data:
+                f.write("*{}: {}\n".format(kw, data[kw]))
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-j", "--json", dest = "json_input")
+parser.add_argument("-x", "--xres", dest = "xres_input")
+parser.add_argument("-o", "--output", dest = "output")
+parser.add_argument("--brightness", type = float)
+args = parser.parse_args()
+
+if args.json_input is not None:
+    data = load_json(args.json_input)
+elif args.xres_input is not None:
+    data = load_xresource(args.xres_input)
+else:
+    data = load_xresource(None)
+
+if args.brightness is not None:
+    data = adjust_brightness(data, args.brightness)
+
+apply_color(data)
+print_format_table()
+
+if args.output is not None:
+    write_output(data, args.output)

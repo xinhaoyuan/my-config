@@ -109,7 +109,7 @@ aw.screen.connect_for_each_screen(function (scr)
             fg = beautiful.fg_normal,
             bg = beautiful.bg_normal,
             height = beautiful.bar_height,
-            position = "top",
+            position = "bottom",
             border_width = 0,
       })
 
@@ -179,7 +179,7 @@ aw.screen.connect_for_each_screen(function (scr)
       -- right_layout:add(battery_widget)
       local clock = wi.widget.textclock(" %m/%d/%y %a %H:%M ")
       clock:set_font(mono_font)
-      calendar_widget = calendar({ fdow = 7, position = "top_right" })
+      calendar_widget = calendar({ fdow = 7, position = "bottom_right" })
       calendar_widget:attach(clock)
       right_layout:add(clock)
       right_layout:add(wc_button_container[s])

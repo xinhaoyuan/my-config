@@ -23,3 +23,6 @@ if [ -z "$HIDPI" ]; then
 else
     xrdb -merge $HOME/.Xresources.d/hidpi
 fi
+if [ -e "$HOME/.Xresources.d/theme" ]; then
+    xrdb -merge $HOME/.Xresources.d/theme
+fi

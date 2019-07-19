@@ -319,7 +319,20 @@ awful_rule.rules = {
       rule = { class = "Synapse" },
       properties = {
          border_width = 0,
-         borderless = true
+         borderless = true,
+         ontop = true,
+      },
+   },
+   {
+      rule = { class = "Plank", type = "dock" },
+      properties = {
+         border_width = 0,
+         borderless = true,
+         floating = true,
+         sticky = true,
+         ontop = true,
+         focusable = false,
+         below = false,
       },
    },
    -- {
