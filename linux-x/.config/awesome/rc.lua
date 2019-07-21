@@ -45,11 +45,29 @@ local switcher         = require("awesome-switcher-mod")
 local utils            = require("my-utils")
 local dpi              = require("beautiful.xresources").apply_dpi
 
+local delayed = gears_timer.delayed_call
+
 beautiful.layout_machi = machi.get_icon()
-machi.default_editor.set_gap(dpi(10), dpi(10))
+machi.default_editor.set_gap(beautiful.useless_gap * 2, 0)
 
 -- Define the tag list upfront for keybindings
 local tag_list = { "STICKY", "1", "2", "3", "4" }
+awful_layout.layouts = {
+   machi.default_layout,
+   awful_layout.suit.tile,
+   awful_layout.suit.tile.left,
+   awful_layout.suit.tile.bottom,
+   awful_layout.suit.tile.top,
+   awful_layout.suit.fair,
+   awful_layout.suit.fair.horizontal,
+   awful_layout.suit.spiral,
+   awful_layout.suit.spiral.dwindle,
+   awful_layout.suit.magnifier,
+   awful_layout.suit.corner.nw,
+   -- awful_layout.suit.corner.ne,
+   -- awful_layout.suit.corner.sw,
+   -- awful_layout.suit.corner.se,
+}
 
 -- helper functions
 
@@ -127,8 +145,8 @@ local global_keys = table_join(
          switcher.switch(-1, "Mod1", "Alt_L", "Shift", "Tab")
    end),
    awful.key({ "Mod4" }, "/",               function () machi.default_editor.start_interactive() end),
-   -- awful.key({ "Mod4" }, "[",               function () awful_layout.inc(layouts, -1) end),
-   -- awful.key({ "Mod4" }, "]",               function () awful_layout.inc(layouts, 1) end),
+   awful.key({ "Mod4" }, "[",               function () awful_layout.inc(awful_layout.layouts, -1) end),
+   awful.key({ "Mod4" }, "]",               function () awful_layout.inc(awful_layout.layouts, 1) end),
    awful.key({ "Mod4" }, "w",               function () my_focus_by_direction("up") end),
    awful.key({ "Mod4" }, "a",               function () my_focus_by_direction("left") end),
    awful.key({ "Mod4" }, "s",               function () my_focus_by_direction("down") end),
@@ -166,9 +184,13 @@ end
 local client_keys = table_join(
    awful.key({ "Mod4" }, "Tab", function (c)
          machi.editor.fit_region(c)
-         if not (c.floating or c.maximized or c.maximized_vertical or c.maximized_horizontal) then
-            machi.switcher.start(c)
-         end
+         delayed(
+            function ()
+               if not (c.floating or c.maximized or c.maximized_vertical or c.maximized_horizontal) then
+                  machi.switcher.start(c)
+               end
+            end
+         )
    end),
 
    awful.key({ "Mod4" }, "Up", function (c)
@@ -386,28 +408,8 @@ awful_rule.rules = {
 
 awful.screen.connect_for_each_screen(
    function (s)
-      -- generate screen name
-      -- local info_array = {}
-      -- print("!!! " .. tostring(#s.outputs))
-      -- for _, info in ipairs(s.outputs) do
-      --    print("!!! " .. tostring(#info))
-      --    for k, v in pairs(info.name) do
-      --       print(tostring(k) .. ":" .. tostring("v"))
-      --    end
-      --    info_array[#info_array + 1] = info.name
-      -- end
-      -- table.sort(info_array)
-      -- local approx_id = ""
-      -- for i, info in ipairs(info_array) do
-      --    if i == 1 then
-      --       approx_id = info
-      --    else
-      --       approx_id = approx_id .. "+" .. info
-      --    end
-      -- end
-
       for i, t in ipairs(tag_list) do
-         local tag = awful.tag.add(t, { screen = s, layout = machi.default_layout, gap = 0 })
+         local tag = awful.tag.add(t, { screen = s, layout = machi.default_layout, layouts = awful_layout.layouts })
       end
       -- 1 is the hidden tag
       s.tags[2]:view_only()

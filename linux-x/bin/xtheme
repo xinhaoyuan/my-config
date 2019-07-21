@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-A utility to adjust current color themes
+A utility to tune the current (xresource) color themes.
 """
 
 import json
@@ -56,7 +56,7 @@ def load_xresource(path):
     return data
 
 def print_format_table():
-    print("THIS IS A NORMAL TEXT")
+    print("The quick brown fox jumps over the lazy dog.")
     for bg in range(40,48):
         format = ";".join(["0", str(bg - 10), str(bg)])
         sys.stdout.write('\x1b[%sm %s \x1b[0m' % (format, "██"))
@@ -66,12 +66,23 @@ def print_format_table():
         sys.stdout.write('\x1b[%sm %s \x1b[0m' % (format, "██"))
     sys.stdout.write("\n")
 
-def adjust_brightness(data, amount):
+def adjust_brightness(data, selector, amount):
+    print(selector)
     colors = {}
     for k in data:
         colors[k] = colour.Color(data[k])
-        if k not in SPECIAL_COLORS:
+        if k in selector:
             colors[k].luminance = min(1, max(0, colors[k].luminance + amount))
+    for k in colors:
+        colors[k] = colors[k].hex_l
+    return colors
+
+def adjust_saturation(data, selector, amount):
+    colors = {}
+    for k in data:
+        colors[k] = colour.Color(data[k])
+        if k in selector:
+            colors[k].saturation = min(1, max(0, colors[k].saturation + amount))
     for k in colors:
         colors[k] = colors[k].hex_l
     return colors
@@ -91,6 +102,7 @@ parser.add_argument("-j", "--json", dest = "json_input")
 parser.add_argument("-x", "--xres", dest = "xres_input")
 parser.add_argument("-o", "--output", dest = "output")
 parser.add_argument("--brightness", type = float)
+parser.add_argument("commands", metavar = "CMD", nargs = "*")
 args = parser.parse_args()
 
 if args.json_input is not None:
@@ -100,8 +112,61 @@ elif args.xres_input is not None:
 else:
     data = load_xresource(None)
 
-if args.brightness is not None:
-    data = adjust_brightness(data, args.brightness)
+selector_stack = []
+selector = SPECIAL_COLORS + ["color{}".format(i) for i in range(16)]
+i = 0
+cmds = args.commands
+while i < len(cmds):
+    cmd = cmds[i]
+    i += 1
+
+    if cmd == "brightness" and i < len(cmds):
+        data = adjust_brightness(data, selector, float(cmds[i]))
+        i += 1
+    elif cmd == "saturation" and i < len(cmds):
+        data = adjust_saturation(data, selector, float(cmds[i]))
+        i += 1
+    elif (cmd == "+" or cmd == "-" or cmd == "=") and i < len(cmds):
+        if cmds[i] == "all":
+            target = SPECIAL_COLORS + ["color{}".format(i) for i in range(16)]
+        elif cmds[i] == "regular":
+            target = ["color{}".format(i) for i in range(16)]
+        elif cmds[i] == "special":
+            target = list(SPECIAL_COLORS)
+        elif cmds[i] in data:
+            target = [cmds[i]]
+        else:
+            target = None
+
+        if target is not None:
+            if cmd == "+":
+                for k in target:
+                    if k not in selector:
+                        selector.append(k)
+            elif cmd == "-":
+                for k in target:
+                    if k in selector:
+                        selector.remove(k)
+            elif cmd == "=":
+                selector = target
+
+            i += 1
+    elif cmd == "pushsel":
+        selector_stack.append(selector)
+        selector = SPECIAL_COLORS + ["color{}".format(i) for i in range(16)]
+    elif cmd == "popsel":
+        if len(selector_stack) > 0:
+            selector = selector_stack[len(selector_stack)].pop()
+    elif cmd == "swap" and i + 1 < len(cmds):
+        if cmds[i] in data and cmds[i + 1] in data:
+            tmp = data[cmds[i]]
+            data[cmds[i]] = data[cmds[i + 1]]
+            data[cmds[i + 1]] = tmp
+            i += 2
+    elif cmd == "set" and i + 1 < len(cmds):
+        if cmds[i] in data and cmds[i + 1] in data:
+            data[cmds[i]] = data[cmds[i + 1]]
+            i += 2
 
 apply_color(data)
 print_format_table()
