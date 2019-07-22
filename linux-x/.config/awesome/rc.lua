@@ -355,6 +355,7 @@ awful_rule.rules = {
          ontop = true,
          focusable = false,
          below = false,
+         has_client_input_shape = true,
       },
    },
    -- {
