@@ -41,7 +41,9 @@ local config           = require("my-config")
 local focus            = require("my-focus")
 local autofocus        = require("my-autofocus")
 local machi            = require("layout-machi")
+-- local revelation       = require("revelation")
 local switcher         = require("awesome-switcher-mod")
+local yass             = require("yass")
 local utils            = require("my-utils")
 local dpi              = require("beautiful.xresources").apply_dpi
 
@@ -49,6 +51,7 @@ local delayed = gears_timer.delayed_call
 
 beautiful.layout_machi = machi.get_icon()
 machi.default_editor.set_gap(beautiful.useless_gap * 2, 0)
+-- revelation.init()
 
 -- Define the tag list upfront for keybindings
 local tag_list = { "STICKY", "1", "2", "3", "4" }
@@ -136,14 +139,27 @@ switcher.settings.cycle_raise_client = true  -- raise clients on cycle
 
 -- base keys and buttons
 local global_keys = table_join(
+   -- awful.key({ "Mod1" }, "Tab",
+   --    function ()
+   --       switcher.switch( 1, "Mod1", "Alt_L", "Shift", "Tab")
+   -- end),
+   -- awful.key({ "Mod1", "Shift" }, "Tab",
+   --    function ()
+   --       switcher.switch(-1, "Mod1", "Alt_L", "Shift", "Tab")
+   -- end),
    awful.key({ "Mod1" }, "Tab",
       function ()
-         switcher.switch( 1, "Mod1", "Alt_L", "Shift", "Tab")
+         yass.default.start()
    end),
    awful.key({ "Mod1", "Shift" }, "Tab",
       function ()
          switcher.switch(-1, "Mod1", "Alt_L", "Shift", "Tab")
    end),
+   -- awful.key({ "Mod4" }, "q",
+   --    function ()
+   --       revelation({rule={class="Plank"}, is_excluded=true,
+   --                   curr_tag_only=true})
+   -- end),
    awful.key({ "Mod4" }, "/",               function () machi.default_editor.start_interactive() end),
    awful.key({ "Mod4" }, "[",               function () awful_layout.inc(awful_layout.layouts, -1) end),
    awful.key({ "Mod4" }, "]",               function () awful_layout.inc(awful_layout.layouts, 1) end),
