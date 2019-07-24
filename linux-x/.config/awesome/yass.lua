@@ -11,16 +11,24 @@ local api = {
 }
 
 local focus_timestamp = 0
+local function update_focus_timestamp(c)
+   if c == nil then return end
+   if c.focus_timestamp ~= nil and
+      c.focus_timestamp > focus_timestamp
+   then
+      focus_timestamp = c.focus_timestamp
+   end
+   focus_timestamp = focus_timestamp + 1
+   c.focus_timestamp = focus_timestamp
+end
+
+-- For avoiding accidentally updating ordering during switching
+local focus_timestamp_update_lock = false
 client.connect_signal(
    "focus",
    function (c)
-      if c.focus_timestamp ~= nil and
-         c.focus_timestamp > focus_timestamp
-      then
-         focus_timestamp = c.focus_timestamp
-      end
-      focus_timestamp = focus_timestamp + 1
-      c.focus_timestamp = focus_timestamp
+      if focus_timestamp_update_lock then return end
+      update_focus_timestamp(c)
    end
 )
 
@@ -166,32 +174,35 @@ local function create(config)
       if #tablist < 2 then
          return
       end
-      tablist_index = 1
-      switch()
 
       panel.visible = true
       panel.bgimage = draw_info
+      focus_timestamp_update_lock = true
 
-      local kg
-      kg = keygrabber.run(
+      switch()
+
+      local kg = nil
+      local function stop()
+         update_focus_timestamp(tablist[tablist_index])
+         focus_timestamp_update_lock = false
+         panel.visible = false
+         if kg ~= nil then
+            api.awful.keygrabber.stop(kg)
+            kg = nil
+         end
+      end
+
+      kg = api.awful.keygrabber.run(
          function (mod, key, event)
             if event == "release" then
                if to_release[key] then
-                  panel.visible = false
-                  keygrabber.stop(kg)
+                  stop()
                end
-
-               return
-            end
-
-            if key == "Tab" then
-               ensure_tablist()
-
+            elseif key == "Tab" then
                switch()
                panel.bgimage = draw_info
-            else
-               print("Unhandled key " .. key)
             end
+            return true
          end
       )
    end
