@@ -61,7 +61,7 @@ local function create(config)
       local font_color_hl = with_alpha(api.gears.color(api.beautiful.fg_focus), 1)
       local label_size = api.dpi(30)
       local border_color = with_alpha(api.gears.color(api.beautiful.border_focus), 0.75)
-      local fill_color = with_alpha(api.gears.color(api.beautiful.bg_normal), 0.5)
+      local fill_color = with_alpha(api.gears.color(api.beautiful.bg_normal), 0.75)
       local fill_color_hl = with_alpha(api.gears.color(api.beautiful.bg_focus), 1)
 
       if screen == nil then
