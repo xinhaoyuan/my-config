@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Example: [this file] firefox-esr.desktop chromium.desktop
+Example: [this file] -t firefox-esr.desktop -r chromium.desktop
 """
 
 import sys, os
@@ -8,13 +8,18 @@ from xdg import XDG_DATA_DIRS
 from configparser import RawConfigParser
 import logging
 import subprocess
+import argparse
+import re
 
-if len(sys.argv) < 2:
-    print("Example: [this file] firefox-esr.desktop chromium.desktop")
+parser = argparse.ArgumentParser()
+parser.add_argument("-t", dest = "target")
+parser.add_argument("-s", dest = "search")
+parser.add_argument("-r", dest = "replace")
+args = parser.parse_args()
+
+if args.target is None and args.search is None:
+    sys.stderr.write("Need -t or -s\n")
     sys.exit(1)
-
-target = sys.argv[1]
-replace = sys.argv[2] if len(sys.argv) >= 3 else None
 
 logging.basicConfig(level = logging.INFO)
 logger = logging.getLogger(__file__)
@@ -40,21 +45,32 @@ with open(results[1], "r") as f:
 
 for mime, apps_str in data.items("MIME Cache"):
     apps = list(filter(len, apps_str.split(";")))
-    if target not in apps:
+    found = False
+    if args.target:
+        found = args.target in apps
+    else:
+        for item in apps:
+            if re.search(args.search, item):
+                found = True
+                break
+
+    if not found:
         continue
-    if replace is None:
+    if args.target is None or args.replace is None:
         sys.stdout.write("{}:{}\n".format(mime, " ".join(apps)))
     else:
         logger.debug("Found mimetype {} with apps {}".format(mime, apps))
         if len(apps) == 1:
-            logger.info("Skip {} since {} is the only app".format(mime, target))
+            logger.info("Skip {} since {} is the only app".format(mime, args.target))
             continue
-        if apps[0] != target:
-            logger.info("Skip {} since {} is not the first app".format(mime, target))
+        if apps[0] != args.target:
+            logger.info("Skip {} since {} is not the first app".format(mime, args.target))
             continue
-        if replace not in apps:
-            logger.info("Skip {} since {} is not in apps".format(mime, replace))
+        if args.replace not in apps:
+            logger.info("Skip {} since {} is not in apps".format(mime, args.replace))
             continue
-        cmd = ["xdg-mime", "default",  replace, mime]
+        cmd = ["xdg-mime", "default",  args.replace, mime]
         logger.info("Calling {}".format(cmd))
         subprocess.check_call(" ".join(cmd), shell = True)
+
+print('Reminder: it is recommended to run "update-desktop-database" and "update-mime-database" if you changed the setting.')
