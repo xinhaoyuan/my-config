@@ -9,7 +9,7 @@ if [ ! -e $HOME/.xsession-init-guard ]; then
     # wicd-gtk -t &
     nm-applet &
     synapse -s &
-    # plank &
+    plank &
 fi
 
 touch $HOME/.xsession-init-guard

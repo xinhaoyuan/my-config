@@ -1,4 +1,4 @@
-export PATH="$HOME/bin:/usr/local/sbin:/usr/local/bin:$PATH"
+export $(dbus-launch)
 
 $HOME/bin/set_dpi.py --fallback-dpi 144 --min-dpi 96 --max-dpi 192
 

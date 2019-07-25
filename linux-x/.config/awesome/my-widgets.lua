@@ -161,14 +161,20 @@ aw.screen.connect_for_each_screen(function (scr)
          layout         = wi.layout.fixed.horizontal
       }
 
-      my_tray:set_base_size(beautiful.bar_height - dpi(4))
-      local tray_layout = wi.widget {
-         { forced_width = 0, forced_height = dpi(2), color = beautiful.bg_normal, widget = wi.widget.separator },
-         my_tray,
-         { forced_width = 0, forced_height = dpi(2), color = beautiful.bg_normal, widget = wi.widget.separator },
-         layout = wi.layout.align.vertical,
-      }
-      right_layout:add(tray_layout)
+      local tray_padding = dpi(1)
+      if tray_padding > 0 then
+         my_tray:set_base_size(beautiful.bar_height - tray_padding * 2)
+         local tray_layout = wi.widget {
+            { forced_width = 0, forced_height = tray_padding, color = beautiful.bg_normal, widget = wi.widget.separator },
+            my_tray,
+            { forced_width = 0, forced_height = tray_padding, color = beautiful.bg_normal, widget = wi.widget.separator },
+            layout = wi.layout.align.vertical,
+         }
+         right_layout:add(tray_layout)
+      else
+         right_layout:add(my_tray)
+      end
+
       -- local volume_widget = wi.widget.textbox()
       -- volume_widget:set_font(mono_font)
       -- vicious.register(volume_widget, vicious.widgets.volume,
