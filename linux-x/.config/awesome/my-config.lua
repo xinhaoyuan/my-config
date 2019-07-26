@@ -1,7 +1,8 @@
-local be = require("beautiful")
+local awful  = require("awful")
+local be     = require("beautiful")
 local gshape = require("gears.shape")
-local wi = require("wibox")
-local dpi   = require("beautiful.xresources").apply_dpi
+local wi     = require("wibox")
+local dpi    = require("beautiful.xresources").apply_dpi
 
 be.init("~/.config/awesome/theme.lua")
 
@@ -28,11 +29,11 @@ config.tasklist_template = {
       {
          {
             {
-               id     = "icon_role",
-               widget = wi.widget.imagebox,
+               id     = "clienticon",
+               widget = awful.widget.clienticon,
             },
-            id = "icon_margin_role",
-            margins = dpi(2),
+            -- id = "icon_margin_role",
+            margins = dpi(1),
             widget  = wi.container.margin,
          },
          {
@@ -45,7 +46,6 @@ config.tasklist_template = {
       left  = dpi(5),
       right = dpi(5),
       widget = wi.container.margin
-
    },
    id     = "background_role",
    widget = wi.container.background,

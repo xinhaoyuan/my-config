@@ -55,6 +55,6 @@ if dpi is not None:
     sys.stderr.write("Set scaling to {:0.1f}\n".format(scaling))
     sys.stderr.write("Set icon_size to {}\n".format(icon_size))
     
-    sp.call("echo 'Xft.dpi:{}' | xrdb -merge".format(dpi), shell = True)
+    sp.call("echo '*dpi:{}' | xrdb -merge".format(dpi), shell = True)
     sp.call("echo 'hidpi.scaling:{:0.1f}' | xrdb -merge".format(scaling), shell = True)
     sp.call("echo 'Xcursor*size:{}' | xrdb -merge".format(icon_size), shell = True)

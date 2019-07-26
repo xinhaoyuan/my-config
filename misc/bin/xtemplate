@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+
+
+import sys, subprocess
+
+start_prefix = sys.argv[1]
+end_prefix = sys.argv[2]
+to_ignore = False
+for line in sys.stdin:
+    if to_ignore:
+        if line.startswith(end_prefix):
+            sys.stdout.write(line)
+            to_ignore = False
+    else:
+        sys.stdout.write(line)
+        if line.startswith(start_prefix):
+            cmd = line[len(start_prefix):].strip()
+            sys.stdout.flush()
+            subprocess.check_call(cmd, shell = True)
+            to_ignore = True

@@ -2,13 +2,14 @@
 
 if [ ! -e $HOME/.xsession-init-guard ]; then
     nitrogen --restore
+    update-rofi-config
     fcitx
     compton --config $HOME/.config/compton/compton.conf &
     xscreensaver -no-splash &
     cbatticon -n &
     # wicd-gtk -t &
     nm-applet &
-    synapse -s &
+    # synapse -s &
     plank &
 fi
 

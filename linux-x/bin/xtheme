@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-A utility to tune the current (xresource) color themes.
+A utility to tune color themes.
 """
 
 import json
@@ -8,7 +8,6 @@ import os, sys
 import colour
 import subprocess as sp
 import io
-import argparse
 
 DEFAULT_COLOR_JSON_PATH = os.path.join(os.environ["HOME"], ".cache/wal/colors.json")
 SPECIAL_COLORS = ["foreground", "background", "cursor"]
@@ -37,7 +36,7 @@ def apply_color(data):
         if name in data:
             sys.stdout.write("\033]4;{};{}\007".format(i, data[name]))
 
-def load_xresource(path):
+def load_xres(path):
     data = { }
     if path is None or path == "":
         f = io.StringIO(sp.check_output(["xrdb","-query"]).decode("utf-8"))
@@ -55,16 +54,30 @@ def load_xresource(path):
                 data[kw] = kv[1].strip()
     return data
 
-def print_format_table():
-    print("The quick brown fox jumps over the lazy dog.")
-    for bg in range(40,48):
-        format = ";".join(["0", str(bg - 10), str(bg)])
-        sys.stdout.write('\x1b[%sm %s \x1b[0m' % (format, "██"))
-    sys.stdout.write("\n")
-    for bg in range(100,108):
-        format = ";".join(["0", str(bg - 10), str(bg)])
-        sys.stdout.write('\x1b[%sm %s \x1b[0m' % (format, "██"))
-    sys.stdout.write("\n")
+def color_write(s, b, f, t):
+    format = ";".join(["38", "2", str(int(f[1:3], 16)), str(int(f[3:5], 16)), str(int(f[5:7], 16)), "48", "2", str(int(b[1:3], 16)), str(int(b[3:5], 16)), str(int(b[5:7], 16))])
+    s.write("\x1b[%sm%s\x1b[0m" % (format, t))
+
+def print_format_table(data):
+    if data is None:
+        print("The quick brown fox jumps over the lazy dog.")
+        for bg in range(40,48):
+            format = ";".join(["0", str(bg - 10), str(bg)])
+            sys.stdout.write('\x1b[%sm %s \x1b[0m' % (format, "██"))
+        sys.stdout.write("\n")
+        for bg in range(100,108):
+            format = ";".join(["0", str(bg - 10), str(bg)])
+            sys.stdout.write('\x1b[%sm %s \x1b[0m' % (format, "██"))
+        sys.stdout.write("\n")
+    else:
+        color_write(sys.stdout, data["background"], data["foreground"], "The quick brown fox jumps over the lazy dog.")
+        sys.stdout.write("\n")
+        for i in range(8):
+            color_write(sys.stdout, data["color{}".format(i)], data["color{}".format(i)], " ██ ")
+        sys.stdout.write("\n")
+        for i in range(8, 16):
+            color_write(sys.stdout, data["color{}".format(i)], data["color{}".format(i)], " ██ ")
+        sys.stdout.write("\n")
 
 def adjust_brightness(data, selector, amount):
     print(selector)
@@ -87,40 +100,64 @@ def adjust_saturation(data, selector, amount):
         colors[k] = colors[k].hex_l
     return colors
 
-def write_output(data, path):
-    with open(path, "w") as f:
-        for kw in SPECIAL_COLORS:
-            if kw in data:
-                f.write("*{}: {}\n".format(kw, data[kw]))
-        for i in range(16):
-            kw = "color{}".format(i)
-            if kw in data:
-                f.write("*{}: {}\n".format(kw, data[kw]))
+def save_xres(data, path):
+    f = sys.stdout if path is None else open(path, "w")
+    for kw in SPECIAL_COLORS:
+        if kw in data:
+            f.write("*{}: {}\n".format(kw, data[kw]))
+    for i in range(16):
+        kw = "color{}".format(i)
+        if kw in data:
+            f.write("*{}: {}\n".format(kw, data[kw]))
+    if f is not sys.stdout:
+        f.close()
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-j", "--json", dest = "json_input")
-parser.add_argument("-x", "--xres", dest = "xres_input")
-parser.add_argument("-o", "--output", dest = "output")
-parser.add_argument("--brightness", type = float)
-parser.add_argument("commands", metavar = "CMD", nargs = "*")
-args = parser.parse_args()
+def save_rofi(data, path):
+    f = sys.stdout if path is None else open(path, "w")
+    f.write("* {")
+    for kw in SPECIAL_COLORS:
+        f.write("x-{}:{};".format(kw, data[kw]))
+    for i in range(16):
+        kw = "color{}".format(i)
+        f.write("x-{}:{};".format(kw, data[kw]))
+    f.write("}\n")
+    if f is not sys.stdout:
+        f.close()
 
-if args.json_input is not None:
-    data = load_json(args.json_input)
-elif args.xres_input is not None:
-    data = load_xresource(args.xres_input)
-else:
-    data = load_xresource(None)
 
 selector_stack = []
 selector = SPECIAL_COLORS + ["color{}".format(i) for i in range(16)]
 i = 0
-cmds = args.commands
+cmds = sys.argv[1:]
+data = None
 while i < len(cmds):
     cmd = cmds[i]
     i += 1
 
-    if cmd == "brightness" and i < len(cmds):
+    if cmd == "load" and i + 1 < len(cmds):
+        kind = cmds[i]
+        source = cmds[i + 1]
+        i += 2
+        if kind == "xres":
+            data = load_xres(None if source == "-" else source)
+        elif kind == "wal":
+            data = load_json(None if source == "-" else source)
+        continue
+    if cmd == "print":
+        print_format_table(None)
+        continue
+    elif data is None:
+        continue
+
+    if cmd == "save" and i + 1 < len(cmds):
+        kind = cmds[i]
+        source = cmds[i + 1]
+        i += 2
+        if kind == "xres":
+            save_xres(data, None if source == "-" else source)
+        elif kind == "rofi":
+            save_rofi(data, None if source == "-" else source)
+    elif cmd == "brightness" and i < len(cmds):
         data = adjust_brightness(data, selector, float(cmds[i]))
         i += 1
     elif cmd == "saturation" and i < len(cmds):
@@ -167,9 +204,7 @@ while i < len(cmds):
         if cmds[i] in data and cmds[i + 1] in data:
             data[cmds[i]] = data[cmds[i + 1]]
             i += 2
-
-apply_color(data)
-print_format_table()
-
-if args.output is not None:
-    write_output(data, args.output)
+    elif cmd == "apply":
+        apply_color(data)
+    elif cmd == "preview":
+        print_format_table(data)

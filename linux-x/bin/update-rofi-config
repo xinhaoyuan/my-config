@@ -1,0 +1,3 @@
+#!/bin/sh
+
+xtemplate "// generating from" "// generating end" < $HOME/.config/rofi/config.rasi.template > $HOME/.config/rofi/config.rasi
