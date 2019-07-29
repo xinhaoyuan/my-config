@@ -43,6 +43,8 @@ data = RawConfigParser()
 with open(results[1], "r") as f:
     data.read_file(f)
 
+has_sideeffect = False
+
 for mime, apps_str in data.items("MIME Cache"):
     apps = list(filter(len, apps_str.split(";")))
     found = False
@@ -63,14 +65,16 @@ for mime, apps_str in data.items("MIME Cache"):
         if len(apps) == 1:
             logger.info("Skip {} since {} is the only app".format(mime, args.target))
             continue
-        if apps[0] != args.target:
-            logger.info("Skip {} since {} is not the first app".format(mime, args.target))
-            continue
+        # if apps[0] != args.target:
+        #     logger.info("Skip {} since {} is not the first app".format(mime, args.target))
+        #     continue
         if args.replace not in apps:
             logger.info("Skip {} since {} is not in apps".format(mime, args.replace))
             continue
         cmd = ["xdg-mime", "default",  args.replace, mime]
         logger.info("Calling {}".format(cmd))
         subprocess.check_call(" ".join(cmd), shell = True)
+        has_sideeffect = True
 
-print('Reminder: it is recommended to run "update-desktop-database" and "update-mime-database" if you changed the setting.')
+if has_sideeffect:
+    print('Reminder: it is recommended to run "update-desktop-database" and "update-mime-database" if you changed the setting.')
