@@ -1,4 +1,4 @@
--- Yet Another Simple Switcher
+-- Yet Another Minimal Switcher
 --   Author: Xinhao Yuan <xinhaoyuan@gmail.com>
 
 local api = {
@@ -52,6 +52,11 @@ local function with_alpha(col, alpha)
    return api.lgi.cairo.SolidPattern.create_rgba(r, g, b, alpha)
 end
 
+local function activate(c)
+   c:emit_signal("request::activate", "mouse.move", {raise=false})
+   c:raise()
+end
+
 local function create(config)
    local function filter(c)
       return c:isvisible() and api.awful.client.focus.filter(c)
@@ -66,7 +71,19 @@ local function create(config)
       same_screen = config.same_screen
    end
 
-   local to_release = { ["Alt_L"] = true }
+   local to_release = { }
+   if config and config.release_key ~= nil then
+      to_release[config.release_key] = true
+   else
+      to_release["Alt_L"] = true
+   end
+
+   local switch_key
+   if config and config.switch_key ~= nil then
+      switch_key = config.switch_key
+   else
+      switch_key = "Tab"
+   end
 
    local function start(screen)
       local tablist_font_desc = api.beautiful.get_merged_font(
@@ -177,8 +194,7 @@ local function create(config)
          if #tablist > 0 then
             tablist_index = tablist_index % #tablist + 1
             c = tablist[tablist_index]
-            c:emit_signal("request::activate", "mouse.move", {raise=false})
-            c:raise()
+            activate(c)
          end
       end
 
@@ -187,13 +203,13 @@ local function create(config)
          return
       end
 
-      panel.visible = true
-      panel.bgimage = draw_info
       focus_timestamp_update_lock = true
 
       switch()
 
       local kg = nil
+      local timer = nil
+
       local function stop()
          update_focus_timestamp(tablist[tablist_index])
          focus_timestamp_update_lock = false
@@ -202,7 +218,24 @@ local function create(config)
             api.awful.keygrabber.stop(kg)
             kg = nil
          end
+
+         if timer ~= nil then
+            timer:stop()
+            timer = nil
+         end
       end
+
+      timer = api.gears.timer.start_new(
+         0.5,
+         function ()
+            if timer ~= nil then
+               panel.bgimage = draw_info
+               panel.visible = true
+               timer = nil
+            end
+            return false
+         end
+      )
 
       kg = api.awful.keygrabber.run(
          function (mod, key, event)
@@ -210,9 +243,16 @@ local function create(config)
                if to_release[key] then
                   stop()
                end
-            elseif key == "Tab" then
+            elseif key == switch_key then
                switch()
                panel.bgimage = draw_info
+               if not panel.visible then
+                  panel.visible = true
+               end
+               if timer ~= nil then
+                  timer:stop()
+                  timer = nil
+               end
             end
             return true
          end

@@ -43,7 +43,7 @@ local config           = require("my-config")
 local focus            = require("my-focus")
 local autofocus        = require("my-autofocus")
 local machi            = require("layout-machi")
-local yass             = require("yass")
+local yams             = require("yams")
 local utils            = require("my-utils")
 local dpi              = require("beautiful.xresources").apply_dpi
 
@@ -132,7 +132,7 @@ end
 local global_keys = table_join(
    awful.key({ "Mod1" }, "Tab",
       function ()
-         yass.default.start()
+         yams.default.start()
    end),
    -- awful.key({ "Mod4" }, "q",
    --    function ()
