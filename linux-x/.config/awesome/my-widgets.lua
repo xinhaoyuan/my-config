@@ -10,7 +10,7 @@ local config = require("my-config")
 local volumearc_widget = require("awesome-wm-widgets.volumearc-widget.volumearc")
 -- local battery_widget = require("awesome-wm-widgets.battery-widget.battery")
 local calendar = require("calendar.calendar")
-local freedesktop = require("freedesktop")
+local menu = require("my-menu")
 local dpi = require("beautiful.xresources").apply_dpi
 
 local my_wibar = {}
@@ -19,20 +19,9 @@ local my_task_list = {}
 local my_tray = wi.widget.systray()
 local mono_font = beautiful.mono_font or beautiful.font
 
-local fd_menu  = freedesktop.menu.build({
-      before = { { "awesome",
-                   {
-                      { "restart", awesome.restart },
-                      { "quit", awesome.quit },
-                      { "shutdown", function () os.execute("systemctl poweroff") end },
-                   },
-                   beautiful.awesome_icon } },
-      after = { },
-})
-
 root.buttons(
    aw.util.table.join(
-      aw.button({ }, 3, function () fd_menu:show() end),
+      aw.button({ }, 3, function () menu:show() end),
       root.buttons()
    )
 )
@@ -197,7 +186,7 @@ aw.screen.connect_for_each_screen(function (scr)
       local layoutbox = aw.widget.layoutbox(s)
       layoutbox:buttons(
          aw.util.table.join(
-            aw.button({ }, 3, function () fd_menu:show() end),
+            aw.button({ }, 3, function () menu:show() end),
             aw.button({ }, 4, function () aw.layout.inc( 1) end),
             aw.button({ }, 5, function () aw.layout.inc(-1) end)))
       left_layout:add(layoutbox)

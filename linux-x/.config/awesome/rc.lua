@@ -3,6 +3,7 @@
 
 local capi = {
    awesome = awesome,
+   screen = screen,
    keygrabber = keygrabber,
    client = client,
    mouse = mouse,
@@ -45,6 +46,7 @@ local autofocus        = require("my-autofocus")
 local machi            = require("layout-machi")
 local yams             = require("yams")
 local utils            = require("my-utils")
+local menu             = require("my-menu")
 local dpi              = require("beautiful.xresources").apply_dpi
 
 local delayed = gears_timer.delayed_call
@@ -142,15 +144,16 @@ local global_keys = table_join(
    awful.key({ "Mod4" }, "/",               function () machi.default_editor.start_interactive() end),
    awful.key({ "Mod4" }, "[",               function () awful_layout.inc(awful_layout.layouts, -1) end),
    awful.key({ "Mod4" }, "]",               function () awful_layout.inc(awful_layout.layouts, 1) end),
-   awful.key({ "Mod4" }, "w",               function () my_focus_by_direction("up") end),
-   awful.key({ "Mod4" }, "a",               function () my_focus_by_direction("left") end),
-   awful.key({ "Mod4" }, "s",               function () my_focus_by_direction("down") end),
-   awful.key({ "Mod4" }, "d",               function () my_focus_by_direction("right") end),
+   awful.key({ "Mod4" }, "k",               function () my_focus_by_direction("up") end),
+   awful.key({ "Mod4" }, "h",               function () my_focus_by_direction("left") end),
+   awful.key({ "Mod4" }, "j",               function () my_focus_by_direction("down") end),
+   awful.key({ "Mod4" }, "l",               function () my_focus_by_direction("right") end),
    awful.key({ }, "XF86AudioLowerVolume",   function () spawn("amixer sset Master,0 5%-") end),
    awful.key({ }, "XF86AudioRaiseVolume",   function () spawn("amixer sset Master,0 5%+") end),
    awful.key({ }, "XF86AudioMute",          function () spawn("amixer sset Master,0 toggle") end),
    awful.key({ }, "XF86MonBrightnessUp",    function () spawn("xbacklight -inc 5") end),
    awful.key({ }, "XF86MonBrightnessDown",  function () spawn("xbacklight -dec 5") end),
+   awful.key({ "Mod4" }, "Escape",          function () menu:show() end),
    awful.key({ "Mod4" }, "Return",          function () spawn(config.cmd_terminal) end),
    awful.key({ "Mod4" }, "t",               function () spawn(config.cmd_terminal) end),
    awful.key({ "Mod4" }, "e",               function () spawn(config.cmd_file_manager) end),
@@ -162,8 +165,43 @@ local global_keys = table_join(
                       "-font", beautiful.mono_font or beautiful.font}
          awful.spawn(cmd)
    end),
-   awful.key({ "Mod4", "Control" }, "m",    function ()
-         for _, c in pairs(capi.client.get()) do c.minimized = false end
+   awful.key({ "Mod4" }, "d",               function ()
+         -- the old way for reference
+         -- local clients = {}
+         -- local has_visible = false
+         -- for _, c in ipairs(capi.client.get()) do
+         --    if c:isvisible() and awful.client.focus.filter(c) then
+         --       c.orig_minimized = c.minimized
+         --       c.minimized = true
+         --       has_visible = true
+         --    end
+         -- end
+
+         -- if not has_visible then
+         --    for _, c in ipairs(capi.client.get()) do
+         --       if c.orig_minimized ~= nil then
+         --          c.minimized = c.orig_minimized
+         --          c.orig_minimized = nil
+         --       end
+         --    end
+         -- end
+
+         local to_restore = true
+         for s in capi.screen do
+            if #s.selected_tags > 0 then
+               to_restore = false
+               s.orig_selected_tags = s.selected_tags
+               awful.tag.viewnone(s)
+            end
+         end
+
+         if not to_restore then return end
+         for s in capi.screen do
+            if s.orig_selected_tags ~= nil then
+               awful.tag.viewmore(s.orig_selected_tags, s)
+               s.orig_selected_tags = nil
+            end
+         end
    end),
    awful.key({ "Mod4", "Control" }, "r",      capi.awesome.restart),
    awful.key({ "Mod4", "Control" }, "Escape", capi.awesome.quit)
