@@ -10,6 +10,7 @@ local config = require("my-config")
 local volumearc_widget = require("awesome-wm-widgets.volumearc-widget.volumearc")
 -- local battery_widget = require("awesome-wm-widgets.battery-widget.battery")
 local calendar = require("calendar.calendar")
+local freedesktop = require("freedesktop")
 local dpi = require("beautiful.xresources").apply_dpi
 
 local my_wibar = {}
@@ -17,6 +18,24 @@ local my_tag_list = {}
 local my_task_list = {}
 local my_tray = wi.widget.systray()
 local mono_font = beautiful.mono_font or beautiful.font
+
+local fd_menu  = freedesktop.menu.build({
+      before = { { "awesome",
+                   {
+                      { "restart", awesome.restart },
+                      { "quit", awesome.quit },
+                      { "shutdown", function () os.execute("systemctl poweroff") end },
+                   },
+                   beautiful.awesome_icon } },
+      after = { },
+})
+
+root.buttons(
+   aw.util.table.join(
+      aw.button({ }, 3, function () fd_menu:show() end),
+      root.buttons()
+   )
+)
 
 -- -- dummy bar for conky
 -- aw.wibar.new({ position = "top", height = config.bar_height * config.widget_scale_factor, opacity = 0 })
@@ -68,8 +87,32 @@ my_task_list.buttons = aw.util.table.join(
 local wc_button_container = {}
 local current_screen = nil
 
+-- a basic stable sort
+local function sort(l, c)
+   local ret = {}
+   for i = 1, #l, 1 do
+      ret[i] = l[i]
+      for j = i, 2, -1 do
+         local to_swap
+         if c == nil then
+            to_swap = ret[j - 1] > ret[j]
+         else
+            to_swap = c(ret[j], ret[j - 1])
+         end
+         if to_swap then
+            local tmp = ret[j - 1]
+            ret[j - 1] = ret[j]
+            ret[j] = tmp
+         else
+            break
+         end
+      end
+   end
+   return ret
+end
+
 aw.screen.connect_for_each_screen(function (scr)
-      s = scr.index
+      local s = scr.index
 
       my_task_list[s] = aw.widget.tasklist {
          screen = s,
@@ -79,20 +122,23 @@ aw.screen.connect_for_each_screen(function (scr)
             font = mono_font
          },
          update_function = function (w, b, l, d, objects, args)
-            -- Reorder the clients so that floating client are on the right side
-            fl_clients = {}
-            clients = {}
-            for i, obj in ipairs(objects) do
-               if obj.floating or obj.maximized or obj.maximized_horizontal or obj.maximized_vertical then
-                  fl_clients[#fl_clients + 1] = obj
-               else
-                  clients[#clients + 1] = obj
-               end
-            end
-            for i, obj in ipairs(fl_clients) do
-               clients[#clients + 1] = obj
-            end
-            awc.list_update(w, b, l, d, clients, args)
+            -- not used any more. just for future reference
+
+            -- -- Reorder the clients so that floating clients are on the right side
+            -- fl_clients = {}
+            -- clients = {}
+            -- for i, obj in ipairs(objects) do
+            --    if obj.floating or obj.maximized or obj.maximized_horizontal or obj.maximized_vertical then
+            --       fl_clients[#fl_clients + 1] = obj
+            --    else
+            --       clients[#clients + 1] = obj
+            --    end
+            -- end
+            -- for i, obj in ipairs(fl_clients) do
+            --    clients[#clients + 1] = obj
+            -- end
+
+            awc.list_update(w, b, l, d, objects, args)
          end,
          widget_template = config.tasklist_template,
       }
@@ -151,6 +197,7 @@ aw.screen.connect_for_each_screen(function (scr)
       local layoutbox = aw.widget.layoutbox(s)
       layoutbox:buttons(
          aw.util.table.join(
+            aw.button({ }, 3, function () fd_menu:show() end),
             aw.button({ }, 4, function () aw.layout.inc( 1) end),
             aw.button({ }, 5, function () aw.layout.inc(-1) end)))
       left_layout:add(layoutbox)

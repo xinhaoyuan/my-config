@@ -193,8 +193,7 @@ local function create(config)
       local function switch()
          if #tablist > 0 then
             tablist_index = tablist_index % #tablist + 1
-            c = tablist[tablist_index]
-            activate(c)
+            activate(tablist[tablist_index])
          end
       end
 
@@ -225,17 +224,8 @@ local function create(config)
          end
       end
 
-      timer = api.gears.timer.start_new(
-         0.5,
-         function ()
-            if timer ~= nil then
-               panel.bgimage = draw_info
-               panel.visible = true
-               timer = nil
-            end
-            return false
-         end
-      )
+      panel.bgimage = draw_info
+      panel.visible = true
 
       kg = api.awful.keygrabber.run(
          function (mod, key, event)
@@ -246,13 +236,6 @@ local function create(config)
             elseif key == switch_key then
                switch()
                panel.bgimage = draw_info
-               if not panel.visible then
-                  panel.visible = true
-               end
-               if timer ~= nil then
-                  timer:stop()
-                  timer = nil
-               end
             end
             return true
          end

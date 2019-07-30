@@ -1,12 +1,12 @@
 [submodule "linux-x/.config/awesome/layout-machi"]
 	path = linux-x/.config/awesome/layout-machi
 	url = https://github.com/xinhaoyuan/layout-machi.git
-[submodule "linux-x/.config/awesome/--force"]
-	path = linux-x/.config/awesome/--force
-	url = https://github.com/deficient/calendar.git
 [submodule "linux-x/.config/awesome/calendar"]
 	path = linux-x/.config/awesome/calendar
 	url = https://github.com/deficient/calendar.git
 [submodule "linux-x/.config/awesome/awesome-wm-widgets"]
 	path = linux-x/.config/awesome/awesome-wm-widgets
 	url = https://github.com/streetturtle/awesome-wm-widgets.git
+[submodule "linux-x/.config/awesome/freedesktop"]
+	path = linux-x/.config/awesome/freedesktop
+	url = https://github.com/lcpz/awesome-freedesktop.git
