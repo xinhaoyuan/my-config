@@ -165,27 +165,41 @@ local global_keys = table_join(
                       "-font", beautiful.mono_font or beautiful.font}
          awful.spawn(cmd)
    end),
+   -- keep the both ways of showing the desktop, not sure which one is better for now.
    awful.key({ "Mod4" }, "d",               function ()
-         -- the old way for reference
-         -- local clients = {}
-         -- local has_visible = false
-         -- for _, c in ipairs(capi.client.get()) do
-         --    if c:isvisible() and awful.client.focus.filter(c) then
-         --       c.orig_minimized = c.minimized
-         --       c.minimized = true
-         --       has_visible = true
-         --    end
-         -- end
+         local clients = {}
+         local has_visible = false
+         for _, c in ipairs(capi.client.get()) do
+            if c:isvisible() and awful.client.focus.filter(c) then
+               c.orig_minimized = c.minimized
+               c.minimized = true
+               has_visible = true
+            end
+         end
 
-         -- if not has_visible then
-         --    for _, c in ipairs(capi.client.get()) do
-         --       if c.orig_minimized ~= nil then
-         --          c.minimized = c.orig_minimized
-         --          c.orig_minimized = nil
-         --       end
-         --    end
-         -- end
+         if not has_visible then
+            clients = {}
+            for _, c in ipairs(capi.client.get()) do
+               if c.orig_minimized ~= nil then
+                  clients[#clients + 1] = c
+               end
+            end
 
+            -- I thought I should put newer client later. Turned out to be the reversed way. 
+            table.sort(
+               clients,
+               function (a, b)
+                  return a.focus_timestamp > b.focus_timestamp
+               end
+            )
+
+            for _, c in ipairs(clients) do
+               c.minimized = c.orig_minimized
+               c.orig_minimized = nil
+            end
+         end
+   end),
+   awful.key({ "Mod4" }, "q",               function ()
          local to_restore = true
          for s in capi.screen do
             if #s.selected_tags > 0 then

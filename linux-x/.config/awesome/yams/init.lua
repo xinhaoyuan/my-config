@@ -22,12 +22,6 @@ local function update_focus_timestamp(c)
    c.focus_timestamp = focus_timestamp
 end
 
-local function ensure_focus_timestamp(c)
-   if c ~= nil and c.focus_timestamp == nil then
-      c.focus_timestamp = focus_timestamp
-   end
-end
-
 -- For avoiding accidentally updating ordering during switching
 local focus_timestamp_update_lock = false
 client.connect_signal(
@@ -35,6 +29,15 @@ client.connect_signal(
    function (c)
       if focus_timestamp_update_lock then return end
       update_focus_timestamp(c)
+   end
+)
+
+client.connect_signal(
+   "manage",
+   function (c)
+      if c.focus_timestamp == nil then
+         c.focus_timestamp = 0
+      end
    end
 )
 
@@ -120,7 +123,6 @@ local function create(config)
             tablist = {}
             for c in api.awful.client.iterate(filter, nil, same_screen and screen or nil) do
                tablist[#tablist + 1] = c
-               ensure_focus_timestamp(c)
             end
             table.sort(
                tablist,
