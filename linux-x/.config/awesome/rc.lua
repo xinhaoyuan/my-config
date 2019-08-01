@@ -237,12 +237,13 @@ end
 
 local client_keys = table_join(
    awful.key({ "Mod4" }, "Tab", function (c)
-         machi.editor.fit_region(c)
+         c.maximized = false
+         c.maximized_vertical = false
+         c.maximized_horizontal = false
+         c.floating = false
          delayed(
             function ()
-               if not (c.floating or c.maximized or c.maximized_vertical or c.maximized_horizontal) then
-                  machi.switcher.start(c)
-               end
+               machi.switcher.start(c)
             end
          )
    end),
@@ -399,7 +400,7 @@ awful_rule.rules = {
 awful.screen.connect_for_each_screen(
    function (s)
       for i, t in ipairs(tag_list) do
-         local tag = awful.tag.add(t, { screen = s, layout = machi.default_layout, layouts = awful_layout.layouts })
+         local tag = awful.tag.add(t, { screen = s, layout = awful_layout.layouts[1], layouts = awful_layout.layouts })
       end
       -- 1 is the hidden tag
       s.tags[2]:view_only()
