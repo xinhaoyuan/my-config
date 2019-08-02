@@ -103,6 +103,8 @@ end
 aw.screen.connect_for_each_screen(function (scr)
       local s = scr.index
 
+      scr.mypromptbox = aw.widget.prompt()
+
       my_task_list[s] = aw.widget.tasklist {
          screen = s,
          filter = aw.widget.tasklist.filter.currenttags,
@@ -191,6 +193,7 @@ aw.screen.connect_for_each_screen(function (scr)
             aw.button({ }, 5, function () aw.layout.inc(-1) end)))
       left_layout:add(layoutbox)
       left_layout:add(my_tag_list[s])
+      left_layout:add(scr.mypromptbox)
       local right_layout = wi.widget {
          spacing        = dpi(5),
          spacing_widget = { color = beautiful.bg_normal, widget = wi.widget.separator },
@@ -238,6 +241,22 @@ aw.screen.connect_for_each_screen(function (scr)
 
       my_wibar[s]:set_widget(layout)
 end)
+
+root.keys(
+   aw.util.table.join(
+      root.keys(),
+      aw.key({ "Mod4" }, ";",
+         function ()
+            aw.prompt.run {
+               prompt       = "Run Lua code: ",
+               font         = beautiful.mono_font or beautiful.font,
+               textbox      = aw.screen.focused().mypromptbox.widget,
+               exe_callback = aw.util.eval,
+               history_path = aw.util.get_cache_dir() .. "/history_eval"
+            }
+         end,
+         {description = "lua execute prompt", group = "awesome"})
+))
 
 tm {
    timeout = 0.5,

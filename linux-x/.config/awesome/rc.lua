@@ -287,11 +287,13 @@ local client_keys = table_join(
 
 local client_buttons = awful.util.table.join(
    awful.button({ }, 1, function (c) capi.client.focus = c; c:raise() end),
-   awful.button({ "Mod4" }, 1, awful.mouse.client.move),
-   awful.button({ "Mod4" }, 3, awful.mouse.client.resize)
+   awful.button({ "Mod4" }, 1, function (c) awful.mouse.client.move(c) end),
+   awful.button({ "Mod4" }, 3, function (c) awful.mouse.client.resize(c, "bottom_right") end)
 )
 
 -- back to floating before moving
+
+awful.mouse.resize.set_mode("live")
 
 awful.mouse.resize.add_enter_callback(
    function (c)

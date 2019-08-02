@@ -5,5 +5,6 @@ theme.font = "Sans 10"
 theme.mono_font = "Hack 10"
 theme.useless_gap = dpi(8)
 theme.bar_height = dpi(22)
+theme.menu_width = dpi(150)
 
 return theme
