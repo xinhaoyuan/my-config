@@ -33,7 +33,6 @@ COLORNAME can be background/foreground/cursor/color{0 ... 15}.
 
 def help():
     sys.stdout.write(HELP_MSG)
-    
 
 def load_json(path):
     if path == "":
@@ -146,7 +145,6 @@ def save_rofi(data, path):
     f.write("}\n")
     if f is not sys.stdout:
         f.close()
-
 
 selector_stack = []
 selector = SPECIAL_COLORS + ["color{}".format(i) for i in range(16)]
