@@ -11,6 +11,29 @@ import io
 
 DEFAULT_COLOR_JSON_PATH = os.path.join(os.environ["HOME"], ".cache/wal/colors.json")
 SPECIAL_COLORS = ["foreground", "background", "cursor"]
+HELP_MSG = """\
+help: print this message.
+load [xres/wal] [path/-]: load color theme from Xresource or wal json file. "-" is for the default location.
+save [xres/wal] [path]: save color theme to Xresource file or wal json file.
++ [all/regular/special/COLORNAME]: add the name(-set) to the name selection.
+- [all/regular/special/COLORNAME]: remove the name(-set) from the name selection.
+= [all/regular/special/COLORNAME]: set the name selection to the name(-set).
+pushsel: save the current name selection and set new selection to all names.
+popsel: restore the name selection.
+brightness delta: adjust the brightness of the selected names.
+saturation delta: adjust the saturation of the selected names.
+set dst_name src_name: set the color of dst_name to the src_name.
+swap name_1 name_2: swap the colors of name_1 and name_2.
+preview: preview the current theme through escape sequence.
+apply: apply the current theme to the terminal through escape sequence.
+print: print the color table.
+
+COLORNAME can be background/foreground/cursor/color{0 ... 15}.
+"""
+
+def help():
+    sys.stdout.write(HELP_MSG)
+    
 
 def load_json(path):
     if path == "":
@@ -143,9 +166,11 @@ while i < len(cmds):
         elif kind == "wal":
             data = load_json(None if source == "-" else source)
         continue
-    if cmd == "print":
+    elif cmd == "print":
         print_format_table(None)
         continue
+    elif cmd == "help":
+        help()
     elif data is None:
         continue
 
