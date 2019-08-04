@@ -47,6 +47,7 @@ local machi            = require("layout-machi")
 local yams             = require("yams")
 local utils            = require("my-utils")
 local menu             = require("my-menu")
+-- local mouse_lock       = require("mouse-lock")
 local dpi              = require("beautiful.xresources").apply_dpi
 
 local delayed = gears_timer.delayed_call

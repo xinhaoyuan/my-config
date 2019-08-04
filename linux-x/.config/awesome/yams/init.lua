@@ -57,7 +57,6 @@ end
 
 local function activate(c)
    c:emit_signal("request::activate", "mouse.move", {raise=false})
-   c:raise()
 end
 
 local function create(config)
@@ -113,30 +112,53 @@ local function create(config)
             height = screen.workarea.height,
             bg = "#00000000",
             opacity = 1,
-            ontop = true
+            ontop = true,
+            type = "dock",
       })
 
       local tablist = nil
+      local tablist_index = nil
 
-      local function ensure_tablist()
-         if tablist == nil then
-            tablist = {}
-            for c in api.awful.client.iterate(filter, nil, same_screen and screen or nil) do
-               tablist[#tablist + 1] = c
-            end
-            table.sort(
-               tablist,
-               function (a, b)
-                  return a.focus_timestamp > b.focus_timestamp
-               end
-            )
-            tablist_index = 1
+      local function make_tablist()
+         tablist = {}
+         for c in api.awful.client.iterate(filter, nil, same_screen and screen or nil) do
+            tablist[#tablist + 1] = c
          end
+         table.sort(
+            tablist,
+            function (a, b)
+               return a.focus_timestamp > b.focus_timestamp
+            end
+         )
+
+         for i = #tablist, 1, -1 do
+            local c = tablist[i]
+            c.saved_layer_info = {c.ontop, c.above, c.below}
+            c.ontop = false
+            c.above = false
+            c.below = false
+            if c.saved_layer_info[1] or c.saved_layer_info[2] then
+               c:raise()
+            elseif c.saved_layer_info[3] then
+               c:lower()
+            end
+         end
+
+         tablist_index = 1
+      end
+
+      local function restore_layers()
+         for i = 1, #tablist do
+            local c = tablist[i]
+            c.ontop = c.saved_layer_info[1]
+            c.above = c.saved_layer_info[2]
+            c.below = c.saved_layer_info[3]
+            c.saved_layer_info = nil
+         end
+         tablist[tablist_index]:raise()
       end
 
       local function draw_info(context, cr, width, height)
-         ensure_tablist()
-
          cr:set_source_rgba(0, 0, 0, 0)
          cr:rectangle(0, 0, width, height)
          cr:fill()
@@ -194,13 +216,16 @@ local function create(config)
 
       local function switch()
          if #tablist > 0 then
+            tablist[tablist_index].ontop = false
             tablist_index = tablist_index % #tablist + 1
+            tablist[tablist_index].ontop = true
             activate(tablist[tablist_index])
          end
       end
 
-      ensure_tablist()
+      make_tablist()
       if #tablist < 2 then
+         retore_layers()
          return
       end
 
@@ -209,7 +234,6 @@ local function create(config)
       switch()
 
       local kg = nil
-      local timer = nil
 
       local function stop()
          update_focus_timestamp(tablist[tablist_index])
@@ -219,11 +243,7 @@ local function create(config)
             api.awful.keygrabber.stop(kg)
             kg = nil
          end
-
-         if timer ~= nil then
-            timer:stop()
-            timer = nil
-         end
+         restore_layers()
       end
 
       panel.bgimage = draw_info
