@@ -186,7 +186,7 @@ local global_keys = table_join(
                end
             end
 
-            -- I thought I should put newer client later. Turned out to be the reversed way. 
+            -- I thought I should put newer client later. Turned out to be the reversed way.
             table.sort(
                clients,
                function (a, b)
@@ -289,7 +289,10 @@ local client_keys = table_join(
 local client_buttons = awful.util.table.join(
    awful.button({ }, 1, function (c) capi.client.focus = c; c:raise() end),
    awful.button({ "Mod4" }, 1, function (c) awful.mouse.client.move(c) end),
-   awful.button({ "Mod4" }, 3, function (c) awful.mouse.client.resize(c, "bottom_right") end)
+   awful.button({ "Mod4" }, 3, function (c)
+         local _, cc = awful.placement.closest_corner(mouse, {parent = c})
+         awful.mouse.client.resize(c, cc)
+   end)
 )
 
 -- back to floating before moving
