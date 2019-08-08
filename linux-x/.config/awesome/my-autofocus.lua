@@ -16,15 +16,29 @@ local api = {
    awful_client = require("awful.client"),
    timer = require("gears.timer"),
    focus = require("my-focus"),
+   fts = require("focus-timestamp"),
 }
 
 local find_alternative_focus = function (prev, s)
-   return api.focus.match_in_history(
-      {
-         function (c)
-            return c.screen == s and api.awful_client.focus.filter(c)
-         end
-   })
+   clients = {}
+   for c in api.awful_client.iterate(function (c)
+         return c:isvisible() and api.awful_client.focus.filter(c) 
+   end) do
+      clients[#clients + 1] = c
+   end
+   table.sort(
+      clients,
+      function (a, b)
+         return api.fts.get(a) > api.fts.get(b)
+      end
+   )
+   if #clients == 0 then
+      return nil
+   end
+   for _, c in ipairs(clients) do
+      if c.screen == s then return c end
+   end
+   return clients[1]
 end
 
 local autofocus = {
@@ -36,46 +50,51 @@ local autofocus = {
 -- @param prev the previous focus client, may not be valid now
 -- @param s the screen of prev, in case prev.screen is not accessible now
 local function check_focus(prev, s)
-    if not s or not s.valid then return end
-    -- When no visible client has the focus...
-    if not api.client.focus or not api.client.focus:isvisible() or not api.awful_client.focus.filter(api.client.focus) then
-        local c = autofocus.find_alternative_focus(prev, s)
-        if c then
-            -- raise the client in "request::activate" will set the urgent flag when switching tag
-            c:emit_signal("request::activate", "autofocus.check_focus",
-                          {raise=false})
-            c:raise()
-        end
-    end
+   if not s or not s.valid then return end
+   -- When no visible client has the focus...
+   if not api.client.focus or not api.client.focus:isvisible() or not api.awful_client.focus.filter(api.client.focus) then
+      local c = autofocus.find_alternative_focus(prev, s)
+      if c then
+         -- raise the client in "request::activate" will set the urgent flag when switching tag
+         api.fts.lock()
+         c:emit_signal("request::activate", "autofocus.check_focus",
+                       {raise=false})
+         c:raise()
+         api.fts.unlock()
+      end
+   end
 end
 
 --- Check client focus (delayed).
 -- @param obj An object that should have a .screen property.
 local function check_focus_delayed(obj)
-    api.timer.delayed_call(check_focus, obj, obj.screen)
+   api.timer.delayed_call(check_focus, obj, obj.screen)
 end
 
 --- Give focus on tag selection change.
 --
 -- @param tag A tag object
 local function check_focus_tag(t)
-    local s = t.screen
-    if (not s) or (not s.valid) then return end
-    s = screen[s]
-    check_focus(nil, s)
-    if not api.client.focus or not api.awful_client.focus.filter(api.client.focus) or screen[api.client.focus.screen] ~= s then
-        local c = api.awful_client.focus.history.get(s, 0, api.awful_client.focus.filter)
-        if c then
-            -- raise the client in "request::activate" will set the urgent flag when switching tag
-            c:emit_signal("request::activate", "autofocus.check_focus_tag",
-                          {raise=false})
-            c:raise()
-        end
-    end
+   local s = t.screen
+   if (not s) or (not s.valid) then return end
+   s = screen[s]
+   check_focus(nil, s)
+   if not api.client.focus or not api.awful_client.focus.filter(api.client.focus) or screen[api.client.focus.screen] ~= s then
+      -- local c = api.awful_client.focus.history.get(s, 0, api.awful_client.focus.filter)
+      local c = autofocus.find_alternative_focus(nil, s)
+      if c then
+         -- raise the client in "request::activate" will set the urgent flag when switching tag
+         api.fts.lock()
+         c:emit_signal("request::activate", "autofocus.check_focus_tag",
+                       {raise=false})
+         c:raise()
+         api.fts.unlock()
+      end
+   end
 end
 
 tag.connect_signal("property::selected", function (t)
-    api.timer.delayed_call(check_focus_tag, t)
+                      api.timer.delayed_call(check_focus_tag, t)
 end)
 
 api.client.connect_signal("unfocus",             check_focus_delayed)

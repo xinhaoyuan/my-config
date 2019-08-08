@@ -85,30 +85,34 @@ local spawn_with_shell = function(cmd, to_notify)
    awful.spawn.with_shell(cmd)
 end
 
+local open_tmux_session = function(name)
+   awful.spawn({config.cmd_terminal, "-e", "tmux", "new", "-As", name})
+end
+
 table_join = awful.util.table.join
 
-autofocus.find_alternative_focus = function(prev, s)
-   local pid = nil
-   if prev and prev.valid then
-      pid = prev.tomb_pid or prev.pid
-   end
+-- autofocus.find_alternative_focus = function(prev, s)
+--    local pid = nil
+--    if prev and prev.valid then
+--       pid = prev.tomb_pid or prev.pid
+--    end
 
-   local filters = {}
+--    local filters = {}
 
-   -- prioritize any window has the same pid
-   if pid then
-      filters[#filters + 1] = function (c)
-         return c.valid and c:isvisible() and c.pid == pid
-      end
-   end
+--    -- prioritize any window has the same pid
+--    if pid then
+--       filters[#filters + 1] = function (c)
+--          return c.valid and c:isvisible() and c.pid == pid
+--       end
+--    end
 
-   -- then any visible window
-   filters[#filters + 1] = function (c)
-      return c.valid and c:isvisible()
-   end
+--    -- then any visible window
+--    filters[#filters + 1] = function (c)
+--       return c.valid and c:isvisible()
+--    end
 
-   return focus.match_in_history(filters, true)
-end
+--    return focus.match_in_history(filters, true)
+-- end
 
 local my_focus_by_direction = function(dir)
    local old_c = capi.client.focus
@@ -166,6 +170,10 @@ local global_keys = table_join(
                       "-font", beautiful.mono_font or beautiful.font}
          awful.spawn(cmd)
    end),
+   awful.key({ "Mod4" }, "F1",              function() open_tmux_session("F1") end),
+   awful.key({ "Mod4" }, "F2",              function() open_tmux_session("F2") end),
+   awful.key({ "Mod4" }, "F3",              function() open_tmux_session("F3") end),
+   awful.key({ "Mod4" }, "F4",              function() open_tmux_session("F4") end),
    -- keep the both ways of showing the desktop, not sure which one is better for now.
    awful.key({ "Mod4" }, "d",               function ()
          local clients = {}
@@ -227,8 +235,8 @@ for i = 2, #tag_list do
    global_keys =
       table_join(
          awful.key({ "Mod4" }, tostring(i - 1), function () awful.screen.focused().tags[i]:view_only() end),
-         awful.key({ "Mod4", "Shift" }, tostring(i - 1), function () awful.tag.viewtoggle(awful.screen.focused().tags[i]) end),
-         awful.key({ "Mod4", "Control" }, tostring(i - 1), function ()
+         awful.key({ "Mod4", "Control" }, tostring(i - 1), function () awful.tag.viewtoggle(awful.screen.focused().tags[i]) end),
+         awful.key({ "Mod4", "Shift" }, tostring(i - 1), function ()
                local c = capi.client.focus
                if c == nil then return end
                awful.client.toggletag(c.screen.tags[i], c)

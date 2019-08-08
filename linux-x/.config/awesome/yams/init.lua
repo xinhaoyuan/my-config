@@ -8,38 +8,8 @@ local api = {
    awful     = require("awful"),
    lgi       = require("lgi"),
    dpi       = require("beautiful.xresources").apply_dpi,
+   fts       = require("focus-timestamp")
 }
-
-local focus_timestamp = 0
-local function update_focus_timestamp(c)
-   if c == nil then return end
-   if c.focus_timestamp ~= nil and
-      c.focus_timestamp > focus_timestamp
-   then
-      focus_timestamp = c.focus_timestamp
-   end
-   focus_timestamp = focus_timestamp + 1
-   c.focus_timestamp = focus_timestamp
-end
-
--- For avoiding accidentally updating ordering during switching
-local focus_timestamp_update_lock = false
-client.connect_signal(
-   "focus",
-   function (c)
-      if focus_timestamp_update_lock then return end
-      update_focus_timestamp(c)
-   end
-)
-
-client.connect_signal(
-   "manage",
-   function (c)
-      if c.focus_timestamp == nil then
-         c.focus_timestamp = 0
-      end
-   end
-)
 
 local function min(a, b)
    if a < b then return a else return b end
@@ -127,7 +97,7 @@ local function create(config)
          table.sort(
             tablist,
             function (a, b)
-               return a.focus_timestamp > b.focus_timestamp
+               return api.fts.get(a) > api.fts.get(b)
             end
          )
 
@@ -229,15 +199,15 @@ local function create(config)
          return
       end
 
-      focus_timestamp_update_lock = true
+      api.fts.lock()
 
       switch()
 
       local kg = nil
 
       local function stop()
-         update_focus_timestamp(tablist[tablist_index])
-         focus_timestamp_update_lock = false
+         api.fts.update(tablist[tablist_index])
+         api.fts.unlock()
          panel.visible = false
          if kg ~= nil then
             api.awful.keygrabber.stop(kg)
