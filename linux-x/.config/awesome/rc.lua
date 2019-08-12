@@ -149,10 +149,10 @@ local global_keys = table_join(
    awful.key({ "Mod4" }, "/",               function () machi.default_editor.start_interactive() end),
    awful.key({ "Mod4" }, "[",               function () awful_layout.inc(awful_layout.layouts, -1) end),
    awful.key({ "Mod4" }, "]",               function () awful_layout.inc(awful_layout.layouts, 1) end),
-   awful.key({ "Mod4" }, "k",               function () my_focus_by_direction("up") end),
-   awful.key({ "Mod4" }, "h",               function () my_focus_by_direction("left") end),
-   awful.key({ "Mod4" }, "j",               function () my_focus_by_direction("down") end),
-   awful.key({ "Mod4" }, "l",               function () my_focus_by_direction("right") end),
+   awful.key({ "Mod4" }, "Up",              function () my_focus_by_direction("up") end),
+   awful.key({ "Mod4" }, "Left",            function () my_focus_by_direction("left") end),
+   awful.key({ "Mod4" }, "Down",            function () my_focus_by_direction("down") end),
+   awful.key({ "Mod4" }, "Right",           function () my_focus_by_direction("right") end),
    awful.key({ }, "XF86AudioLowerVolume",   function () spawn("amixer sset Master,0 5%-") end),
    awful.key({ }, "XF86AudioRaiseVolume",   function () spawn("amixer sset Master,0 5%+") end),
    awful.key({ }, "XF86AudioMute",          function () spawn("amixer sset Master,0 toggle") end),
@@ -257,7 +257,7 @@ local client_keys = table_join(
          )
    end),
 
-   awful.key({ "Mod4" }, "Up", function (c)
+   awful.key({ "Mod4" }, "=", function (c)
          if c.fullscreen then
          elseif c.minimized then
             c.minimized = false
@@ -266,7 +266,7 @@ local client_keys = table_join(
          end
    end),
 
-   awful.key({ "Mod4" }, "Down", function (c)
+   awful.key({ "Mod4" }, "-", function (c)
          if c.fullscreen then
          elseif c.maximized then
             c.maximized = false
@@ -279,7 +279,7 @@ local client_keys = table_join(
          c.fullscreen = not c.fullscreen
    end),
 
-   awful.key({ "Mod4" }, "Right", function (c)
+   awful.key({ "Mod4" }, "`", function (c)
          if c.fullscreen then
          else
             if c.floating then

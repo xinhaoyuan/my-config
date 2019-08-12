@@ -59,7 +59,7 @@ local function check_focus(prev, s)
          api.fts.lock()
          c:emit_signal("request::activate", "autofocus.check_focus",
                        {raise=false})
-         c:raise()
+         -- c:raise()
          api.fts.unlock()
       end
    end
@@ -83,11 +83,10 @@ local function check_focus_tag(t)
       -- local c = api.awful_client.focus.history.get(s, 0, api.awful_client.focus.filter)
       local c = autofocus.find_alternative_focus(nil, s)
       if c then
-         -- raise the client in "request::activate" will set the urgent flag when switching tag
          api.fts.lock()
          c:emit_signal("request::activate", "autofocus.check_focus_tag",
                        {raise=false})
-         c:raise()
+         -- c:raise()
          api.fts.unlock()
       end
    end
