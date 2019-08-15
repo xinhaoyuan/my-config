@@ -195,7 +195,7 @@ local function create(config)
 
       make_tablist()
       if #tablist < 2 then
-         retore_layers()
+         restore_layers()
          return
       end
 
