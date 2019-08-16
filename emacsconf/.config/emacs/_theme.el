@@ -84,7 +84,7 @@
              (if (string-prefix-p "rxvt" term)
                  (progn
                    ;; for xterm-query
-                   (load "term/xterm.el")
+                   (load "term/xterm")
                    (flet ((my-xterm-maybe-set-dark-background-mode
                            (redc greenc bluec)
                            (message "!!! %d %d %d" redc greenc bluec)
