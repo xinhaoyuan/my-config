@@ -114,22 +114,14 @@ table_join = awful.util.table.join
 --    return focus.match_in_history(filters, true)
 -- end
 
-local my_focus_by_direction = function(dir)
-   local old_c = capi.client.focus
-
-   if old_c ~= nil and old_c.screen ~= awful.screen.focused() then
-      awful.screen.focus(old_c.screen.index)
-   end
-
-   awful.client.focus.bydirection(dir);
-   local new_c = capi.client.focus
-
-   if new_c == old_c then
+local function go_by_direction(dir, with_client)
+   if with_client then
+      local c = capi.client.focus
+      awful.screen.focus_bydirection(dir, c.screen)
+      c:move_to_screen(mouse.screen.index)
+      c:raise()
+   else
       awful.screen.focus_bydirection(dir)
-   end
-
-   if capi.client.focus ~= nil then
-      capi.client.focus:raise()
    end
 end
 
@@ -149,10 +141,14 @@ local global_keys = table_join(
    awful.key({ "Mod4" }, "/",               function () machi.default_editor.start_interactive() end),
    awful.key({ "Mod4" }, "[",               function () awful_layout.inc(awful_layout.layouts, -1) end),
    awful.key({ "Mod4" }, "]",               function () awful_layout.inc(awful_layout.layouts, 1) end),
-   awful.key({ "Mod4" }, "Up",              function () my_focus_by_direction("up") end),
-   awful.key({ "Mod4" }, "Left",            function () my_focus_by_direction("left") end),
-   awful.key({ "Mod4" }, "Down",            function () my_focus_by_direction("down") end),
-   awful.key({ "Mod4" }, "Right",           function () my_focus_by_direction("right") end),
+   awful.key({ "Mod4" }, "Up",              function () go_by_direction("up") end),
+   awful.key({ "Mod4" }, "Left",            function () go_by_direction("left") end),
+   awful.key({ "Mod4" }, "Down",            function () go_by_direction("down") end),
+   awful.key({ "Mod4" }, "Right",           function () go_by_direction("right") end),
+   awful.key({ "Control", "Mod4" }, "Up",   function () go_by_direction("up", true) end),
+   awful.key({ "Control", "Mod4" }, "Left", function () go_by_direction("left", true) end),
+   awful.key({ "Control", "Mod4" }, "Down", function () go_by_direction("down", true) end),
+   awful.key({ "Control", "Mod4" }, "Right",function () go_by_direction("right", true) end),
    awful.key({ }, "XF86AudioLowerVolume",   function () spawn("amixer sset Master,0 5%-") end),
    awful.key({ }, "XF86AudioRaiseVolume",   function () spawn("amixer sset Master,0 5%+") end),
    awful.key({ }, "XF86AudioMute",          function () spawn("amixer sset Master,0 toggle") end),
