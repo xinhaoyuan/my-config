@@ -108,6 +108,8 @@ aw.screen.connect_for_each_screen(function (scr)
       my_task_list[s] = aw.widget.tasklist {
          screen = s,
          filter = aw.widget.tasklist.filter.currenttags,
+         buttons = my_task_list.buttons,
+         style = { font = mono_font },
          update_function = function (w, b, l, d, objects, args)
             -- not used any more. just for future reference
 
@@ -292,16 +294,19 @@ client.connect_signal(
          end)
       )
 
+      local titlewidget = aw.titlebar.widget.titlewidget(c)
+      titlewidget:set_font(mono_font)
       aw.titlebar(
          c,
          {
             size = dpi(20),
+            font = mono_font,
          }
       ):setup
       {
          { -- Left
             aw.titlebar.widget.iconwidget(c),
-            aw.titlebar.widget.titlewidget(c),
+            titlewidget,
             spacing = dpi(2),
             buttons = buttons,
             layout  = wi.layout.fixed.horizontal
