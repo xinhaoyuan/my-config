@@ -108,10 +108,6 @@ aw.screen.connect_for_each_screen(function (scr)
       my_task_list[s] = aw.widget.tasklist {
          screen = s,
          filter = aw.widget.tasklist.filter.currenttags,
-         buttons = my_task_list.buttons,
-         style = {
-            font = mono_font
-         },
          update_function = function (w, b, l, d, objects, args)
             -- not used any more. just for future reference
 
@@ -178,6 +174,8 @@ aw.screen.connect_for_each_screen(function (scr)
                      y = c.y + c.height / 2,
                             }, true)
                aw.mouse.client.move(c)
+            elseif b == 2 then
+               aw.titlebar.toggle(c)
             elseif b == 3 then
                aw.mouse.client.resize(c)
             end
@@ -275,3 +273,52 @@ tm {
       end
    end
 }
+
+client.connect_signal(
+   "request::titlebars",
+   function (c)
+      -- buttons for the titlebar
+      local buttons = aw.util.table.join(
+         aw.button({ }, 1, function()
+               c:emit_signal("request::activate", "titlebar", {raise = true})
+               aw.mouse.client.move(c)
+         end),
+         aw.button({ }, 2, function()
+               aw.titlebar.hide(c)
+         end),
+         aw.button({ }, 3, function()
+               c:emit_signal("request::activate", "titlebar", {raise = true})
+               aw.mouse.client.resize(c)
+         end)
+      )
+
+      aw.titlebar(
+         c,
+         {
+            size = dpi(20),
+         }
+      ):setup
+      {
+         { -- Left
+            aw.titlebar.widget.iconwidget(c),
+            aw.titlebar.widget.titlewidget(c),
+            spacing = dpi(2),
+            buttons = buttons,
+            layout  = wi.layout.fixed.horizontal
+         },
+         { -- Space
+            buttons = buttons,
+            layout  = wi.layout.fixed.horizontal
+         },
+         { -- Right
+            aw.titlebar.widget.floatingbutton (c),
+            aw.titlebar.widget.maximizedbutton(c),
+            aw.titlebar.widget.stickybutton   (c),
+            aw.titlebar.widget.ontopbutton    (c),
+            aw.titlebar.widget.closebutton    (c),
+            layout = wi.layout.fixed.horizontal()
+         },
+         layout = wi.layout.align.horizontal,
+      }
+   end
+)

@@ -160,7 +160,6 @@ local global_keys = table_join(
    awful.key({ }, "XF86MonBrightnessDown",  function () spawn("xbacklight -dec 5") end),
    awful.key({ "Mod4" }, "Escape",          function () menu:show() end),
    awful.key({ "Mod4" }, "Return",          function () spawn(config.cmd_terminal) end),
-   awful.key({ "Mod4" }, "t",               function () spawn(config.cmd_terminal) end),
    awful.key({ "Mod4" }, "e",               function () spawn(config.cmd_file_manager) end),
    awful.key({ "Mod4" }, "\\",              function ()
          local cmd = {"rofi", "show",
@@ -275,6 +274,8 @@ local client_keys = table_join(
          end
    end),
 
+   awful.key({ "Mod4" }, "t", function (c) awful.titlebar.toggle(c) end),
+
    awful.key({ "Mod4" }, "f", function (c)
          c.fullscreen = not c.fullscreen
    end),
@@ -323,32 +324,33 @@ root.keys(global_keys)
 
 -- rules
 
--- change border color based on focus
-capi.client.connect_signal(
-   "focus",
-   function (c)
-      c.border_color = beautiful.border_focus
-   end
-)
-capi.client.connect_signal(
-   "unfocus",
-   function (c)
-      c.border_color = beautiful.border_normal
-   end
-)
+-- Borders are not used anymore
+-- -- change border color based on focus
+-- capi.client.connect_signal(
+--    "focus",
+--    function (c)
+--       c.border_color = beautiful.border_focus
+--    end
+-- )
+-- capi.client.connect_signal(
+--    "unfocus",
+--    function (c)
+--       c.border_color = beautiful.border_normal
+--    end
+-- )
 
--- remove border for maximized windows
-function reset_border(c)
-   if not c.borderless and c.floating and not c.maximized then
-      c.border_width = beautiful.border_width
-   else
-      c.border_width = 0
-   end
-end
+-- -- remove border for maximized windows
+-- function reset_border(c)
+--    if not c.borderless and c.floating and not c.maximized then
+--       c.border_width = beautiful.border_width
+--    else
+--       c.border_width = 0
+--    end
+-- end
 
-capi.client.connect_signal("manage", reset_border)
-capi.client.connect_signal("property::maximized", reset_border)
-capi.client.connect_signal("property::floating", reset_border)
+-- capi.client.connect_signal("manage", reset_border)
+-- capi.client.connect_signal("property::maximized", reset_border)
+-- capi.client.connect_signal("property::floating", reset_border)
 
 awful_rule.rules = {
    {
@@ -363,7 +365,16 @@ awful_rule.rules = {
          screen = function(c) return capi.awesome.startup and c.screen or awful.screen.focused() end,
          floating = true,
          placement = awful.placement.centered,
+         border_width = 0,
+         borderless = true,
       }
+   },
+   { rule_any = { type = { "normal", "dialog" } },
+     properties = { titlebars_enabled = true }
+   },
+   { rule_any = { class = { "Google-chrome", "Chromium" } },
+     rule = { role = "browser" },
+     properties = { titlebars_enabled = false }
    },
    {
       rule = { class = "URxvt" },
@@ -374,16 +385,12 @@ awful_rule.rules = {
    {
       rule = { class = "Synapse" },
       properties = {
-         border_width = 0,
-         borderless = true,
          ontop = true,
       },
    },
    {
       rule = { class = "Plank", type = "dock" },
       properties = {
-         border_width = 0,
-         borderless = true,
          floating = true,
          sticky = true,
          ontop = true,
