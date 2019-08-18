@@ -299,7 +299,7 @@ client.connect_signal(
       aw.titlebar(
          c,
          {
-            size = dpi(20),
+            size = beautiful.titlebar_size,
             font = mono_font,
          }
       ):setup
