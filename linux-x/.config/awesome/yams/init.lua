@@ -63,7 +63,7 @@ local function create(config)
       local font_color = with_alpha(api.gears.color(api.beautiful.fg_normal), 1)
       local font_color_hl = with_alpha(api.gears.color(api.beautiful.fg_focus), 1)
       local label_size = api.dpi(30)
-      local border_color = with_alpha(api.gears.color(api.beautiful.border_focus), 0.75)
+      local border_color = with_alpha(api.gears.color(api.beautiful.border_focus), 0.85)
       local fill_color = with_alpha(api.gears.color(api.beautiful.bg_normal), 0.75)
       local fill_color_hl = with_alpha(api.gears.color(api.beautiful.bg_focus), 1)
 
@@ -158,7 +158,7 @@ local function create(config)
          local x_offset = width / 2
          local y_offset = height / 2 - info_height / 2 + vpadding
 
-         cr:rectangle((width - info_width) / 2, y_offset - vpadding - start_y, info_width, info_height)
+         cr:rectangle((width - info_width) / 2, y_offset - vpadding, info_width, info_height)
          cr:set_source(fill_color)
          cr:fill()
 
