@@ -12,7 +12,7 @@ theme.mono_font = "Hack 10"
 theme.useless_gap = dpi(8)
 theme.bar_height = dpi(22)
 theme.menu_width = dpi(150)
-theme.border_width = 0
+theme.border_width = dpi(2)
 theme.titlebar_size = dpi(20)
 
 local function text_to_surface(text, font_desc, color_desc, width, height)

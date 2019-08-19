@@ -53,7 +53,7 @@ local dpi              = require("beautiful.xresources").apply_dpi
 local delayed = gears_timer.delayed_call
 
 beautiful.layout_machi = machi.get_icon()
-machi.default_editor.set_gap(beautiful.useless_gap * 2, 0)
+machi.default_editor.set_gap(beautiful.useless_gap * 2, beautiful.useless_gap)
 -- revelation.init()
 
 -- Define the tag list upfront for keybindings
@@ -320,33 +320,31 @@ root.keys(global_keys)
 
 -- rules
 
--- Borders are not used anymore
--- -- change border color based on focus
--- capi.client.connect_signal(
---    "focus",
---    function (c)
---       c.border_color = beautiful.border_focus
---    end
--- )
--- capi.client.connect_signal(
---    "unfocus",
---    function (c)
---       c.border_color = beautiful.border_normal
---    end
--- )
+-- change border color based on focus
+capi.client.connect_signal(
+   "focus",
+   function (c)
+      c.border_color = beautiful.border_focus
+   end
+)
+capi.client.connect_signal(
+   "unfocus",
+   function (c)
+      c.border_color = beautiful.border_normal
+   end
+)
 
--- -- remove border for maximized windows
--- function reset_border(c)
---    if not c.borderless and c.floating and not c.maximized then
---       c.border_width = beautiful.border_width
---    else
---       c.border_width = 0
---    end
--- end
+-- remove border for maximized windows
+function reset_border(c)
+   if not c.borderless and not c.maximized then
+      c.border_width = beautiful.border_width
+   else
+      c.border_width = 0
+   end
+end
 
--- capi.client.connect_signal("manage", reset_border)
--- capi.client.connect_signal("property::maximized", reset_border)
--- capi.client.connect_signal("property::floating", reset_border)
+capi.client.connect_signal("manage", reset_border)
+capi.client.connect_signal("property::maximized", reset_border)
 
 awful_rule.rules = {
    {
@@ -356,21 +354,12 @@ awful_rule.rules = {
          size_hints_honor = false,
          keys = client_keys,
          buttons = client_buttons,
-         borderless = false,
          border_color = beautiful.border_normal,
          screen = function(c) return capi.awesome.startup and c.screen or awful.screen.focused() end,
          floating = true,
          placement = awful.placement.centered,
          border_width = 0,
-         borderless = true,
       }
-   },
-   { rule_any = { type = { "normal", "dialog" } },
-     properties = { titlebars_enabled = true }
-   },
-   { rule_any = { class = { "Google-chrome", "Chromium" } },
-     rule = { role = "browser" },
-     properties = { titlebars_enabled = false }
    },
    {
       rule = { class = "URxvt" },
