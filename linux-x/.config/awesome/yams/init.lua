@@ -125,6 +125,7 @@ local function create(config)
             c.below = c.saved_layer_info[3]
             c.saved_layer_info = nil
          end
+         activate(tablist[tablist_index])
          tablist[tablist_index]:raise()
       end
 
@@ -207,6 +208,7 @@ local function create(config)
 
       local function stop()
          api.fts.update(tablist[tablist_index])
+         api.awful.client.focus.history.add(tablist[tablist_index])
          api.fts.unlock()
          panel.visible = false
          if kg ~= nil then
