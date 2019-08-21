@@ -89,7 +89,7 @@ local function create(config)
       local tablist = nil
       local tablist_index = nil
 
-      local function make_tablist()
+      local function initialize()
          tablist = {}
          for c in api.awful.client.iterate(filter, nil, same_screen and screen or nil) do
             tablist[#tablist + 1] = c
@@ -117,7 +117,7 @@ local function create(config)
          tablist_index = 1
       end
 
-      local function restore_layers()
+      local function finalize()
          for i = 1, #tablist do
             local c = tablist[i]
             c.ontop = c.saved_layer_info[1]
@@ -193,9 +193,9 @@ local function create(config)
          end
       end
 
-      make_tablist()
+      initialize()
       if #tablist < 2 then
-         restore_layers()
+         finalize()
          return
       end
 
@@ -213,7 +213,7 @@ local function create(config)
             api.awful.keygrabber.stop(kg)
             kg = nil
          end
-         restore_layers()
+         finalize()
       end
 
       panel.bgimage = draw_info
