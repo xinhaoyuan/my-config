@@ -129,7 +129,7 @@ aw.screen.connect_for_each_screen(function (scr)
 
             awc.list_update(w, b, l, d, objects, args)
          end,
-         widget_template = config.tasklist_template,
+         widget_template = beautiful.tasklist_template,
       }
 
       my_tag_list[s] = aw.widget.taglist(

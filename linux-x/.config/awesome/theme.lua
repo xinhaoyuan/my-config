@@ -1,4 +1,6 @@
 local theme = dofile("/usr/share/awesome/themes/xresources/theme.lua")
+local awful = require("awful")
+local wibox = require("wibox")
 local beautiful = require("beautiful")
 local xresources = require("beautiful.xresources")
 local dpi   = xresources.apply_dpi
@@ -13,6 +15,44 @@ theme.useless_gap = dpi(8)
 theme.bar_height = dpi(22)
 theme.menu_width = dpi(150)
 theme.border_width = dpi(2)
+
+-- theme.tasklist_shape = function(cr, w, h)
+--    offset = h / 4
+--    cr:move_to(0, 0)
+--    cr:line_to(w, 0)
+--    cr:line_to(w - offset, h)
+--    cr:line_to(offset, h)
+--    cr:close_path()
+-- end
+-- theme.tasklist_shape_focus = gshape.powerline
+
+theme.tasklist_template = {
+   {
+      {
+         {
+            {
+               id     = "clienticon",
+               widget = awful.widget.clienticon,
+            },
+            -- id = "icon_margin_role",
+            margins = dpi(1),
+            widget  = wibox.container.margin,
+         },
+         {
+            id     = "text_role",
+            widget = wibox.widget.textbox,
+         },
+         layout = wibox.layout.fixed.horizontal,
+      },
+      id = "text_margin_role",
+      left  = dpi(1),
+      right = dpi(1),
+      widget = wibox.container.margin
+   },
+   id     = "background_role",
+   widget = wibox.container.background,
+}
+
 theme.titlebar_size = dpi(20)
 
 local function text_to_surface(text, font_desc, color_desc, width, height)
