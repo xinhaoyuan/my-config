@@ -110,6 +110,12 @@ aw.screen.connect_for_each_screen(function (scr)
          filter = aw.widget.tasklist.filter.currenttags,
          buttons = my_task_list.buttons,
          style = { font = mono_font },
+         source = function ()
+            -- Sort clients with their constant ids to make the order stable.
+            local cls = aw.widget.tasklist.source.all_clients()
+            table.sort(cls, function (a, b) return a.window < b.window end)
+            return cls
+         end,
          update_function = function (w, b, l, d, objects, args)
             -- not used any more. just for future reference
 
