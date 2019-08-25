@@ -34,13 +34,17 @@ local function _simple_button(args)
    local action = args.action
    ret.widget = wi.widget {
       {
-         markup = args.markup or nil,
-         text = args.text or nil,
-         font = beautiful.fontname_mono .. " 16",
-         buttons = action and awful.util.table.join(
-            awful.button({ }, 1, function () action(false) end),
-            awful.button({ }, 3, function () action(true) end)),
-         widget = wi.widget.textbox,
+         {
+            markup = args.markup or nil,
+            text = args.text or nil,
+            font = beautiful.fontname_mono .. " 16",
+            buttons = action and awful.util.table.join(
+               awful.button({ }, 1, function () action(false) end),
+               awful.button({ }, 3, function () action(true) end)),
+            widget = wi.widget.textbox,
+         },
+         top = dpi(5), bottom = dpi(5), left = dpi(5), right = dpi(5),
+         widget = wi.container.margin,
       },
       fg = beautiful.fg_normal,
       bg = beautiful.bg_normal,

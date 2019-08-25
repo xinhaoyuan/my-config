@@ -18,12 +18,10 @@ local function create_view(args)
    view.keys = {}
 
    local rows = wibox.widget {
-      spacing = dpi(10),
       layout = wibox.layout.fixed.vertical,
    }
    for i, r in ipairs(args.rows or {}) do
       local row_layout = wibox.widget {
-         spacing = dpi(10),
          layout = wibox.layout.fixed.horizontal,
       }
       for j, cell in ipairs(r) do
@@ -37,11 +35,12 @@ local function create_view(args)
       rows:add(row_layout)
    end
 
-   view.widget = wibox.widget {
-      rows,
-      left = dpi(10), right = dpi(10), bottom = dpi(10), top = dpi(10),
-      widget = wibox.container.margin,
-   }
+   view.widget = rows
+   -- wibox.widget {
+   --    rows,
+   --    left = dpi(10), right = dpi(10), bottom = dpi(10), top = dpi(10),
+   --    widget = wibox.container.margin,
+   -- }
 
    view.key_handler = function (mod, key, event)
       if event == "press" and view.keys[key] then
