@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+cd $HOME/.screenlayout
+
+choice=$(for f in *.sh; do
+             echo ${f%.sh}
+         done | rofi -dmenu -p "Screen layout" "$@")
+./${choice}.sh

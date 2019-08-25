@@ -29,7 +29,7 @@ local function create_view(args)
       for j, cell in ipairs(r) do
          if cell.key_handler then
             for _, k in ipairs(cell.keys or {}) do
-               view.keys[k] = cell.key_handler 
+               view.keys[k] = cell.key_handler
             end
          end
          row_layout:add(cell.widget)
@@ -37,7 +37,11 @@ local function create_view(args)
       rows:add(row_layout)
    end
 
-   view.widget = rows
+   view.widget = wibox.widget {
+      rows,
+      left = dpi(10), right = dpi(10), bottom = dpi(10), top = dpi(10),
+      widget = wibox.container.margin,
+   }
 
    view.key_handler = function (mod, key, event)
       if event == "press" and view.keys[key] then
@@ -55,108 +59,43 @@ local waffle = {
    create_view = create_view,
    gravity_ = "southwest",
    widget_container = wibox.widget {
-      bg = beautiful.bg_normal,
-      widget = wibox.container.background,
+      fill_vertical = true,
+      fill_horizontal = true,
+      widget = wibox.container.place,
    },
 }
 
-function waffle:update_layout()   
+function waffle:update_layout()
+   if self.wibox_.widget == nil then
+      self.wibox_.widget = self.widget_container
+   end
    if self.gravity_ == "center" then
-      self.wibox_.widget = wibox.widget {
-         nil,
-         {
-            nil, self.widget_container, nil,
-            expand = "outside",
-            layout = wibox.layout.align.horizontal,
-         }, nil,
-         expand = "outside",
-         layout = wibox.layout.align.vertical,
-      }
+      self.widget_container.valign = "center"
+      self.widget_container.halign = "center"
    elseif self.gravity_ == "north" then
-      self.wibox_.widget = wibox.widget {
-         {
-            nil, self.widget_container, nil,
-            expand = "outside",
-            layout = wibox.layout.align.horizontal,
-         }, nil, nil,
-         expand = "inside",
-         layout = wibox.layout.align.vertical,
-      }
+      self.widget_container.valign = "top"
+      self.widget_container.halign = "center"
    elseif self.gravity_ == "south" then
-      self.wibox_.widget = wibox.widget {
-         nil, nil,
-         {
-            nil, self.widget_container, nil,
-            expand = "outside",
-            layout = wibox.layout.align.horizontal,
-         },
-         expand = "inside",
-         layout = wibox.layout.align.vertical,
-      }
+      self.widget_container.valign = "bottom"
+      self.widget_container.halign = "center"
    elseif self.gravity_ == "west" then
-      self.wibox_.widget = wibox.widget {
-         nil,
-         {
-            self.widget_container, nil, nil,
-            expand = "inside",
-            layout = wibox.layout.align.horizontal,
-         }, nil,
-         expand = "outside",
-         layout = wibox.layout.align.vertical,
-      }
+      self.widget_container.valign = "center"
+      self.widget_container.halign = "left"
    elseif self.gravity_ == "east" then
-      self.wibox_.widget = wibox.widget {
-         nil,
-         {
-            nil, nil, self.widget_container,
-            expand = "inside",
-            layout = wibox.layout.align.horizontal,
-         }, nil,
-         expand = "outside",
-         layout = wibox.layout.align.vertical,
-      }
+      self.widget_container.valign = "center"
+      self.widget_container.halign = "right"
    elseif self.gravity_ == "northeast" then
-      self.wibox_.widget = wibox.widget {
-         {
-            nil, nil, self.widget_container,
-            expand = "inside",
-            layout = wibox.layout.align.horizontal,
-         }, nil, nil,
-         expand = "inside",
-         layout = wibox.layout.align.vertical,
-      }
+      self.widget_container.valign = "top"
+      self.widget_container.halign = "right"
    elseif self.gravity_ == "northwest" then
-      self.wibox_.widget = wibox.widget {
-         {
-            self.widget_container, nil, nil,
-            expand = "inside",
-            layout = wibox.layout.align.horizontal,
-         }, nil, nil,
-         expand = "inside",
-         layout = wibox.layout.align.vertical,
-      }
+      self.widget_container.valign = "top"
+      self.widget_container.halign = "left"
    elseif self.gravity_ == "southeast" then
-      self.wibox_.widget = wibox.widget {
-         nil, nil,
-         {
-            nil, nil, self.widget_container,
-            expand = "inside",
-            layout = wibox.layout.align.horizontal,
-         },
-         expand = "inside",
-         layout = wibox.layout.align.vertical,
-      }
+      self.widget_container.valign = "bottom"
+      self.widget_container.halign = "right"
    elseif self.gravity_ == "southwest" then
-      self.wibox_.widget = wibox.widget {
-         nil, nil,
-         {
-            self.widget_container, nil, nil,
-            expand = "inside",
-            layout = wibox.layout.align.horizontal,
-         },
-         expand = "inside",
-         layout = wibox.layout.align.vertical,
-      }
+      self.widget_container.valign = "bottom"
+      self.widget_container.halign = "left"
    end
 end
 
@@ -197,7 +136,7 @@ function waffle:show(view, push, screen)
       table.insert(self.stack_, self.view_)
    end
    self.view_ = view
-   self.widget_container.widget = view.widget 
+   self.widget_container.widget = view.widget
 
    if not self.wibox_.visible then
       self.keygrabber_ = awful.keygrabber.run(

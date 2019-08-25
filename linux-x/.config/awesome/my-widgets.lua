@@ -1,5 +1,4 @@
-local aw  = require("awful")
-local awc = require("awful.widget.common")
+local awful  = require("awful")
 local beautiful = require("beautiful")
 local wi  = require("wibox")
 local tm  = require("gears.timer")
@@ -21,61 +20,102 @@ local my_tray = wi.widget.systray()
 local mono_font = beautiful.mono_font or beautiful.font
 
 root.buttons(
-   aw.util.table.join(
-      aw.button({ }, 3, function () menu:show() end),
+   awful.util.table.join(
+      awful.button({ }, 3, function () menu:show() end),
       root.buttons()
    )
 )
 
 -- -- dummy bar for conky
--- aw.wibar.new({ position = "top", height = config.bar_height * config.widget_scale_factor, opacity = 0 })
+-- awful.wibar.new({ position = "top", height = config.bar_height * config.widget_scale_factor, opacity = 0 })
 
 local function _button(args)
    return wi.widget {
-      {
-         text = args.text or "",
-         font = beautiful.fontname_mono .. " 20",
-         widget = wi.widget.textbox
-      },
-      bg = beautiful.bg_normal,
-      fg = beautiful.fg_normal,
-      widget= wi.container.background
+      markup = args.markup or nil,
+      text = args.text or nil,
+      font = beautiful.fontname_mono .. " 16",
+      widget = wi.widget.textbox,
    }
 end
 
-local waffle_subview = waffle.create_view({
-      rows = {
-         {
-            {widget = _button({text = "Hello"})},
-            {widget = _button({text = "world"})}
-         },
-      }
-})
+local function view_with_background(view)
+   return {
+      widget = wi.widget {
+         view.widget,
+         bg = beautiful.bg_normal,
+         fg = beautiful.fg_normal,
+         widget = wi.container.background,
+      },
+      key_handler = view.key_handler,
+   }
+end
 
-local waffle_root_view = waffle.create_view({
-      rows = {
-         {
-            {widget = _button({text = "title bar on"}), keys = {"a"}, key_handler = function(mod, key, event) waffle:show(waffle_subview, true) end},
-            {widget = _button({text = "2"})}
-         },
-         {
-            {widget = _button({text = "3"})},
-            {widget = _button({text = "4"})}
-         },
-      }
-})
-
-my_tag_list.buttons = aw.util.table.join(
-   aw.button({ }, 1, aw.tag.viewonly),
-   aw.button({ "Mod4" }, 1, aw.client.movetotag),
-   aw.button({ }, 3, aw.tag.viewtoggle),
-   aw.button({ "Mod4" }, 3, aw.client.toggletag)
-   -- aw.button({ }, 4, function(t) aw.tag.viewnext(aw.tag.getscreen(t)) end),
-   -- aw.button({ }, 5, function(t) aw.tag.viewprev(aw.tag.getscreen(t)) end)
+local waffle_root_view = view_with_background(
+   waffle.create_view({
+         rows = {
+            {
+               {
+                  widget = _button({markup = "<u>W</u>eb browser"}),
+                  keys = {"w"},
+                  key_handler = function(mod, key, event)
+                     awful.spawn(config.cmd_web_browser)
+                     waffle:hide()
+                  end
+               },
+            },
+            {
+               {
+                  widget = _button({markup = "Fil<u>e</u> manager"}),
+                  keys = {"e"},
+                  key_handler = function(mod, key, event)
+                     awful.spawn(config.cmd_file_manager)
+                     waffle:hide()
+                  end
+               },
+            },
+            {
+               {
+                  widget = _button({markup = "<u>T</u>erminal"}),
+                  keys = {"t"},
+                  key_handler = function(mod, key, event)
+                     awful.spawn(config.cmd_terminal)
+                     waffle:hide()
+                  end
+               },
+            },
+            {
+               {
+                  widget = _button({markup = "<u>S</u>creen layout"}),
+                  keys = {"s", "S"},
+                  key_handler = function(mod, key, event)
+                     if key == "S" then
+                        local cmd = {"arandr"}
+                        awful.spawn(cmd)
+                     else
+                        local cmd = {"rofi-screen-layout",
+                                     "-font", beautiful.mono_font or beautiful.font
+                        }
+                        awful.spawn(cmd)
+                     end
+                     waffle:hide()
+                  end
+               },
+            },
+         }
+   })
 )
 
-my_task_list.buttons = aw.util.table.join(
-   aw.button({ }, 1, function (c)
+my_tag_list.buttons = awful.util.table.join(
+   awful.button({ }, 1, awful.tag.viewonly),
+   awful.button({ "Mod4" }, 1, awful.client.movetotag),
+   awful.button({ }, 3, awful.tag.viewtoggle),
+   awful.button({ "Mod4" }, 3, awful.client.toggletag)
+   -- awful.button({ }, 4, function(t) awful.tag.viewnext(awful.tag.getscreen(t)) end),
+   -- awful.button({ }, 5, function(t) awful.tag.viewprev(awful.tag.getscreen(t)) end)
+)
+
+my_task_list.buttons = awful.util.table.join(
+   awful.button({ }, 1, function (c)
          if c == client.focus then
             c.minimized = true
          else
@@ -83,7 +123,7 @@ my_task_list.buttons = aw.util.table.join(
             -- :isvisible() makes no sense
             c.minimized = false
             if not c:isvisible() then
-               aw.tag.viewonly(c:tags()[1])
+               awful.tag.viewonly(c:tags()[1])
             end
             -- This will also un-minimize
             -- the client, if needed
@@ -91,20 +131,20 @@ my_task_list.buttons = aw.util.table.join(
             c:raise()
          end
    end)
-   -- aw.button({ }, 3, function ()
+   -- awful.button({ }, 3, function ()
    --       if instance then
    --          instance:hide()
    --          instance = nil
    --       else
-   --          instance = aw.menu.clients({ width=500 })
+   --          instance = awful.menu.clients({ width=500 })
    --       end
    -- end),
-   -- aw.button({ }, 4, function ()
-   --       aw.client.focus.byidx(1)
+   -- awful.button({ }, 4, function ()
+   --       awful.client.focus.byidx(1)
    --       if client.focus then client.focus:raise() end
    -- end),
-   -- aw.button({ }, 5, function ()
-   --       aw.client.focus.byidx(-1)
+   -- awful.button({ }, 5, function ()
+   --       awful.client.focus.byidx(-1)
    --       if client.focus then client.focus:raise() end
    -- end)
 )
@@ -136,19 +176,19 @@ local function sort(l, c)
    return ret
 end
 
-aw.screen.connect_for_each_screen(function (scr)
+awful.screen.connect_for_each_screen(function (scr)
       local s = scr.index
 
-      scr.mypromptbox = aw.widget.prompt()
+      scr.mypromptbox = awful.widget.prompt()
 
-      my_task_list[s] = aw.widget.tasklist {
+      my_task_list[s] = awful.widget.tasklist {
          screen = s,
-         filter = aw.widget.tasklist.filter.currenttags,
+         filter = awful.widget.tasklist.filter.currenttags,
          buttons = my_task_list.buttons,
          style = { font = mono_font },
          source = function ()
             -- Sort clients with their constant ids to make the order stable.
-            local cls = aw.widget.tasklist.source.all_clients()
+            local cls = awful.widget.tasklist.source.all_clients()
             table.sort(cls, function (a, b) return a.window < b.window end)
             return cls
          end,
@@ -169,19 +209,19 @@ aw.screen.connect_for_each_screen(function (scr)
             --    clients[#clients + 1] = obj
             -- end
 
-            awc.list_update(w, b, l, d, objects, args)
+            awful.widget.common.list_update(w, b, l, d, objects, args)
          end,
          widget_template = beautiful.tasklist_template,
       }
 
-      my_tag_list[s] = aw.widget.taglist(
+      my_tag_list[s] = awful.widget.taglist(
          s, function (t) return config.tag_filter(t.name) end, my_tag_list.buttons,
          {
             font = mono_font
          }
       )
 
-      my_wibar[s] = aw.wibar({
+      my_wibar[s] = awful.wibar({
             screen = s,
             fg = beautiful.fg_normal,
             bg = beautiful.bg_normal,
@@ -217,23 +257,23 @@ aw.screen.connect_for_each_screen(function (scr)
                      x = c.x + c.width / 2,
                      y = c.y + c.height / 2,
                             }, true)
-               aw.mouse.client.move(c)
+               awful.mouse.client.move(c)
             elseif b == 2 then
-               aw.titlebar.toggle(c)
+               awful.titlebar.toggle(c)
             elseif b == 3 then
-               aw.mouse.client.resize(c)
+               awful.mouse.client.resize(c)
             end
          end
       )
 
       local left_layout = wi.layout.fixed.horizontal()
-      local layoutbox = aw.widget.layoutbox(s)
+      local layoutbox = awful.widget.layoutbox(s)
       layoutbox:buttons(
-         aw.util.table.join(
-            aw.button({ }, 1, function () waffle:show(waffle_root_view) end),
-            aw.button({ }, 3, function () menu:show() end),
-            aw.button({ }, 4, function () aw.layout.inc( 1) end),
-            aw.button({ }, 5, function () aw.layout.inc(-1) end)))
+         awful.util.table.join(
+            awful.button({ }, 1, function () waffle:show(waffle_root_view) end),
+            awful.button({ }, 3, function () menu:show() end),
+            awful.button({ }, 4, function () awful.layout.inc( 1) end),
+            awful.button({ }, 5, function () awful.layout.inc(-1) end)))
       left_layout:add(layoutbox)
       left_layout:add(my_tag_list[s])
       left_layout:add(scr.mypromptbox)
@@ -286,17 +326,17 @@ aw.screen.connect_for_each_screen(function (scr)
 end)
 
 root.keys(
-   aw.util.table.join(
+   awful.util.table.join(
       root.keys(),
-      aw.key({ "Mod4" }, "F12", function () waffle:show(waffle_root_view) end),
-      aw.key({ "Mod4" }, ";",
+      awful.key({ "Mod4" }, "F12", function () waffle:show(waffle_root_view) end),
+      awful.key({ "Mod4" }, ";",
          function ()
-            aw.prompt.run {
+            awful.prompt.run {
                prompt       = "Run Lua code: ",
                font         = beautiful.mono_font or beautiful.font,
-               textbox      = aw.screen.focused().mypromptbox.widget,
-               exe_callback = aw.util.eval,
-               history_path = aw.util.get_cache_dir() .. "/history_eval"
+               textbox      = awful.screen.focused().mypromptbox.widget,
+               exe_callback = awful.util.eval,
+               history_path = awful.util.get_cache_dir() .. "/history_eval"
             }
          end,
          {description = "lua execute prompt", group = "awesome"})
@@ -324,23 +364,23 @@ client.connect_signal(
    "request::titlebars",
    function (c)
       -- buttons for the titlebar
-      local buttons = aw.util.table.join(
-         aw.button({ }, 1, function()
+      local buttons = awful.util.table.join(
+         awful.button({ }, 1, function()
                c:emit_signal("request::activate", "titlebar", {raise = true})
-               aw.mouse.client.move(c)
+               awful.mouse.client.move(c)
          end),
-         aw.button({ }, 2, function()
-               aw.titlebar.hide(c)
+         awful.button({ }, 2, function()
+               awful.titlebar.hide(c)
          end),
-         aw.button({ }, 3, function()
+         awful.button({ }, 3, function()
                c:emit_signal("request::activate", "titlebar", {raise = true})
-               aw.mouse.client.resize(c)
+               awful.mouse.client.resize(c)
          end)
       )
 
-      local titlewidget = aw.titlebar.widget.titlewidget(c)
+      local titlewidget = awful.titlebar.widget.titlewidget(c)
       titlewidget:set_font(mono_font)
-      aw.titlebar(
+      awful.titlebar(
          c,
          {
             size = beautiful.titlebar_size,
@@ -349,7 +389,7 @@ client.connect_signal(
       ):setup
       {
          { -- Left
-            aw.titlebar.widget.iconwidget(c),
+            awful.titlebar.widget.iconwidget(c),
             titlewidget,
             spacing = dpi(2),
             buttons = buttons,
@@ -360,11 +400,11 @@ client.connect_signal(
             layout  = wi.layout.fixed.horizontal
          },
          { -- Right
-            aw.titlebar.widget.floatingbutton (c),
-            aw.titlebar.widget.maximizedbutton(c),
-            aw.titlebar.widget.stickybutton   (c),
-            aw.titlebar.widget.ontopbutton    (c),
-            aw.titlebar.widget.closebutton    (c),
+            awful.titlebar.widget.floatingbutton (c),
+            awful.titlebar.widget.maximizedbutton(c),
+            awful.titlebar.widget.stickybutton   (c),
+            awful.titlebar.widget.ontopbutton    (c),
+            awful.titlebar.widget.closebutton    (c),
             layout = wi.layout.fixed.horizontal()
          },
          layout = wi.layout.align.horizontal,

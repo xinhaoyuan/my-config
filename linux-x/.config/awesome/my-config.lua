@@ -11,6 +11,7 @@ local config = {
       return name ~= "STICKY"
    end,
    cmd_terminal = "urxvt",
+   cmd_web_browser = "x-www-browser",
    cmd_file_manager = "thunar",
 }
 
