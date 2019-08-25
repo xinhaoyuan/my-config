@@ -9,8 +9,10 @@ local gears = require("gears")
 local lgi   = require("lgi")
 local cairo = lgi.cairo
 
-theme.font = "Sans 10"
-theme.mono_font = "Hack 10"
+theme.fontname_normal = "Sans"
+theme.fontname_mono = "Hack"
+theme.font = theme.fontname_normal .. " 10"
+theme.mono_font = theme.fontname_mono .. " 10"
 theme.useless_gap = dpi(8)
 theme.bar_height = dpi(22)
 theme.menu_width = dpi(150)

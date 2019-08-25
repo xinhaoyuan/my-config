@@ -6,6 +6,7 @@ local tm  = require("gears.timer")
 local shp = require("gears.shape")
 local gmath = require("gears.math")
 local vicious = require("vicious")
+local waffle = require("waffle")
 local config = require("my-config")
 local volumearc_widget = require("awesome-wm-widgets.volumearc-widget.volumearc")
 -- local battery_widget = require("awesome-wm-widgets.battery-widget.battery")
@@ -28,6 +29,41 @@ root.buttons(
 
 -- -- dummy bar for conky
 -- aw.wibar.new({ position = "top", height = config.bar_height * config.widget_scale_factor, opacity = 0 })
+
+local function _button(args)
+   return wi.widget {
+      {
+         text = args.text or "",
+         font = beautiful.fontname_mono .. " 20",
+         widget = wi.widget.textbox
+      },
+      bg = beautiful.bg_normal,
+      fg = beautiful.fg_normal,
+      widget= wi.container.background
+   }
+end
+
+local waffle_subview = waffle.create_view({
+      rows = {
+         {
+            {widget = _button({text = "Hello"})},
+            {widget = _button({text = "world"})}
+         },
+      }
+})
+
+local waffle_root_view = waffle.create_view({
+      rows = {
+         {
+            {widget = _button({text = "title bar on"}), keys = {"a"}, key_handler = function(mod, key, event) waffle:show(waffle_subview, true) end},
+            {widget = _button({text = "2"})}
+         },
+         {
+            {widget = _button({text = "3"})},
+            {widget = _button({text = "4"})}
+         },
+      }
+})
 
 my_tag_list.buttons = aw.util.table.join(
    aw.button({ }, 1, aw.tag.viewonly),
@@ -194,6 +230,7 @@ aw.screen.connect_for_each_screen(function (scr)
       local layoutbox = aw.widget.layoutbox(s)
       layoutbox:buttons(
          aw.util.table.join(
+            aw.button({ }, 1, function () waffle:show(waffle_root_view) end),
             aw.button({ }, 3, function () menu:show() end),
             aw.button({ }, 4, function () aw.layout.inc( 1) end),
             aw.button({ }, 5, function () aw.layout.inc(-1) end)))
@@ -251,6 +288,7 @@ end)
 root.keys(
    aw.util.table.join(
       root.keys(),
+      aw.key({ "Mod4" }, "F12", function () waffle:show(waffle_root_view) end),
       aw.key({ "Mod4" }, ";",
          function ()
             aw.prompt.run {
