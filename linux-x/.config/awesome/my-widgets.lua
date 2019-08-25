@@ -29,13 +29,53 @@ root.buttons(
 -- -- dummy bar for conky
 -- awful.wibar.new({ position = "top", height = config.bar_height * config.widget_scale_factor, opacity = 0 })
 
-local function _button(args)
-   return wi.widget {
-      markup = args.markup or nil,
-      text = args.text or nil,
-      font = beautiful.fontname_mono .. " 16",
-      widget = wi.widget.textbox,
+local function _simple_button(args)
+   local ret = {}
+   local action = args.action
+   ret.widget = wi.widget {
+      {
+         markup = args.markup or nil,
+         text = args.text or nil,
+         font = beautiful.fontname_mono .. " 16",
+         buttons = action and awful.util.table.join(
+            awful.button({ }, 1, function () action(false) end),
+            awful.button({ }, 3, function () action(true) end)),
+         widget = wi.widget.textbox,
+      },
+      fg = beautiful.fg_normal,
+      bg = beautiful.bg_normal,
+      widget = wi.container.background
    }
+
+   ret.widget:connect_signal(
+      "mouse::enter",
+      function ()
+         ret.widget.fg = beautiful.fg_focus
+         ret.widget.bg = beautiful.bg_focus
+      end
+   )
+
+   ret.widget:connect_signal(
+      "mouse::leave",
+      function ()
+         ret.widget.fg = beautiful.fg_normal
+         ret.widget.bg = beautiful.bg_normal
+      end
+   )
+
+   if args.key ~= nil and action then
+      ret.keys = { args.key }
+      ret.key_handler = function (mod, _, event)
+         for _, m in ipairs(mod) do
+            mod[m] = true
+         end
+         if event == "press" then
+            action(mod["Shift"])
+         end
+      end
+   end
+
+   return ret
 end
 
 local function view_with_background(view)
@@ -54,41 +94,41 @@ local waffle_root_view = view_with_background(
    waffle.create_view({
          rows = {
             {
-               {
-                  widget = _button({markup = "<u>W</u>eb browser"}),
-                  keys = {"w"},
-                  key_handler = function(mod, key, event)
-                     awful.spawn(config.cmd_web_browser)
-                     waffle:hide()
-                  end
-               },
+               _simple_button({
+                     markup = "<u>W</u>eb browser",
+                     key = "w",
+                     action = function (alt)
+                        awful.spawn(config.cmd_web_browser)
+                        waffle:hide()
+                     end
+               }),
             },
             {
-               {
-                  widget = _button({markup = "Fil<u>e</u> manager"}),
-                  keys = {"e"},
-                  key_handler = function(mod, key, event)
-                     awful.spawn(config.cmd_file_manager)
-                     waffle:hide()
-                  end
-               },
+               _simple_button({
+                     markup = "Fil<u>e</u> manager",
+                     key = "e",
+                     action = function (alt)
+                        awful.spawn(config.cmd_file_manager)
+                        waffle:hide()
+                     end
+               }),
             },
             {
-               {
-                  widget = _button({markup = "<u>T</u>erminal"}),
-                  keys = {"t"},
-                  key_handler = function(mod, key, event)
-                     awful.spawn(config.cmd_terminal)
-                     waffle:hide()
-                  end
-               },
+               _simple_button({
+                     markup = "<u>T</u>erminal",
+                     key = "t",
+                     action = function (alt)
+                        awful.spawn(config.cmd_terminal)
+                        waffle:hide()
+                     end
+               }),
             },
             {
-               {
-                  widget = _button({markup = "<u>S</u>creen layout"}),
-                  keys = {"s", "S"},
-                  key_handler = function(mod, key, event)
-                     if key == "S" then
+               _simple_button({
+                     markup = "<u>S</u>creen layout",
+                     key = "s",
+                     action = function (alt)
+                     if alt then
                         local cmd = {"arandr"}
                         awful.spawn(cmd)
                      else
@@ -97,9 +137,9 @@ local waffle_root_view = view_with_background(
                         }
                         awful.spawn(cmd)
                      end
-                     waffle:hide()
-                  end
-               },
+                        waffle:hide()
+                     end
+               }),
             },
          }
    })

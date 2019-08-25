@@ -58,12 +58,22 @@ end
 local waffle = {
    create_view = create_view,
    gravity_ = "southwest",
-   widget_container = wibox.widget {
-      fill_vertical = true,
-      fill_horizontal = true,
-      widget = wibox.container.place,
-   },
 }
+
+waffle.widget_container = wibox.widget {
+   fill_vertical = false,
+   fill_horizontal = false,
+   widget = wibox.container.place,
+}
+waffle.widget_container:connect_signal(
+   "button::press",
+   function (_, x, y, button, _, info)
+      local f = info.drawable:find_widgets(x, y)
+      if #f == 1 then
+         -- Only happens only if clicking the empty area
+         waffle:hide()
+      end
+end)
 
 function waffle:update_layout()
    if self.wibox_.widget == nil then
@@ -141,6 +151,9 @@ function waffle:show(view, push, screen)
    if not self.wibox_.visible then
       self.keygrabber_ = awful.keygrabber.run(
          function (mod, key, event)
+            if #key == 1 then
+               key = key:lower()
+            end
             if self.view_.key_handler and self.view_.key_handler(mod, key, event) then
                -- pass
             elseif event == "press" then
