@@ -51,6 +51,10 @@ local function create_view(args)
       end
    end
 
+   view.options = {
+      key_default_to_exit = args.key_default_to_exit or true
+   }
+
    return view
 end
 
@@ -156,11 +160,19 @@ function waffle:show(view, push, screen)
             end
             if self.view_.key_handler and self.view_.key_handler(mod, key, event) then
                -- pass
-            elseif event == "press" then
-               if key == "Escape" or key == "F12" then
+            elseif key == "Escape" or key == "F12" then
+               if event == "press" then
                   self:hide()
-               elseif key == "BackSpace" then
+               end
+            elseif key == "BackSpace" then
+               if event == "press" then
                   self:go_back()
+               end
+            else
+               if self.view_.options.key_default_to_exit then
+                  if event == "press" then
+                     self:hide()
+                  end
                end
             end
          end

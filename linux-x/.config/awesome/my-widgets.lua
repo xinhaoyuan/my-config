@@ -7,7 +7,7 @@ local gmath = require("gears.math")
 local vicious = require("vicious")
 local waffle = require("waffle")
 local config = require("my-config")
-local volumearc_widget = require("awesome-wm-widgets.volumearc-widget.volumearc")
+-- local volumearc_widget = require("awesome-wm-widgets.volumearc-widget.volumearc")
 -- local battery_widget = require("awesome-wm-widgets.battery-widget.battery")
 local calendar = require("calendar.calendar")
 local menu = require("my-menu")
@@ -83,7 +83,7 @@ local function _simple_button(args)
 end
 
 local function view_with_background_and_border(view)
-   return {
+   local ret = {
       widget = wi.widget {
          {
             view.widget,
@@ -98,8 +98,10 @@ local function view_with_background_and_border(view)
          color = beautiful.border_focus,
          widget = wi.container.margin,
       },
-      key_handler = view.key_handler,
    }
+
+   setmetatable(ret, { __index = view })
+   return ret
 end
 
 local waffle_root_view = view_with_background_and_border(
@@ -358,9 +360,9 @@ awful.screen.connect_for_each_screen(function (scr)
       --                        args[1], label[args[2]])
       --                  end, 2, "Master")
       -- right_layout:add(volume_widget)
-      volumearc_widget:set_forced_height(beautiful.bar_height - dpi(4))
-      volumearc_widget:set_forced_width(beautiful.bar_height - dpi(4))
-      right_layout:add(volumearc_widget)
+      -- volumearc_widget:set_forced_height(beautiful.bar_height - dpi(4))
+      -- volumearc_widget:set_forced_width(beautiful.bar_height - dpi(4))
+      -- right_layout:add(volumearc_widget)
       -- right_layout:add(battery_widget)
       local clock = wi.widget.textclock(" %m/%d/%y %a %H:%M ")
       clock:set_font(mono_font)

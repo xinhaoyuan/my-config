@@ -23,6 +23,14 @@ awesome-git
 openbox (not used for now)
 cmake
 
+## Linux desktop
+
+cbatticon -- battery
+nm-applet -- network
+pasystray -- pulse audio
+fcitx     -- input method
+xcape     -- convert modifier taps to other keys
+
 sudo apt-get install stow tmux git zsh emacs build-essential consolekit xdotool xclip wmctrl xorg-dev php5-cli pkg-config
 
 For building awesome git, extra development libs are needed
