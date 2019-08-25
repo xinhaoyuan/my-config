@@ -6,9 +6,9 @@ local api = {
    beautiful = require("beautiful"),
    wibox     = require("wibox"),
    awful     = require("awful"),
+   fts       = require("focus-timestamp"),
    lgi       = require("lgi"),
    dpi       = require("beautiful.xresources").apply_dpi,
-   fts       = require("focus-timestamp")
 }
 
 local function min(a, b)
@@ -200,16 +200,19 @@ local function create(config)
          return
       end
 
-      api.fts.lock()
+      api.awful.client.focus.history.disable_tracking()
 
       switch()
 
       local kg = nil
 
       local function stop()
+         -- At this moment, tablist[tablist_index] is already focused.
+         -- We do not want to trigger the focus event by focus-out-and-focus-in.
+         -- So we just manually update the history info instead.
          api.fts.update(tablist[tablist_index])
          api.awful.client.focus.history.add(tablist[tablist_index])
-         api.fts.unlock()
+         api.awful.client.focus.history.enable_tracking()
          panel.visible = false
          if kg ~= nil then
             api.awful.keygrabber.stop(kg)

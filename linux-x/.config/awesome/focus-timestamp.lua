@@ -1,8 +1,5 @@
 local awful = require("awful")
-local module = {
-   update_lock = 0,
-}
-
+local fts = {}
 local focus_timestamp = 0
 local function update_focus_timestamp(c)
    if c == nil then return end
@@ -18,9 +15,7 @@ end
 client.connect_signal(
    "focus",
    function (c)
-      if module.update_lock > 0 then
-         c.focus_timestamp_touched = true
-      else
+      if awful.client.focus.history.is_enabled() then
          update_focus_timestamp(c)
       end
    end
@@ -35,23 +30,9 @@ client.connect_signal(
    end
 )
 
-function module.lock()
-   if module.update_lock == 0 then
-      awful.client.focus.history.disable_tracking()
-   end
-   module.update_lock = module.update_lock + 1
-end
+fts.update = update_focus_timestamp
 
-function module.unlock()
-   if module.update_lock > 0 then
-      module.update_lock = module.update_lock - 1
-      if module.update_lock == 0 then
-         awful.client.focus.history.enable_tracking()
-      end
-   end
-end
-
-function module.get(c)
+function fts.get(c)
    if c.focus_timestamp == nil then
       return -1
    else
@@ -59,6 +40,4 @@ function module.get(c)
    end
 end
 
-module.update = update_focus_timestamp
-
-return module
+return fts
