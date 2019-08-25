@@ -39,8 +39,8 @@ local function _simple_button(args)
             text = args.text or nil,
             font = beautiful.fontname_mono .. " 16",
             buttons = action and awful.util.table.join(
-               awful.button({ }, 1, function () action(false) end),
-               awful.button({ }, 3, function () action(true) end)),
+               awful.button({ }, 1, nil, function () action(false) end),
+               awful.button({ }, 3, nil, function () action(true) end)),
             widget = wi.widget.textbox,
          },
          top = dpi(5), bottom = dpi(5), left = dpi(5), right = dpi(5),
@@ -82,19 +82,27 @@ local function _simple_button(args)
    return ret
 end
 
-local function view_with_background(view)
+local function view_with_background_and_border(view)
    return {
       widget = wi.widget {
-         view.widget,
-         bg = beautiful.bg_normal,
-         fg = beautiful.fg_normal,
-         widget = wi.container.background,
+         {
+            view.widget,
+            bg = beautiful.bg_normal,
+            fg = beautiful.fg_normal,
+            widget = wi.container.background,
+         },
+         top = beautiful.border_width,
+         bottom = beautiful.border_width,
+         left = beautiful.border_width,
+         right = beautiful.border_width,
+         color = beautiful.border_focus,
+         widget = wi.container.margin,
       },
       key_handler = view.key_handler,
    }
 end
 
-local waffle_root_view = view_with_background(
+local waffle_root_view = view_with_background_and_border(
    waffle.create_view({
          rows = {
             {
@@ -314,7 +322,7 @@ awful.screen.connect_for_each_screen(function (scr)
       local layoutbox = awful.widget.layoutbox(s)
       layoutbox:buttons(
          awful.util.table.join(
-            awful.button({ }, 1, function () waffle:show(waffle_root_view) end),
+            awful.button({ }, 1, function () waffle:set_gravity("southwest"); waffle:show(waffle_root_view) end),
             awful.button({ }, 3, function () menu:show() end),
             awful.button({ }, 4, function () awful.layout.inc( 1) end),
             awful.button({ }, 5, function () awful.layout.inc(-1) end)))
@@ -372,7 +380,7 @@ end)
 root.keys(
    awful.util.table.join(
       root.keys(),
-      awful.key({ "Mod4" }, "F12", function () waffle:show(waffle_root_view) end),
+      awful.key({ "Mod4" }, "F12", function () waffle:set_gravity("center"); waffle:show(waffle_root_view) end),
       awful.key({ "Mod4" }, ";",
          function ()
             awful.prompt.run {

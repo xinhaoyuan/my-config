@@ -75,9 +75,10 @@ waffle.widget_container:connect_signal(
 end)
 
 function waffle:update_layout()
-   if self.wibox_.widget == nil then
+   if self.wibox_ and self.wibox_.widget == nil then
       self.wibox_.widget = self.widget_container
    end
+
    if self.gravity_ == "center" then
       self.widget_container.valign = "center"
       self.widget_container.halign = "center"
