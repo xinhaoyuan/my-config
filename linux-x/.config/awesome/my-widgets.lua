@@ -43,7 +43,7 @@ local function _simple_button(args)
                awful.button({ }, 3, nil, function () action(true) end)),
             widget = wi.widget.textbox,
          },
-         top = dpi(5), bottom = dpi(5), left = dpi(5), right = dpi(5),
+         margins = dpi(5),
          widget = wi.container.margin,
       },
       fg = beautiful.fg_normal,
@@ -240,6 +240,20 @@ awful.screen.connect_for_each_screen(function (scr)
          filter = awful.widget.tasklist.filter.currenttags,
          buttons = my_task_list.buttons,
          style = { font = mono_font },
+         layout = {
+            spacing_widget = {
+               {
+                  forced_height = dpi(12),
+                  thickness = 1,
+                  widget = wi.widget.separator,
+               },
+               valign = "center",
+               halign = "center",
+               widget = wi.container.place,
+            },
+            spacing = dpi(6),
+            layout = wi.layout.fixed.horizontal
+         },
          source = function ()
             -- Sort clients with their constant ids to make the order stable.
             local cls = awful.widget.tasklist.source.all_clients()

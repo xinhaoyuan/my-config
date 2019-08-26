@@ -37,7 +37,7 @@ theme.tasklist_template = {
                widget = awful.widget.clienticon,
             },
             -- id = "icon_margin_role",
-            margins = dpi(1),
+            top = dpi(1), bottom = dpi(1),
             widget  = wibox.container.margin,
          },
          {
@@ -47,8 +47,8 @@ theme.tasklist_template = {
          layout = wibox.layout.fixed.horizontal,
       },
       id = "text_margin_role",
-      left  = dpi(1),
-      right = dpi(1),
+      left  = dpi(5),
+      right = dpi(5),
       widget = wibox.container.margin
    },
    id     = "background_role",
