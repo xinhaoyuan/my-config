@@ -38,6 +38,8 @@ local function _simple_button(args)
             markup = args.markup or nil,
             text = args.text or nil,
             font = beautiful.fontname_mono .. " 16",
+            forced_width = dpi(200),
+            align = "center",
             buttons = action and awful.util.table.join(
                awful.button({ }, 1, nil, function () action(false) end),
                awful.button({ }, 3, nil, function () action(true) end)),
