@@ -252,7 +252,7 @@ awful.screen.connect_for_each_screen(function (scr)
                widget = wi.container.place,
             },
             spacing = dpi(6),
-            layout = wi.layout.fixed.horizontal
+            layout = wi.layout.flex.horizontal
          },
          source = function ()
             -- Sort clients with their constant ids to make the order stable.
