@@ -387,11 +387,16 @@ awful.screen.connect_for_each_screen(function (scr)
       right_layout:add(clock)
       right_layout:add(wc_button_container[s])
 
-      local layout = wi.layout.align.horizontal()
-      layout:set_left(left_layout)
-      layout:set_middle(my_task_list[s])
-      layout:set_right(right_layout)
-
+      local layout = wi.widget {
+         left_layout,
+         {
+            my_task_list[s],
+            left = dpi(5), right = dpi(5),
+            widget = wi.container.margin
+         },
+         right_layout,
+         layout = wi.layout.align.horizontal,
+      }
       my_wibar[s]:set_widget(layout)
 end)
 
