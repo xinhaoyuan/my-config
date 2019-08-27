@@ -39,7 +39,7 @@ local function _simple_button(args)
          {
             markup = args.markup or nil,
             text = args.text or nil,
-            font = beautiful.fontname_mono .. " 16",
+            font = beautiful.fontname_mono .. " 12",
             forced_width = waffle_width,
             align = "center",
             widget = wi.widget.textbox,
