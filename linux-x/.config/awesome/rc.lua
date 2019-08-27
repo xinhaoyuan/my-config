@@ -86,7 +86,7 @@ local spawn_with_shell = function(cmd, to_notify)
 end
 
 local open_tmux_session = function(name)
-   awful.spawn({config.cmd_terminal, "-e", "tmux", "new", "-As", name})
+   awful.spawn(config.gen_terminal_with_cmd({"tmux", "new", "-As", name}))
 end
 
 table_join = awful.util.table.join
@@ -119,7 +119,7 @@ local function go_by_direction(dir, with_client)
       local c = capi.client.focus
       awful.screen.focus_bydirection(dir, c.screen)
       c:move_to_screen(mouse.screen.index)
-      c:raise()
+      c:emit_signal("request::activate", "mouse.resisze", {raise = true})
    else
       awful.screen.focus_bydirection(dir)
    end

@@ -11,6 +11,15 @@ local config = {
       return name ~= "STICKY"
    end,
    cmd_terminal = "urxvt",
+   gen_terminal_with_cmd = function (cmd)
+      local ret = {"urxvt", "-e"}
+      if type(cmd) == "table" then
+         for i = 1, #cmd do
+            table.insert(ret, cmd[i])
+         end
+      end
+      return ret
+   end,
    cmd_web_browser = "x-www-browser",
    cmd_file_manager = "thunar",
 }
