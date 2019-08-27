@@ -119,7 +119,7 @@ local function go_by_direction(dir, with_client)
       local c = capi.client.focus
       awful.screen.focus_bydirection(dir, c.screen)
       c:move_to_screen(mouse.screen.index)
-      c:emit_signal("request::activate", "mouse.resisze", {raise = true})
+      c:emit_signal("request::activate", "mouse.resize", {raise = true})
    else
       awful.screen.focus_bydirection(dir)
    end
