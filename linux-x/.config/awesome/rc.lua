@@ -410,6 +410,25 @@ awful.screen.connect_for_each_screen(
       end
       -- 1 is the hidden tag
       s.tags[2]:view_only()
+
+      -- fix window geometry
+      s:connect_signal(
+         "property::geometry",
+         function (s)
+            local clients = {}
+            for _, c in ipairs(s.all_clients) do
+               if not c.minimized and c.maximized then
+                  c.maximized = false
+                  table.insert(clients, c)
+               end
+            end
+
+            delayed(function ()
+                  for _, c in ipairs(clients) do
+                     c.maximized = true
+                  end
+            end)
+      end)
    end
 )
 
