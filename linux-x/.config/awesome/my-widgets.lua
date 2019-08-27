@@ -40,11 +40,11 @@ local function _simple_button(args)
             font = beautiful.fontname_mono .. " 16",
             forced_width = dpi(200),
             align = "center",
-            buttons = action and awful.util.table.join(
-               awful.button({ }, 1, nil, function () action(false) end),
-               awful.button({ }, 3, nil, function () action(true) end)),
             widget = wi.widget.textbox,
          },
+         buttons = action and awful.util.table.join(
+            awful.button({ }, 1, nil, function () action(false) end),
+            awful.button({ }, 3, nil, function () action(true) end)),
          margins = dpi(5),
          widget = wi.container.margin,
       },
