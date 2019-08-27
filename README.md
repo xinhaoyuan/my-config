@@ -31,6 +31,7 @@ cmake
  - fcitx -- input method
  - xcape -- convert modifier taps to other keys
  - arandr -- multi-monitor configure
+ - pavucontrol -- pulseaudio setting
  - rxvt-unicode-256color -- terminal
  - pcmanfm/nemo/thunar -- file manager
  - chromium/chrome/firefox -- browser
