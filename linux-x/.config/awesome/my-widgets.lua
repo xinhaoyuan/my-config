@@ -29,6 +29,8 @@ root.buttons(
 -- -- dummy bar for conky
 -- awful.wibar.new({ position = "top", height = config.bar_height * config.widget_scale_factor, opacity = 0 })
 
+local waffle_width = dpi(200)
+
 local function _simple_button(args)
    local ret = {}
    local action = args.action
@@ -38,7 +40,7 @@ local function _simple_button(args)
             markup = args.markup or nil,
             text = args.text or nil,
             font = beautiful.fontname_mono .. " 16",
-            forced_width = dpi(200),
+            forced_width = waffle_width,
             align = "center",
             widget = wi.widget.textbox,
          },
@@ -106,6 +108,42 @@ local function view_with_background_and_border(view)
    return ret
 end
 
+local waffle_setting_view = view_with_background_and_border(
+   waffle.create_view({
+         rows = {
+            {
+               _simple_button({
+                     markup = "<u>S</u>creen layout",
+                     key = "s",
+                     action = function (alt)
+                        if alt then
+                           local cmd = {"arandr"}
+                           awful.spawn(cmd)
+                        else
+                           local cmd = {"rofi-screen-layout",
+                                        "-font", beautiful.mono_font or beautiful.font
+                           }
+                           awful.spawn(cmd)
+                        end
+                        waffle:hide()
+                     end
+               }),
+            },
+            {
+               _simple_button({
+                     markup = "Pulse <u>A</u>udio",
+                     key = "a",
+                     action = function (alt)
+                        local cmd = {"pavucontrol"}
+                        awful.spawn(cmd)
+                        waffle:hide()
+                     end
+               }),
+            }
+         }
+   })
+)
+
 local waffle_root_view = view_with_background_and_border(
    waffle.create_view({
          rows = {
@@ -141,19 +179,10 @@ local waffle_root_view = view_with_background_and_border(
             },
             {
                _simple_button({
-                     markup = "<u>S</u>creen layout",
+                     markup = "<u>S</u>etting",
                      key = "s",
                      action = function (alt)
-                     if alt then
-                        local cmd = {"arandr"}
-                        awful.spawn(cmd)
-                     else
-                        local cmd = {"rofi-screen-layout",
-                                     "-font", beautiful.mono_font or beautiful.font
-                        }
-                        awful.spawn(cmd)
-                     end
-                        waffle:hide()
+                        waffle:show(waffle_setting_view, true)
                      end
                }),
             },
