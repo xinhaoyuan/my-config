@@ -258,11 +258,14 @@ local client_keys = table_join(
             c.minimized = false
          elseif not c.maximized then
             c.maximized = true
+         else
+            c.fullscreen = true
          end
    end),
 
    awful.key({ "Mod4" }, "-", function (c)
          if c.fullscreen then
+            c.fullscreen = false
          elseif c.maximized then
             c.maximized = false
          elseif not c.minimized then
