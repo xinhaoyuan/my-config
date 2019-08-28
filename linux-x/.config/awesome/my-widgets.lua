@@ -108,6 +108,27 @@ local function view_with_background_and_border(view)
    return ret
 end
 
+local waffle_poweroff_count = 0
+local waffle_poweroff_view = view_with_background_and_border(
+   waffle.create_view({
+         rows = {
+            {
+               _simple_button({
+                     markup = "<u>P</u>ower off\n(2 more time)",
+                     key = "p",
+                     action = function (alt)
+                        waffle_poweroff_count = waffle_poweroff_count + 1
+                        if waffle_poweroff_count >= 2 then
+                           awful.spawn({"systemctl", "poweroff"})
+                           waffle:hide()
+                        end
+                     end
+               }),
+            },
+         },
+   })
+)
+
 local waffle_setting_view = view_with_background_and_border(
    waffle.create_view({
          rows = {
@@ -139,7 +160,17 @@ local waffle_setting_view = view_with_background_and_border(
                         waffle:hide()
                      end
                }),
-            }
+            },
+            {
+               _simple_button({
+                     markup = "<u>P</u>ower off",
+                     key = "p",
+                     action = function (alt)
+                        waffle_poweroff_count = 0
+                        waffle:show(waffle_poweroff_view, true)
+                     end
+               }),
+            },
          }
    })
 )
