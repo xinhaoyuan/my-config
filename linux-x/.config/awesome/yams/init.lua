@@ -30,8 +30,15 @@ local function activate(c)
 end
 
 local function create(config)
+   -- the default filter will get all focusable client with any selected tags
    local function filter(c)
-      return c:isvisible() and api.awful.client.focus.filter(c)
+      if not api.awful.client.focus.filter(c) then return false end
+      for _, t in ipairs(c:tags()) do
+         if t.selected then
+            return true
+         end
+      end
+      return false
    end
 
    if config and config.filter ~= nil then
@@ -97,6 +104,10 @@ local function create(config)
          table.sort(
             tablist,
             function (a, b)
+               -- prioritize non-minimized client
+               if a.minimized ~= b.minimized then
+                  return b.minimized
+               end
                return api.fts.get(a) > api.fts.get(b)
             end
          )
@@ -125,8 +136,12 @@ local function create(config)
             c.below = c.saved_layer_info[3]
             c.saved_layer_info = nil
          end
-         activate(tablist[tablist_index])
-         tablist[tablist_index]:raise()
+         local c = tablist[tablist_index]
+         if c.minimized then
+            c.minimized = false
+         end
+         activate(c)
+         c:raise()
       end
 
       local function draw_info(context, cr, width, height)
