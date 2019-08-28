@@ -244,7 +244,9 @@ local client_keys = table_join(
          c.maximized = false
          c.maximized_vertical = false
          c.maximized_horizontal = false
+         c.fullscreen = false
          c.floating = false
+         c:raise()
          delayed(
             function ()
                machi.switcher.start(c)
