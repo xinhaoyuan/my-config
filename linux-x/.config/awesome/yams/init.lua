@@ -96,6 +96,22 @@ local function create(config)
       local tablist = nil
       local tablist_index = nil
 
+      -- filter out invalid clients, but will not add new ones in.
+      local function maintain_tablist()
+         local j = 0
+         for i = 1, #tablist do
+            if tablist[i].valid then
+               j = j + 1
+               tablist[j] = tablist[i]
+            elseif i <= tablist_index and tablist_index > 1 then
+               tablist_index = tablist_index - 1
+            end
+         end
+         for i = #tablist, j + 1, -1 do
+            table.remove(tablist, i)
+         end
+      end
+
       local function initialize()
          tablist = {}
          for c in api.awful.client.iterate(filter, nil, same_screen and screen or nil) do
@@ -136,12 +152,15 @@ local function create(config)
             c.below = c.saved_layer_info[3]
             c.saved_layer_info = nil
          end
-         local c = tablist[tablist_index]
-         if c.minimized then
-            c.minimized = false
+
+         if #tablist > 0 then
+            local c = tablist[tablist_index]
+            if c.minimized then
+               c.minimized = false
+            end
+            activate(c)
+            c:raise()
          end
-         activate(c)
-         c:raise()
       end
 
       local function draw_info(context, cr, width, height)
@@ -157,18 +176,22 @@ local function create(config)
          local info_height = vpadding
          local info_width = 2 * vpadding
          local exts = {}
+         local labels = {}
 
          for index, tc in ipairs(tablist) do
-            local label = tc.name
-            pl:set_text(label)
-            local w, h
-            w, h = pl:get_size()
-            w = w / api.lgi.Pango.SCALE
-            h = h / api.lgi.Pango.SCALE
-            local ext = { width = w, height = h, x_bearing = 0, y_bearing = 0 }
-            exts[#exts + 1] = ext
-            info_height = info_height + ext.height + vpadding
-            info_width = max(info_width, w + 2 * vpadding)
+            if tc.valid then
+               local label = tc.name
+               pl:set_text(label)
+               local w, h
+               w, h = pl:get_size()
+               w = w / api.lgi.Pango.SCALE
+               h = h / api.lgi.Pango.SCALE
+               local ext = { width = w, height = h, x_bearing = 0, y_bearing = 0 }
+               table.insert(exts, ext)
+               table.insert(labels, tc.name)
+               info_height = info_height + ext.height + vpadding
+               info_width = max(info_width, w + 2 * vpadding)
+            end
          end
 
          local x_offset = width / 2
@@ -178,8 +201,7 @@ local function create(config)
          cr:set_source(fill_color)
          cr:fill()
 
-         for index, tc in ipairs(tablist) do
-            local label = tc.name
+         for index, label in ipairs(labels) do
             local ext = exts[index]
             if index == tablist_index then
                cr:rectangle(x_offset - ext.width / 2 - vpadding / 2, y_offset - vpadding / 2, ext.width + vpadding, ext.height + vpadding)
@@ -201,6 +223,7 @@ local function create(config)
       end
 
       local function switch()
+         maintain_tablist()
          if #tablist > 0 then
             tablist[tablist_index].ontop = false
             tablist_index = tablist_index % #tablist + 1
@@ -225,8 +248,11 @@ local function create(config)
          -- At this moment, tablist[tablist_index] is already focused.
          -- We do not want to trigger the focus event by focus-out-and-focus-in.
          -- So we just manually update the history info instead.
-         api.fts.update(tablist[tablist_index])
-         api.awful.client.focus.history.add(tablist[tablist_index])
+         maintain_tablist()
+         if #tablist > 0 then
+            api.fts.update(tablist[tablist_index])
+            api.awful.client.focus.history.add(tablist[tablist_index])
+         end
          api.awful.client.focus.history.enable_tracking()
          panel.visible = false
          if kg ~= nil then
