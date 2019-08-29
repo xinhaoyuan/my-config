@@ -34,16 +34,17 @@ local waffle_width = dpi(200)
 local function _simple_button(args)
    local ret = {}
    local action = args.action
+   ret.textbox = wi.widget {
+      markup = args.markup or nil,
+      text = args.text or nil,
+      font = beautiful.fontname_mono .. " 12",
+      forced_width = waffle_width,
+      align = "center",
+      widget = wi.widget.textbox,
+   }
    ret.widget = wi.widget {
       {
-         {
-            markup = args.markup or nil,
-            text = args.text or nil,
-            font = beautiful.fontname_mono .. " 12",
-            forced_width = waffle_width,
-            align = "center",
-            widget = wi.widget.textbox,
-         },
+         ret.textbox,
          buttons = action and awful.util.table.join(
             awful.button({ }, 1, nil, function () action(false) end),
             awful.button({ }, 3, nil, function () action(true) end)),
@@ -109,21 +110,30 @@ local function view_with_background_and_border(view)
 end
 
 local waffle_poweroff_count = 0
+local waffle_poweroff_button = nil
+waffle_poweroff_button = _simple_button({
+      markup = "",
+      key = "p",
+      action = function (alt)
+         waffle_poweroff_count = waffle_poweroff_count + 1
+         if waffle_poweroff_count >= 2 then
+            awful.spawn({"systemctl", "poweroff"})
+            waffle:hide()
+         else
+            waffle_poweroff_button:update_text()
+         end
+      end
+})
+
+function waffle_poweroff_button:update_text()
+   self.textbox.markup = "<u>P</u>ower off\n(" .. tostring(2 - waffle_poweroff_count) .. " more times)"
+end
+
 local waffle_poweroff_view = view_with_background_and_border(
    waffle.create_view({
          rows = {
             {
-               _simple_button({
-                     markup = "<u>P</u>ower off\n(2 more time)",
-                     key = "p",
-                     action = function (alt)
-                        waffle_poweroff_count = waffle_poweroff_count + 1
-                        if waffle_poweroff_count >= 2 then
-                           awful.spawn({"systemctl", "poweroff"})
-                           waffle:hide()
-                        end
-                     end
-               }),
+               waffle_poweroff_button,
             },
          },
    })
@@ -167,6 +177,7 @@ local waffle_setting_view = view_with_background_and_border(
                      key = "p",
                      action = function (alt)
                         waffle_poweroff_count = 0
+                        waffle_poweroff_button:update_text()
                         waffle:show(waffle_poweroff_view, true)
                      end
                }),
