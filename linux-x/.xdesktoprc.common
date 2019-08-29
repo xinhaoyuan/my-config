@@ -6,7 +6,6 @@ if [ ! -e $HOME/.xsession-init-guard ]; then
     update-rofi-config
     fcitx
     compton --config $HOME/.config/compton/compton.conf &
-    xscreensaver -no-splash &
     cbatticon -n &
     pasystray --notify=all &
     # wicd-gtk -t &
