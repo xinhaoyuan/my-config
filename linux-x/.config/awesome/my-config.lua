@@ -22,6 +22,7 @@ local config = {
    end,
    cmd_web_browser = "x-www-browser",
    cmd_file_manager = "thunar",
+   cmd_appfinder = "xfce4-appfinder",
 }
 
 return config

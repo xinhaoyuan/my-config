@@ -169,6 +169,7 @@ local global_keys = table_join(
    awful.key({ "Mod4" }, "F2",              function() open_tmux_session("F2") end),
    awful.key({ "Mod4" }, "F3",              function() open_tmux_session("F3") end),
    awful.key({ "Mod4" }, "F4",              function() open_tmux_session("F4") end),
+   awful.key({ "Mod4", "Shift" }, "F12",    function() awful.spawn(config.cmd_appfinder) end),
    -- keep the both ways of showing the desktop, not sure which one is better for now.
    awful.key({ "Mod4" }, "d",               function ()
          local clients = {}
