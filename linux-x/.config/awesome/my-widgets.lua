@@ -162,11 +162,31 @@ local waffle_setting_view = view_with_background_and_border(
             },
             {
                _simple_button({
-                     markup = "Pulse <u>A</u>udio",
+                     markup = "Pulse <u>a</u>udio",
                      key = "a",
                      action = function (alt)
                         local cmd = {"pavucontrol"}
                         awful.spawn(cmd)
+                        waffle:hide()
+                     end
+               }),
+            },
+            {
+               _simple_button({
+                     markup = "S<u>u</u>spend",
+                     key = "u",
+                     action = function (alt)
+                        awful.spawn({"systemctl", "suspend"})
+                        waffle:hide()
+                     end
+               }),
+            },
+            {
+               _simple_button({
+                     markup = "<u>L</u>ock screen",
+                     key = "l",
+                     action = function (alt)
+                        config.action_screen_locker()
                         waffle:hide()
                      end
                }),

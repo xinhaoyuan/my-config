@@ -10,19 +10,32 @@ local config = {
    tag_filter = function (name)
       return name ~= "STICKY"
    end,
-   cmd_terminal = "urxvt",
-   gen_terminal_with_cmd = function (cmd)
-      local ret = {"urxvt", "-e"}
-      if type(cmd) == "table" then
-         for i = 1, #cmd do
-            table.insert(ret, cmd[i])
+   action_terminal = function (extra_cmd)
+      local cmd = {"urxvt"}
+      if type(extra_cmd) == "table" then
+         table.insert(cmd, "-e")
+         for i = 1, #extra_cmd do
+            table.insert(cmd, extra_cmd[i])
          end
       end
-      return ret
+      awful.spawn(cmd)
    end,
-   cmd_web_browser = "x-www-browser",
-   cmd_file_manager = "thunar",
-   cmd_appfinder = "xfce4-appfinder",
+   action_web_browser = function (url)
+      local cmd = {"x-www-browser"}
+      if url then table.insert(cmd, url) end
+      awful.spawn(cmd)
+   end,
+   action_file_manager = function (path)
+      local cmd = {"thunar"}
+      if path then table.insert(cmd, path) end
+      awful.spawn(cmd)
+   end,
+   action_app_finder = function ()
+      awful.spawn("xfce4-appfinder")
+   end,
+   action_screen_locker = function ()
+      awful.spawn({"i3lock", "-c", "#000000"})
+   end,
 }
 
 return config
