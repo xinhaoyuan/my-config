@@ -34,7 +34,7 @@ local config = {
       awful.spawn("xfce4-appfinder")
    end,
    action_screen_locker = function ()
-      awful.spawn({"i3lock", "-c", "#000000"}, false)
+      awful.spawn({"i3lock", "-e", "-c", "404040"}, false)
    end,
 }
 
