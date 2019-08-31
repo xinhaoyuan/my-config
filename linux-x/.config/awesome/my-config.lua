@@ -30,6 +30,14 @@ local config = {
       if path then table.insert(cmd, path) end
       awful.spawn(cmd)
    end,
+   action_launcher = function ()
+      local cmd = {"rofi", "show",
+                   "-combi-modi", "window,drun",
+                   "-show", "combi",
+                   "-modi", "combi",
+                   "-font", be.mono_font or be.font}
+      awful.spawn(cmd)
+   end,
    action_app_finder = function ()
       awful.spawn("xfce4-appfinder")
    end,

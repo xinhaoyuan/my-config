@@ -155,19 +155,12 @@ local global_keys = table_join(
    awful.key({ "Mod4" }, "t",               function () config.action_terminal() end),
    awful.key({ "Mod4" }, "e",               function () config.action_file_manager() end),
    awful.key({ "Mod4" }, "l",               function () config.action_screen_locker() end),
-   awful.key({ "Mod4" }, "\\",              function ()
-         local cmd = {"rofi", "show",
-                      "-combi-modi", "window,drun",
-                      "-show", "combi",
-                      "-modi", "combi",
-                      "-font", beautiful.mono_font or beautiful.font}
-         spawn(cmd)
-   end),
-   awful.key({ "Mod4" }, "F1",              function() open_tmux_session("F1") end),
-   awful.key({ "Mod4" }, "F2",              function() open_tmux_session("F2") end),
-   awful.key({ "Mod4" }, "F3",              function() open_tmux_session("F3") end),
-   awful.key({ "Mod4" }, "F4",              function() open_tmux_session("F4") end),
-   awful.key({ "Mod4", "Shift" }, "F12",    function() config.action_app_finder() end),
+   awful.key({ "Mod4" }, "\\",              function () config.action_launcher() end),
+   awful.key({ "Mod4", "Shift" }, "F12",    function () config.action_app_finder() end),
+   awful.key({ "Mod4" }, "F1",              function () open_tmux_session("F1") end),
+   awful.key({ "Mod4" }, "F2",              function () open_tmux_session("F2") end),
+   awful.key({ "Mod4" }, "F3",              function () open_tmux_session("F3") end),
+   awful.key({ "Mod4" }, "F4",              function () open_tmux_session("F4") end),
    -- keep the both ways of showing the desktop, not sure which one is better for now.
    awful.key({ "Mod4" }, "d",               function ()
          local clients = {}
