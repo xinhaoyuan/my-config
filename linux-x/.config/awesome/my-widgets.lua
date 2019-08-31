@@ -214,7 +214,7 @@ local waffle_root_view = view_with_background_and_border(
                      markup = "<u>W</u>eb browser",
                      key = "w",
                      action = function (alt)
-                        awful.spawn(config.cmd_web_browser)
+                        config.action_web_browser()
                         waffle:hide()
                      end
                }),
@@ -224,7 +224,7 @@ local waffle_root_view = view_with_background_and_border(
                      markup = "Fil<u>e</u> manager",
                      key = "e",
                      action = function (alt)
-                        awful.spawn(config.cmd_file_manager)
+                        config.action_file_manager()
                         waffle:hide()
                      end
                }),
@@ -234,7 +234,7 @@ local waffle_root_view = view_with_background_and_border(
                      markup = "<u>T</u>erminal",
                      key = "t",
                      action = function (alt)
-                        awful.spawn(config.cmd_terminal)
+                        config.action_terminal()
                         waffle:hide()
                      end
                }),
