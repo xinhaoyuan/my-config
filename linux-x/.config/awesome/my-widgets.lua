@@ -1,6 +1,7 @@
 local awful  = require("awful")
 local beautiful = require("beautiful")
-local wi  = require("wibox")
+local watch = require("awful.widget.watch")
+local wibox  = require("wibox")
 local tm  = require("gears.timer")
 local shp = require("gears.shape")
 local gmath = require("gears.math")
@@ -16,7 +17,7 @@ local dpi = require("beautiful.xresources").apply_dpi
 local my_wibar = {}
 local my_tag_list = {}
 local my_task_list = {}
-local my_tray = wi.widget.systray()
+local my_tray = wibox.widget.systray()
 local mono_font = beautiful.mono_font or beautiful.font
 
 root.buttons(
@@ -34,26 +35,26 @@ local waffle_width = dpi(200)
 local function _simple_button(args)
    local ret = {}
    local action = args.action
-   ret.textbox = wi.widget {
+   ret.textbox = wibox.widget {
       markup = args.markup or nil,
       text = args.text or nil,
       font = beautiful.fontname_mono .. " 12",
       forced_width = waffle_width,
       align = "center",
-      widget = wi.widget.textbox,
+      widget = wibox.widget.textbox,
    }
-   ret.widget = wi.widget {
+   ret.widget = wibox.widget {
       {
          ret.textbox,
          buttons = action and awful.util.table.join(
             awful.button({ }, 1, nil, function () action(false) end),
             awful.button({ }, 3, nil, function () action(true) end)),
          margins = dpi(5),
-         widget = wi.container.margin,
+         widget = wibox.container.margin,
       },
       fg = beautiful.fg_normal,
       bg = beautiful.bg_normal,
-      widget = wi.container.background
+      widget = wibox.container.background
    }
 
    ret.widget:connect_signal(
@@ -89,19 +90,19 @@ end
 
 local function view_with_background_and_border(view)
    local ret = {
-      widget = wi.widget {
+      widget = wibox.widget {
          {
             view.widget,
             bg = beautiful.bg_normal,
             fg = beautiful.fg_normal,
-            widget = wi.container.background,
+            widget = wibox.container.background,
          },
          top = beautiful.border_width,
          bottom = beautiful.border_width,
          left = beautiful.border_width,
          right = beautiful.border_width,
          color = beautiful.border_focus,
-         widget = wi.container.margin,
+         widget = wibox.container.margin,
       },
    }
 
@@ -206,9 +207,56 @@ local waffle_setting_view = view_with_background_and_border(
    })
 )
 
+local cpu_widget, ram_widget
+do
+   local cpugraph_widget = wibox.widget {
+      max_value = 100,
+      background_color = "#00000000",
+      forced_width = waffle_width,
+      forced_height = dpi(30),
+      step_width = dpi(2),
+      step_spacing = dpi(1),
+      widget = wibox.widget.graph,
+      color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5,#74aeab"
+   }
+
+   cpu_widget = wibox.widget {
+      wibox.container.mirror(cpugraph_widget, { horizontal = true }),
+      bottom = dpi(2),
+      widget = wibox.container.margin
+   }
+
+   local total_prev = 0
+   local idle_prev = 0
+
+   watch({"grep", "-e", "^cpu ", "/proc/stat"}, 1,
+      function(widget, stdout)
+         local user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice =
+            stdout:match('(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s')
+
+         local total = user + nice + system + idle + iowait + irq + softirq + steal
+
+         local diff_idle = idle - idle_prev
+         local diff_total = total - total_prev
+         local diff_usage = (1000 * (diff_total - diff_idle) / diff_total + 5) / 10
+
+         widget:add_value(diff_usage)
+
+         total_prev = total
+         idle_prev = idle
+      end,
+      cpugraph_widget
+   )
+end
+
 local waffle_root_view = view_with_background_and_border(
    waffle.create_view({
          rows = {
+            {
+               {
+                  widget = cpu_widget,
+               },
+            },
             {
                _simple_button({
                      markup = "<u>W</u>eb browser",
@@ -338,14 +386,14 @@ awful.screen.connect_for_each_screen(function (scr)
                {
                   forced_height = dpi(12),
                   thickness = 1,
-                  widget = wi.widget.separator,
+                  widget = wibox.widget.separator,
                },
                valign = "center",
                halign = "center",
-               widget = wi.container.place,
+               widget = wibox.container.place,
             },
             spacing = dpi(6),
-            layout = wi.layout.flex.horizontal
+            layout = wibox.layout.flex.horizontal
          },
          source = function ()
             -- Sort clients with their constant ids to make the order stable.
@@ -391,20 +439,20 @@ awful.screen.connect_for_each_screen(function (scr)
             border_width = 0,
       })
 
-      local wc_button = wi.widget{
+      local wc_button = wibox.widget{
          markup = '☯',
          font = beautiful.font,
-         widget = wi.widget.textbox
+         widget = wibox.widget.textbox
       }
 
-      wc_button_container[s] = wi.widget {
+      wc_button_container[s] = wibox.widget {
          {
             wc_button,
             left = dpi(5),
             right = dpi(5),
-            widget = wi.container.margin
+            widget = wibox.container.margin
          },
-         widget = wi.container.background
+         widget = wibox.container.background
       }
 
       wc_button_container[s]:connect_signal(
@@ -427,7 +475,7 @@ awful.screen.connect_for_each_screen(function (scr)
          end
       )
 
-      local left_layout = wi.layout.fixed.horizontal()
+      local left_layout = wibox.layout.fixed.horizontal()
       local layoutbox = awful.widget.layoutbox(s)
       layoutbox:buttons(
          awful.util.table.join(
@@ -438,27 +486,27 @@ awful.screen.connect_for_each_screen(function (scr)
       left_layout:add(layoutbox)
       left_layout:add(my_tag_list[s])
       left_layout:add(scr.mypromptbox)
-      local right_layout = wi.widget {
+      local right_layout = wibox.widget {
          spacing        = dpi(5),
-         spacing_widget = { color = beautiful.bg_normal, widget = wi.widget.separator },
-         layout         = wi.layout.fixed.horizontal
+         spacing_widget = { color = beautiful.bg_normal, widget = wibox.widget.separator },
+         layout         = wibox.layout.fixed.horizontal
       }
 
       local tray_padding = dpi(1)
       if tray_padding > 0 then
          my_tray:set_base_size(beautiful.bar_height - tray_padding * 2)
-         local tray_layout = wi.widget {
-            { forced_width = 0, forced_height = tray_padding, color = beautiful.bg_normal, widget = wi.widget.separator },
+         local tray_layout = wibox.widget {
+            { forced_width = 0, forced_height = tray_padding, color = beautiful.bg_normal, widget = wibox.widget.separator },
             my_tray,
-            { forced_width = 0, forced_height = tray_padding, color = beautiful.bg_normal, widget = wi.widget.separator },
-            layout = wi.layout.align.vertical,
+            { forced_width = 0, forced_height = tray_padding, color = beautiful.bg_normal, widget = wibox.widget.separator },
+            layout = wibox.layout.align.vertical,
          }
          right_layout:add(tray_layout)
       else
          right_layout:add(my_tray)
       end
 
-      -- local volume_widget = wi.widget.textbox()
+      -- local volume_widget = wibox.widget.textbox()
       -- volume_widget:set_font(mono_font)
       -- vicious.register(volume_widget, vicious.widgets.volume,
       --                  function (widget, args)
@@ -471,22 +519,22 @@ awful.screen.connect_for_each_screen(function (scr)
       -- volumearc_widget:set_forced_width(beautiful.bar_height - dpi(4))
       -- right_layout:add(volumearc_widget)
       -- right_layout:add(battery_widget)
-      local clock = wi.widget.textclock(" %m/%d/%y %a %H:%M ")
+      local clock = wibox.widget.textclock(" %m/%d/%y %a %H:%M ")
       clock:set_font(mono_font)
       calendar_widget = calendar({ fdow = 7, position = "bottom_right" })
       calendar_widget:attach(clock)
       right_layout:add(clock)
       right_layout:add(wc_button_container[s])
 
-      local layout = wi.widget {
+      local layout = wibox.widget {
          left_layout,
          {
             my_task_list[s],
             left = dpi(5), right = dpi(5),
-            widget = wi.container.margin
+            widget = wibox.container.margin
          },
          right_layout,
-         layout = wi.layout.align.horizontal,
+         layout = wibox.layout.align.horizontal,
       }
       my_wibar[s]:set_widget(layout)
 end)
@@ -559,11 +607,11 @@ client.connect_signal(
             titlewidget,
             spacing = dpi(2),
             buttons = buttons,
-            layout  = wi.layout.fixed.horizontal
+            layout  = wibox.layout.fixed.horizontal
          },
          { -- Space
             buttons = buttons,
-            layout  = wi.layout.fixed.horizontal
+            layout  = wibox.layout.fixed.horizontal
          },
          { -- Right
             awful.titlebar.widget.floatingbutton (c),
@@ -571,9 +619,9 @@ client.connect_signal(
             awful.titlebar.widget.stickybutton   (c),
             awful.titlebar.widget.ontopbutton    (c),
             awful.titlebar.widget.closebutton    (c),
-            layout = wi.layout.fixed.horizontal()
+            layout = wibox.layout.fixed.horizontal()
          },
-         layout = wi.layout.align.horizontal,
+         layout = wibox.layout.align.horizontal,
       }
    end
 )
