@@ -77,13 +77,8 @@ awful_layout.layouts = {
 
 -- helper functions
 
-local spawn = function(cmd, to_notify)
-   awful.spawn.spawn(cmd)
-end
-
-local spawn_with_shell = function(cmd, to_notify)
-   awful.spawn.with_shell(cmd)
-end
+local spawn = awful.spawn.spawn
+local spawn_with_shell = awful.spawn.with_shell
 
 local open_tmux_session = function(name)
    config.action_terminal({"tmux", "new", "-As", name})
@@ -149,11 +144,11 @@ local global_keys = table_join(
    awful.key({ "Control", "Mod4" }, "Left", function () go_by_direction("left", true) end),
    awful.key({ "Control", "Mod4" }, "Down", function () go_by_direction("down", true) end),
    awful.key({ "Control", "Mod4" }, "Right",function () go_by_direction("right", true) end),
-   awful.key({ }, "XF86AudioLowerVolume",   function () spawn("pactl set-sink-volume @DEFAULT_SINK@ -5%") end),
-   awful.key({ }, "XF86AudioRaiseVolume",   function () spawn("pactl set-sink-volume @DEFAULT_SINK@ +5%") end),
-   awful.key({ }, "XF86AudioMute",          function () spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle") end),
-   awful.key({ }, "XF86MonBrightnessUp",    function () spawn("xbacklight -inc 5") end),
-   awful.key({ }, "XF86MonBrightnessDown",  function () spawn("xbacklight -dec 5") end),
+   awful.key({ }, "XF86AudioLowerVolume",   function () spawn("pactl set-sink-volume @DEFAULT_SINK@ -5%", false) end),
+   awful.key({ }, "XF86AudioRaiseVolume",   function () spawn("pactl set-sink-volume @DEFAULT_SINK@ +5%", false) end),
+   awful.key({ }, "XF86AudioMute",          function () spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle", false) end),
+   awful.key({ }, "XF86MonBrightnessUp",    function () spawn("xbacklight -inc 5", false) end),
+   awful.key({ }, "XF86MonBrightnessDown",  function () spawn("xbacklight -dec 5", false) end),
    awful.key({ "Mod4" }, "Escape",          function () menu:show() end),
    awful.key({ "Mod4" }, "Return",          function () config.action_terminal() end),
    awful.key({ "Mod4" }, "w",               function () config.action_web_browser() end),
@@ -166,13 +161,13 @@ local global_keys = table_join(
                       "-show", "combi",
                       "-modi", "combi",
                       "-font", beautiful.mono_font or beautiful.font}
-         awful.spawn(cmd)
+         spawn(cmd)
    end),
    awful.key({ "Mod4" }, "F1",              function() open_tmux_session("F1") end),
    awful.key({ "Mod4" }, "F2",              function() open_tmux_session("F2") end),
    awful.key({ "Mod4" }, "F3",              function() open_tmux_session("F3") end),
    awful.key({ "Mod4" }, "F4",              function() open_tmux_session("F4") end),
-   awful.key({ "Mod4", "Shift" }, "F12",    function() awful.spawn(config.cmd_appfinder) end),
+   awful.key({ "Mod4", "Shift" }, "F12",    function() config.action_app_finder() end),
    -- keep the both ways of showing the desktop, not sure which one is better for now.
    awful.key({ "Mod4" }, "d",               function ()
          local clients = {}
