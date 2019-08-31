@@ -152,7 +152,6 @@ local global_keys = table_join(
    awful.key({ "Mod4" }, "Escape",          function () menu:show() end),
    awful.key({ "Mod4" }, "Return",          function () config.action_terminal() end),
    awful.key({ "Mod4" }, "w",               function () config.action_web_browser() end),
-   awful.key({ "Mod4" }, "t",               function () config.action_terminal() end),
    awful.key({ "Mod4" }, "e",               function () config.action_file_manager() end),
    awful.key({ "Mod4" }, "l",               function () config.action_screen_locker() end),
    awful.key({ "Mod4" }, "\\",              function () config.action_launcher() end),
