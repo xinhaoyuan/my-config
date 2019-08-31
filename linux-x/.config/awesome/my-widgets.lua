@@ -49,7 +49,7 @@ local function _simple_button(args)
          buttons = action and awful.util.table.join(
             awful.button({ }, 1, nil, function () action(false) end),
             awful.button({ }, 3, nil, function () action(true) end)),
-         margins = dpi(5),
+         top = dpi(5), bottom = dpi(5),
          widget = wibox.container.margin,
       },
       fg = beautiful.fg_normal,
@@ -222,7 +222,6 @@ do
 
    cpu_widget = wibox.widget {
       wibox.container.mirror(cpugraph_widget, { horizontal = true }),
-      bottom = dpi(2),
       widget = wibox.container.margin
    }
 
