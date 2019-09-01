@@ -626,7 +626,7 @@ awful.screen.connect_for_each_screen(function (scr)
          layout         = wibox.layout.fixed.horizontal
       }
 
-      if scr == screen.primary then 
+      if scr == screen.primary then
          local tray_padding = dpi(1)
          if tray_padding > 0 then
             my_tray:set_base_size(beautiful.bar_height - tray_padding * 2)
