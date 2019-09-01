@@ -2,17 +2,17 @@ local awful  = require("awful")
 local beautiful = require("beautiful")
 local watch = require("awful.widget.watch")
 local wibox  = require("wibox")
-local tm  = require("gears.timer")
-local shp = require("gears.shape")
+local gtimer  = require("gears.timer")
+local gshape = require("gears.shape")
+local gcolor = require("gears.color")
 local gmath = require("gears.math")
 local vicious = require("vicious")
 local waffle = require("waffle")
 local config = require("my-config")
--- local volumearc_widget = require("awesome-wm-widgets.volumearc-widget.volumearc")
--- local battery_widget = require("awesome-wm-widgets.battery-widget.battery")
 local calendar = require("calendar.calendar")
 local menu = require("my-menu")
 local dpi = require("beautiful.xresources").apply_dpi
+local icons = require("icons")
 
 local my_wibar = {}
 local my_tag_list = {}
@@ -30,7 +30,7 @@ root.buttons(
 -- -- dummy bar for conky
 -- awful.wibar.new({ position = "top", height = config.bar_height * config.widget_scale_factor, opacity = 0 })
 
-local waffle_width = dpi(200)
+local waffle_width = beautiful.waffle_width or dpi(200)
 
 local function _simple_button(args)
    local ret = {}
@@ -207,13 +207,14 @@ local waffle_setting_view = view_with_background_and_border(
    })
 )
 
-local cpu_widget, ram_widget
+local cpu_widget_width = waffle_width - dpi(24)
+local cpu_widget
 do
    local cpugraph_widget = wibox.widget {
       max_value = 100,
       background_color = "#00000000",
-      forced_width = waffle_width,
-      forced_height = dpi(30),
+      forced_width = cpu_widget_width,
+      forced_height = dpi(24),
       step_width = dpi(2),
       step_spacing = dpi(1),
       widget = wibox.widget.graph,
@@ -248,12 +249,73 @@ do
    )
 end
 
+local ram_widget_width = waffle_width - dpi(24)
+local ram_widget
+do
+   local ramgraph_widget = wibox.widget {
+      max_value = 100,
+      background_color = "#00000000",
+      forced_width = ram_widget_width,
+      forced_height = dpi(24),
+      step_width = dpi(2),
+      step_spacing = dpi(1),
+      widget = wibox.widget.graph,
+      color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5,#74aeab"
+   }
+
+   ram_widget = wibox.widget {
+      wibox.container.mirror(ramgraph_widget, { horizontal = true }),
+      widget = wibox.container.margin
+   }
+
+   local prev_usage = 0
+
+   watch({"egrep", "-e", "MemTotal:|MemAvailable:", "/proc/meminfo"}, 1,
+         function(widget, stdout, stderr, exitreason, exitcode)
+            local total, available = stdout:match('MemTotal:%s+([0-9]+) .*MemAvailable:%s+([0-9]+)')
+            local usage = math.floor((total - available) / total * 100 + 0.5) 
+
+            widget:add_value(usage - prev_usage)
+         end,
+         ramgraph_widget
+   )
+end
+
 local waffle_root_view = view_with_background_and_border(
    waffle.create_view({
          rows = {
             {
                {
                   widget = cpu_widget,
+               },
+               {
+                  widget = wibox.widget {
+                     {
+                        image = gcolor.recolor_image(icons.cpu, beautiful.fg_normal),
+                        forced_height = dpi(20),
+                        forced_width = dpi(20),
+                        widget = wibox.widget.imagebox,
+                     },
+                     margins = dpi(2),
+                     widget = wibox.container.margin,
+                  },
+               },
+            },
+            {
+               {
+                  widget = ram_widget,
+               },
+               {
+                  widget = wibox.widget {
+                     {
+                        image = gcolor.recolor_image(icons.ram, beautiful.fg_normal),
+                        forced_height = dpi(20),
+                        forced_width = dpi(20),
+                        widget = wibox.widget.imagebox,
+                     },
+                     margins = dpi(2),
+                     widget = wibox.container.margin,
+                  },
                },
             },
             {
@@ -555,7 +617,7 @@ root.keys(
          {description = "lua execute prompt", group = "awesome"})
 ))
 
-tm {
+gtimer {
    timeout = 0.5,
    autostart = true,
    callback = function()
