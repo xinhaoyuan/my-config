@@ -14,10 +14,6 @@ local menu = require("my-menu")
 local dpi = require("beautiful.xresources").apply_dpi
 local icons = require("icons")
 
-local my_wibar = {}
-local my_tag_list = {}
-local my_task_list = {}
-local my_tray = wibox.widget.systray()
 local mono_font = beautiful.mono_font or beautiful.font
 
 root.buttons(
@@ -27,8 +23,7 @@ root.buttons(
    )
 )
 
--- -- dummy bar for conky
--- awful.wibar.new({ position = "top", height = config.bar_height * config.widget_scale_factor, opacity = 0 })
+-- Waffle menu
 
 local waffle_width = beautiful.waffle_width or dpi(200)
 
@@ -253,36 +248,91 @@ do
    )
 end
 
-local ram_widget_width = waffle_width / 2 - dpi(24)
-local ram_widget
+-- local ram_widget_width = waffle_width / 2 - dpi(24)
+-- local ram_widget
+-- do
+--    local ramgraph_widget = wibox.widget {
+--       max_value = 100,
+--       background_color = "#00000000",
+--       forced_width = ram_widget_width,
+--       forced_height = dpi(24),
+--       step_width = dpi(2),
+--       step_spacing = dpi(1),
+--       widget = wibox.widget.graph,
+--       color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5,#74aeab"
+--    }
+
+--    ram_widget = wibox.widget {
+--       wibox.container.mirror(ramgraph_widget, { horizontal = true }),
+--       widget = wibox.container.margin
+--    }
+
+--    local prev_usage = 0
+
+--    watch({"egrep", "-e", "MemTotal:|MemAvailable:", "/proc/meminfo"}, 1,
+--       function(widget, stdout, stderr, exitreason, exitcode)
+--          local total, available = stdout:match('MemTotal:%s+([0-9]+) .*MemAvailable:%s+([0-9]+)')
+--          local usage = math.floor((total - available) / total * 100 + 0.5)
+
+--          widget:add_value(usage - prev_usage)
+--       end,
+--       ramgraph_widget
+--    )
+-- end
+
+local volumebar_widget_width = waffle_width / 2 - dpi(24)
+local volumebar_widget
 do
-   local ramgraph_widget = wibox.widget {
-      max_value = 100,
-      background_color = "#00000000",
-      forced_width = ram_widget_width,
+   local GET_VOLUME_CMD = 'amixer -D pulse sget Master'
+   local INC_VOLUME_CMD = 'amixer -D pulse sset Master 5%+'
+   local DEC_VOLUME_CMD = 'amixer -D pulse sset Master 5%-'
+   local TOG_VOLUME_CMD = 'amixer -D pulse sset Master toggle'
+
+   local bar_color = "#74aeab"
+   local mute_color = "#ff0000"
+   local background_color = "#3a3a3a"
+
+   volumebar_widget = wibox.widget {
+      max_value = 1,
+      forced_width = volumebar_widget_width,
       forced_height = dpi(24),
-      step_width = dpi(2),
-      step_spacing = dpi(1),
-      widget = wibox.widget.graph,
-      color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5,#74aeab"
+      paddings = 0,
+      border_width = 0.5,
+      color = bar_color,
+      background_color = background_color,
+      shape = gshape.bar,
+      clip = true,
+      margins = {
+         top = dpi(11),
+         bottom = dpi(11),
+      },
+      widget = wibox.widget.progressbar
    }
 
-   ram_widget = wibox.widget {
-      wibox.container.mirror(ramgraph_widget, { horizontal = true }),
-      widget = wibox.container.margin
-   }
+   local update_graphic = function(widget, stdout, _, _, _)
+      local mute = string.match(stdout, "%[(o%D%D?)%]")
+      local volume = string.match(stdout, "(%d?%d?%d)%%")
+      volume = tonumber(string.format("% 3d", volume))
 
-   local prev_usage = 0
+      widget.value = volume / 100;
+      widget.color = mute == "off" and mute_color
+         or bar_color
 
-   watch({"egrep", "-e", "MemTotal:|MemAvailable:", "/proc/meminfo"}, 1,
-      function(widget, stdout, stderr, exitreason, exitcode)
-         local total, available = stdout:match('MemTotal:%s+([0-9]+) .*MemAvailable:%s+([0-9]+)')
-         local usage = math.floor((total - available) / total * 100 + 0.5)
+   end
 
-         widget:add_value(usage - prev_usage)
-      end,
-      ramgraph_widget
-   )
+   volumebar_widget:connect_signal("button::press", function(_,_,_,button)
+                                      if (button == 4)     then awful.spawn(INC_VOLUME_CMD, false)
+                                      elseif (button == 5) then awful.spawn(DEC_VOLUME_CMD, false)
+                                      elseif (button == 1) then awful.spawn(TOG_VOLUME_CMD, false)
+                                      end
+
+                                      awful.spawn.easy_async(
+                                         GET_VOLUME_CMD, function(stdout, stderr, exitreason, exitcode)
+                                            update_graphic(volumebar_widget, stdout, stderr, exitreason, exitcode)
+                                      end)
+   end)
+
+   watch(GET_VOLUME_CMD, 1, update_graphic, volumebar_widget)
 end
 
 local waffle_root_view_base = waffle.create_view(
@@ -337,29 +387,32 @@ local waffle_root_view = {
          with_background_and_border(
             wibox.widget {
                {
-                  cpu_widget,
                   {
+                     cpu_widget,
                      {
-                        image = gcolor.recolor_image(icons.cpu, beautiful.fg_normal),
-                        forced_height = dpi(20),
-                        forced_width = dpi(20),
-                        widget = wibox.widget.imagebox,
+                        {
+                           image = gcolor.recolor_image(icons.cpu, beautiful.fg_normal),
+                           forced_height = dpi(16),
+                           forced_width = dpi(16),
+                           widget = wibox.widget.imagebox,
+                        },
+                        margins = dpi(4),
+                        widget = wibox.container.margin,
                      },
-                     margins = dpi(2),
-                     widget = wibox.container.margin,
-                  },
-                  ram_widget,
-                  {
+                     volumebar_widget,
                      {
-                        image = gcolor.recolor_image(icons.ram, beautiful.fg_normal),
-                        forced_height = dpi(20),
-                        forced_width = dpi(20),
-                        widget = wibox.widget.imagebox,
+                        {
+                           image = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
+                           forced_height = dpi(16),
+                           forced_width = dpi(16),
+                           widget = wibox.widget.imagebox,
+                        },
+                        margins = dpi(4),
+                        widget = wibox.container.margin,
                      },
-                     margins = dpi(2),
-                     widget = wibox.container.margin,
+                     layout = wibox.layout.fixed.horizontal,
                   },
-                  layout = wibox.layout.fixed.horizontal,
+                  layout = wibox.layout.fixed.vertical,
                },
                bg = beautiful.bg_normal,
                widget = wibox.container.background,
@@ -373,6 +426,13 @@ local waffle_root_view = {
 }
 
 setmetatable(waffle_root_view, {__index = waffle_root_view_base})
+
+-- Screen bar
+
+local my_wibar = {}
+local my_tag_list = {}
+local my_task_list = {}
+local my_tray = wibox.widget.systray()
 
 my_tag_list.buttons = awful.util.table.join(
    awful.button({ }, 1, awful.tag.viewonly),
@@ -566,18 +626,20 @@ awful.screen.connect_for_each_screen(function (scr)
          layout         = wibox.layout.fixed.horizontal
       }
 
-      local tray_padding = dpi(1)
-      if tray_padding > 0 then
-         my_tray:set_base_size(beautiful.bar_height - tray_padding * 2)
-         local tray_layout = wibox.widget {
-            { forced_width = 0, forced_height = tray_padding, color = beautiful.bg_normal, widget = wibox.widget.separator },
-            my_tray,
-            { forced_width = 0, forced_height = tray_padding, color = beautiful.bg_normal, widget = wibox.widget.separator },
-            layout = wibox.layout.align.vertical,
-         }
-         right_layout:add(tray_layout)
-      else
-         right_layout:add(my_tray)
+      if scr == screen.primary then 
+         local tray_padding = dpi(1)
+         if tray_padding > 0 then
+            my_tray:set_base_size(beautiful.bar_height - tray_padding * 2)
+            local tray_layout = wibox.widget {
+               { forced_width = 0, forced_height = tray_padding, color = beautiful.bg_normal, widget = wibox.widget.separator },
+               my_tray,
+               { forced_width = 0, forced_height = tray_padding, color = beautiful.bg_normal, widget = wibox.widget.separator },
+               layout = wibox.layout.align.vertical,
+            }
+            right_layout:add(tray_layout)
+         else
+            right_layout:add(my_tray)
+         end
       end
 
       -- local volume_widget = wibox.widget.textbox()

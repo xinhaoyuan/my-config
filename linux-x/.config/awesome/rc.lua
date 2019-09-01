@@ -77,9 +77,6 @@ awful_layout.layouts = {
 
 -- helper functions
 
-local spawn = awful.spawn.spawn
-local spawn_with_shell = awful.spawn.with_shell
-
 local open_tmux_session = function(name)
    config.action_terminal({"tmux", "new", "-As", name})
 end
@@ -128,11 +125,6 @@ local global_keys = table_join(
       function ()
          yams.default.start()
    end),
-   -- awful.key({ "Mod4" }, "q",
-   --    function ()
-   --       revelation({rule={class="Plank"}, is_excluded=true,
-   --                   curr_tag_only=true})
-   -- end),
    awful.key({ "Mod4" }, "/",               function () machi.default_editor.start_interactive() end),
    awful.key({ "Mod4" }, "[",               function () awful_layout.inc(awful_layout.layouts, -1) end),
    awful.key({ "Mod4" }, "]",               function () awful_layout.inc(awful_layout.layouts, 1) end),
@@ -144,11 +136,11 @@ local global_keys = table_join(
    awful.key({ "Control", "Mod4" }, "Left", function () go_by_direction("left", true) end),
    awful.key({ "Control", "Mod4" }, "Down", function () go_by_direction("down", true) end),
    awful.key({ "Control", "Mod4" }, "Right",function () go_by_direction("right", true) end),
-   awful.key({ }, "XF86AudioLowerVolume",   function () spawn("pactl set-sink-volume @DEFAULT_SINK@ -5%", false) end),
-   awful.key({ }, "XF86AudioRaiseVolume",   function () spawn("pactl set-sink-volume @DEFAULT_SINK@ +5%", false) end),
-   awful.key({ }, "XF86AudioMute",          function () spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle", false) end),
-   awful.key({ }, "XF86MonBrightnessUp",    function () spawn("xbacklight -inc 5", false) end),
-   awful.key({ }, "XF86MonBrightnessDown",  function () spawn("xbacklight -dec 5", false) end),
+   awful.key({ }, "XF86AudioLowerVolume",   function () config.action_audio_setup("volume-adjust", -5) end),
+   awful.key({ }, "XF86AudioRaiseVolume",   function () config.action_audio_setup("volume-adjust",  5) end),
+   awful.key({ }, "XF86AudioMute",          function () config.action_audio_setup("mute-toggle") end),
+   awful.key({ }, "XF86MonBrightnessUp",    function () awful.spawn("xbacklight -inc 5", false) end),
+   awful.key({ }, "XF86MonBrightnessDown",  function () awful.spawn("xbacklight -dec 5", false) end),
    awful.key({ "Mod4" }, "Escape",          function () menu:show() end),
    awful.key({ "Mod4" }, "Return",          function () config.action_terminal() end),
    awful.key({ "Mod4" }, "w",               function () config.action_web_browser() end),

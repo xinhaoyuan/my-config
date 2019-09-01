@@ -44,6 +44,17 @@ local config = {
    action_screen_locker = function ()
       awful.spawn({"i3lock", "-e", "-c", "404040"}, false)
    end,
+   action_audio_setup = function (method, arg)
+      if method == "mute-toggle" then
+         awful.spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle", false)
+      elseif method == "volume-adjust" then
+         if arg > 0 then
+            awful.spawn("pactl set-sink-volume @DEFAULT_SINK@ +" .. tostring(arg) .. "%", false)
+         else
+            awful.spawn("pactl set-sink-volume @DEFAULT_SINK@ " .. tostring(arg) .. "%", false)
+         end
+      end
+   end,      
 }
 
 return config
