@@ -378,21 +378,21 @@ awful_rule.rules = {
          focusable = false,
          below = false,
          has_client_input_shape = true,
+         borderless = true,
       },
    },
-   -- {
-   --    rule = { class = "Conky" },
-   --    properties = {
-   --       floating = true,
-   --       sticky = true,
-   --       ontop = false,
-   --       below = true,
-   --       focus = false,
-   --       border_width = 0,
-   --       focusable = false,
-   --       tag = "STICKY"
-   --    }
-   -- },
+   {
+      rule = { class = "Conky" },
+      properties = {
+         floating = true,
+         sticky = true,
+         ontop = false,
+         below = true,
+         focus = false,
+         borderless = true,
+         focusable = false,
+      }
+   },
 }
 
 -- tags and layouts
