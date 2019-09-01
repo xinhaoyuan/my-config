@@ -248,39 +248,39 @@ do
    )
 end
 
--- local ram_widget_width = waffle_width / 2 - dpi(24)
--- local ram_widget
--- do
---    local ramgraph_widget = wibox.widget {
---       max_value = 100,
---       background_color = "#00000000",
---       forced_width = ram_widget_width,
---       forced_height = dpi(24),
---       step_width = dpi(2),
---       step_spacing = dpi(1),
---       widget = wibox.widget.graph,
---       color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5,#74aeab"
---    }
+local ram_widget_width = waffle_width / 2 - dpi(24)
+local ram_widget
+do
+   local ramgraph_widget = wibox.widget {
+      max_value = 100,
+      background_color = "#00000000",
+      forced_width = ram_widget_width,
+      forced_height = dpi(24),
+      step_width = dpi(2),
+      step_spacing = dpi(1),
+      widget = wibox.widget.graph,
+      color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5,#74aeab"
+   }
 
---    ram_widget = wibox.widget {
---       wibox.container.mirror(ramgraph_widget, { horizontal = true }),
---       widget = wibox.container.margin
---    }
+   ram_widget = wibox.widget {
+      wibox.container.mirror(ramgraph_widget, { horizontal = true }),
+      widget = wibox.container.margin
+   }
 
---    local prev_usage = 0
+   local prev_usage = 0
 
---    watch({"egrep", "-e", "MemTotal:|MemAvailable:", "/proc/meminfo"}, 1,
---       function(widget, stdout, stderr, exitreason, exitcode)
---          local total, available = stdout:match('MemTotal:%s+([0-9]+) .*MemAvailable:%s+([0-9]+)')
---          local usage = math.floor((total - available) / total * 100 + 0.5)
+   watch({"egrep", "-e", "MemTotal:|MemAvailable:", "/proc/meminfo"}, 1,
+      function(widget, stdout, stderr, exitreason, exitcode)
+         local total, available = stdout:match('MemTotal:%s+([0-9]+) .*MemAvailable:%s+([0-9]+)')
+         local usage = math.floor((total - available) / total * 100 + 0.5)
 
---          widget:add_value(usage - prev_usage)
---       end,
---       ramgraph_widget
---    )
--- end
+         widget:add_value(usage - prev_usage)
+      end,
+      ramgraph_widget
+   )
+end
 
-local volumebar_widget_width = waffle_width / 2 - dpi(24)
+local volumebar_widget_width = waffle_width - dpi(24)
 local volumebar_widget
 do
    local GET_VOLUME_CMD = 'amixer -D pulse sget Master'
@@ -399,10 +399,10 @@ local waffle_root_view = {
                         margins = dpi(4),
                         widget = wibox.container.margin,
                      },
-                     volumebar_widget,
+                     ram_widget,
                      {
                         {
-                           image = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
+                           image = gcolor.recolor_image(icons.ram, beautiful.fg_normal),
                            forced_height = dpi(16),
                            forced_width = dpi(16),
                            widget = wibox.widget.imagebox,
@@ -421,6 +421,32 @@ local waffle_root_view = {
          widget = wibox.container.margin,
       },
       with_background_and_border(waffle_root_view_base.widget),
+      {
+         with_background_and_border(
+            wibox.widget {
+               {
+                  {
+                     volumebar_widget,
+                     {
+                        {
+                           image = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
+                           forced_height = dpi(16),
+                           forced_width = dpi(16),
+                           widget = wibox.widget.imagebox,
+                        },
+                        margins = dpi(4),
+                        widget = wibox.container.margin,
+                     },
+                     layout = wibox.layout.fixed.horizontal,
+                  },
+                  layout = wibox.layout.fixed.vertical,
+               },
+               bg = beautiful.bg_normal,
+               widget = wibox.container.background,
+         }),
+         top = dpi(10),
+         widget = wibox.container.margin,
+      },
       layout = wibox.layout.fixed.vertical,
    }
 }
