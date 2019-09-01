@@ -88,22 +88,26 @@ local function _simple_button(args)
    return ret
 end
 
+local function with_background_and_border(widget)
+   return wibox.widget {
+      {
+         widget,
+         bg = beautiful.bg_normal,
+         fg = beautiful.fg_normal,
+         widget = wibox.container.background,
+      },
+      top = beautiful.border_width,
+      bottom = beautiful.border_width,
+      left = beautiful.border_width,
+      right = beautiful.border_width,
+      color = beautiful.border_focus,
+      widget = wibox.container.margin,
+   }
+end
+
 local function view_with_background_and_border(view)
    local ret = {
-      widget = wibox.widget {
-         {
-            view.widget,
-            bg = beautiful.bg_normal,
-            fg = beautiful.fg_normal,
-            widget = wibox.container.background,
-         },
-         top = beautiful.border_width,
-         bottom = beautiful.border_width,
-         left = beautiful.border_width,
-         right = beautiful.border_width,
-         color = beautiful.border_focus,
-         widget = wibox.container.margin,
-      },
+      widget = with_background_and_border(view.widget)
    }
 
    setmetatable(ret, { __index = view })
@@ -207,7 +211,7 @@ local waffle_setting_view = view_with_background_and_border(
    })
 )
 
-local cpu_widget_width = waffle_width - dpi(24)
+local cpu_widget_width = waffle_width / 2 - dpi(24)
 local cpu_widget
 do
    local cpugraph_widget = wibox.widget {
@@ -249,7 +253,7 @@ do
    )
 end
 
-local ram_widget_width = waffle_width - dpi(24)
+local ram_widget_width = waffle_width / 2 - dpi(24)
 local ram_widget
 do
    local ramgraph_widget = wibox.widget {
@@ -271,25 +275,70 @@ do
    local prev_usage = 0
 
    watch({"egrep", "-e", "MemTotal:|MemAvailable:", "/proc/meminfo"}, 1,
-         function(widget, stdout, stderr, exitreason, exitcode)
-            local total, available = stdout:match('MemTotal:%s+([0-9]+) .*MemAvailable:%s+([0-9]+)')
-            local usage = math.floor((total - available) / total * 100 + 0.5) 
+      function(widget, stdout, stderr, exitreason, exitcode)
+         local total, available = stdout:match('MemTotal:%s+([0-9]+) .*MemAvailable:%s+([0-9]+)')
+         local usage = math.floor((total - available) / total * 100 + 0.5)
 
-            widget:add_value(usage - prev_usage)
-         end,
-         ramgraph_widget
+         widget:add_value(usage - prev_usage)
+      end,
+      ramgraph_widget
    )
 end
 
-local waffle_root_view = view_with_background_and_border(
-   waffle.create_view({
-         rows = {
-            {
+local waffle_root_view_base = waffle.create_view(
+   {
+      rows = {
+         {
+            _simple_button({
+                  markup = "<u>W</u>eb browser",
+                  key = "w",
+                  action = function (alt)
+                     config.action_web_browser()
+                     waffle:hide()
+                  end
+            }),
+         },
+         {
+            _simple_button({
+                  markup = "Fil<u>e</u> manager",
+                  key = "e",
+                  action = function (alt)
+                     config.action_file_manager()
+                     waffle:hide()
+                  end
+            }),
+         },
+         {
+            _simple_button({
+                  markup = "<u>T</u>erminal",
+                  key = "t",
+                  action = function (alt)
+                     config.action_terminal()
+                     waffle:hide()
+                  end
+            }),
+         },
+         {
+            _simple_button({
+                  markup = "<u>S</u>etting",
+                  key = "s",
+                  action = function (alt)
+                     waffle:show(waffle_setting_view, true)
+                  end
+            }),
+         },
+      }
+   }
+)
+
+local waffle_root_view = {
+   widget = wibox.widget {
+      {
+         with_background_and_border(
+            wibox.widget {
                {
-                  widget = cpu_widget,
-               },
-               {
-                  widget = wibox.widget {
+                  cpu_widget,
+                  {
                      {
                         image = gcolor.recolor_image(icons.cpu, beautiful.fg_normal),
                         forced_height = dpi(20),
@@ -299,14 +348,8 @@ local waffle_root_view = view_with_background_and_border(
                      margins = dpi(2),
                      widget = wibox.container.margin,
                   },
-               },
-            },
-            {
-               {
-                  widget = ram_widget,
-               },
-               {
-                  widget = wibox.widget {
+                  ram_widget,
+                  {
                      {
                         image = gcolor.recolor_image(icons.ram, beautiful.fg_normal),
                         forced_height = dpi(20),
@@ -316,50 +359,20 @@ local waffle_root_view = view_with_background_and_border(
                      margins = dpi(2),
                      widget = wibox.container.margin,
                   },
+                  layout = wibox.layout.fixed.horizontal,
                },
-            },
-            {
-               _simple_button({
-                     markup = "<u>W</u>eb browser",
-                     key = "w",
-                     action = function (alt)
-                        config.action_web_browser()
-                        waffle:hide()
-                     end
-               }),
-            },
-            {
-               _simple_button({
-                     markup = "Fil<u>e</u> manager",
-                     key = "e",
-                     action = function (alt)
-                        config.action_file_manager()
-                        waffle:hide()
-                     end
-               }),
-            },
-            {
-               _simple_button({
-                     markup = "<u>T</u>erminal",
-                     key = "t",
-                     action = function (alt)
-                        config.action_terminal()
-                        waffle:hide()
-                     end
-               }),
-            },
-            {
-               _simple_button({
-                     markup = "<u>S</u>etting",
-                     key = "s",
-                     action = function (alt)
-                        waffle:show(waffle_setting_view, true)
-                     end
-               }),
-            },
-         }
-   })
-)
+               bg = beautiful.bg_normal,
+               widget = wibox.container.background,
+         }),
+         bottom = dpi(10),
+         widget = wibox.container.margin,
+      },
+      with_background_and_border(waffle_root_view_base.widget),
+      layout = wibox.layout.fixed.vertical,
+   }
+}
+
+setmetatable(waffle_root_view, {__index = waffle_root_view_base})
 
 my_tag_list.buttons = awful.util.table.join(
    awful.button({ }, 1, awful.tag.viewonly),
