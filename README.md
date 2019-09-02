@@ -25,6 +25,7 @@ cmake
 
 ## Linux desktop
 
+ - dex -- autostart
  - cbatticon -- battery
  - nm-applet -- network
  - pasystray, pavucontrol -- pulse audio
