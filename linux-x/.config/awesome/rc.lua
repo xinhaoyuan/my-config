@@ -54,10 +54,9 @@ local delayed = gears_timer.delayed_call
 
 beautiful.layout_machi = machi.get_icon()
 machi.default_editor.set_gap(beautiful.useless_gap * 2, beautiful.useless_gap)
--- revelation.init()
 
 -- Define the tag list upfront for keybindings
-local tag_list = { "STICKY", "1", "2", "3", "4" }
+local tag_list = { "1", "2", "3", "4" }
 awful_layout.layouts = {
    machi.default_layout,
    awful_layout.suit.tile,
@@ -81,8 +80,9 @@ local open_tmux_session = function(name)
    config.action_terminal({"tmux", "new", "-As", name})
 end
 
-table_join = awful.util.table.join
+local table_join = awful.util.table.join
 
+-- -- Keep it for reference
 -- autofocus.find_alternative_focus = function(prev, s)
 --    local pid = nil
 --    if prev and prev.valid then
@@ -208,13 +208,13 @@ local global_keys = table_join(
    awful.key({ "Mod4", "Control" }, "Escape", capi.awesome.quit)
 )
 
--- tag 1 is hidden
-for i = 2, #tag_list do
+for i = 1, #tag_list do
+   local key = tostring(i)
    global_keys =
       table_join(
-         awful.key({ "Mod4" }, tostring(i - 1), function () awful.screen.focused().tags[i]:view_only() end),
-         awful.key({ "Mod4", "Control" }, tostring(i - 1), function () awful.tag.viewtoggle(awful.screen.focused().tags[i]) end),
-         awful.key({ "Mod4", "Shift" }, tostring(i - 1), function ()
+         awful.key({ "Mod4" }, key, function () awful.screen.focused().tags[i]:view_only() end),
+         awful.key({ "Mod4", "Control" }, key, function () awful.tag.viewtoggle(awful.screen.focused().tags[i]) end),
+         awful.key({ "Mod4", "Shift" }, key, function ()
                local c = capi.client.focus
                if c == nil then return end
                awful.client.toggletag(c.screen.tags[i], c)
@@ -390,8 +390,8 @@ awful.screen.connect_for_each_screen(
       for i, t in ipairs(tag_list) do
          local tag = awful.tag.add(t, { screen = s, layout = awful_layout.layouts[1], layouts = awful_layout.layouts })
       end
-      -- 1 is the hidden tag
-      s.tags[2]:view_only()
+
+      s.tags[1]:view_only()
 
       -- fix window geometry
       s:connect_signal(
