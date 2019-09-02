@@ -303,6 +303,7 @@ do
       shape = gshape.bar,
       clip = true,
       margins = {
+         left = dpi(4),
          top = dpi(11),
          bottom = dpi(11),
       },
@@ -692,7 +693,7 @@ awful.screen.connect_for_each_screen(function (scr)
          left_layout,
          {
             my_task_list[s],
-            left = dpi(5), right = dpi(5),
+            right = dpi(5),
             widget = wibox.container.margin
          },
          right_layout,
