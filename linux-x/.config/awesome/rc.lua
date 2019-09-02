@@ -350,12 +350,6 @@ awful_rule.rules = {
       }
    },
    {
-      rule = { class = "URxvt" },
-      properties = {
-         opacity = 0.9,
-      },
-   },
-   {
       rule = { class = "Synapse" },
       properties = {
          ontop = true,

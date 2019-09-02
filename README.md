@@ -28,6 +28,7 @@ cmake
  - cbatticon -- battery
  - nm-applet -- network
  - pasystray, pavucontrol -- pulse audio
+ - amixer -- alternative audio control
  - fcitx -- input method
  - xcape -- convert modifier taps to other keys
  - arandr -- multi-monitor configure
