@@ -371,6 +371,16 @@ local waffle_root_view_base = waffle.create_view(
          },
          {
             _simple_button({
+                  markup = "<u>L</u>ock screen",
+                  key = "l",
+                  action = function (alt)
+                     config.action_screen_locker()
+                     waffle:hide()
+                  end
+            }),
+         },
+         {
+            _simple_button({
                   markup = "<u>S</u>etting",
                   key = "s",
                   action = function (alt)

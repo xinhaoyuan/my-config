@@ -125,11 +125,11 @@ function waffle:show(view, push, screen)
    if self.wibox_ == nil then
       self.wibox_ = wibox({
             screen = screen,
-            x = screen.workarea.x,
-            y = screen.workarea.y,
-            width = screen.workarea.width,
-            height = screen.workarea.height,
-            bg = "#00000000",
+            x = screen.geometry.x,
+            y = screen.geometry.y,
+            width = screen.geometry.width,
+            height = screen.geometry.height,
+            bg = "#00000040",
             opacity = 1,
             ontop = true,
             type = "dock",
