@@ -78,7 +78,26 @@ waffle.widget_container:connect_signal(
       end
 end)
 
-function waffle:update_layout()
+function waffle:update_layout(screen)
+   screen = screen or (self.wibox_ and self.wibox_.screen)
+   if screen then
+      if beautiful.waffle_use_entire_screen then
+         self.wibox_:geometry({
+               x = screen.geometry.x,
+               y = screen.geometry.y,
+               width = screen.geometry.width,
+               height = screen.geometry.height,
+         })
+      else
+         self.wibox_:geometry({
+               x = screen.workarea.x,
+               y = screen.workarea.y,
+               width = screen.workarea.width,
+               height = screen.workarea.height,
+         })
+      end
+   end
+
    if self.wibox_ and self.wibox_.widget == nil then
       self.wibox_.widget = self.widget_container
    end
@@ -129,21 +148,14 @@ function waffle:show(view, push, screen)
             y = screen.geometry.y,
             width = screen.geometry.width,
             height = screen.geometry.height,
-            bg = "#00000040",
+            bg = beautiful.waffle_background or "#00000060",
             opacity = 1,
             ontop = true,
             type = "dock",
       })
-
-      self:update_layout()
-   else
-      self.wibox_:geometry({
-            x = screen.workarea.x,
-            y = screen.workarea.y,
-            width = screen.workarea.width,
-            height = screen.workarea.height,
-      })
    end
+
+   self:update_layout(screen)
 
    if push then
       self.stack_ = self.stack_ or {}
