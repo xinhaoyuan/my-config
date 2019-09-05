@@ -148,7 +148,7 @@ function waffle:show(view, push, screen)
             y = screen.geometry.y,
             width = screen.geometry.width,
             height = screen.geometry.height,
-            bg = beautiful.waffle_background or "#00000060",
+            bg = beautiful.waffle_background or (beautiful.bg_normal:sub(1,7) .. "80"),
             opacity = 1,
             ontop = true,
             type = "dock",
