@@ -183,16 +183,6 @@ local waffle_setting_view = view_with_background_and_border(
             },
             {
                _simple_button({
-                     markup = "<u>L</u>ock screen",
-                     key = "l",
-                     action = function (alt)
-                        config.action_screen_locker()
-                        waffle:hide()
-                     end
-               }),
-            },
-            {
-               _simple_button({
                      markup = "<u>P</u>ower off",
                      key = "p",
                      action = function (alt)
