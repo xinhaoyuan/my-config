@@ -55,6 +55,21 @@ theme.tasklist_template = {
    widget = wibox.container.background,
 }
 
+-- theme.tasklist_layout = {
+--    spacing_widget = {
+--       {
+--          forced_height = dpi(12),
+--          thickness = 1,
+--          widget = wibox.widget.separator,
+--       },
+--       valign = "center",
+--       halign = "center",
+--       widget = wibox.container.place,
+--    },
+--    spacing = dpi(6),
+--    layout = wibox.layout.flex.horizontal
+-- }
+
 theme.titlebar_size = dpi(20)
 
 local function text_to_surface(text, font_desc, color_desc, width, height)
