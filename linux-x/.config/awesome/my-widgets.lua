@@ -497,12 +497,10 @@ local waffle_root_view = {
 
 setmetatable(waffle_root_view, {__index = waffle_root_view_base})
 
-local my_tag_list = {}
 
 -- Screen bar
 
-local my_wibars = {}
-local my_tasklist_widgets = {}
+local my_widgets = {}
 local my_tray = wibox.widget.systray()
 local my_tag_list_buttons = awful.util.table.join(
    awful.button({ }, 1, awful.tag.viewonly),
@@ -513,7 +511,7 @@ local my_tag_list_buttons = awful.util.table.join(
    -- awful.button({ }, 5, function(t) awful.tag.viewprev(awful.tag.getscreen(t)) end)
 )
 
-local my_tasklist_widgets_buttons = awful.util.table.join(
+local my_tasklist_buttons = awful.util.table.join(
    awful.button({ }, 1, function (c)
          if c == client.focus then
             c.minimized = true
@@ -532,7 +530,6 @@ local my_tasklist_widgets_buttons = awful.util.table.join(
    end)
 )
 
-local wc_containers = {}
 local current_screen = nil
 
 -- a basic stable sort
@@ -559,15 +556,16 @@ local function sort(l, c)
    return ret
 end
 
-local function setup_widgets_for_screen(scr)
+local function setup_screen(scr)
    local s = scr.index
 
    scr.mypromptbox = awful.widget.prompt()
 
-   my_tasklist_widgets[s] = awful.widget.tasklist {
+   my_widgets[s] = {}
+   my_widgets[s].tasklist = awful.widget.tasklist {
       screen = s,
       filter = awful.widget.tasklist.filter.currenttags,
-      buttons = my_tasklist_widgets_buttons,
+      buttons = my_tasklist_buttons,
       style = { font = mono_font },
       layout = beautiful.tasklist_layout,
       source = function ()
@@ -598,14 +596,14 @@ local function setup_widgets_for_screen(scr)
       widget_template = beautiful.tasklist_template,
    }
 
-   my_tag_list[s] = awful.widget.taglist(
+   my_widgets[s].tag_list = awful.widget.taglist(
       s, function (t) return config.tag_filter(t.name) end, my_tag_list_buttons,
       {
          font = mono_font
       }
    )
 
-   my_wibars[s] = awful.wibar({
+   my_widgets[s].wibar = awful.wibar({
          screen = s,
          fg = beautiful.fg_normal,
          bg = beautiful.bg_normal,
@@ -620,7 +618,7 @@ local function setup_widgets_for_screen(scr)
       widget = wibox.widget.textbox
    }
 
-   wc_containers[s] = wibox.widget {
+   my_widgets[s].indicator = wibox.widget {
       {
          wc_button,
          left = dpi(5),
@@ -630,7 +628,7 @@ local function setup_widgets_for_screen(scr)
       widget = wibox.container.background
    }
 
-   wc_containers[s]:connect_signal(
+   my_widgets[s].indicator:connect_signal(
       "button::press",
       function (_, _, _, b)
          local c = client.focus
@@ -659,7 +657,7 @@ local function setup_widgets_for_screen(scr)
          awful.button({ }, 4, function () awful.layout.inc( 1) end),
          awful.button({ }, 5, function () awful.layout.inc(-1) end)))
    left_layout:add(layoutbox)
-   left_layout:add(my_tag_list[s])
+   left_layout:add(my_widgets[s].tag_list)
    left_layout:add(scr.mypromptbox)
    local right_layout = wibox.widget {
       spacing        = dpi(5),
@@ -701,32 +699,30 @@ local function setup_widgets_for_screen(scr)
    calendar_widget = calendar({ fdow = 7, position = "bottom_right" })
    calendar_widget:attach(clock)
    right_layout:add(clock)
-   right_layout:add(wc_containers[s])
+   right_layout:add(my_widgets[s].indicator)
 
    local layout = wibox.widget {
       left_layout,
       {
-         my_tasklist_widgets[s],
+         my_widgets[s].tasklist,
          right = dpi(5),
          widget = wibox.container.margin
       },
       right_layout,
       layout = wibox.layout.align.horizontal,
    }
-   my_wibars[s]:set_widget(layout)
+   my_widgets[s].wibar:set_widget(layout)
 end
 
 local function reset_widgets_for_screens()
-   for _, wb in ipairs(my_wibars) do
-      wb.visible = false
+   for _, w in ipairs(my_widgets) do
+      w.wibar.visible = false
    end
-   my_wibars = {}
-   my_tasklist_widgets = {}
-   wc_containers = {}
+   my_widgets = {}
    current_screen = nil
 
    for scr in capi.screen do
-      setup_widgets_for_screen(scr)
+      setup_screen(scr)
    end
 end
 
@@ -758,11 +754,11 @@ gtimer {
       local nscreen = capi.mouse.screen.index
       if nscreen ~= current_screen then
          if current_screen ~= nil then
-            wc_containers[current_screen]:set_bg(beautiful.bg_normal)
-            wc_containers[current_screen]:set_fg(beautiful.fg_normal)
+            my_widgets[current_screen].indicator:set_bg(beautiful.bg_normal)
+            my_widgets[current_screen].indicator:set_fg(beautiful.fg_normal)
          end
-         wc_containers[nscreen]:set_bg(beautiful.bg_focus)
-         wc_containers[nscreen]:set_fg(beautiful.fg_focus)
+         my_widgets[nscreen].indicator:set_bg(beautiful.bg_focus)
+         my_widgets[nscreen].indicator:set_fg(beautiful.fg_focus)
          -- switch active screen
          current_screen = nscreen
       end
