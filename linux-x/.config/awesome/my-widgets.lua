@@ -497,10 +497,11 @@ local waffle_root_view = {
 
 setmetatable(waffle_root_view, {__index = waffle_root_view_base})
 
+local my_tag_list = {}
+
 -- Screen bar
 
-local my_wibar = {}
-local my_tag_list = {}
+local my_wibars = {}
 local my_tasklist_widgets = {}
 local my_tray = wibox.widget.systray()
 local my_tag_list_buttons = awful.util.table.join(
@@ -604,7 +605,7 @@ local function setup_widgets_for_screen(scr)
       }
    )
 
-   my_wibar[s] = awful.wibar({
+   my_wibars[s] = awful.wibar({
          screen = s,
          fg = beautiful.fg_normal,
          bg = beautiful.bg_normal,
@@ -712,13 +713,14 @@ local function setup_widgets_for_screen(scr)
       right_layout,
       layout = wibox.layout.align.horizontal,
    }
-   my_wibar[s]:set_widget(layout)
+   my_wibars[s]:set_widget(layout)
 end
 
 local function reset_widgets_for_screens()
-   for _, tl in ipairs(my_tasklist_widgets) do
-      tl.visible = false
+   for _, wb in ipairs(my_wibars) do
+      wb.visible = false
    end
+   my_wibars = {}
    my_tasklist_widgets = {}
    wc_containers = {}
    current_screen = nil
