@@ -1,3 +1,7 @@
+local capi = {
+   screen = screen,
+   mouse = mouse,
+}
 local awful  = require("awful")
 local beautiful = require("beautiful")
 local watch = require("awful.widget.watch")
@@ -35,7 +39,7 @@ local function _simple_button(args)
    if args.icon ~= nil then
       width = width - button_height
    end
-   
+
    ret.textbox = wibox.widget {
       markup = args.markup or nil,
       text = args.text or nil,
@@ -497,10 +501,9 @@ setmetatable(waffle_root_view, {__index = waffle_root_view_base})
 
 local my_wibar = {}
 local my_tag_list = {}
-local my_task_list = {}
+local my_tasklist_widgets = {}
 local my_tray = wibox.widget.systray()
-
-my_tag_list.buttons = awful.util.table.join(
+local my_tag_list_buttons = awful.util.table.join(
    awful.button({ }, 1, awful.tag.viewonly),
    awful.button({ "Mod4" }, 1, awful.client.movetotag),
    awful.button({ }, 3, awful.tag.viewtoggle),
@@ -509,7 +512,7 @@ my_tag_list.buttons = awful.util.table.join(
    -- awful.button({ }, 5, function(t) awful.tag.viewprev(awful.tag.getscreen(t)) end)
 )
 
-my_task_list.buttons = awful.util.table.join(
+local my_tasklist_widgets_buttons = awful.util.table.join(
    awful.button({ }, 1, function (c)
          if c == client.focus then
             c.minimized = true
@@ -526,25 +529,9 @@ my_task_list.buttons = awful.util.table.join(
             c:raise()
          end
    end)
-   -- awful.button({ }, 3, function ()
-   --       if instance then
-   --          instance:hide()
-   --          instance = nil
-   --       else
-   --          instance = awful.menu.clients({ width=500 })
-   --       end
-   -- end),
-   -- awful.button({ }, 4, function ()
-   --       awful.client.focus.byidx(1)
-   --       if client.focus then client.focus:raise() end
-   -- end),
-   -- awful.button({ }, 5, function ()
-   --       awful.client.focus.byidx(-1)
-   --       if client.focus then client.focus:raise() end
-   -- end)
 )
 
-local wc_button_container = {}
+local wc_containers = {}
 local current_screen = nil
 
 -- a basic stable sort
@@ -571,162 +558,179 @@ local function sort(l, c)
    return ret
 end
 
-awful.screen.connect_for_each_screen(function (scr)
-      local s = scr.index
+local function setup_widgets_for_screen(scr)
+   local s = scr.index
 
-      scr.mypromptbox = awful.widget.prompt()
+   scr.mypromptbox = awful.widget.prompt()
 
-      my_task_list[s] = awful.widget.tasklist {
+   my_tasklist_widgets[s] = awful.widget.tasklist {
+      screen = s,
+      filter = awful.widget.tasklist.filter.currenttags,
+      buttons = my_tasklist_widgets_buttons,
+      style = { font = mono_font },
+      layout = beautiful.tasklist_layout,
+      source = function ()
+         -- Sort clients with their constant ids to make the order stable.
+         local cls = awful.widget.tasklist.source.all_clients()
+         table.sort(cls, function (a, b) return a.window < b.window end)
+         return cls
+      end,
+      update_function = function (w, b, l, d, objects, args)
+         -- not used any more. just for future reference
+
+         -- -- Reorder the clients so that floating clients are on the right side
+         -- fl_clients = {}
+         -- clients = {}
+         -- for i, obj in ipairs(objects) do
+         --    if obj.floating or obj.maximized or obj.maximized_horizontal or obj.maximized_vertical then
+         --       fl_clients[#fl_clients + 1] = obj
+         --    else
+         --       clients[#clients + 1] = obj
+         --    end
+         -- end
+         -- for i, obj in ipairs(fl_clients) do
+         --    clients[#clients + 1] = obj
+         -- end
+
+         awful.widget.common.list_update(w, b, l, d, objects, args)
+      end,
+      widget_template = beautiful.tasklist_template,
+   }
+
+   my_tag_list[s] = awful.widget.taglist(
+      s, function (t) return config.tag_filter(t.name) end, my_tag_list_buttons,
+      {
+         font = mono_font
+      }
+   )
+
+   my_wibar[s] = awful.wibar({
          screen = s,
-         filter = awful.widget.tasklist.filter.currenttags,
-         buttons = my_task_list.buttons,
-         style = { font = mono_font },
-         layout = beautiful.tasklist_layout,
-         source = function ()
-            -- Sort clients with their constant ids to make the order stable.
-            local cls = awful.widget.tasklist.source.all_clients()
-            table.sort(cls, function (a, b) return a.window < b.window end)
-            return cls
-         end,
-         update_function = function (w, b, l, d, objects, args)
-            -- not used any more. just for future reference
+         fg = beautiful.fg_normal,
+         bg = beautiful.bg_normal,
+         height = beautiful.bar_height,
+         position = "bottom",
+         border_width = 0,
+   })
 
-            -- -- Reorder the clients so that floating clients are on the right side
-            -- fl_clients = {}
-            -- clients = {}
-            -- for i, obj in ipairs(objects) do
-            --    if obj.floating or obj.maximized or obj.maximized_horizontal or obj.maximized_vertical then
-            --       fl_clients[#fl_clients + 1] = obj
-            --    else
-            --       clients[#clients + 1] = obj
-            --    end
-            -- end
-            -- for i, obj in ipairs(fl_clients) do
-            --    clients[#clients + 1] = obj
-            -- end
+   local wc_button = wibox.widget{
+      markup = '☯',
+      font = beautiful.font,
+      widget = wibox.widget.textbox
+   }
 
-            awful.widget.common.list_update(w, b, l, d, objects, args)
-         end,
-         widget_template = beautiful.tasklist_template,
-      }
+   wc_containers[s] = wibox.widget {
+      {
+         wc_button,
+         left = dpi(5),
+         right = dpi(5),
+         widget = wibox.container.margin
+      },
+      widget = wibox.container.background
+   }
 
-      my_tag_list[s] = awful.widget.taglist(
-         s, function (t) return config.tag_filter(t.name) end, my_tag_list.buttons,
-         {
-            font = mono_font
-         }
-      )
-
-      my_wibar[s] = awful.wibar({
-            screen = s,
-            fg = beautiful.fg_normal,
-            bg = beautiful.bg_normal,
-            height = beautiful.bar_height,
-            position = "bottom",
-            border_width = 0,
-      })
-
-      local wc_button = wibox.widget{
-         markup = '☯',
-         font = beautiful.font,
-         widget = wibox.widget.textbox
-      }
-
-      wc_button_container[s] = wibox.widget {
-         {
-            wc_button,
-            left = dpi(5),
-            right = dpi(5),
-            widget = wibox.container.margin
-         },
-         widget = wibox.container.background
-      }
-
-      wc_button_container[s]:connect_signal(
-         "button::press",
-         function (_, _, _, b)
-            local c = client.focus
-            if c == nil then return end
-            if b == 1 then
-               -- move the mouse to the center of the client before movement
-               mouse.coords({
-                     x = c.x + c.width / 2,
-                     y = c.y + c.height / 2,
-                            }, true)
-               awful.mouse.client.move(c)
-            elseif b == 2 then
-               awful.titlebar.toggle(c)
-            elseif b == 3 then
-               awful.mouse.client.resize(c)
-            end
-         end
-      )
-
-      local left_layout = wibox.layout.fixed.horizontal()
-      local layoutbox = awful.widget.layoutbox(s)
-      layoutbox:buttons(
-         awful.util.table.join(
-            awful.button({ }, 1, function () waffle:set_gravity("southwest"); waffle:show(waffle_root_view) end),
-            awful.button({ }, 3, function () menu:show() end),
-            awful.button({ }, 4, function () awful.layout.inc( 1) end),
-            awful.button({ }, 5, function () awful.layout.inc(-1) end)))
-      left_layout:add(layoutbox)
-      left_layout:add(my_tag_list[s])
-      left_layout:add(scr.mypromptbox)
-      local right_layout = wibox.widget {
-         spacing        = dpi(5),
-         spacing_widget = { color = beautiful.bg_normal, widget = wibox.widget.separator },
-         layout         = wibox.layout.fixed.horizontal
-      }
-
-      if scr == screen.primary then
-         local tray_padding = dpi(1)
-         if tray_padding > 0 then
-            my_tray:set_base_size(beautiful.bar_height - tray_padding * 2)
-            local tray_layout = wibox.widget {
-               { forced_width = 0, forced_height = tray_padding, color = beautiful.bg_normal, widget = wibox.widget.separator },
-               my_tray,
-               { forced_width = 0, forced_height = tray_padding, color = beautiful.bg_normal, widget = wibox.widget.separator },
-               layout = wibox.layout.align.vertical,
-            }
-            right_layout:add(tray_layout)
-         else
-            right_layout:add(my_tray)
+   wc_containers[s]:connect_signal(
+      "button::press",
+      function (_, _, _, b)
+         local c = client.focus
+         if c == nil then return end
+         if b == 1 then
+            -- move the mouse to the center of the client before movement
+            capi.mouse.coords({
+                  x = c.x + c.width / 2,
+                  y = c.y + c.height / 2,
+                         }, true)
+            awful.mouse.client.move(c)
+         elseif b == 2 then
+            awful.titlebar.toggle(c)
+         elseif b == 3 then
+            awful.mouse.client.resize(c)
          end
       end
+                                        )
 
-      -- local volume_widget = wibox.widget.textbox()
-      -- volume_widget:set_font(mono_font)
-      -- vicious.register(volume_widget, vicious.widgets.volume,
-      --                  function (widget, args)
-      --                     local label = {["♫"] = "O", ["♩"] = "M"}
-      --                     return ("V[%d%% %s]"):format(
-      --                        args[1], label[args[2]])
-      --                  end, 2, "Master")
-      -- right_layout:add(volume_widget)
-      -- volumearc_widget:set_forced_height(beautiful.bar_height - dpi(4))
-      -- volumearc_widget:set_forced_width(beautiful.bar_height - dpi(4))
-      -- right_layout:add(volumearc_widget)
-      -- right_layout:add(battery_widget)
-      local clock = wibox.widget.textclock(" %m/%d/%y %a %H:%M ")
-      clock:set_font(mono_font)
-      calendar_widget = calendar({ fdow = 7, position = "bottom_right" })
-      calendar_widget:attach(clock)
-      right_layout:add(clock)
-      right_layout:add(wc_button_container[s])
+   local left_layout = wibox.layout.fixed.horizontal()
+   local layoutbox = awful.widget.layoutbox(s)
+   layoutbox:buttons(
+      awful.util.table.join(
+         awful.button({ }, 1, function () waffle:set_gravity("southwest"); waffle:show(waffle_root_view) end),
+         awful.button({ }, 3, function () menu:show() end),
+         awful.button({ }, 4, function () awful.layout.inc( 1) end),
+         awful.button({ }, 5, function () awful.layout.inc(-1) end)))
+   left_layout:add(layoutbox)
+   left_layout:add(my_tag_list[s])
+   left_layout:add(scr.mypromptbox)
+   local right_layout = wibox.widget {
+      spacing        = dpi(5),
+      spacing_widget = { color = beautiful.bg_normal, widget = wibox.widget.separator },
+      layout         = wibox.layout.fixed.horizontal
+   }
 
-      local layout = wibox.widget {
-         left_layout,
-         {
-            my_task_list[s],
-            right = dpi(5),
-            widget = wibox.container.margin
-         },
-         right_layout,
-         layout = wibox.layout.align.horizontal,
-      }
-      my_wibar[s]:set_widget(layout)
-end)
+   if scr == capi.screen.primary then
+      local tray_padding = dpi(1)
+      if tray_padding > 0 then
+         my_tray:set_base_size(beautiful.bar_height - tray_padding * 2)
+         local tray_layout = wibox.widget {
+            { forced_width = 0, forced_height = tray_padding, color = beautiful.bg_normal, widget = wibox.widget.separator },
+            my_tray,
+            { forced_width = 0, forced_height = tray_padding, color = beautiful.bg_normal, widget = wibox.widget.separator },
+            layout = wibox.layout.align.vertical,
+         }
+         right_layout:add(tray_layout)
+      else
+         right_layout:add(my_tray)
+      end
+   end
+
+   -- local volume_widget = wibox.widget.textbox()
+   -- volume_widget:set_font(mono_font)
+   -- vicious.register(volume_widget, vicious.widgets.volume,
+   --                  function (widget, args)
+   --                     local label = {["♫"] = "O", ["♩"] = "M"}
+   --                     return ("V[%d%% %s]"):format(
+   --                        args[1], label[args[2]])
+   --                  end, 2, "Master")
+   -- right_layout:add(volume_widget)
+   -- volumearc_widget:set_forced_height(beautiful.bar_height - dpi(4))
+   -- volumearc_widget:set_forced_width(beautiful.bar_height - dpi(4))
+   -- right_layout:add(volumearc_widget)
+   -- right_layout:add(battery_widget)
+   local clock = wibox.widget.textclock(" %m/%d/%y %a %H:%M ")
+   clock:set_font(mono_font)
+   calendar_widget = calendar({ fdow = 7, position = "bottom_right" })
+   calendar_widget:attach(clock)
+   right_layout:add(clock)
+   right_layout:add(wc_containers[s])
+
+   local layout = wibox.widget {
+      left_layout,
+      {
+         my_tasklist_widgets[s],
+         right = dpi(5),
+         widget = wibox.container.margin
+      },
+      right_layout,
+      layout = wibox.layout.align.horizontal,
+   }
+   my_wibar[s]:set_widget(layout)
+end
+
+local function reset_widgets_for_screens()
+   for _, tl in ipairs(my_tasklist_widgets) do
+      tl.visible = false
+   end
+   my_tasklist_widgets = {}
+   wc_containers = {}
+   current_screen = nil
+
+   for scr in capi.screen do
+      setup_widgets_for_screen(scr)
+   end
+end
+
+reset_widgets_for_screens()
+
+capi.screen.connect_signal("list", reset_widgets_for_screens)
 
 root.keys(
    awful.util.table.join(
@@ -749,14 +753,14 @@ gtimer {
    timeout = 0.5,
    autostart = true,
    callback = function()
-      local nscreen = mouse.screen.index
+      local nscreen = capi.mouse.screen.index
       if nscreen ~= current_screen then
          if current_screen ~= nil then
-            wc_button_container[current_screen]:set_bg(beautiful.bg_normal)
-            wc_button_container[current_screen]:set_fg(beautiful.fg_normal)
+            wc_containers[current_screen]:set_bg(beautiful.bg_normal)
+            wc_containers[current_screen]:set_fg(beautiful.fg_normal)
          end
-         wc_button_container[nscreen]:set_bg(beautiful.bg_focus)
-         wc_button_container[nscreen]:set_fg(beautiful.fg_focus)
+         wc_containers[nscreen]:set_bg(beautiful.bg_focus)
+         wc_containers[nscreen]:set_fg(beautiful.fg_focus)
          -- switch active screen
          current_screen = nscreen
       end
