@@ -26,31 +26,65 @@ root.buttons(
 -- Waffle menu
 
 local waffle_width = beautiful.waffle_width or dpi(200)
+local button_height = dpi(24)
 
 local function _simple_button(args)
    local ret = {}
    local action = args.action
+   local width = waffle_width - dpi(10)
+   if args.icon ~= nil then
+      width = width - button_height
+   end
+   
    ret.textbox = wibox.widget {
       markup = args.markup or nil,
       text = args.text or nil,
       font = beautiful.fontname_mono .. " 12",
-      forced_width = waffle_width,
+      forced_width = width,
+      forced_height = button_height,
       align = "center",
       widget = wibox.widget.textbox,
    }
-   ret.widget = wibox.widget {
-      {
-         ret.textbox,
-         buttons = action and awful.util.table.join(
-            awful.button({ }, 1, nil, function () action(false) end),
-            awful.button({ }, 3, nil, function () action(true) end)),
-         top = dpi(5), bottom = dpi(5),
-         widget = wibox.container.margin,
-      },
-      fg = beautiful.fg_normal,
-      bg = beautiful.bg_normal,
-      widget = wibox.container.background
-   }
+
+   if args.icon ~= nil then
+      ret.widget = wibox.widget {
+         {
+            {
+               {
+                  image = args.icon,
+                  resize = true,
+                  forced_width = button_height,
+                  forced_height = button_height,
+                  widget = wibox.widget.imagebox,
+               },
+               ret.textbox,
+               layout = wibox.layout.fixed.horizontal
+            },
+            buttons = action and awful.util.table.join(
+                     awful.button({ }, 1, nil, function () action(false) end),
+                     awful.button({ }, 3, nil, function () action(true) end)),
+            margins = dpi(5),
+            widget = wibox.container.margin,
+         },
+         fg = beautiful.fg_normal,
+         bg = beautiful.bg_normal,
+         widget = wibox.container.background
+      }
+   else
+      ret.widget = wibox.widget {
+         {
+            ret.textbox,
+            buttons = action and awful.util.table.join(
+               awful.button({ }, 1, nil, function () action(false) end),
+               awful.button({ }, 3, nil, function () action(true) end)),
+            margins = dpi(5),
+            widget = wibox.container.margin,
+         },
+         fg = beautiful.fg_normal,
+         bg = beautiful.bg_normal,
+         widget = wibox.container.background
+      }
+   end
 
    ret.widget:connect_signal(
       "mouse::enter",
@@ -126,7 +160,7 @@ waffle_poweroff_button = _simple_button({
 })
 
 function waffle_poweroff_button:update_text()
-   self.textbox.markup = "<u>P</u>ower off\n(" .. tostring(2 - waffle_poweroff_count) .. " more times)"
+   self.textbox.markup = "<u>P</u>ower off <span size='x-small'>(" .. tostring(2 - waffle_poweroff_count) .. " more times)</span>"
 end
 
 local waffle_poweroff_view = view_with_background_and_border(
@@ -331,6 +365,7 @@ local waffle_root_view_base = waffle.create_view(
       rows = {
          {
             _simple_button({
+                  icon = gcolor.recolor_image(icons.browser, beautiful.fg_normal),
                   markup = "<u>W</u>eb browser",
                   key = "w",
                   action = function (alt)
@@ -341,6 +376,7 @@ local waffle_root_view_base = waffle.create_view(
          },
          {
             _simple_button({
+                  icon = gcolor.recolor_image(icons.file_manager, beautiful.fg_normal),
                   markup = "Fil<u>e</u> manager",
                   key = "e",
                   action = function (alt)
@@ -351,6 +387,7 @@ local waffle_root_view_base = waffle.create_view(
          },
          {
             _simple_button({
+                  icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal),
                   markup = "<u>T</u>erminal",
                   key = "t",
                   action = function (alt)
@@ -361,6 +398,7 @@ local waffle_root_view_base = waffle.create_view(
          },
          {
             _simple_button({
+                  icon = gcolor.recolor_image(icons.lock, beautiful.fg_normal),
                   markup = "<u>L</u>ock screen",
                   key = "l",
                   action = function (alt)
@@ -371,6 +409,7 @@ local waffle_root_view_base = waffle.create_view(
          },
          {
             _simple_button({
+                  icon = gcolor.recolor_image(icons.setup, beautiful.fg_normal),
                   markup = "<u>S</u>etting",
                   key = "s",
                   action = function (alt)
