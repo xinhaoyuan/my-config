@@ -27,3 +27,11 @@ os.execute(HOME_DIR .. "/.xdesktoprc.awesome")
 require("config")
 require("my-autofocus")
 require("my-menu")
+
+require("gears.timer").delayed_call(
+   function ()
+      if client.focus then
+         client.focus:emit_signal("request::activate", "mouse.move", {raise=true})
+      end
+   end
+)
