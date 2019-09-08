@@ -66,7 +66,6 @@ alayout.layouts = {
    -- alayout.suit.corner.se,
 }
 
-
 -- Define the tag list upfront for keybindings
 
 local mono_font = beautiful.mono_font or beautiful.font
