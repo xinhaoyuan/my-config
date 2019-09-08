@@ -15,7 +15,6 @@ local api = {
    client = client,
    awful_client = require("awful.client"),
    timer = require("gears.timer"),
-   focus = require("my-focus"),
    fts = require("focus-timestamp"),
 }
 
