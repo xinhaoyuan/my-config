@@ -13,6 +13,7 @@
 (load "_csharp.el")
 (load "_fstar.el")
 (load "_boogie.el")
+(load "_lang-server.el")
 (autoload 'simple-indent-mode "simple-indent-mode.el" "simple-indent-mode" t)
 
 ;; coq {{{
@@ -126,9 +127,10 @@
                         (make-glyph-code ?│))
 
 (require 'subr-x)
-(require 'redo)
-(require 'psvn)
-(require 'htmlize)
+(require 'redo nil 'noerror)
+(require 'psvn nil 'noerror)
+(require 'htmlize nil 'noerror)
+(require 'yasnippet nil 'noerror)
 (if (require 'visual-fill-column nil 'noerror)
     (add-hook 'visual-line-mode-hook
               (lambda ()
@@ -467,7 +469,7 @@
 (define-key my-prefix (kbd "C-l") 'nlinum-mode)
 (define-key my-prefix (kbd "C-c") 'flycheck-mode)
 (define-key my-prefix (kbd "TAB") 'simple-indent-mode)
-
+(define-key my-prefix (kbd "l") 'lsp)
 (define-key my-prefix (kbd "v") 'set-variable)
 
 (define-key my-prefix (kbd "o c") (lambda () (interactive) (find-file my-configure-dir)))
