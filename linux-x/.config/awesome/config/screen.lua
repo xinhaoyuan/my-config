@@ -1,7 +1,11 @@
+local mod = {}
+
 local capi = {
+   awesome = awesome,
    screen = screen,
    mouse = mouse,
 }
+local action = require((...):match("(.-)[^%.]+$") .. "action")
 local awful  = require("awful")
 local beautiful = require("beautiful")
 local watch = require("awful.widget.watch")
@@ -12,11 +16,58 @@ local gcolor = require("gears.color")
 local gmath = require("gears.math")
 local vicious = require("vicious")
 local waffle = require("waffle")
-local config = require("my-config")
 local calendar = require("calendar.calendar")
 local menu = require("my-menu")
 local dpi = require("beautiful.xresources").apply_dpi
 local icons = require("icons")
+local yams = require("yams")
+
+-- helper functions
+
+local table_join = awful.util.table.join
+
+local function open_tmux_session(name)
+   action.terminal({"tmux", "new", "-As", name})
+end
+
+local function go_by_direction(dir, with_client)
+   if with_client then
+      local c = capi.client.focus
+      awful.screen.focus_bydirection(dir, c.screen)
+      c:move_to_screen(mouse.screen.index)
+      c:emit_signal("request::activate", "mouse.resize", {raise = true})
+   else
+      awful.screen.focus_bydirection(dir)
+   end
+end
+
+-- add machi layout
+
+local machi = require("layout-machi")
+
+beautiful.layout_machi = machi.get_icon()
+machi.default_editor.set_gap(beautiful.useless_gap * 2, beautiful.useless_gap)
+
+local alayout = require("awful.layout")
+alayout.layouts = {
+   machi.default_layout,
+   alayout.suit.tile,
+   alayout.suit.tile.left,
+   alayout.suit.tile.bottom,
+   alayout.suit.tile.top,
+   alayout.suit.fair,
+   alayout.suit.fair.horizontal,
+   alayout.suit.spiral,
+   alayout.suit.spiral.dwindle,
+   alayout.suit.magnifier,
+   alayout.suit.corner.nw,
+   -- alayout.suit.corner.ne,
+   -- alayout.suit.corner.sw,
+   -- alayout.suit.corner.se,
+}
+
+
+-- Define the tag list upfront for keybindings
 
 local mono_font = beautiful.mono_font or beautiful.font
 
@@ -373,7 +424,7 @@ local waffle_root_view_base = waffle.create_view(
                   markup = "<u>W</u>eb browser",
                   key = "w",
                   action = function (alt)
-                     config.action_web_browser()
+                     action.web_browser()
                      waffle:hide()
                   end
             }),
@@ -384,7 +435,7 @@ local waffle_root_view_base = waffle.create_view(
                   markup = "Fil<u>e</u> manager",
                   key = "e",
                   action = function (alt)
-                     config.action_file_manager()
+                     action.file_manager()
                      waffle:hide()
                   end
             }),
@@ -395,7 +446,7 @@ local waffle_root_view_base = waffle.create_view(
                   markup = "<u>T</u>erminal",
                   key = "t",
                   action = function (alt)
-                     config.action_terminal()
+                     action.terminal()
                      waffle:hide()
                   end
             }),
@@ -406,7 +457,7 @@ local waffle_root_view_base = waffle.create_view(
                   markup = "<u>L</u>ock screen",
                   key = "l",
                   action = function (alt)
-                     config.action_screen_locker()
+                     action.screen_locker()
                      waffle:hide()
                   end
             }),
@@ -597,7 +648,7 @@ local function setup_screen(scr)
    }
 
    my_widgets[s].tag_list = awful.widget.taglist(
-      s, function (t) return config.tag_filter(t.name) end, my_tag_list_buttons,
+      s, function (t) return true end, my_tag_list_buttons,
       {
          font = mono_font
       }
@@ -765,54 +816,145 @@ gtimer {
    end
 }
 
-client.connect_signal(
-   "request::titlebars",
-   function (c)
-      -- buttons for the titlebar
-      local buttons = awful.util.table.join(
-         awful.button({ }, 1, function()
-               c:emit_signal("request::activate", "titlebar", {raise = true})
-               awful.mouse.client.move(c)
-         end),
-         awful.button({ }, 2, function()
-               awful.titlebar.hide(c)
-         end),
-         awful.button({ }, 3, function()
-               c:emit_signal("request::activate", "titlebar", {raise = true})
-               awful.mouse.client.resize(c)
-         end)
-      )
+-- base keys and buttons
+local global_keys = table_join(
+   awful.key({ "Mod1" }, "Tab",
+      function ()
+         yams.default.start()
+   end),
+   awful.key({ "Mod4" }, "/",               function () machi.default_editor.start_interactive() end),
+   awful.key({ "Mod4" }, "[",               function () alayout.inc(alayout.layouts, -1) end),
+   awful.key({ "Mod4" }, "]",               function () alayout.inc(alayout.layouts, 1) end),
+   awful.key({ "Mod4" }, "Up",              function () go_by_direction("up") end),
+   awful.key({ "Mod4" }, "Left",            function () go_by_direction("left") end),
+   awful.key({ "Mod4" }, "Down",            function () go_by_direction("down") end),
+   awful.key({ "Mod4" }, "Right",           function () go_by_direction("right") end),
+   awful.key({ "Control", "Mod4" }, "Up",   function () go_by_direction("up", true) end),
+   awful.key({ "Control", "Mod4" }, "Left", function () go_by_direction("left", true) end),
+   awful.key({ "Control", "Mod4" }, "Down", function () go_by_direction("down", true) end),
+   awful.key({ "Control", "Mod4" }, "Right",function () go_by_direction("right", true) end),
+   awful.key({ }, "XF86AudioLowerVolume",   function () action.audio_setup("volume-adjust", -5) end),
+   awful.key({ }, "XF86AudioRaiseVolume",   function () action.audio_setup("volume-adjust",  5) end),
+   awful.key({ }, "XF86AudioMute",          function () action.audio_setup("mute-toggle") end),
+   awful.key({ }, "XF86MonBrightnessUp",    function () awful.spawn("xbacklight -inc 5", false) end),
+   awful.key({ }, "XF86MonBrightnessDown",  function () awful.spawn("xbacklight -dec 5", false) end),
+   awful.key({ "Mod4" }, "Escape",          function () menu:show() end),
+   awful.key({ "Mod4" }, "Return",          function () action.terminal() end),
+   awful.key({ "Mod4" }, "w",               function () action.web_browser() end),
+   awful.key({ "Mod4" }, "e",               function () action.file_manager() end),
+   awful.key({ "Mod4" }, "l",               function () action.screen_locker() end),
+   awful.key({ "Mod4" }, "\\",              function () action.launcher() end),
+   awful.key({ "Mod4", "Shift" }, "F12",    function () action.app_finder() end),
+   awful.key({ "Mod4" }, "F1",              function () open_tmux_session("F1") end),
+   awful.key({ "Mod4" }, "F2",              function () open_tmux_session("F2") end),
+   awful.key({ "Mod4" }, "F3",              function () open_tmux_session("F3") end),
+   awful.key({ "Mod4" }, "F4",              function () open_tmux_session("F4") end),
+   -- keep the both ways of showing the desktop, not sure which one is better for now.
+   awful.key({ "Mod4" }, "d",               function ()
+         local clients = {}
+         local has_visible = false
+         for _, c in ipairs(capi.client.get()) do
+            if c:isvisible() and awful.client.focus.filter(c) then
+               c.orig_minimized = c.minimized
+               c.minimized = true
+               has_visible = true
+            end
+         end
 
-      local titlewidget = awful.titlebar.widget.titlewidget(c)
-      titlewidget:set_font(mono_font)
-      awful.titlebar(
-         c,
-         {
-            size = beautiful.titlebar_size,
-            font = mono_font,
-         }
-      ):setup
-      {
-         { -- Left
-            awful.titlebar.widget.iconwidget(c),
-            titlewidget,
-            spacing = dpi(2),
-            buttons = buttons,
-            layout  = wibox.layout.fixed.horizontal
-         },
-         { -- Space
-            buttons = buttons,
-            layout  = wibox.layout.fixed.horizontal
-         },
-         { -- Right
-            awful.titlebar.widget.floatingbutton (c),
-            awful.titlebar.widget.maximizedbutton(c),
-            awful.titlebar.widget.stickybutton   (c),
-            awful.titlebar.widget.ontopbutton    (c),
-            awful.titlebar.widget.closebutton    (c),
-            layout = wibox.layout.fixed.horizontal()
-         },
-         layout = wibox.layout.align.horizontal,
-      }
+         if not has_visible then
+            clients = {}
+            for _, c in ipairs(capi.client.get()) do
+               if c.orig_minimized ~= nil then
+                  clients[#clients + 1] = c
+               end
+            end
+
+            -- I thought I should put newer client later. Turned out to be the reversed way.
+            table.sort(
+               clients,
+               function (a, b)
+                  return a.focus_timestamp > b.focus_timestamp
+               end
+            )
+
+            for _, c in ipairs(clients) do
+               c.minimized = c.orig_minimized
+               c.orig_minimized = nil
+            end
+         end
+   end),
+   awful.key({ "Mod4" }, "q",               function ()
+         local to_restore = true
+         for s in capi.screen do
+            if #s.selected_tags > 0 then
+               to_restore = false
+               s.orig_selected_tags = s.selected_tags
+               awful.tag.viewnone(s)
+            end
+         end
+
+         if not to_restore then return end
+         for s in capi.screen do
+            if s.orig_selected_tags ~= nil then
+               awful.tag.viewmore(s.orig_selected_tags, s)
+               s.orig_selected_tags = nil
+            end
+         end
+   end),
+   awful.key({ "Mod4", "Control" }, "r",      capi.awesome.restart),
+   awful.key({ "Mod4", "Control" }, "Escape", capi.awesome.quit)
+)
+
+-- tags and layouts
+
+mod.tags = { "1", "2", "3", "4" }
+
+for i = 1, #mod.tags do
+   local key = tostring(i)
+   global_keys =
+      table_join(
+         awful.key({ "Mod4" }, key, function () awful.screen.focused().tags[i]:view_only() end),
+         awful.key({ "Mod4", "Control" }, key, function () awful.tag.viewtoggle(awful.screen.focused().tags[i]) end),
+         awful.key({ "Mod4", "Shift" }, key, function ()
+               local c = capi.client.focus
+               if c == nil then return end
+               awful.client.toggletag(c.screen.tags[i], c)
+         end),
+         global_keys)
+end
+
+root.keys(table_join(root.keys(), global_keys))
+
+-- initialize tags for each screen
+
+awful.screen.connect_for_each_screen(
+   function (s)
+      for i, t in ipairs(mod.tags) do
+         local tag = awful.tag.add(t, { screen = s, layout = alayout.layouts[1], layouts = alayout.layouts })
+      end
+
+      s.tags[1]:view_only()
+
+      -- fix window geometry
+      s:connect_signal(
+         "property::geometry",
+         function (s)
+            local clients = {}
+            for _, c in ipairs(s.all_clients) do
+               if not c.minimized and c.maximized then
+                  c.maximized = false
+                  table.insert(clients, c)
+               end
+            end
+
+            delayed(function ()
+                  for _, c in ipairs(clients) do
+                     c.maximized = true
+                  end
+            end)
+      end)
    end
 )
+
+
+return mod 
