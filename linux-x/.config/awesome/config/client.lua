@@ -51,10 +51,6 @@ local client_keys = table_join(
    awful.key({ "Mod4" }, "t", function (c) awful.titlebar.toggle(c) end),
 
    awful.key({ "Mod4" }, "f", function (c)
-         c.fullscreen = not c.fullscreen
-   end),
-
-   awful.key({ "Mod4" }, "`", function (c)
          if c.fullscreen then
          else
             if c.floating then
