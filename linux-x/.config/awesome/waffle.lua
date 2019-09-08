@@ -13,53 +13,7 @@ local dpi = require("beautiful.xresources").apply_dpi
 --   .widget -- the entry widget
 --   .key_handler (optional) -- the key handling function. It returns a boolean if the key event is captured.
 
-local function create_view(args)
-   local view = {}
-   view.keys = {}
-
-   local rows = wibox.widget {
-      layout = wibox.layout.fixed.vertical,
-   }
-   for i, r in ipairs(args.rows or {}) do
-      local row_layout = wibox.widget {
-         layout = wibox.layout.fixed.horizontal,
-      }
-      for j, cell in ipairs(r) do
-         if cell.key_handler then
-            for _, k in ipairs(cell.keys or {}) do
-               view.keys[k] = cell.key_handler
-            end
-         end
-         row_layout:add(cell.widget)
-      end
-      rows:add(row_layout)
-   end
-
-   view.widget = rows
-   -- wibox.widget {
-   --    rows,
-   --    left = dpi(10), right = dpi(10), bottom = dpi(10), top = dpi(10),
-   --    widget = wibox.container.margin,
-   -- }
-
-   view.key_handler = function (mod, key, event)
-      if event == "press" and view.keys[key] then
-         view.keys[key](mod, key, event)
-         return true
-      else
-         return false
-      end
-   end
-
-   view.options = {
-      -- Options here.
-   }
-
-   return view
-end
-
 local waffle = {
-   create_view = create_view,
    gravity_ = "southwest",
 }
 

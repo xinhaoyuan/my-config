@@ -12,7 +12,52 @@ local dpi = require("beautiful.xresources").apply_dpi
 local waffle_width = beautiful.waffle_width or dpi(200)
 local button_height = dpi(24)
 
-local function _simple_button(args)
+local function create_view(args)
+   local view = {}
+   view.keys = {}
+
+   local rows = wibox.widget {
+      layout = wibox.layout.fixed.vertical,
+   }
+   for i, r in ipairs(args.rows or {}) do
+      local row_layout = wibox.widget {
+         layout = wibox.layout.fixed.horizontal,
+      }
+      for j, cell in ipairs(r) do
+         if cell.key_handler then
+            for _, k in ipairs(cell.keys or {}) do
+               view.keys[k] = cell.key_handler
+            end
+         end
+         row_layout:add(cell.widget)
+      end
+      rows:add(row_layout)
+   end
+
+   view.widget = rows
+   -- wibox.widget {
+   --    rows,
+   --    left = dpi(10), right = dpi(10), bottom = dpi(10), top = dpi(10),
+   --    widget = wibox.container.margin,
+   -- }
+
+   view.key_handler = function (mod, key, event)
+      if event == "press" and view.keys[key] then
+         view.keys[key](mod, key, event)
+         return true
+      else
+         return false
+      end
+   end
+
+   view.options = {
+      -- Options here.
+   }
+
+   return view
+end
+
+local function simple_button(args)
    local ret = {}
    local action = args.action
    local width = waffle_width - dpi(10)
@@ -129,7 +174,7 @@ end
 
 local waffle_poweroff_count = 0
 local waffle_poweroff_button = nil
-waffle_poweroff_button = _simple_button({
+waffle_poweroff_button = simple_button({
       markup = "",
       key = "p",
       action = function (alt)
@@ -148,7 +193,7 @@ function waffle_poweroff_button:update_text()
 end
 
 local waffle_poweroff_view = view_with_background_and_border(
-   waffle.create_view({
+   create_view({
          rows = {
             {
                waffle_poweroff_button,
@@ -158,10 +203,10 @@ local waffle_poweroff_view = view_with_background_and_border(
 )
 
 local waffle_setting_view = view_with_background_and_border(
-   waffle.create_view({
+   create_view({
          rows = {
             {
-               _simple_button({
+               simple_button({
                      markup = "<u>S</u>creen layout",
                      key = "s",
                      action = function (alt)
@@ -179,7 +224,7 @@ local waffle_setting_view = view_with_background_and_border(
                }),
             },
             {
-               _simple_button({
+               simple_button({
                      markup = "Pulse <u>a</u>udio",
                      key = "a",
                      action = function (alt)
@@ -190,7 +235,7 @@ local waffle_setting_view = view_with_background_and_border(
                }),
             },
             {
-               _simple_button({
+               simple_button({
                      markup = "S<u>u</u>spend",
                      key = "u",
                      action = function (alt)
@@ -200,7 +245,7 @@ local waffle_setting_view = view_with_background_and_border(
                }),
             },
             {
-               _simple_button({
+               simple_button({
                      markup = "<u>P</u>ower off",
                      key = "p",
                      action = function (alt)
@@ -344,11 +389,11 @@ do
    watch(GET_VOLUME_CMD, 1, update_graphic, volumebar_widget)
 end
 
-local waffle_root_view_base = waffle.create_view(
+local waffle_root_view_base = create_view(
    {
       rows = {
          {
-            _simple_button({
+            simple_button({
                   icon = gcolor.recolor_image(icons.browser, beautiful.fg_normal),
                   markup = "<u>W</u>eb browser",
                   key = "w",
@@ -359,7 +404,7 @@ local waffle_root_view_base = waffle.create_view(
             }),
          },
          {
-            _simple_button({
+            simple_button({
                   icon = gcolor.recolor_image(icons.file_manager, beautiful.fg_normal),
                   markup = "Fil<u>e</u> manager",
                   key = "e",
@@ -370,7 +415,7 @@ local waffle_root_view_base = waffle.create_view(
             }),
          },
          {
-            _simple_button({
+            simple_button({
                   icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal),
                   markup = "<u>T</u>erminal",
                   key = "t",
@@ -381,7 +426,7 @@ local waffle_root_view_base = waffle.create_view(
             }),
          },
          {
-            _simple_button({
+            simple_button({
                   icon = gcolor.recolor_image(icons.lock, beautiful.fg_normal),
                   markup = "<u>L</u>ock screen",
                   key = "l",
@@ -392,7 +437,7 @@ local waffle_root_view_base = waffle.create_view(
             }),
          },
          {
-            _simple_button({
+            simple_button({
                   icon = gcolor.recolor_image(icons.setup, beautiful.fg_normal),
                   markup = "<u>S</u>etting",
                   key = "s",
