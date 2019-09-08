@@ -140,6 +140,7 @@ function waffle:set_gravity(gravity)
 end
 
 function waffle:show(view, push, screen)
+   view = view or self.root_view_
    screen = screen or awful.screen.focused()
    if self.wibox_ == nil then
       self.wibox_ = wibox({
@@ -209,6 +210,10 @@ function waffle:hide()
    end
    self.view_ = nil
    self.stack_ = nil
+end
+
+function waffle:set_root_view(v)
+   self.root_view_ = v
 end
 
 return waffle

@@ -7,6 +7,7 @@ local mod = {
    action = require(... .. ".action"),
    screen = require(... .. ".screen"),
    client = require(... .. ".client"),
+   waffle = require(... .. ".waffle"),
 }
 
 return mod
