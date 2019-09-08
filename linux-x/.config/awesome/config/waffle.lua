@@ -187,7 +187,7 @@ function waffle_poweroff_button:update_text()
 end
 
 local waffle_poweroff_view = create_view(with_background_and_border(waffle_poweroff_button))
-local waffle_setting_view = create_view(
+local waffle_settings_view = create_view(
    with_background_and_border(
       wibox.widget {
          simple_button({
@@ -415,10 +415,10 @@ local waffle_root_view = create_view(
             }),
             simple_button({
                   icon = gcolor.recolor_image(icons.setup, beautiful.fg_normal),
-                  markup = "<u>S</u>etting",
+                  markup = "<u>S</u>ettings",
                   key = "s",
                   action = function (alt)
-                     waffle:show(waffle_setting_view, true)
+                     waffle:show(waffle_settings_view, true)
                   end
             }),
             layout = wibox.layout.fixed.vertical,
