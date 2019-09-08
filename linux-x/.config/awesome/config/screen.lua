@@ -25,6 +25,7 @@ local yams = require("yams")
 -- helper functions
 
 local table_join = awful.util.table.join
+local delayed = gtimer.delayed_call
 
 local function open_tmux_session(name)
    action.terminal({"tmux", "new", "-As", name})
@@ -956,5 +957,4 @@ awful.screen.connect_for_each_screen(
    end
 )
 
-
-return mod 
+return mod

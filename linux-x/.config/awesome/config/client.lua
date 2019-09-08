@@ -6,8 +6,11 @@ local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local dpi = require("beautiful.xresources").apply_dpi
+local gtimer = require("gears.timer")
+local machi = require("layout-machi")
 
 local table_join = awful.util.table.join
+local delayed = gtimer.delayed_call
 
 local client_keys = table_join(
    awful.key({ "Mod4" }, "Tab", function (c)
