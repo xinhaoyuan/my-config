@@ -45,7 +45,7 @@ local function create(config)
       filter = config.filter
    end
 
-   local same_screen = false
+   local same_screen = true
    if config and config.same_screen ~= nil then
       same_screen = config.same_screen
    end
