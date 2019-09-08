@@ -12,35 +12,34 @@ local dpi = require("beautiful.xresources").apply_dpi
 local waffle_width = beautiful.waffle_width or dpi(200)
 local button_height = dpi(24)
 
-local function create_view(args)
+local function create_view(root)
+   local checked = {[root] = true}
+   local traverse_pool = {root}
    local view = {}
    view.keys = {}
 
-   local rows = wibox.widget {
-      layout = wibox.layout.fixed.vertical,
-   }
-   for i, r in ipairs(args.rows or {}) do
-      local row_layout = wibox.widget {
-         layout = wibox.layout.fixed.horizontal,
-      }
-      for j, cell in ipairs(r) do
-         if cell.key_handler then
-            for _, k in ipairs(cell.keys or {}) do
-               view.keys[k] = cell.key_handler
+   -- traverse the hierachy in depth-first order
+   while #traverse_pool > 0 do
+      local widget = traverse_pool[#traverse_pool]
+      table.remove(traverse_pool, #traverse_pool)
+
+      for _, c in ipairs(widget:get_children()) do
+         if not checked[c] then
+            checked[c] = true
+            table.insert(traverse_pool, c)
+         end
+      end
+      
+      if widget.keys then
+         for k, f in pairs(widget.keys) do
+            if not view.keys[k] then
+               view.keys[k] = f
             end
          end
-         row_layout:add(cell.widget)
       end
-      rows:add(row_layout)
    end
 
-   view.widget = rows
-   -- wibox.widget {
-   --    rows,
-   --    left = dpi(10), right = dpi(10), bottom = dpi(10), top = dpi(10),
-   --    widget = wibox.container.margin,
-   -- }
-
+   view.widget = root
    view.key_handler = function (mod, key, event)
       if event == "press" and view.keys[key] then
          view.keys[key](mod, key, event)
@@ -58,14 +57,13 @@ local function create_view(args)
 end
 
 local function simple_button(args)
-   local ret = {}
    local action = args.action
    local width = waffle_width - dpi(10)
    if args.icon ~= nil then
       width = width - button_height
    end
 
-   ret.textbox = wibox.widget {
+   local textbox = wibox.widget {
       markup = args.markup or nil,
       text = args.text or nil,
       font = beautiful.fontname_mono .. " 12",
@@ -75,8 +73,10 @@ local function simple_button(args)
       widget = wibox.widget.textbox,
    }
 
+   local ret
+
    if args.icon ~= nil then
-      ret.widget = wibox.widget {
+      ret = wibox.widget {
          {
             {
                {
@@ -86,7 +86,7 @@ local function simple_button(args)
                   forced_height = button_height,
                   widget = wibox.widget.imagebox,
                },
-               ret.textbox,
+               textbox,
                layout = wibox.layout.fixed.horizontal
             },
             buttons = action and awful.util.table.join(
@@ -100,9 +100,9 @@ local function simple_button(args)
          widget = wibox.container.background
       }
    else
-      ret.widget = wibox.widget {
+      ret = wibox.widget {
          {
-            ret.textbox,
+            textbox,
             buttons = action and awful.util.table.join(
                awful.button({ }, 1, nil, function () action(false) end),
                awful.button({ }, 3, nil, function () action(true) end)),
@@ -115,33 +115,36 @@ local function simple_button(args)
       }
    end
 
-   ret.widget:connect_signal(
+   ret:connect_signal(
       "mouse::enter",
       function ()
-         ret.widget.fg = beautiful.fg_focus
-         ret.widget.bg = beautiful.bg_focus
+         ret.fg = beautiful.fg_focus
+         ret.bg = beautiful.bg_focus
       end
    )
 
-   ret.widget:connect_signal(
+   ret:connect_signal(
       "mouse::leave",
       function ()
-         ret.widget.fg = beautiful.fg_normal
-         ret.widget.bg = beautiful.bg_normal
+         ret.fg = beautiful.fg_normal
+         ret.bg = beautiful.bg_normal
       end
    )
 
    if args.key ~= nil and action then
-      ret.keys = { args.key }
-      ret.key_handler = function (mod, _, event)
-         for _, m in ipairs(mod) do
-            mod[m] = true
+      ret.keys = {
+         [args.key] = function (mod, _, event)
+            for _, m in ipairs(mod) do
+               mod[m] = true
+            end
+            if event == "press" then
+               action(mod["Shift"])
+            end
          end
-         if event == "press" then
-            action(mod["Shift"])
-         end
-      end
+      }
    end
+
+   ret.textbox = textbox
 
    return ret
 end
@@ -161,15 +164,6 @@ local function with_background_and_border(widget)
       color = beautiful.border_focus,
       widget = wibox.container.margin,
    }
-end
-
-local function view_with_background_and_border(view)
-   local ret = {
-      widget = with_background_and_border(view.widget)
-   }
-
-   setmetatable(ret, { __index = view })
-   return ret
 end
 
 local waffle_poweroff_count = 0
@@ -192,70 +186,36 @@ function waffle_poweroff_button:update_text()
    self.textbox.markup = "<u>P</u>ower off <span size='x-small'>(" .. tostring(2 - waffle_poweroff_count) .. " more times)</span>"
 end
 
-local waffle_poweroff_view = view_with_background_and_border(
-   create_view({
-         rows = {
-            {
-               waffle_poweroff_button,
-            },
-         },
-   })
-)
-
-local waffle_setting_view = view_with_background_and_border(
-   create_view({
-         rows = {
-            {
-               simple_button({
-                     markup = "<u>S</u>creen layout",
-                     key = "s",
-                     action = function (alt)
-                        if alt then
-                           local cmd = {"arandr"}
-                           awful.spawn(cmd)
-                        else
-                           local cmd = {"rofi-screen-layout",
-                                        "-font", beautiful.mono_font or beautiful.font
-                           }
-                           awful.spawn(cmd)
-                        end
-                        waffle:hide()
-                     end
-               }),
-            },
-            {
-               simple_button({
-                     markup = "Pulse <u>a</u>udio",
-                     key = "a",
-                     action = function (alt)
-                        local cmd = {"pavucontrol"}
-                        awful.spawn(cmd)
-                        waffle:hide()
-                     end
-               }),
-            },
-            {
-               simple_button({
-                     markup = "S<u>u</u>spend",
-                     key = "u",
-                     action = function (alt)
-                        awful.spawn({"systemctl", "suspend"})
-                        waffle:hide()
-                     end
-               }),
-            },
-            {
-               simple_button({
-                     markup = "<u>P</u>ower off",
-                     key = "p",
-                     action = function (alt)
-                        waffle_poweroff_count = 0
-                        waffle_poweroff_button:update_text()
-                        waffle:show(waffle_poweroff_view, true)
-                     end
-               }),
-            },
-         }
+local waffle_poweroff_view = create_view(with_background_and_border(waffle_poweroff_button))
+local waffle_setting_view = create_view(
+   with_background_and_border(
+      wibox.widget {
+         simple_button({
+               markup = "<u>S</u>creen layout",
+               key = "s",
+               action = function (alt)
+                  if alt then
+                     local cmd = {"arandr"}
+                     awful.spawn(cmd)
+                  else
+                     local cmd = {"rofi-screen-layout",
+                                  "-font", beautiful.mono_font or beautiful.font
+                     }
+                     awful.spawn(cmd)
+                  end
+                  waffle:hide()
+               end
+         }),
+         simple_button({
+               markup = "Pulse <u>a</u>udio",
+               key = "a",
+               action = function (alt)
+                  local cmd = {"pavucontrol"}
+                  awful.spawn(cmd)
+                  waffle:hide()
+               end
+         }),
+         layout = wibox.layout.fixed.vertical,
    })
 )
 
@@ -389,69 +349,8 @@ do
    watch(GET_VOLUME_CMD, 1, update_graphic, volumebar_widget)
 end
 
-local waffle_root_view_base = create_view(
-   {
-      rows = {
-         {
-            simple_button({
-                  icon = gcolor.recolor_image(icons.browser, beautiful.fg_normal),
-                  markup = "<u>W</u>eb browser",
-                  key = "w",
-                  action = function (alt)
-                     action.web_browser()
-                     waffle:hide()
-                  end
-            }),
-         },
-         {
-            simple_button({
-                  icon = gcolor.recolor_image(icons.file_manager, beautiful.fg_normal),
-                  markup = "Fil<u>e</u> manager",
-                  key = "e",
-                  action = function (alt)
-                     action.file_manager()
-                     waffle:hide()
-                  end
-            }),
-         },
-         {
-            simple_button({
-                  icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal),
-                  markup = "<u>T</u>erminal",
-                  key = "t",
-                  action = function (alt)
-                     action.terminal()
-                     waffle:hide()
-                  end
-            }),
-         },
-         {
-            simple_button({
-                  icon = gcolor.recolor_image(icons.lock, beautiful.fg_normal),
-                  markup = "<u>L</u>ock screen",
-                  key = "l",
-                  action = function (alt)
-                     action.screen_locker()
-                     waffle:hide()
-                  end
-            }),
-         },
-         {
-            simple_button({
-                  icon = gcolor.recolor_image(icons.setup, beautiful.fg_normal),
-                  markup = "<u>S</u>etting",
-                  key = "s",
-                  action = function (alt)
-                     waffle:show(waffle_setting_view, true)
-                  end
-            }),
-         },
-      }
-   }
-)
-
-local waffle_root_view = {
-   widget = wibox.widget {
+local waffle_root_view = create_view(
+   wibox.widget {
       with_background_and_border(
          wibox.widget {
             {
@@ -485,7 +384,45 @@ local waffle_root_view = {
             bg = beautiful.bg_normal,
             widget = wibox.container.background,
       }),
-      with_background_and_border(waffle_root_view_base.widget),
+      with_background_and_border(
+         wibox.widget {
+            simple_button({
+                  icon = gcolor.recolor_image(icons.browser, beautiful.fg_normal),
+                  markup = "<u>W</u>eb browser",
+                  key = "w",
+                  action = function (alt)
+                     action.web_browser()
+                     waffle:hide()
+                  end
+            }),
+            simple_button({
+                  icon = gcolor.recolor_image(icons.file_manager, beautiful.fg_normal),
+                  markup = "Fil<u>e</u> manager",
+                  key = "e",
+                  action = function (alt)
+                     action.file_manager()
+                     waffle:hide()
+                  end
+            }),
+            simple_button({
+                  icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal),
+                  markup = "<u>T</u>erminal",
+                  key = "t",
+                  action = function (alt)
+                     action.terminal()
+                     waffle:hide()
+                  end
+            }),
+            simple_button({
+                  icon = gcolor.recolor_image(icons.setup, beautiful.fg_normal),
+                  markup = "<u>S</u>etting",
+                  key = "s",
+                  action = function (alt)
+                     waffle:show(waffle_setting_view, true)
+                  end
+            }),
+            layout = wibox.layout.fixed.vertical,
+      }),
       with_background_and_border(
          wibox.widget {
             {
@@ -508,12 +445,42 @@ local waffle_root_view = {
             bg = beautiful.bg_normal,
             widget = wibox.container.background,
       }),
+      with_background_and_border(
+         wibox.widget {
+            simple_button({
+                  icon = gcolor.recolor_image(icons.lock, beautiful.fg_normal),
+                  markup = "<u>L</u>ock screen",
+                  key = "l",
+                  action = function (alt)
+                     action.screen_locker()
+                     waffle:hide()
+                  end
+            }),
+            simple_button({
+                  icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
+                  markup = "S<u>u</u>spend",
+                  key = "u",
+                  action = function (alt)
+                     awful.spawn({"systemctl", "suspend"})
+                     waffle:hide()
+                  end
+            }),
+            simple_button({
+                  icon = gcolor.recolor_image(icons.poweroff, beautiful.fg_normal),
+                  markup = "<u>P</u>ower off",
+                  key = "p",
+                  action = function (alt)
+                     waffle_poweroff_count = 0
+                     waffle_poweroff_button:update_text()
+                     waffle:show(waffle_poweroff_view, true)
+                  end
+            }),
+            layout = wibox.layout.fixed.vertical,
+      }),
       spacing = dpi(10),
       layout = wibox.layout.fixed.vertical,
    }
-}
-
-setmetatable(waffle_root_view, {__index = waffle_root_view_base})
+)
 
 waffle:set_root_view(waffle_root_view)
 

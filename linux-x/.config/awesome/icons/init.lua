@@ -7,7 +7,11 @@ icons.audio = local_path .. "audio.svg"
 icons.browser = local_path .. "browser.svg"
 icons.terminal = local_path .. "terminal.svg"
 icons.file_manager = local_path .. "file_manager.svg"
-icons.lock = local_path .. "lock.svg"
 icons.setup = local_path .. "setup.svg"
+
+icons.lock = local_path .. "lock.svg"
+icons.sleep = local_path .. "sleep.svg"
+icons.poweroff = local_path .. "poweroff.svg"
+
 
 return icons
