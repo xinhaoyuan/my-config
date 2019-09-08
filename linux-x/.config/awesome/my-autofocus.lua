@@ -85,7 +85,7 @@ local function check_focus_tag(t)
          api.awful_client.focus.history.disable_tracking()
          c:emit_signal("request::activate", "autofocus.check_focus_tag",
                        {raise=false})
-         -- c:raise()
+         c:raise()
          api.awful_client.focus.history.enable_tracking()
       end
    end
