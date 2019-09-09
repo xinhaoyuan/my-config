@@ -4,6 +4,7 @@ local capi = {
    awesome = awesome,
    screen = screen,
    mouse = mouse,
+   client = client,
 }
 local action = require((...):match("(.-)[^%.]+$") .. "action")
 local awful  = require("awful")
@@ -446,7 +447,7 @@ for i = 1, #mod.tags do
          awful.key({ "Mod4", "Shift" }, key, function ()
                local c = capi.client.focus
                if c == nil then return end
-               awful.client.toggletag(c.screen.tags[i], c)
+               c:toggle_tag(c.screen.tags[i])
          end),
          global_keys)
 end
