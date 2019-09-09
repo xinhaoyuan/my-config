@@ -309,6 +309,7 @@ end
 reset_widgets_for_screens()
 
 capi.screen.connect_signal("list", reset_widgets_for_screens)
+capi.screen.connect_signal("primary_changed", reset_widgets_for_screens)
 
 root.keys(
    awful.util.table.join(
