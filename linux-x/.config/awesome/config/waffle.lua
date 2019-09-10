@@ -149,6 +149,10 @@ local function simple_button(args)
    return ret
 end
 
+local function em(t)
+   return "<span color='#a9444e'>" .. t .. "</span>"
+end
+
 local function with_background_and_border(widget)
    return wibox.widget {
       {
@@ -183,7 +187,7 @@ waffle_poweroff_button = simple_button({
 })
 
 function waffle_poweroff_button:update_text()
-   self.textbox.markup = "<u>P</u>ower off <span size='x-small'>(" .. tostring(2 - waffle_poweroff_count) .. " more times)</span>"
+   self.textbox.markup = em("P") .. "ower off <span size='x-small'>(" .. tostring(2 - waffle_poweroff_count) .. " more times)</span>"
 end
 
 local waffle_poweroff_view = create_view(with_background_and_border(waffle_poweroff_button))
@@ -191,7 +195,7 @@ local waffle_settings_view = create_view(
    with_background_and_border(
       wibox.widget {
          simple_button({
-               markup = "<u>S</u>creen layout",
+               markup = em("S") .. "creen layout",
                key = "s",
                action = function (alt)
                   if alt then
@@ -207,7 +211,7 @@ local waffle_settings_view = create_view(
                end
          }),
          simple_button({
-               markup = "Pulse <u>a</u>udio",
+               markup = "Pulse " .. em("a") .. "udio",
                key = "a",
                action = function (alt)
                   local cmd = {"pavucontrol"}
@@ -388,7 +392,7 @@ local waffle_root_view = create_view(
          wibox.widget {
             simple_button({
                   icon = gcolor.recolor_image(icons.browser, beautiful.fg_normal),
-                  markup = "<u>W</u>eb browser",
+                  markup = em("W") .. "eb browser",
                   key = "w",
                   action = function (alt)
                      action.web_browser()
@@ -397,7 +401,7 @@ local waffle_root_view = create_view(
             }),
             simple_button({
                   icon = gcolor.recolor_image(icons.file_manager, beautiful.fg_normal),
-                  markup = "Fil<u>e</u> manager",
+                  markup = "Fil" .. em("e") .. " manager",
                   key = "e",
                   action = function (alt)
                      action.file_manager()
@@ -406,7 +410,7 @@ local waffle_root_view = create_view(
             }),
             simple_button({
                   icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal),
-                  markup = "<u>T</u>erminal",
+                  markup = em("T") .. "erminal",
                   key = "t",
                   action = function (alt)
                      action.terminal()
@@ -415,7 +419,7 @@ local waffle_root_view = create_view(
             }),
             simple_button({
                   icon = gcolor.recolor_image(icons.setup, beautiful.fg_normal),
-                  markup = "<u>S</u>ettings",
+                  markup = em("S") .. "ettings",
                   key = "s",
                   action = function (alt)
                      waffle:show(waffle_settings_view, true)
@@ -449,7 +453,7 @@ local waffle_root_view = create_view(
          wibox.widget {
             simple_button({
                   icon = gcolor.recolor_image(icons.lock, beautiful.fg_normal),
-                  markup = "<u>L</u>ock screen",
+                  markup = em("L") .. "ock screen",
                   key = "l",
                   action = function (alt)
                      action.screen_locker()
@@ -458,7 +462,7 @@ local waffle_root_view = create_view(
             }),
             simple_button({
                   icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
-                  markup = "S<u>u</u>spend",
+                  markup = "S" .. em("u") .. "spend",
                   key = "u",
                   action = function (alt)
                      awful.spawn({"systemctl", "suspend"})
@@ -467,7 +471,7 @@ local waffle_root_view = create_view(
             }),
             simple_button({
                   icon = gcolor.recolor_image(icons.poweroff, beautiful.fg_normal),
-                  markup = "<u>P</u>ower off",
+                  markup = em("P") .. "ower off",
                   key = "p",
                   action = function (alt)
                      waffle_poweroff_count = 0
