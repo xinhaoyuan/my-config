@@ -110,12 +110,12 @@ capi.client.connect_signal(
       )
 
       local titlewidget = awful.titlebar.widget.titlewidget(c)
-      titlewidget:set_font(mono_font)
+      titlewidget:set_font(beautiful.font)
       awful.titlebar(
          c,
          {
             size = beautiful.titlebar_size,
-            font = mono_font,
+            font = beautiful.font,
          }
       ):setup
       {

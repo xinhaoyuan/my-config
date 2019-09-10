@@ -9,10 +9,8 @@ local gears = require("gears")
 local lgi   = require("lgi")
 local cairo = lgi.cairo
 
-theme.fontname_normal = "Sans"
-theme.fontname_mono = "Hack"
+theme.fontname_normal = "Hack"
 theme.font = theme.fontname_normal .. " 10"
-theme.mono_font = theme.fontname_mono .. " 10"
 theme.useless_gap = dpi(8)
 theme.bar_height = dpi(22)
 theme.menu_width = dpi(150)
@@ -92,7 +90,7 @@ local function text_to_surface(text, font_desc, color_desc, width, height)
    return surf
 end
 
-local font_desc = beautiful.get_merged_font(theme.mono_font, dpi(10))
+local font_desc = beautiful.get_merged_font(theme.font, dpi(10))
 local color_desc_normal = gears.color(theme.fg_normal)
 local color_desc_focus = gears.color(theme.fg_focus)
 local color_desc_hover = gears.color(xrdb.color1)

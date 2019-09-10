@@ -66,7 +66,7 @@ local function simple_button(args)
    local textbox = wibox.widget {
       markup = args.markup or nil,
       text = args.text or nil,
-      font = beautiful.fontname_mono .. " 12",
+      font = beautiful.fontname_normal .. " 12",
       forced_width = width,
       forced_height = button_height,
       align = "center",
@@ -203,7 +203,7 @@ local waffle_settings_view = create_view(
                      awful.spawn(cmd)
                   else
                      local cmd = {"rofi-screen-layout",
-                                  "-font", beautiful.mono_font or beautiful.font
+                                  "-font", beautiful.font
                      }
                      awful.spawn(cmd)
                   end

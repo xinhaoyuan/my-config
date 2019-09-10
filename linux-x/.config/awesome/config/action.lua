@@ -30,7 +30,7 @@ local action = {
                    "-combi-modi", "window,drun",
                    "-show", "combi",
                    "-modi", "combi",
-                   "-font", be.mono_font or be.font}
+                   "-font", be.font}
       awful.spawn(cmd)
    end,
    app_finder = function ()

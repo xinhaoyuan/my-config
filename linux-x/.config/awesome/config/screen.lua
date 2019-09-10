@@ -69,8 +69,6 @@ alayout.layouts = {
 
 -- Define the tag list upfront for keybindings
 
-local mono_font = beautiful.mono_font or beautiful.font
-
 root.buttons(
    awful.util.table.join(
       awful.button({ }, 3, function () menu:show() end),
@@ -146,7 +144,7 @@ local function setup_screen(scr)
       screen = s,
       filter = awful.widget.tasklist.filter.currenttags,
       buttons = my_tasklist_buttons,
-      style = { font = mono_font },
+      style = { font = beautiful.font },
       layout = beautiful.tasklist_layout,
       source = function ()
          -- Sort clients with their constant ids to make the order stable.
@@ -179,7 +177,7 @@ local function setup_screen(scr)
    my_widgets[s].tag_list = awful.widget.taglist(
       s, function (t) return true end, my_tag_list_buttons,
       {
-         font = mono_font
+         font = beautiful.font
       }
    )
 
@@ -262,7 +260,7 @@ local function setup_screen(scr)
    end
 
    -- local volume_widget = wibox.widget.textbox()
-   -- volume_widget:set_font(mono_font)
+   -- volume_widget:set_font(beautiful.font)
    -- vicious.register(volume_widget, vicious.widgets.volume,
    --                  function (widget, args)
    --                     local label = {["♫"] = "O", ["♩"] = "M"}
@@ -275,7 +273,7 @@ local function setup_screen(scr)
    -- right_layout:add(volumearc_widget)
    -- right_layout:add(battery_widget)
    local clock = wibox.widget.textclock(" %m/%d/%y %a %H:%M ")
-   clock:set_font(mono_font)
+   clock:set_font(beautiful.font)
    calendar_widget = calendar({ fdow = 7, position = "bottom_right" })
    calendar_widget:attach(clock)
    right_layout:add(clock)
@@ -319,7 +317,7 @@ root.keys(
          function ()
             awful.prompt.run {
                prompt       = "Run Lua code: ",
-               font         = beautiful.mono_font or beautiful.font,
+               font         = beautiful.font,
                textbox      = awful.screen.focused().mypromptbox.widget,
                exe_callback = awful.util.eval,
                history_path = awful.util.get_cache_dir() .. "/history_eval"
