@@ -92,7 +92,7 @@ local my_tag_list_buttons = awful.util.table.join(
 
 local my_tasklist_buttons = awful.util.table.join(
    awful.button({ }, 1, function (c)
-         if c == client.focus then
+         if c == capi.client.focus then
             c.minimized = true
          else
             -- Without this, the following
@@ -103,7 +103,7 @@ local my_tasklist_buttons = awful.util.table.join(
             end
             -- This will also un-minimize
             -- the client, if needed
-            client.focus = c
+            capi.client.focus = c
             c:raise()
          end
    end),
@@ -216,7 +216,7 @@ local function setup_screen(scr)
    my_widgets[s].indicator:connect_signal(
       "button::press",
       function (_, _, _, b)
-         local c = client.focus
+         local c = capi.client.focus
          if c == nil then return end
          if b == 1 then
             -- move the mouse to the center of the client before movement
