@@ -1,4 +1,5 @@
-local action = require((...):match("(.-)[^%.]+$") .. "action")
+local shared = require((...):match("(.-)[^%.]+$") .. "shared")
+
 local awful = require("awful")
 local beautiful = require("beautiful")
 local wibox = require("wibox")
@@ -395,7 +396,7 @@ local waffle_root_view = create_view(
                   markup = em("W") .. "eb browser",
                   key = "w",
                   action = function (alt)
-                     action.web_browser()
+                     shared.action.web_browser()
                      waffle:hide()
                   end
             }),
@@ -404,7 +405,7 @@ local waffle_root_view = create_view(
                   markup = "Fil" .. em("e") .. " manager",
                   key = "e",
                   action = function (alt)
-                     action.file_manager()
+                     shared.action.file_manager()
                      waffle:hide()
                   end
             }),
@@ -413,7 +414,7 @@ local waffle_root_view = create_view(
                   markup = em("T") .. "erminal",
                   key = "t",
                   action = function (alt)
-                     action.terminal()
+                     shared.action.terminal()
                      waffle:hide()
                   end
             }),
@@ -456,7 +457,7 @@ local waffle_root_view = create_view(
                   markup = em("L") .. "ock screen",
                   key = "l",
                   action = function (alt)
-                     action.screen_locker()
+                     shared.action.screen_locker()
                      waffle:hide()
                   end
             }),

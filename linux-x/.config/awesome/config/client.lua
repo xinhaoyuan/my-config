@@ -2,12 +2,22 @@ local capi = {
    awesome = awesome,
    client = client,
 }
+
+local shared = require((...):match("(.-)[^%.]+$") .. "shared")
+shared.client = {}
+
 local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local dpi = require("beautiful.xresources").apply_dpi
 local gtimer = require("gears.timer")
 local machi = require("layout-machi")
+
+function shared.client.titlebar_toggle(c)
+   local geo = c:geometry()
+   awful.titlebar.toggle(c)
+   c:geometry(geo)
+end
 
 local table_join = awful.util.table.join
 local delayed = gtimer.delayed_call
@@ -48,7 +58,7 @@ local client_keys = table_join(
          end
    end),
 
-   awful.key({ "Mod4" }, "t", function (c) awful.titlebar.toggle(c) end),
+   awful.key({ "Mod4" }, "t", function (c) shared.client.titlebar_toggle(c) end),
 
    awful.key({ "Mod4" }, "f", function (c)
          if c.fullscreen then
@@ -101,7 +111,7 @@ capi.client.connect_signal(
                awful.mouse.client.move(c)
          end),
          awful.button({ }, 2, function()
-               awful.titlebar.hide(c)
+               shared.client.titlebar_toggle(c)
          end),
          awful.button({ }, 3, function()
                c:emit_signal("request::activate", "titlebar", {raise = true})

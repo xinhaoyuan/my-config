@@ -1,10 +1,12 @@
+local shared = require((...):match("(.-)[^%.]+$") .. "shared")
+
 local awful  = require("awful")
 local be     = require("beautiful")
 local gshape = require("gears.shape")
 local wi     = require("wibox")
 local dpi    = require("beautiful.xresources").apply_dpi
 
-local action = {
+shared.action = {
    terminal = function (extra_cmd)
       local cmd = {"urxvt"}
       if type(extra_cmd) == "table" then
@@ -52,4 +54,4 @@ local action = {
    end,
 }
 
-return action
+return nil

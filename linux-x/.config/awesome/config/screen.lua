@@ -1,12 +1,13 @@
-local mod = {}
-
 local capi = {
    awesome = awesome,
    screen = screen,
    mouse = mouse,
    client = client,
 }
-local action = require((...):match("(.-)[^%.]+$") .. "action")
+
+local shared = require((...):match("(.-)[^%.]+$") .. "shared")
+shared.screen = {}
+
 local awful  = require("awful")
 local beautiful = require("beautiful")
 local watch = require("awful.widget.watch")
@@ -28,7 +29,7 @@ local table_join = awful.util.table.join
 local delayed = gtimer.delayed_call
 
 local function open_tmux_session(name)
-   action.terminal({"tmux", "new", "-As", name})
+   shared.action.terminal({"tmux", "new", "-As", name})
 end
 
 local function go_by_direction(dir, with_client)
@@ -105,6 +106,12 @@ local my_tasklist_buttons = awful.util.table.join(
             client.focus = c
             c:raise()
          end
+   end),
+   awful.button({ }, 2, function (c)
+         c:kill()
+   end),
+   awful.button({ }, 3, function (c)
+         shared.client.titlebar_toggle(c)
    end)
 )
 
@@ -279,22 +286,27 @@ local function setup_screen(scr)
    right_layout:add(clock)
    right_layout:add(my_widgets[s].indicator)
 
-   local layout = wibox.widget {
-      left_layout,
+   local layout = wibox.widget{
       {
-         my_widgets[s].tasklist,
-         right = dpi(5),
-         widget = wibox.container.margin
+         left_layout,
+         {
+            my_widgets[s].tasklist,
+            right = dpi(5),
+            widget = wibox.container.margin
+         },
+         right_layout,
+         layout = wibox.layout.align.horizontal,
       },
-      right_layout,
-      layout = wibox.layout.align.horizontal,
+      top = beautiful.border_width,
+      color = beautiful.border_focus,
+      widget = wibox.container.margin,
    }
    my_widgets[s].wibar:set_widget(layout)
 end
 
 local function reset_widgets_for_screens()
    for _, w in ipairs(my_widgets) do
-      w.wibar.visible = false
+      w.wibar:remove()
    end
    my_widgets = {}
    current_screen = nil
@@ -361,18 +373,18 @@ local global_keys = table_join(
    awful.key({ "Control", "Mod4" }, "Left", function () go_by_direction("left", true) end),
    awful.key({ "Control", "Mod4" }, "Down", function () go_by_direction("down", true) end),
    awful.key({ "Control", "Mod4" }, "Right",function () go_by_direction("right", true) end),
-   awful.key({ }, "XF86AudioLowerVolume",   function () action.audio_setup("volume-adjust", -5) end),
-   awful.key({ }, "XF86AudioRaiseVolume",   function () action.audio_setup("volume-adjust",  5) end),
-   awful.key({ }, "XF86AudioMute",          function () action.audio_setup("mute-toggle") end),
+   awful.key({ }, "XF86AudioLowerVolume",   function () shared.action.audio_setup("volume-adjust", -5) end),
+   awful.key({ }, "XF86AudioRaiseVolume",   function () shared.action.audio_setup("volume-adjust",  5) end),
+   awful.key({ }, "XF86AudioMute",          function () shared.action.audio_setup("mute-toggle") end),
    awful.key({ }, "XF86MonBrightnessUp",    function () awful.spawn("xbacklight -inc 5", false) end),
    awful.key({ }, "XF86MonBrightnessDown",  function () awful.spawn("xbacklight -dec 5", false) end),
    awful.key({ "Mod4" }, "Escape",          function () menu:show() end),
-   awful.key({ "Mod4" }, "Return",          function () action.terminal() end),
-   awful.key({ "Mod4" }, "w",               function () action.web_browser() end),
-   awful.key({ "Mod4" }, "e",               function () action.file_manager() end),
-   awful.key({ "Mod4" }, "l",               function () action.screen_locker() end),
-   awful.key({ "Mod4" }, "\\",              function () action.launcher() end),
-   awful.key({ "Mod4", "Shift" }, "F12",    function () action.app_finder() end),
+   awful.key({ "Mod4" }, "Return",          function () shared.action.terminal() end),
+   awful.key({ "Mod4" }, "w",               function () shared.action.web_browser() end),
+   awful.key({ "Mod4" }, "e",               function () shared.action.file_manager() end),
+   awful.key({ "Mod4" }, "l",               function () shared.action.screen_locker() end),
+   awful.key({ "Mod4" }, "\\",              function () shared.action.launcher() end),
+   awful.key({ "Mod4", "Shift" }, "F12",    function () shared.action.app_finder() end),
    awful.key({ "Mod4" }, "F1",              function () open_tmux_session("F1") end),
    awful.key({ "Mod4" }, "F2",              function () open_tmux_session("F2") end),
    awful.key({ "Mod4" }, "F3",              function () open_tmux_session("F3") end),
@@ -435,9 +447,9 @@ local global_keys = table_join(
 
 -- tags and layouts
 
-mod.tags = { "1", "2", "3", "4" }
+shared.screen.tags = { "1", "2", "3", "4" }
 
-for i = 1, #mod.tags do
+for i = 1, #shared.screen.tags do
    local key = tostring(i)
    global_keys =
       table_join(
@@ -457,7 +469,7 @@ root.keys(table_join(root.keys(), global_keys))
 
 awful.screen.connect_for_each_screen(
    function (s)
-      for i, t in ipairs(mod.tags) do
+      for i, t in ipairs(shared.screen.tags) do
          local tag = awful.tag.add(t, { screen = s, layout = alayout.layouts[1], layouts = alayout.layouts })
       end
 
