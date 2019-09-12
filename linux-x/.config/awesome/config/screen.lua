@@ -192,7 +192,7 @@ local function setup_screen(scr)
          screen = s,
          fg = beautiful.fg_normal,
          bg = beautiful.bg_normal,
-         height = beautiful.bar_height,
+         height = beautiful.bar_height + beautiful.border_width,
          position = "bottom",
          border_width = 0,
    })
@@ -255,10 +255,9 @@ local function setup_screen(scr)
       if tray_padding > 0 then
          my_tray:set_base_size(beautiful.bar_height - tray_padding * 2)
          local tray_layout = wibox.widget {
-            { forced_width = 0, forced_height = tray_padding, color = beautiful.bg_normal, widget = wibox.widget.separator },
             my_tray,
-            { forced_width = 0, forced_height = tray_padding, color = beautiful.bg_normal, widget = wibox.widget.separator },
-            layout = wibox.layout.align.vertical,
+            left = tray_padding,
+            widget = wibox.container.margin,
          }
          right_layout:add(tray_layout)
       else
