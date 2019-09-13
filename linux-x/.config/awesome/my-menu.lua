@@ -1,3 +1,4 @@
+local awful = require("awful")
 local beautiful = require("beautiful")
 local freedesktop = require("freedesktop")
 
@@ -11,8 +12,7 @@ for file in files do
       table.insert(menu_screen_layouts,
                    { layout_name,
                      function ()
-                        os.execute(file_to_execute)
-                        os.execute("nitrogen --restore")
+                        awful.spawn(file_to_execute, false)
                      end
       })
    end

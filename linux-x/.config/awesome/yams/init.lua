@@ -2,6 +2,7 @@
 --   Author: Xinhao Yuan <xinhaoyuan@gmail.com>
 
 local api = {
+   client    = client,
    gears     = require("gears"),
    beautiful = require("beautiful"),
    wibox     = require("wibox"),
@@ -74,7 +75,11 @@ local function create(config)
       local fill_color_hl = with_alpha(api.gears.color(api.beautiful.bg_focus), 1)
 
       if screen == nil then
-         screen = api.awful.screen.focused()
+         if api.client.focus then
+            screen = api.client.focus.screen
+         else
+            screen = api.awful.screen.focused()
+         end
       end
 
       local start_x = screen.workarea.x

@@ -91,6 +91,10 @@ local my_tag_list_buttons = awful.util.table.join(
    -- awful.button({ }, 5, function(t) awful.tag.viewprev(awful.tag.getscreen(t)) end)
 )
 
+local client_menu = awful.menu({
+      { "Close", function () capi.client.focus:kill() end },
+})
+
 local my_tasklist_buttons = awful.util.table.join(
    awful.button({ }, 1, function (c)
          if c == capi.client.focus then
@@ -109,10 +113,10 @@ local my_tasklist_buttons = awful.util.table.join(
          end
    end),
    awful.button({ }, 2, function (c)
-         c:kill()
+         shared.client.titlebar_toggle(c)
    end),
    awful.button({ }, 3, function (c)
-         shared.client.titlebar_toggle(c)
+         client_menu:show()
    end)
 )
 
@@ -303,6 +307,8 @@ local function reset_widgets_for_screens()
    for scr in capi.screen do
       setup_screen(scr)
    end
+
+   awful.spawn("nitrogen --restore", false)
 end
 
 reset_widgets_for_screens()
