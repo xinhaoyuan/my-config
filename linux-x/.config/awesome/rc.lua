@@ -3,7 +3,12 @@
 
 -- Remember certain information after client is detached but before the object is gone.
 -- Need to do this before everything, so that signal handler fires before standard ones.
-client.connect_signal(
+
+local capi = {
+   client = client,
+}
+
+capi.client.connect_signal(
    "unmanage",
    function (c)
       c.tomb_floating = c.floating
@@ -30,8 +35,8 @@ require("my-menu")
 
 require("gears.timer").delayed_call(
    function ()
-      if client.focus then
-         client.focus:emit_signal("request::activate", "mouse.move", {raise=true})
+      if capi.client.focus then
+         capi.client.focus:emit_signal("request::activate", "mouse.move", {raise=true})
       end
    end
 )

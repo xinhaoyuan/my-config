@@ -13,13 +13,15 @@
 
 local api = {
    client = client,
+   screen = screen,
+   tag = tag,
    awful_client = require("awful.client"),
    timer = require("gears.timer"),
    fts = require("focus-timestamp"),
 }
 
 local find_alternative_focus = function (prev, s)
-   clients = {}
+   local clients = {}
    for c in api.awful_client.iterate(function (c)
          return c:isvisible() and api.awful_client.focus.filter(c) 
    end) do
@@ -76,9 +78,9 @@ end
 local function check_focus_tag(t)
    local s = t.screen
    if (not s) or (not s.valid) then return end
-   s = screen[s]
+   s = api.screen[s]
    check_focus(nil, s)
-   if not api.client.focus or not api.awful_client.focus.filter(api.client.focus) or screen[api.client.focus.screen] ~= s then
+   if not api.client.focus or not api.awful_client.focus.filter(api.client.focus) or api.screen[api.client.focus.screen] ~= s then
       -- local c = api.awful_client.focus.history.get(s, 0, api.awful_client.focus.filter)
       local c = autofocus.find_alternative_focus(nil, s)
       if c then
@@ -91,7 +93,7 @@ local function check_focus_tag(t)
    end
 end
 
-tag.connect_signal("property::selected", function (t)
+api.tag.connect_signal("property::selected", function (t)
                       api.timer.delayed_call(check_focus_tag, t)
 end)
 

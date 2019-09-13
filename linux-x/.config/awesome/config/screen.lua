@@ -3,6 +3,7 @@ local capi = {
    screen = screen,
    mouse = mouse,
    client = client,
+   root = root,
 }
 
 local shared = require((...):match("(.-)[^%.]+$") .. "shared")
@@ -36,7 +37,7 @@ local function go_by_direction(dir, with_client)
    if with_client then
       local c = capi.client.focus
       awful.screen.focus_bydirection(dir, c.screen)
-      c:move_to_screen(mouse.screen.index)
+      c:move_to_screen(capi.mouse.screen.index)
       c:emit_signal("request::activate", "mouse.resize", {raise = true})
    else
       awful.screen.focus_bydirection(dir)
@@ -70,10 +71,10 @@ alayout.layouts = {
 
 -- Define the tag list upfront for keybindings
 
-root.buttons(
+capi.root.buttons(
    awful.util.table.join(
       awful.button({ }, 3, function () menu:show() end),
-      root.buttons()
+      capi.root.buttons()
    )
 )
 
@@ -269,7 +270,7 @@ local function setup_screen(scr)
    -- right_layout:add(battery_widget)
    local clock = wibox.widget.textclock(" %m/%d/%y %a %H:%M ")
    clock:set_font(beautiful.font)
-   calendar_widget = calendar({ fdow = 7, position = "bottom_right" })
+   local calendar_widget = calendar({ fdow = 7, position = "bottom_right" })
    calendar_widget:attach(clock)
    right_layout:add(clock)
    right_layout:add(my_widgets[s].indicator)
@@ -309,9 +310,9 @@ reset_widgets_for_screens()
 capi.screen.connect_signal("list", reset_widgets_for_screens)
 capi.screen.connect_signal("primary_changed", reset_widgets_for_screens)
 
-root.keys(
+capi.root.keys(
    awful.util.table.join(
-      root.keys(),
+      capi.root.keys(),
       awful.key({ "Mod4" }, "F12", function () waffle:set_gravity("center"); waffle:show() end),
       awful.key({ "Mod4" }, ";",
          function ()
@@ -451,7 +452,7 @@ for i = 1, #shared.screen.tags do
          global_keys)
 end
 
-root.keys(table_join(root.keys(), global_keys))
+capi.root.keys(table_join(capi.root.keys(), global_keys))
 
 -- initialize tags for each screen
 
@@ -484,4 +485,4 @@ awful.screen.connect_for_each_screen(
    end
 )
 
-return mod
+return nil

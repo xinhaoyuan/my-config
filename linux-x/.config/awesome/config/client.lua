@@ -1,6 +1,7 @@
 local capi = {
    awesome = awesome,
    client = client,
+   mouse,
 }
 
 local shared = require((...):match("(.-)[^%.]+$") .. "shared")
@@ -79,7 +80,7 @@ local client_buttons = table_join(
    awful.button({ }, 1, function (c) capi.client.focus = c; c:raise() end),
    awful.button({ "Mod4" }, 1, function (c) awful.mouse.client.move(c) end),
    awful.button({ "Mod4" }, 3, function (c)
-         local _, cc = awful.placement.closest_corner(mouse, {parent = c})
+         local _, cc = awful.placement.closest_corner(capi.mouse, {parent = c})
          awful.mouse.client.resize(c, cc)
    end)
 )
@@ -168,7 +169,7 @@ capi.client.connect_signal(
 )
 
 -- remove border for maximized windows
-function reset_border(c)
+local function reset_border(c)
    if not c.borderless and not c.maximized then
       c.border_width = beautiful.border_width
    else
