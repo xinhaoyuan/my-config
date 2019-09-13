@@ -251,18 +251,7 @@ local function setup_screen(scr)
    }
 
    if scr == capi.screen.primary then
-      local tray_padding = dpi(1)
-      if tray_padding > 0 then
-         my_tray:set_base_size(beautiful.bar_height - tray_padding * 2)
-         local tray_layout = wibox.widget {
-            my_tray,
-            left = tray_padding,
-            widget = wibox.container.margin,
-         }
-         right_layout:add(tray_layout)
-      else
-         right_layout:add(my_tray)
-      end
+      right_layout:add(my_tray)
    end
 
    -- local volume_widget = wibox.widget.textbox()
