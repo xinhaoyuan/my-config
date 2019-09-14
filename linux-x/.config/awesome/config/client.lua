@@ -176,14 +176,18 @@ capi.client.connect_signal(
    "focus",
    function (c)
       c.border_color = beautiful.border_focus
-      c.titlebar_container.color = beautiful.border_focus 
+      if c.titlebar_container then
+         c.titlebar_container.color = beautiful.border_focus
+      end
    end
 )
 capi.client.connect_signal(
    "unfocus",
    function (c)
       c.border_color = beautiful.border_normal
-      c.titlebar_container.color = beautiful.border_normal
+      if c.titlebar_container then
+         c.titlebar_container.color = beautiful.border_normal
+      end
    end
 )
 
