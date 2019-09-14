@@ -20,6 +20,18 @@ function shared.client.titlebar_toggle(c)
    c:geometry(geo)
 end
 
+function shared.client.titlebar_show(c)
+   local geo = c:geometry()
+   awful.titlebar.show(c)
+   c:geometry(geo)
+end
+
+function shared.client.titlebar_hide(c)
+   local geo = c:geometry()
+   awful.titlebar.hide(c)
+   c:geometry(geo)
+end
+
 local table_join = awful.util.table.join
 local delayed = gtimer.delayed_call
 
@@ -101,7 +113,6 @@ awful.mouse.resize.add_enter_callback(
       c:raise()
    end, 'mouse.resize')
 
-
 capi.client.connect_signal(
    "request::titlebars",
    function (c)
@@ -122,35 +133,41 @@ capi.client.connect_signal(
 
       local titlewidget = awful.titlebar.widget.titlewidget(c)
       titlewidget:set_font(beautiful.font)
+      local titlebar_container = wibox.widget {
+         {
+            { -- Left
+               awful.titlebar.widget.iconwidget(c),
+               titlewidget,
+               spacing = dpi(2),
+               buttons = buttons,
+               layout  = wibox.layout.fixed.horizontal
+            },
+            { -- Space
+               buttons = buttons,
+               layout  = wibox.layout.fixed.horizontal
+            },
+            { -- Right
+               awful.titlebar.widget.floatingbutton (c),
+               awful.titlebar.widget.maximizedbutton(c),
+               awful.titlebar.widget.stickybutton   (c),
+               awful.titlebar.widget.ontopbutton    (c),
+               awful.titlebar.widget.closebutton    (c),
+               layout = wibox.layout.fixed.horizontal()
+            },
+            layout = wibox.layout.align.horizontal,
+         },
+         bottom = beautiful.border_width,
+         color = capi.client.focus == c and beautiful.border_focus or beautiful.border_normal,
+         widget = wibox.container.margin,
+      }
       awful.titlebar(
          c,
          {
-            size = beautiful.titlebar_size,
+            size = beautiful.titlebar_size + beautiful.border_width,
             font = beautiful.font,
          }
-      ):setup
-      {
-         { -- Left
-            awful.titlebar.widget.iconwidget(c),
-            titlewidget,
-            spacing = dpi(2),
-            buttons = buttons,
-            layout  = wibox.layout.fixed.horizontal
-         },
-         { -- Space
-            buttons = buttons,
-            layout  = wibox.layout.fixed.horizontal
-         },
-         { -- Right
-            awful.titlebar.widget.floatingbutton (c),
-            awful.titlebar.widget.maximizedbutton(c),
-            awful.titlebar.widget.stickybutton   (c),
-            awful.titlebar.widget.ontopbutton    (c),
-            awful.titlebar.widget.closebutton    (c),
-            layout = wibox.layout.fixed.horizontal()
-         },
-         layout = wibox.layout.align.horizontal,
-      }
+      ):setup({ titlebar_container, widget = wibox.container.margin })
+      c.titlebar_container = titlebar_container
    end
 )
 
@@ -159,12 +176,14 @@ capi.client.connect_signal(
    "focus",
    function (c)
       c.border_color = beautiful.border_focus
+      c.titlebar_container.color = beautiful.border_focus 
    end
 )
 capi.client.connect_signal(
    "unfocus",
    function (c)
       c.border_color = beautiful.border_normal
+      c.titlebar_container.color = beautiful.border_normal
    end
 )
 
@@ -177,7 +196,14 @@ local function reset_border(c)
    end
 end
 
-capi.client.connect_signal("manage", reset_border)
+local function manage_cb(c)
+   reset_border(c)
+   if shared.var.enable_title_bar then
+      shared.client.titlebar_show(c)
+   end
+end
+
+capi.client.connect_signal("manage", manage_cb)
 capi.client.connect_signal("property::maximized", reset_border)
 
 -- rules

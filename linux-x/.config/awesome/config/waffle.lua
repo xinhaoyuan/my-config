@@ -1,4 +1,7 @@
 local shared = require((...):match("(.-)[^%.]+$") .. "shared")
+local capi = {
+   client = client,
+}
 
 local awful = require("awful")
 local beautiful = require("beautiful")
@@ -195,6 +198,24 @@ local waffle_poweroff_view = create_view(with_background_and_border(waffle_power
 local waffle_settings_view = create_view(
    with_background_and_border(
       wibox.widget {
+         simple_button({
+               markup = "Toggle " .. em("t") .. "itlebars",
+               key = "t",
+               action = function (alt)
+                  if shared.var.enable_title_bar then
+                     for _, c in ipairs(capi.client.get()) do
+                        shared.client.titlebar_hide(c)
+                     end
+                     shared.var.enable_title_bar = false
+                  else
+                     for _, c in ipairs(capi.client.get()) do
+                        shared.client.titlebar_show(c)
+                     end
+                     shared.var.enable_title_bar = true
+                  end
+                  waffle:hide()
+               end
+         }),
          simple_button({
                markup = em("S") .. "creen layout",
                key = "s",

@@ -1,3 +1,3 @@
 -- forward declaration placeholder
 
-return {}
+return { var = {} }
