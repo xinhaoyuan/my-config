@@ -1,7 +1,7 @@
 local capi = {
    awesome = awesome,
    client = client,
-   mouse,
+   mouse = mouse,
 }
 
 local shared = require((...):match("(.-)[^%.]+$") .. "shared")
