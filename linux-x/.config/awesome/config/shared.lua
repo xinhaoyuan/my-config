@@ -3,6 +3,7 @@
 
 return {
    var = {
-      enable_titlebar = false
+      enable_titlebar = false,
+      floating_by_default = false,
    }
 }

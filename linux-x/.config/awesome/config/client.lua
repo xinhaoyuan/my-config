@@ -222,7 +222,7 @@ require("awful.rules").rules = {
          buttons = client_buttons,
          border_color = beautiful.border_normal,
          screen = function(c) return capi.awesome.startup and c.screen or awful.screen.focused() end,
-         floating = true,
+         floating = shared.var.floating_by_default,
          placement = awful.placement.centered,
          border_width = 0,
       }
