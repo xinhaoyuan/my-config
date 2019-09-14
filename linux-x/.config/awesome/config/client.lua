@@ -198,7 +198,7 @@ end
 
 local function manage_cb(c)
    reset_border(c)
-   if shared.var.enable_title_bar then
+   if shared.var.enable_titlebar then
       shared.client.titlebar_show(c)
    end
 end
