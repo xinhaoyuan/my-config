@@ -49,7 +49,7 @@ end
 local machi = require("layout-machi")
 
 beautiful.layout_machi = machi.get_icon()
-machi.default_editor.set_gap(beautiful.useless_gap * 2, beautiful.useless_gap)
+machi.default_editor.set_gap(beautiful.useless_gap * 2, beautiful.useless_gap * 2)
 
 local alayout = require("awful.layout")
 alayout.layouts = {
