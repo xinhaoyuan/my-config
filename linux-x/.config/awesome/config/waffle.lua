@@ -468,7 +468,7 @@ do
             local new_rx = recv - prev_recv
             local markup = "<span size='small'>R" .. format_size(new_rx) .. "B/s</span>"
             rx_text_widget:set_markup(markup)
-            rx_text_shadow_widget:set_markup("<span color='#ffffff'>" .. markup .. "</span>")
+            rx_text_shadow_widget:set_markup("<span color='" .. beautiful.bg_normal .. "'>" .. markup .. "</span>")
             netgraph_rx_widget:add_value(new_rx - rx)
             rx = new_rx
          end
@@ -477,7 +477,7 @@ do
             local new_tx = send - prev_send
             local markup = "<span size='small'>T" .. format_size(new_tx) .. "B/s</span>"
             tx_text_widget:set_markup(markup)
-            tx_text_shadow_widget:set_markup("<span color='#ffffff'>" .. markup .. "</span>")
+            tx_text_shadow_widget:set_markup("<span color='" .. beautiful.bg_normal .. "'>" .. markup .. "</span>")
             netgraph_tx_widget:add_value(new_tx - tx)
             tx = new_tx
          end
