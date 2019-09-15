@@ -349,16 +349,38 @@ do
       color = "#74aeab"
    }
 
-   local rx_text = wibox.widget {
+   local rx_text_widget = wibox.widget {
       forced_width = net_widget_width,
       forced_height = dpi(24),
       align = "center",
+      point = {x = 0, y = 0},
+      widget = wibox.widget.textbox,
+   }
+
+   local rx_text_shadow_widget = wibox.widget {
+      forced_width = net_widget_width,
+      forced_height = dpi(24),
+      align = "center",
+      point = {x = 1, y = 1},
       widget = wibox.widget.textbox,
    }
 
    local net_rx_widget = wibox.widget {
       wibox.container.mirror(netgraph_rx_widget, { horizontal = true }),
+      point = {x = 0, y = 0},
       widget = wibox.container.margin
+   }
+
+   local net_rx_layout = wibox.widget {
+      {
+         net_rx_widget,
+         rx_text_shadow_widget,
+         rx_text_widget,
+         layout = wibox.layout.manual,
+      },
+      width = net_widget_width,
+      height = dpi(24),
+      widget = wibox.container.constraint,
    }
 
    local netgraph_tx_widget = wibox.widget {
@@ -373,10 +395,19 @@ do
       color = "#74aeab"
    }
 
-   local tx_text = wibox.widget {
+   local tx_text_widget = wibox.widget {
       forced_width = net_widget_width,
       forced_height = dpi(24),
       align = "center",
+      point = { x = 0, y = 0 },
+      widget = wibox.widget.textbox,
+   }
+
+   local tx_text_shadow_widget = wibox.widget {
+      forced_width = net_widget_width,
+      forced_height = dpi(24),
+      align = "center",
+      point = { x = 1, y = 1 },
       widget = wibox.widget.textbox,
    }
 
@@ -385,17 +416,21 @@ do
       widget = wibox.container.margin
    }
 
-   net_widget = wibox.widget {
-      {
-         net_rx_widget,
-         rx_text,
-         layout = wibox.layout.stack,
-      },
+   local net_tx_layout = wibox.widget {
       {
          net_tx_widget,
-         tx_text,
-         layout = wibox.layout.stack,
+         tx_text_shadow_widget,
+         tx_text_widget,
+         layout = wibox.layout.manual,
       },
+      width = net_widget_width,
+      height = dpi(24),
+      widget = wibox.container.constraint,
+   }
+
+   net_widget = wibox.widget {
+      net_rx_layout,
+      net_tx_layout,
       {
          {
             image = gcolor.recolor_image(icons.ethernet, beautiful.fg_normal),
@@ -431,14 +466,18 @@ do
 
          if prev_recv ~= nil then
             local new_rx = recv - prev_recv
-            rx_text:set_markup("<span size='small'>RX:" .. format_size(new_rx) .. "B</span>")
+            local markup = "<span size='small'>R" .. format_size(new_rx) .. "B/s</span>"
+            rx_text_widget:set_markup(markup)
+            rx_text_shadow_widget:set_markup("<span color='#ffffff'>" .. markup .. "</span>")
             netgraph_rx_widget:add_value(new_rx - rx)
             rx = new_rx
          end
          prev_recv = recv
          if prev_send ~= nil then
             local new_tx = send - prev_send
-            tx_text:set_markup("<span size='small'>TX:" .. format_size(new_tx) .. "B</span>")
+            local markup = "<span size='small'>T" .. format_size(new_tx) .. "B/s</span>"
+            tx_text_widget:set_markup(markup)
+            tx_text_shadow_widget:set_markup("<span color='#ffffff'>" .. markup .. "</span>")
             netgraph_tx_widget:add_value(new_tx - tx)
             tx = new_tx
          end
