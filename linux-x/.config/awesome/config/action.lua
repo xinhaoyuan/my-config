@@ -52,6 +52,9 @@ shared.action = {
          end
       end
    end,
+   wallpaper_setup = function ()
+      awful.spawn("nitrogen --restore", false)
+   end,
 }
 
 return nil

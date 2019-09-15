@@ -11,26 +11,27 @@
 -- @module awful.autofocus
 ---------------------------------------------------------------------------
 
-local api = {
+local capi = {
    client = client,
    screen = screen,
    tag = tag,
-   awful_client = require("awful.client"),
-   timer = require("gears.timer"),
-   fts = require("focus-timestamp"),
 }
+
+local awful_client = require("awful.client")
+local gtimer = require("gears.timer")
+local fts = require("focus-timestamp")
 
 local find_alternative_focus = function (prev, s)
    local clients = {}
-   for c in api.awful_client.iterate(function (c)
-         return c:isvisible() and api.awful_client.focus.filter(c) 
+   for c in awful_client.iterate(function (c)
+         return c:isvisible() and awful_client.focus.filter(c)
    end) do
       clients[#clients + 1] = c
    end
    table.sort(
       clients,
       function (a, b)
-         return api.fts.get(a) > api.fts.get(b)
+         return fts.get(a) > fts.get(b)
       end
    )
    if #clients == 0 then
@@ -53,15 +54,15 @@ local autofocus = {
 local function check_focus(prev, s)
    if not s or not s.valid then return end
    -- When no visible client has the focus...
-   if not api.client.focus or not api.client.focus:isvisible() or not api.awful_client.focus.filter(api.client.focus) then
+   if not capi.client.focus or not capi.client.focus:isvisible() or not awful_client.focus.filter(capi.client.focus) then
       local c = autofocus.find_alternative_focus(prev, s)
       if c then
          -- raise the client in "request::activate" will set the urgent flag when switching tag
-         api.awful_client.focus.history.disable_tracking()
+         awful_client.focus.history.disable_tracking()
          c:emit_signal("request::activate", "autofocus.check_focus",
                        {raise=false})
          -- c:raise()
-         api.awful_client.focus.history.enable_tracking()
+         awful_client.focus.history.enable_tracking()
       end
    end
 end
@@ -69,7 +70,7 @@ end
 --- Check client focus (delayed).
 -- @param obj An object that should have a .screen property.
 local function check_focus_delayed(obj)
-   api.timer.delayed_call(check_focus, obj, obj.screen)
+   gtimer.delayed_call(check_focus, obj, obj.screen)
 end
 
 --- Give focus on tag selection change.
@@ -78,32 +79,33 @@ end
 local function check_focus_tag(t)
    local s = t.screen
    if (not s) or (not s.valid) then return end
-   s = api.screen[s]
+   s = capi.screen[s]
    check_focus(nil, s)
-   if not api.client.focus or not api.awful_client.focus.filter(api.client.focus) or api.screen[api.client.focus.screen] ~= s then
-      -- local c = api.awful_client.focus.history.get(s, 0, api.awful_client.focus.filter)
+   if not capi.client.focus or not awful_client.focus.filter(capi.client.focus) or capi.screen[capi.client.focus.screen] ~= s then
+      -- local c = awful_client.focus.history.get(s, 0, awful_client.focus.filter)
       local c = autofocus.find_alternative_focus(nil, s)
       if c then
-         api.awful_client.focus.history.disable_tracking()
+         awful_client.focus.history.disable_tracking()
          c:emit_signal("request::activate", "autofocus.check_focus_tag",
                        {raise=false})
          c:raise()
-         api.awful_client.focus.history.enable_tracking()
+         awful_client.focus.history.enable_tracking()
       end
    end
 end
 
-api.tag.connect_signal("property::selected", function (t)
-                      api.timer.delayed_call(check_focus_tag, t)
+capi.tag.connect_signal(
+   "property::selected", function (t)
+      gtimer.delayed_call(check_focus_tag, t)
 end)
 
-api.client.connect_signal("unfocus",             check_focus_delayed)
-api.client.connect_signal("unmanage",            function (c) check_focus(c, c.screen) end)
-api.client.connect_signal("tagged",              check_focus_delayed)
-api.client.connect_signal("untagged",            check_focus_delayed)
-api.client.connect_signal("property::hidden",    check_focus_delayed)
-api.client.connect_signal("property::minimized", check_focus_delayed)
-api.client.connect_signal("property::sticky",    check_focus_delayed)
+capi.client.connect_signal("unfocus",             check_focus_delayed)
+capi.client.connect_signal("unmanage",            function (c) check_focus(c, c.screen) end)
+capi.client.connect_signal("tagged",              check_focus_delayed)
+capi.client.connect_signal("untagged",            check_focus_delayed)
+capi.client.connect_signal("property::hidden",    check_focus_delayed)
+capi.client.connect_signal("property::minimized", check_focus_delayed)
+capi.client.connect_signal("property::sticky",    check_focus_delayed)
 
 return autofocus
 

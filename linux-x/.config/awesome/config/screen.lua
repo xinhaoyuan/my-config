@@ -308,7 +308,7 @@ local function reset_widgets_for_screens()
       setup_screen(scr)
    end
 
-   awful.spawn("nitrogen --restore", false)
+   shared.action.wallpaper_setup()
 end
 
 reset_widgets_for_screens()
