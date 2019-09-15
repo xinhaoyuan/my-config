@@ -311,7 +311,7 @@ local function reset_widgets_for_screens()
    shared.action.wallpaper_setup()
 end
 
-reset_widgets_for_screens()
+delayed(reset_widgets_for_screens)
 
 capi.screen.connect_signal("list", reset_widgets_for_screens)
 capi.screen.connect_signal("primary_changed", reset_widgets_for_screens)
