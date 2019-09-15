@@ -557,6 +557,7 @@ local waffle_root_view = create_view(
                   layout = wibox.layout.fixed.horizontal,
                },
                net_widget,
+               spacing = dpi(2),
                layout = wibox.layout.fixed.vertical,
             },
             bg = beautiful.bg_normal,
