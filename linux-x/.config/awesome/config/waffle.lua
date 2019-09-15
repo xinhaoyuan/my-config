@@ -12,8 +12,8 @@ local gshape = require("gears.shape")
 local gcolor = require("gears.color")
 local icons = require("icons")
 local dpi = require("beautiful.xresources").apply_dpi
-                      
-local waffle_width = beautiful.waffle_width or dpi(200)
+
+local waffle_width = beautiful.waffle_width or dpi(240)
 local button_height = dpi(24)
 
 local function create_view(root)
@@ -33,7 +33,7 @@ local function create_view(root)
             table.insert(traverse_pool, c)
          end
       end
-      
+
       if widget.keys then
          for k, f in pairs(widget.keys) do
             if not view.keys[k] then
@@ -287,6 +287,21 @@ do
    )
 end
 
+local function format_size(s)
+   local unit = ""
+   if s >= 1024 * 1024 * 1024 then
+      s = math.floor(s / 1024 / 1024 / 1024 * 100) / 100
+      unit = "G"
+   elseif s >= 1024 * 1024 then
+      s = math.floor(s / 1024 / 1024 * 100) / 100
+      unit = "M"
+   elseif s >= 1024 then
+      s = math.floor(s / 1024 * 100) / 100
+      unit = "K"
+   end
+   return tostring(s) .. unit
+end
+
 local ram_widget_width = waffle_width / 2 - dpi(24)
 local ram_widget
 do
@@ -316,6 +331,120 @@ do
          widget:add_value(usage - prev_usage)
       end,
       ramgraph_widget
+   )
+end
+
+local net_widget_width = (waffle_width - dpi(24)) / 2
+local net_widget
+do
+   local netgraph_rx_widget = wibox.widget {
+      background_color = "#00000000",
+      forced_width = net_widget_width,
+      forced_height = dpi(24),
+      step_width = dpi(2),
+      step_spacing = dpi(1),
+      widget = wibox.widget.graph,
+      scale = true,
+      max_value = 256 * 1024,
+      color = "#74aeab"
+   }
+
+   local rx_text = wibox.widget {
+      forced_width = net_widget_width,
+      forced_height = dpi(24),
+      align = "center",
+      widget = wibox.widget.textbox,
+   }
+
+   local net_rx_widget = wibox.widget {
+      wibox.container.mirror(netgraph_rx_widget, { horizontal = true }),
+      widget = wibox.container.margin
+   }
+
+   local netgraph_tx_widget = wibox.widget {
+      background_color = "#00000000",
+      forced_width = net_widget_width,
+      forced_height = dpi(24),
+      step_width = dpi(2),
+      step_spacing = dpi(1),
+      widget = wibox.widget.graph,
+      scale = true,
+      max_value = 256 * 1024,
+      color = "#74aeab"
+   }
+
+   local tx_text = wibox.widget {
+      forced_width = net_widget_width,
+      forced_height = dpi(24),
+      align = "center",
+      widget = wibox.widget.textbox,
+   }
+
+   local net_tx_widget = wibox.widget {
+      wibox.container.mirror(netgraph_tx_widget, { horizontal = true }),
+      widget = wibox.container.margin
+   }
+
+   net_widget = wibox.widget {
+      {
+         net_rx_widget,
+         rx_text,
+         layout = wibox.layout.stack,
+      },
+      {
+         net_tx_widget,
+         tx_text,
+         layout = wibox.layout.stack,
+      },
+      {
+         {
+            image = gcolor.recolor_image(icons.ethernet, beautiful.fg_normal),
+            forced_height = dpi(16),
+            forced_width = dpi(16),
+            widget = wibox.widget.imagebox,
+         },
+         margins = dpi(4),
+         widget = wibox.container.margin,
+      },
+      layout = wibox.layout.fixed.horizontal,
+   }
+
+   local prev_recv = nil
+   local prev_send = nil
+   local rx = 0
+   local tx = 0
+
+   watch({"egrep", "-e", "[[:alnum:]]+:", "/proc/net/dev"}, 1,
+      function(widget, stdout, stderr, exitreason, exitcode)
+         local recv = 0
+         local send = 0
+         for line in stdout:gmatch("[^\r\n]+") do
+            local items = {}
+            for item in line:match("[^:]*$"):gmatch("%S+") do
+               if #item > 0 then
+                  table.insert(items, item)
+               end
+            end
+            recv = recv + tonumber(items[1])
+            send = send + tonumber(items[9])
+         end
+
+         if prev_recv ~= nil then
+            local new_rx = recv - prev_recv
+            rx_text:set_markup("<span size='small'>RX:" .. format_size(new_rx) .. "B</span>")
+            netgraph_rx_widget:add_value(new_rx - rx)
+            rx = new_rx
+         end
+         prev_recv = recv
+         if prev_send ~= nil then
+            local new_tx = send - prev_send
+            tx_text:set_markup("<span size='small'>TX:" .. format_size(new_tx) .. "B</span>")
+            netgraph_tx_widget:add_value(new_tx - tx)
+            tx = new_tx
+         end
+         prev_send = send
+      end,
+      netgraph_widget
    )
 end
 
@@ -427,6 +556,7 @@ local waffle_root_view = create_view(
                   },
                   layout = wibox.layout.fixed.horizontal,
                },
+               net_widget,
                layout = wibox.layout.fixed.vertical,
             },
             bg = beautiful.bg_normal,
