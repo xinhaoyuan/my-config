@@ -14,7 +14,10 @@ local icons = require("icons")
 local dpi = require("beautiful.xresources").apply_dpi
 
 local waffle_width = beautiful.waffle_width or dpi(240)
-local button_height = dpi(24)
+local button_height = dpi(20)
+local button_padding = dpi(4)
+local font_big = beautiful.fontname_normal .. " 10"
+local font_small = beautiful.fontname_normal .. " 7"
 
 local function create_view(root)
    local checked = {[root] = true}
@@ -60,8 +63,6 @@ local function create_view(root)
    return view
 end
 
-local font_big = beautiful.fontname_normal .. " 14"
-local font_small = beautiful.fontname_normal .. " 7"
 local function simple_button(args)
    local action = args.action
    local width = waffle_width - dpi(10)
@@ -90,6 +91,7 @@ local function simple_button(args)
                   resize = true,
                   forced_width = button_height,
                   forced_height = button_height,
+                  valign = "center",
                   widget = wibox.widget.imagebox,
                },
                textbox,
@@ -98,7 +100,7 @@ local function simple_button(args)
             buttons = action and awful.util.table.join(
                      awful.button({ }, 1, nil, function () action(false) end),
                      awful.button({ }, 3, nil, function () action(true) end)),
-            margins = dpi(5),
+            margins = button_padding,
             widget = wibox.container.margin,
          },
          fg = beautiful.fg_normal,

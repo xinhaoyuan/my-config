@@ -9,7 +9,7 @@ local gears = require("gears")
 local lgi   = require("lgi")
 local cairo = lgi.cairo
 
-theme.fontname_normal = "Determination Sans"
+theme.fontname_normal = "Determination Mono"
 theme.fontname_mono = "Determination Mono"
 theme.font = theme.fontname_normal .. " 10"
 theme.font_mono = theme.fontname_mono .. " 10"
