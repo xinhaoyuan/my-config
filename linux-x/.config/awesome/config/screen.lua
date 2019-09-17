@@ -152,7 +152,7 @@ local function setup_screen(scr)
    scr.mypromptbox = awful.widget.prompt()
 
    my_widgets[s] = {}
-   my_widgets[s].tasklist = awful.widget.tasklist {
+   local tasklist = awful.widget.tasklist {
       screen = s,
       filter = awful.widget.tasklist.filter.currenttags,
       buttons = my_tasklist_buttons,
@@ -185,6 +185,7 @@ local function setup_screen(scr)
       end,
       widget_template = beautiful.tasklist_template,
    }
+   my_widgets[s].tasklist = tasklist
 
    my_widgets[s].tag_list = awful.widget.taglist(
       s, function (t) return true end, my_tag_list_buttons,
@@ -200,6 +201,7 @@ local function setup_screen(scr)
          height = beautiful.bar_height + beautiful.border_width,
          position = "bottom",
          border_width = 0,
+         cursor = "cross",
    })
 
    local wc_button = wibox.widget{
@@ -283,7 +285,7 @@ local function setup_screen(scr)
       {
          left_layout,
          {
-            my_widgets[s].tasklist,
+            tasklist,
             right = dpi(5),
             widget = wibox.container.margin
          },
