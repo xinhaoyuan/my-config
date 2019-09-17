@@ -60,6 +60,8 @@ local function create_view(root)
    return view
 end
 
+local font_big = beautiful.fontname_normal .. " 14"
+local font_small = beautiful.fontname_normal .. " 7"
 local function simple_button(args)
    local action = args.action
    local width = waffle_width - dpi(10)
@@ -70,7 +72,7 @@ local function simple_button(args)
    local textbox = wibox.widget {
       markup = args.markup or nil,
       text = args.text or nil,
-      font = beautiful.fontname_normal .. " 12",
+      font = font_big,
       forced_width = width,
       forced_height = button_height,
       align = "center",
@@ -154,7 +156,7 @@ local function simple_button(args)
 end
 
 local function em(t)
-   return "<span color='#a9444e'>" .. t .. "</span>"
+   return "<span color='" .. beautiful.emphasis_color .. "'>" .. t .. "</span>"
 end
 
 local function with_background_and_border(widget)
@@ -464,7 +466,7 @@ do
 
          if prev_recv ~= nil then
             local new_rx = recv - prev_recv
-            local markup = "<span size='small'>R" .. format_size(new_rx) .. "B/s</span>"
+            local markup = "<span font_desc='" .. font_small .. "'>RX " .. format_size(new_rx) .. "B/s</span>"
             rx_text_widget:set_markup(markup)
             rx_text_shadow_widget:set_markup("<span color='" .. beautiful.bg_normal .. "'>" .. markup .. "</span>")
             netgraph_rx_widget.max_value = 256 * 1024
@@ -474,7 +476,7 @@ do
          prev_recv = recv
          if prev_send ~= nil then
             local new_tx = send - prev_send
-            local markup = "<span size='small'>T" .. format_size(new_tx) .. "B/s</span>"
+            local markup = "<span font_desc='" .. font_small .. "'>TX " .. format_size(new_tx) .. "B/s</span>"
             tx_text_widget:set_markup(markup)
             tx_text_shadow_widget:set_markup("<span color='" .. beautiful.bg_normal .. "'>" .. markup .. "</span>")
             netgraph_tx_widget.max_value = 256 * 1024

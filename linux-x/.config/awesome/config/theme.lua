@@ -9,12 +9,15 @@ local gears = require("gears")
 local lgi   = require("lgi")
 local cairo = lgi.cairo
 
-theme.fontname_normal = "Hack"
+theme.fontname_normal = "Determination Sans"
+theme.fontname_mono = "Determination Mono"
 theme.font = theme.fontname_normal .. " 10"
+theme.font_mono = theme.fontname_mono .. " 10"
 theme.useless_gap = dpi(8)
 theme.bar_height = dpi(22)
 theme.menu_width = dpi(150)
 theme.border_width = dpi(2)
+theme.emphasis_color = '#a9444e'
 
 -- theme.tasklist_shape = function(cr, w, h)
 --    offset = h / 4

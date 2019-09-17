@@ -375,4 +375,28 @@
     <edit name="rh_prefer_bitmaps" mode="assign"><bool>true</bool></edit>
   </match>
 
+  <match target="pattern">
+    <test qual="any" name="family">
+      <string>Determination Sans</string>
+    </test>
+    <test name="weight" compare="more">
+      <const>medium</const>
+    </test>
+    <edit name="weight" mode="assign" binding="same">
+      <const>medium</const>
+    </edit>
+  </match>
+
+  <match target="pattern">
+    <test qual="any" name="family">
+      <string>Determination Mono</string>
+    </test>
+    <test name="weight" compare="more">
+      <const>medium</const>
+    </test>
+    <edit name="weight" mode="assign" binding="same">
+      <const>medium</const>
+    </edit>
+  </match>
+
 </fontconfig>
