@@ -57,11 +57,10 @@ local function check_focus(prev, s)
    if not capi.client.focus or not capi.client.focus:isvisible() or not awful_client.focus.filter(capi.client.focus) then
       local c = autofocus.find_alternative_focus(prev, s)
       if c then
-         -- raise the client in "request::activate" will set the urgent flag when switching tag
          awful_client.focus.history.disable_tracking()
          c:emit_signal("request::activate", "autofocus.check_focus",
                        {raise=false})
-         -- c:raise()
+         c:raise()
          awful_client.focus.history.enable_tracking()
       end
    end
