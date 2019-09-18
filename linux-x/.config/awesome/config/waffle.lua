@@ -77,6 +77,7 @@ local function simple_button(args)
       forced_width = width,
       forced_height = button_height,
       align = "center",
+      valign = "center",
       widget = wibox.widget.textbox,
    }
 
@@ -91,7 +92,6 @@ local function simple_button(args)
                   resize = true,
                   forced_width = button_height,
                   forced_height = button_height,
-                  valign = "center",
                   widget = wibox.widget.imagebox,
                },
                textbox,
