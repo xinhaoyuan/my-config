@@ -511,13 +511,16 @@ do
          local send = 0
          for line in stdout:gmatch("[^\r\n]+") do
             local items = {}
-            for item in line:match("[^:]*$"):gmatch("%S+") do
+            for item in line:gmatch("[^ \t:]+") do
                if #item > 0 then
                   table.insert(items, item)
                end
             end
-            recv = recv + tonumber(items[1])
-            send = send + tonumber(items[9])
+            if items[1]:match("^tun[0-9]*$") == nil then
+               -- Skips VPN for avoiding double-couting
+               recv = recv + tonumber(items[2])
+               send = send + tonumber(items[10])
+            end
          end
 
          if prev_recv ~= nil then
