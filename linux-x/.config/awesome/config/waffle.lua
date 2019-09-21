@@ -263,15 +263,39 @@ do
       color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5,#74aeab"
    }
 
+
+   local cpu_text_widget = wibox.widget {
+      forced_width = cpu_widget_width,
+      forced_height = dpi(24),
+      align = "center",
+      point = {x = 0, y = 0},
+      widget = wibox.widget.textbox,
+   }
+
+   local cpu_text_shadow_widget = wibox.widget {
+      forced_width = cpu_widget_width,
+      forced_height = dpi(24),
+      align = "center",
+      point = {x = 1, y = 1},
+      widget = wibox.widget.textbox,
+   }
+
    cpu_widget = wibox.widget {
-      wibox.container.mirror(cpugraph_widget, { horizontal = true }),
-      widget = wibox.container.margin
+      {
+         wibox.container.mirror(cpugraph_widget, { horizontal = true }),
+         cpu_text_shadow_widget,
+         cpu_text_widget,
+         layout = wibox.layout.manual
+      },
+      width = cpu_widget_width,
+      height = dpi(24),
+      widget = wibox.container.constraint,
    }
 
    local total_prev = 0
    local idle_prev = 0
 
-   watch({"grep", "-e", "^cpu ", "/proc/stat"}, 1,
+   watch({"grep", "-e", "^cpu ", "/proc/stat"}, 3,
       function(widget, stdout)
          local user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice =
             stdout:match('(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s')
@@ -282,26 +306,32 @@ do
          local diff_total = total - total_prev
          local diff_usage = (1000 * (diff_total - diff_idle) / diff_total + 5) / 10
 
-         widget:add_value(diff_usage)
+         local markup = "<span font_desc='" .. font_small .. "'>" .. tostring(math.floor(diff_usage)) .. "%</span>"
+         cpu_text_widget:set_markup(markup)
+         cpu_text_shadow_widget:set_markup("<span color='" .. beautiful.bg_normal .. "'>" .. markup .. "</span>")
+
+         cpugraph_widget:add_value(diff_usage)
 
          total_prev = total
          idle_prev = idle
       end,
-      cpugraph_widget
+      cpu_widget
    )
 end
 
 local function format_size(s)
    local unit = ""
-   if s >= 1024 * 1024 * 1024 then
-      s = math.floor(s / 1024 / 1024 / 1024 * 100) / 100
-      unit = "G"
-   elseif s >= 1024 * 1024 then
-      s = math.floor(s / 1024 / 1024 * 100) / 100
-      unit = "M"
-   elseif s >= 1024 then
-      s = math.floor(s / 1024 * 100) / 100
-      unit = "K"
+   if s >= 1000 * 1000 * 1000 then
+      s = math.floor(s / 1000 / 1000 / 1000 * 100) / 100
+      unit = "g"
+   elseif s >= 1000 * 1000 then
+      s = math.floor(s / 1000 / 1000 * 100) / 100
+      unit = "m"
+   elseif s >= 1000 then
+      s = math.floor(s / 1000 * 100) / 100
+      unit = "k"
+   else
+      s = math.floor(s * 100) / 100
    end
    return tostring(s) .. unit
 end
@@ -320,21 +350,46 @@ do
       color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5,#74aeab"
    }
 
-   ram_widget = wibox.widget {
-      wibox.container.mirror(ramgraph_widget, { horizontal = true }),
-      widget = wibox.container.margin
+   local ram_text_widget = wibox.widget {
+      forced_width = ram_widget_width,
+      forced_height = dpi(24),
+      align = "center",
+      point = {x = 0, y = 0},
+      widget = wibox.widget.textbox,
    }
 
-   local prev_usage = 0
+   local ram_text_shadow_widget = wibox.widget {
+      forced_width = ram_widget_width,
+      forced_height = dpi(24),
+      align = "center",
+      point = {x = 1, y = 1},
+      widget = wibox.widget.textbox,
+   }
 
-   watch({"egrep", "-e", "MemTotal:|MemAvailable:", "/proc/meminfo"}, 1,
+   ram_widget = wibox.widget {
+      {
+         wibox.container.mirror(ramgraph_widget, { horizontal = true }),
+         ram_text_shadow_widget,
+         ram_text_widget,
+         layout = wibox.layout.manual
+      },
+      width = ram_widget_width,
+      height = dpi(24),
+      widget = wibox.container.constraint,
+   }
+
+   watch({"egrep", "-e", "MemTotal:|MemAvailable:", "/proc/meminfo"}, 3,
       function(widget, stdout, stderr, exitreason, exitcode)
          local total, available = stdout:match('MemTotal:%s+([0-9]+) .*MemAvailable:%s+([0-9]+)')
          local usage = math.floor((total - available) / total * 100 + 0.5)
 
-         widget:add_value(usage - prev_usage)
+         local markup = "<span font_desc='" .. font_small .. "'>" .. format_size((total - available) * 1000) .. "B</span>"
+         ram_text_widget:set_markup(markup)
+         ram_text_shadow_widget:set_markup("<span color='" .. beautiful.bg_normal .. "'>" .. markup .. "</span>")
+
+         ramgraph_widget:add_value(usage)
       end,
-      ramgraph_widget
+      ram_widget
    )
 end
 
@@ -448,10 +503,8 @@ do
 
    local prev_recv = nil
    local prev_send = nil
-   local rx = 0
-   local tx = 0
 
-   watch({"egrep", "-e", "[[:alnum:]]+:", "/proc/net/dev"}, 1,
+   watch({"egrep", "-e", "[[:alnum:]]+:", "/proc/net/dev"}, 3,
       function(widget, stdout, stderr, exitreason, exitcode)
          local recv = 0
          local send = 0
@@ -467,23 +520,21 @@ do
          end
 
          if prev_recv ~= nil then
-            local new_rx = recv - prev_recv
-            local markup = "<span font_desc='" .. font_small .. "'>RX " .. format_size(new_rx) .. "B/s</span>"
+            local rx = (recv - prev_recv) / 3
+            local markup = "<span font_desc='" .. font_small .. "'>RX " .. format_size(rx) .. "B/s</span>"
             rx_text_widget:set_markup(markup)
             rx_text_shadow_widget:set_markup("<span color='" .. beautiful.bg_normal .. "'>" .. markup .. "</span>")
             netgraph_rx_widget.max_value = 256 * 1024
-            netgraph_rx_widget:add_value(new_rx - rx)
-            rx = new_rx
+            netgraph_rx_widget:add_value(rx)
          end
          prev_recv = recv
          if prev_send ~= nil then
-            local new_tx = send - prev_send
-            local markup = "<span font_desc='" .. font_small .. "'>TX " .. format_size(new_tx) .. "B/s</span>"
+            local tx = (send - prev_send) / 3
+            local markup = "<span font_desc='" .. font_small .. "'>TX " .. format_size(tx) .. "B/s</span>"
             tx_text_widget:set_markup(markup)
             tx_text_shadow_widget:set_markup("<span color='" .. beautiful.bg_normal .. "'>" .. markup .. "</span>")
             netgraph_tx_widget.max_value = 256 * 1024
-            netgraph_tx_widget:add_value(new_tx - tx)
-            tx = new_tx
+            netgraph_tx_widget:add_value(tx)
          end
          prev_send = send
       end,
