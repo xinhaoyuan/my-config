@@ -137,12 +137,11 @@ capi.client.connect_signal(
          {
             { -- Left
                awful.titlebar.widget.iconwidget(c),
-               titlewidget,
-               spacing = dpi(2),
                buttons = buttons,
                layout  = wibox.layout.fixed.horizontal
             },
             { -- Space
+               titlewidget,
                buttons = buttons,
                layout  = wibox.layout.fixed.horizontal
             },
