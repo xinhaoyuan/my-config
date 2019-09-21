@@ -227,6 +227,12 @@ require("awful.rules").rules = {
       }
    },
    {
+      rule = { class = "URxvt" },
+      properties = {
+         size_hints_honor = true,
+      },
+   },
+   {
       rule = { class = "Synapse" },
       properties = {
          ontop = true,
