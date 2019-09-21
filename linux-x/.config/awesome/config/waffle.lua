@@ -18,6 +18,7 @@ local button_height = dpi(20)
 local button_padding = dpi(4)
 local font_big = beautiful.fontname_normal .. " 10"
 local font_small = beautiful.fontname_normal .. " 7"
+local update_interval_s = 1
 
 local function create_view(root)
    local checked = {[root] = true}
@@ -295,7 +296,7 @@ do
    local total_prev = 0
    local idle_prev = 0
 
-   watch({"grep", "-e", "^cpu ", "/proc/stat"}, 3,
+   watch({"grep", "-e", "^cpu ", "/proc/stat"}, update_interval_s,
       function(widget, stdout)
          local user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice =
             stdout:match('(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s')
@@ -378,7 +379,7 @@ do
       widget = wibox.container.constraint,
    }
 
-   watch({"egrep", "-e", "MemTotal:|MemAvailable:", "/proc/meminfo"}, 3,
+   watch({"egrep", "-e", "MemTotal:|MemAvailable:", "/proc/meminfo"}, update_interval_s,
       function(widget, stdout, stderr, exitreason, exitcode)
          local total, available = stdout:match('MemTotal:%s+([0-9]+) .*MemAvailable:%s+([0-9]+)')
          local usage = math.floor((total - available) / total * 100 + 0.5)
@@ -504,7 +505,7 @@ do
    local prev_recv = nil
    local prev_send = nil
 
-   watch({"egrep", "-e", "[[:alnum:]]+:", "/proc/net/dev"}, 3,
+   watch({"egrep", "-e", "[[:alnum:]]+:", "/proc/net/dev"}, update_interval_s,
       function(widget, stdout, stderr, exitreason, exitcode)
          local recv = 0
          local send = 0
@@ -520,7 +521,7 @@ do
          end
 
          if prev_recv ~= nil then
-            local rx = (recv - prev_recv) / 3
+            local rx = (recv - prev_recv) / update_interval_s
             local markup = "<span font_desc='" .. font_small .. "'>RX " .. format_size(rx) .. "B/s</span>"
             rx_text_widget:set_markup(markup)
             rx_text_shadow_widget:set_markup("<span color='" .. beautiful.bg_normal .. "'>" .. markup .. "</span>")
@@ -529,7 +530,7 @@ do
          end
          prev_recv = recv
          if prev_send ~= nil then
-            local tx = (send - prev_send) / 3
+            local tx = (send - prev_send) / update_interval_s
             local markup = "<span font_desc='" .. font_small .. "'>TX " .. format_size(tx) .. "B/s</span>"
             tx_text_widget:set_markup(markup)
             tx_text_shadow_widget:set_markup("<span color='" .. beautiful.bg_normal .. "'>" .. markup .. "</span>")
