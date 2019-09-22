@@ -11,27 +11,42 @@ index defa426..77f5a4c 100644
  static Key keys[] = {
  	/* modifier             key        function     argument */
 +	/* The first key is always enabled */
-+	{ MODKEY|Mod1Mask,      XK_q,      toggle,      { .v = (void *) &keysenabled } },
++	{ MODKEY|Mod1Mask,      XK_q,      togglekeys,  { 0 } },
  	{ MODKEY|ShiftMask,     XK_Return, focusonce,   { 0 } },
  	{ MODKEY|ShiftMask,     XK_Return, spawn,       { 0 } },
  
 diff --git a/tabbed.c b/tabbed.c
-index ff3ada0..7eb3636 100644
+index ff3ada0..97363a4 100644
 --- a/tabbed.c
 +++ b/tabbed.c
-@@ -648,6 +648,11 @@ isprotodel(int c)
+@@ -112,7 +112,10 @@ static int getfirsttab(void);
+ static Bool gettextprop(Window w, Atom atom, char *text, unsigned int size);
+ static void initfont(const char *fontstr);
+ static Bool isprotodel(int c);
++static void togglekeys(const Arg *arg);
+ static void keypress(const XEvent *e);
++static void grabkey(Window w, int i);
++static void updatekeys(Window w);
+ static void killclient(const Arg *arg);
+ static void manage(Window win);
+ static void maprequest(const XEvent *e);
+@@ -648,6 +651,15 @@ isprotodel(int c)
  	return ret;
  }
  
 +void
 +togglekeys(const Arg *arg) {
++	int i;
 +	keysenabled = !keysenabled;
++	for (i = 0; i < nclients; ++i) {
++		updatekeys(clients[i]->win);
++	}
 +}
 +
  void
  keypress(const XEvent *e)
  {
-@@ -661,6 +666,7 @@ keypress(const XEvent *e)
+@@ -661,6 +673,7 @@ keypress(const XEvent *e)
  		    CLEANMASK(keys[i].mod) == CLEANMASK(ev->state) &&
  		    keys[i].func)
  			keys[i].func(&(keys[i].arg));
@@ -39,3 +54,64 @@ index ff3ada0..7eb3636 100644
  	}
  }
  
+@@ -686,15 +699,39 @@ killclient(const Arg *arg)
+ 	}
+ }
+ 
++void
++grabkey(Window w, int i)
++{
++	int j;
++	KeyCode code;
++	unsigned int modifiers[] =
++		{ 0, LockMask, numlockmask, numlockmask | LockMask };
++
++	if ((code = XKeysymToKeycode(dpy, keys[i].keysym))) {
++		for (j = 0; j < LENGTH(modifiers); j++) {
++			XGrabKey(dpy, code, keys[i].mod |
++				 modifiers[j], w, True,
++				 GrabModeAsync, GrabModeAsync);
++		}
++	}
++}
++
++void updatekeys(Window w)
++{
++	int i;
++	XUngrabKey(dpy, AnyKey, AnyModifier, w);
++	for (i = 0; i < LENGTH(keys); i++) {
++		grabkey(w, i);
++		if (!keysenabled) break;
++	}
++}
++
+ void
+ manage(Window w)
+ {
+ 	updatenumlockmask();
+ 	{
+-		int i, j, nextpos;
+-		unsigned int modifiers[] = { 0, LockMask, numlockmask,
+-		                             numlockmask | LockMask };
+-		KeyCode code;
++		int nextpos;
+ 		Client *c;
+ 		XEvent e;
+ 
+@@ -704,15 +741,7 @@ manage(Window w)
+ 		             StructureNotifyMask | EnterWindowMask);
+ 		XSync(dpy, False);
+ 
+-		for (i = 0; i < LENGTH(keys); i++) {
+-			if ((code = XKeysymToKeycode(dpy, keys[i].keysym))) {
+-				for (j = 0; j < LENGTH(modifiers); j++) {
+-					XGrabKey(dpy, code, keys[i].mod |
+-					         modifiers[j], w, True,
+-					         GrabModeAsync, GrabModeAsync);
+-				}
+-			}
+-		}
++		updatekeys(w);
+ 
+ 		c = ecalloc(1, sizeof *c);
+ 		c->win = w;
