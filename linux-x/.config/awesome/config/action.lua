@@ -9,7 +9,7 @@ local dpi    = require("beautiful.xresources").apply_dpi
 
 shared.action = {
    terminal = function (extra_cmd)
-      local cmd = {"tabbed", "-c", "-F", be.fontname_normal .. ",size=10", "-M", beautiful.fg_normal, "-m", beautiful.bg_normal, "-r", "2", "--", "urxvt", "-embed", "--"}
+      local cmd = {"tabbed", "-c", "-F", be.fontname_normal .. ":size=10", "-M", beautiful.fg_normal, "-m", beautiful.bg_normal, "-r", "2", "--", "urxvt", "-embed", "--"}
       if type(extra_cmd) == "table" then
          table.insert(cmd, "-e")
          for i = 1, #extra_cmd do
