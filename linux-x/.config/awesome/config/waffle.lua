@@ -162,7 +162,7 @@ local function em(t)
    return "<span color='" .. beautiful.emphasis_color .. "'>" .. t .. "</span>"
 end
 
-local function with_background_and_border(widget)
+local function decorate(widget)
    return wibox.widget {
       {
          widget,
@@ -199,9 +199,9 @@ function waffle_poweroff_button:update_text()
    self.textbox.markup = em("P") .. "ower off <span size='x-small'>(" .. tostring(2 - waffle_poweroff_count) .. " more times)</span>"
 end
 
-local waffle_poweroff_view = create_view(with_background_and_border(waffle_poweroff_button))
+local waffle_poweroff_view = create_view(decorate(waffle_poweroff_button))
 local waffle_settings_view = create_view(
-   with_background_and_border(
+   decorate(
       wibox.widget {
          simple_button({
                markup = "Toggle " .. em("t") .. "itlebars",
@@ -626,7 +626,7 @@ end
 
 local waffle_root_view = create_view(
    wibox.widget {
-      with_background_and_border(
+      decorate(
          wibox.widget {
             {
                {
@@ -661,7 +661,7 @@ local waffle_root_view = create_view(
             bg = beautiful.bg_normal,
             widget = wibox.container.background,
       }),
-      with_background_and_border(
+      decorate(
          wibox.widget {
             simple_button({
                   icon = gcolor.recolor_image(icons.browser, beautiful.fg_normal),
@@ -704,7 +704,7 @@ local waffle_root_view = create_view(
             }),
             layout = wibox.layout.fixed.vertical,
       }),
-      with_background_and_border(
+      decorate(
          wibox.widget {
             {
                {
@@ -726,7 +726,7 @@ local waffle_root_view = create_view(
             bg = beautiful.bg_normal,
             widget = wibox.container.background,
       }),
-      with_background_and_border(
+      decorate(
          wibox.widget {
             simple_button({
                   icon = gcolor.recolor_image(icons.lock, beautiful.fg_normal),
