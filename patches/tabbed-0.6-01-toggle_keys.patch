@@ -1,0 +1,41 @@
+diff --git a/config.def.h b/config.def.h
+index defa426..77f5a4c 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -33,9 +33,12 @@ static Bool npisrelative  = False;
+         } \
+ }
+ 
++static Bool keysenabled = False;
+ #define MODKEY ControlMask
+ static Key keys[] = {
+ 	/* modifier             key        function     argument */
++	/* The first key is always enabled */
++	{ MODKEY|Mod1Mask,      XK_q,      toggle,      { .v = (void *) &keysenabled } },
+ 	{ MODKEY|ShiftMask,     XK_Return, focusonce,   { 0 } },
+ 	{ MODKEY|ShiftMask,     XK_Return, spawn,       { 0 } },
+ 
+diff --git a/tabbed.c b/tabbed.c
+index ff3ada0..7eb3636 100644
+--- a/tabbed.c
++++ b/tabbed.c
+@@ -648,6 +648,11 @@ isprotodel(int c)
+ 	return ret;
+ }
+ 
++void
++togglekeys(const Arg *arg) {
++	keysenabled = !keysenabled;
++}
++
+ void
+ keypress(const XEvent *e)
+ {
+@@ -661,6 +666,7 @@ keypress(const XEvent *e)
+ 		    CLEANMASK(keys[i].mod) == CLEANMASK(ev->state) &&
+ 		    keys[i].func)
+ 			keys[i].func(&(keys[i].arg));
++		if (!keysenabled) break;
+ 	}
+ }
+ 

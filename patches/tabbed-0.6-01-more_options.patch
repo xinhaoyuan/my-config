@@ -1,0 +1,31 @@
+diff --git a/config.def.h b/config.def.h
+index defa426..f6d59b2 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -3,5 +3,5 @@
+ /* appearance */
+-static const char font[]        = "monospace:size=9";
++static const char* font         = "monospace:size=9";
+ static const char* normbgcolor  = "#222222";
+ static const char* normfgcolor  = "#cccccc";
+ static const char* selbgcolor   = "#555555";
+diff --git a/tabbed.c b/tabbed.c
+index ff3ada0..cb4b925 100644
+--- a/tabbed.c
++++ b/tabbed.c
+@@ -1311,6 +1311,15 @@ main(int argc, char *argv[])
+ 	case 's':
+ 		doinitspawn = False;
+ 		break;
++	case 'F':
++		font = EARGF(usage());
++		break;
++	case 'M':
++		normfgcolor = EARGF(usage());
++		break;
++	case 'm':
++		normbgcolor = EARGF(usage());
++		break;
+ 	case 'T':
+ 		selfgcolor = EARGF(usage());
+ 		break;

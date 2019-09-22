@@ -1,0 +1,163 @@
+diff --git a/config.def.h b/config.def.h
+index defa426..aad2d72 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -14,6 +14,7 @@ static const char titletrim[]   = "...";
+ static const int  tabwidth      = 200;
+ static const Bool foreground    = True;
+ static       Bool urgentswitch  = False;
++static const Bool hidebarifalone= True;
+ 
+ /*
+  * Where to place a new tab when it is opened. When npisrelative is True,
+diff --git a/tabbed.c b/tabbed.c
+index ff3ada0..5c45899 100644
+--- a/tabbed.c
++++ b/tabbed.c
+@@ -84,6 +84,7 @@ typedef struct {
+ 	int tabx;
+ 	Bool urgent;
+ 	Bool closed;
++	XSizeHints *size_hints;
+ } Client;
+ 
+ /* function declarations */
+@@ -119,6 +120,9 @@ static void maprequest(const XEvent *e);
+ static void move(const Arg *arg);
+ static void movetab(const Arg *arg);
+ static void propertynotify(const XEvent *e);
++static void fit(int c);
++static void setgeo(int c, int x, int y, int w, int h);
++/* Deprecated. Left for compatibility. */
+ static void resize(int c, int w, int h);
+ static void rotate(const Arg *arg);
+ static void run(void);
+@@ -257,7 +261,7 @@ configurenotify(const XEvent *e)
+ 		dc.drawable = XCreatePixmap(dpy, root, ww, wh,
+ 		              DefaultDepth(dpy, screen));
+ 		if (sel > -1)
+-			resize(sel, ww, wh - bh);
++			fit(sel);
+ 		XSync(dpy, False);
+ 	}
+ }
+@@ -318,11 +322,11 @@ drawbar(void)
+ 	int c, cc, fc, width;
+ 	char *name = NULL;
+ 
+-	if (nclients == 0) {
++	if (nclients == 0 || (nclients == 1 && hidebarifalone)) {
+ 		dc.x = 0;
+ 		dc.w = ww;
+ 		XFetchName(dpy, win, &name);
+-		drawtext(name ? name : "", dc.norm);
++		drawtext((name && !hidebarifalone) ? name : "", dc.norm);
+ 		XCopyArea(dpy, dc.drawable, win, dc.gc, 0, 0, ww, bh, 0, 0);
+ 		XSync(dpy, False);
+ 
+@@ -454,7 +458,7 @@ focus(int c)
+ 	if (c < 0 || c >= nclients)
+ 		return;
+ 
+-	resize(c, ww, wh - bh);
++	fit(c);
+ 	XRaiseWindow(dpy, clients[c]->win);
+ 	XSetInputFocus(dpy, clients[c]->win, RevertToParent, CurrentTime);
+ 	sendxembed(c, XEMBED_FOCUS_IN, XEMBED_FOCUS_CURRENT, 0, 0);
+@@ -716,8 +720,19 @@ manage(Window w)
+ 
+ 		c = ecalloc(1, sizeof *c);
+ 		c->win = w;
++		c->size_hints = XAllocSizeHints();
++		long supplied_return;
++		if (XGetWMNormalHints(dpy, w, c->size_hints, &supplied_return) == 0) {
++			c->size_hints->flags = 0;
++		}
++		else {
++			c->size_hints->flags &= supplied_return;
++		}
+ 
+ 		nclients++;
++		if (nclients == 2 && hidebarifalone) {
++			fit(0);
++		}
+ 		clients = erealloc(clients, sizeof(Client *) * nclients);
+ 
+ 		if(npisrelative) {
+@@ -866,13 +881,26 @@ propertynotify(const XEvent *e)
+ }
+ 
+ void
+-resize(int c, int w, int h)
++resize(int c, int w, int h) {
++	setgeo(c, 0, bh, w, h);
++}
++
++void fit(int c) {
++	if (nclients <= 1 && hidebarifalone) {
++		setgeo(c, 0, 0, ww, wh);
++	} else {
++		setgeo(c, 0, bh, ww, wh - bh);
++	}
++}
++
++void
++setgeo(int c, int x, int y, int w, int h)
+ {
+ 	XConfigureEvent ce;
+ 	XWindowChanges wc;
+ 
+-	ce.x = 0;
+-	ce.y = bh;
++	ce.x = wc.x = x;
++	ce.y = wc.y = y;
+ 	ce.width = wc.width = w;
+ 	ce.height = wc.height = h;
+ 	ce.type = ConfigureNotify;
+@@ -883,7 +911,26 @@ resize(int c, int w, int h)
+ 	ce.override_redirect = False;
+ 	ce.border_width = 0;
+ 
+-	XConfigureWindow(dpy, clients[c]->win, CWWidth | CWHeight, &wc);
++	if (clients[c]->size_hints->flags & PResizeInc &&
++	    clients[c]->size_hints->width_inc > 0 &&
++	    clients[c]->size_hints->height_inc > 0) {
++		unsigned int dx = w;
++		unsigned int dy = h;
++		if (clients[c]->size_hints->flags & PMinSize) {
++			dx -= clients[c]->size_hints->min_width;
++			dy -= clients[c]->size_hints->min_height;
++		}
++
++		dx %= clients[c]->size_hints->width_inc;
++		dy %= clients[c]->size_hints->height_inc;
++
++		wc.x += dx >> 1;
++		wc.width -= dx;
++		wc.y += dy >> 1;
++		wc.height -= dy;
++	}
++
++	XConfigureWindow(dpy, clients[c]->win, CWX | CWY | CWWidth | CWHeight, &wc);
+ 	XSendEvent(dpy, clients[c]->win, False, StructureNotifyMask,
+ 	           (XEvent *)&ce);
+ }
+@@ -1128,15 +1175,18 @@ unmanage(int c)
+ 	if (c == 0) {
+ 		/* First client. */
+ 		nclients--;
++		XFree(clients[0]->size_hints);
+ 		free(clients[0]);
+ 		memmove(&clients[0], &clients[1], sizeof(Client *) * nclients);
+ 	} else if (c == nclients - 1) {
+ 		/* Last client. */
+ 		nclients--;
++		XFree(clients[c]->size_hints);
+ 		free(clients[c]);
+ 		clients = erealloc(clients, sizeof(Client *) * nclients);
+ 	} else {
+ 		/* Somewhere inbetween. */
++		XFree(clients[c]->size_hints);
+ 		free(clients[c]);
+ 		memmove(&clients[c], &clients[c+1],
+ 		        sizeof(Client *) * (nclients - (c + 1)));
