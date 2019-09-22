@@ -686,7 +686,11 @@ local waffle_root_view = create_view(
                   markup = em("T") .. "erminal",
                   key = "t",
                   action = function (alt)
-                     shared.action.terminal()
+                     if alt then
+                        awful.spawn("xterm")
+                     else
+                        shared.action.terminal()
+                     end
                      waffle:hide()
                   end
             }),
