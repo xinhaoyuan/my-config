@@ -1,5 +1,5 @@
 diff --git a/config.def.h b/config.def.h
-index defa426..77f5a4c 100644
+index defa426..7c16cc4 100644
 --- a/config.def.h
 +++ b/config.def.h
 @@ -33,9 +33,12 @@ static Bool npisrelative  = False;
