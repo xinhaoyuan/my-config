@@ -1,17 +1,26 @@
 diff --git a/config.def.h b/config.def.h
-index defa426..aad2d72 100644
+index defa426..f7ca1c0 100644
 --- a/config.def.h
 +++ b/config.def.h
-@@ -14,6 +14,7 @@ static const char titletrim[]   = "...";
+@@ -14,6 +14,8 @@ static const char titletrim[]   = "...";
  static const int  tabwidth      = 200;
  static const Bool foreground    = True;
  static       Bool urgentswitch  = False;
-+static const Bool hidebarifalone= True;
++static       Bool hidebar       = False;
++static       Bool hidebarifalone= True;
  
  /*
   * Where to place a new tab when it is opened. When npisrelative is True,
+@@ -39,6 +41,7 @@ static Key keys[] = {
+ 	{ MODKEY|ShiftMask,     XK_Return, focusonce,   { 0 } },
+ 	{ MODKEY|ShiftMask,     XK_Return, spawn,       { 0 } },
+ 
++	{ MODKEY,               XK_t,      togglebar,   { 0 } },
+ 	{ MODKEY|ShiftMask,     XK_l,      rotate,      { .i = +1 } },
+ 	{ MODKEY|ShiftMask,     XK_h,      rotate,      { .i = -1 } },
+ 	{ MODKEY|ShiftMask,     XK_j,      movetab,     { .i = -1 } },
 diff --git a/tabbed.c b/tabbed.c
-index ff3ada0..5c45899 100644
+index ff3ada0..2364914 100644
 --- a/tabbed.c
 +++ b/tabbed.c
 @@ -84,6 +84,7 @@ typedef struct {
@@ -22,7 +31,7 @@ index ff3ada0..5c45899 100644
  } Client;
  
  /* function declarations */
-@@ -119,6 +120,9 @@ static void maprequest(const XEvent *e);
+@@ -119,7 +120,11 @@ static void maprequest(const XEvent *e);
  static void move(const Arg *arg);
  static void movetab(const Arg *arg);
  static void propertynotify(const XEvent *e);
@@ -30,9 +39,22 @@ index ff3ada0..5c45899 100644
 +static void setgeo(int c, int x, int y, int w, int h);
 +/* Deprecated. Left for compatibility. */
  static void resize(int c, int w, int h);
++static void togglebar(const Arg *arg);
  static void rotate(const Arg *arg);
  static void run(void);
-@@ -257,7 +261,7 @@ configurenotify(const XEvent *e)
+ static void sendxembed(int c, long msg, long detail, long d1, long d2);
+@@ -178,6 +183,10 @@ char *argv0;
+ void
+ buttonpress(const XEvent *e)
+ {
++	if (hidebar || (nclients <= 1 && hidebarifalone)) {
++		return;
++	}
++
+ 	const XButtonPressedEvent *ev = &e->xbutton;
+ 	int i, fc;
+ 	Arg arg;
+@@ -257,7 +266,7 @@ configurenotify(const XEvent *e)
  		dc.drawable = XCreatePixmap(dpy, root, ww, wh,
  		              DefaultDepth(dpy, screen));
  		if (sel > -1)
@@ -41,21 +63,21 @@ index ff3ada0..5c45899 100644
  		XSync(dpy, False);
  	}
  }
-@@ -318,11 +322,11 @@ drawbar(void)
+@@ -318,11 +327,11 @@ drawbar(void)
  	int c, cc, fc, width;
  	char *name = NULL;
  
 -	if (nclients == 0) {
-+	if (nclients == 0 || (nclients == 1 && hidebarifalone)) {
++	if (nclients == 0 || hidebar || (nclients == 1 && hidebarifalone)) {
  		dc.x = 0;
  		dc.w = ww;
  		XFetchName(dpy, win, &name);
 -		drawtext(name ? name : "", dc.norm);
-+		drawtext((name && !hidebarifalone) ? name : "", dc.norm);
++		drawtext((name && !hidebar && !hidebarifalone) ? name : "", dc.norm);
  		XCopyArea(dpy, dc.drawable, win, dc.gc, 0, 0, ww, bh, 0, 0);
  		XSync(dpy, False);
  
-@@ -454,7 +458,7 @@ focus(int c)
+@@ -454,7 +463,7 @@ focus(int c)
  	if (c < 0 || c >= nclients)
  		return;
  
@@ -64,7 +86,7 @@ index ff3ada0..5c45899 100644
  	XRaiseWindow(dpy, clients[c]->win);
  	XSetInputFocus(dpy, clients[c]->win, RevertToParent, CurrentTime);
  	sendxembed(c, XEMBED_FOCUS_IN, XEMBED_FOCUS_CURRENT, 0, 0);
-@@ -716,8 +720,19 @@ manage(Window w)
+@@ -716,8 +725,19 @@ manage(Window w)
  
  		c = ecalloc(1, sizeof *c);
  		c->win = w;
@@ -84,17 +106,17 @@ index ff3ada0..5c45899 100644
  		clients = erealloc(clients, sizeof(Client *) * nclients);
  
  		if(npisrelative) {
-@@ -866,13 +881,26 @@ propertynotify(const XEvent *e)
- }
+@@ -867,12 +887,27 @@ propertynotify(const XEvent *e)
  
  void
--resize(int c, int w, int h)
-+resize(int c, int w, int h) {
+ resize(int c, int w, int h)
++{
 +	setgeo(c, 0, bh, w, h);
 +}
 +
-+void fit(int c) {
-+	if (nclients <= 1 && hidebarifalone) {
++void fit(int c)
++{
++	if (hidebar || (nclients <= 1 && hidebarifalone)) {
 +		setgeo(c, 0, 0, ww, wh);
 +	} else {
 +		setgeo(c, 0, bh, ww, wh - bh);
@@ -114,7 +136,7 @@ index ff3ada0..5c45899 100644
  	ce.width = wc.width = w;
  	ce.height = wc.height = h;
  	ce.type = ConfigureNotify;
-@@ -883,7 +911,26 @@ resize(int c, int w, int h)
+@@ -883,11 +918,47 @@ resize(int c, int w, int h)
  	ce.override_redirect = False;
  	ce.border_width = 0;
  
@@ -142,7 +164,28 @@ index ff3ada0..5c45899 100644
  	XSendEvent(dpy, clients[c]->win, False, StructureNotifyMask,
  	           (XEvent *)&ce);
  }
-@@ -1128,15 +1175,18 @@ unmanage(int c)
+ 
++void togglebar(const Arg *arg)
++{
++	int i;
++
++	if (nclients == 1) {
++		hidebarifalone = !hidebarifalone;
++	}
++	else if (nclients > 1) {
++		hidebar = !hidebar;
++	}
++
++	for (i = 0; i < nclients; ++i) {
++		fit(i);
++	}
++	drawbar();
++}
++
+ void
+ rotate(const Arg *arg)
+ {
+@@ -1128,15 +1199,18 @@ unmanage(int c)
  	if (c == 0) {
  		/* First client. */
  		nclients--;

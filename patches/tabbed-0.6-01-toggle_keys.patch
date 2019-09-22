@@ -16,7 +16,7 @@ index defa426..7c16cc4 100644
  	{ MODKEY|ShiftMask,     XK_Return, spawn,       { 0 } },
  
 diff --git a/tabbed.c b/tabbed.c
-index ff3ada0..97363a4 100644
+index ff3ada0..0c1c0a5 100644
 --- a/tabbed.c
 +++ b/tabbed.c
 @@ -112,7 +112,10 @@ static int getfirsttab(void);
@@ -30,12 +30,13 @@ index ff3ada0..97363a4 100644
  static void killclient(const Arg *arg);
  static void manage(Window win);
  static void maprequest(const XEvent *e);
-@@ -648,6 +651,15 @@ isprotodel(int c)
+@@ -648,6 +651,16 @@ isprotodel(int c)
  	return ret;
  }
  
 +void
-+togglekeys(const Arg *arg) {
++togglekeys(const Arg *arg)
++{
 +	int i;
 +	keysenabled = !keysenabled;
 +	for (i = 0; i < nclients; ++i) {
@@ -46,7 +47,7 @@ index ff3ada0..97363a4 100644
  void
  keypress(const XEvent *e)
  {
-@@ -661,6 +673,7 @@ keypress(const XEvent *e)
+@@ -661,6 +674,7 @@ keypress(const XEvent *e)
  		    CLEANMASK(keys[i].mod) == CLEANMASK(ev->state) &&
  		    keys[i].func)
  			keys[i].func(&(keys[i].arg));
@@ -54,7 +55,7 @@ index ff3ada0..97363a4 100644
  	}
  }
  
-@@ -686,15 +699,39 @@ killclient(const Arg *arg)
+@@ -686,15 +700,39 @@ killclient(const Arg *arg)
  	}
  }
  
@@ -98,7 +99,7 @@ index ff3ada0..97363a4 100644
  		Client *c;
  		XEvent e;
  
-@@ -704,15 +741,7 @@ manage(Window w)
+@@ -704,15 +742,7 @@ manage(Window w)
  		             StructureNotifyMask | EnterWindowMask);
  		XSync(dpy, False);
  
