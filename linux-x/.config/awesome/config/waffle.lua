@@ -664,6 +664,32 @@ local waffle_root_view = create_view(
       decorate(
          wibox.widget {
             simple_button({
+                  icon = gcolor.recolor_image(icons.launcher, beautiful.fg_normal),
+                  markup = em("L") .. "uncher",
+                  key = "l",
+                  action = function (alt)
+                     if alt then
+                        shared.action.app_finder()
+                     else
+                        shared.action.launcher()
+                     end
+                     waffle:hide()
+                  end
+            }),
+            simple_button({
+                  icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal),
+                  markup = em("T") .. "erminal",
+                  key = "t",
+                  action = function (alt)
+                     if alt then
+                        awful.spawn("xterm")
+                     else
+                        shared.action.terminal()
+                     end
+                     waffle:hide()
+                  end
+            }),
+            simple_button({
                   icon = gcolor.recolor_image(icons.browser, beautiful.fg_normal),
                   markup = em("W") .. "eb browser",
                   key = "w",
@@ -678,19 +704,6 @@ local waffle_root_view = create_view(
                   key = "e",
                   action = function (alt)
                      shared.action.file_manager()
-                     waffle:hide()
-                  end
-            }),
-            simple_button({
-                  icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal),
-                  markup = em("T") .. "erminal",
-                  key = "t",
-                  action = function (alt)
-                     if alt then
-                        awful.spawn("xterm")
-                     else
-                        shared.action.terminal()
-                     end
                      waffle:hide()
                   end
             }),
@@ -730,8 +743,8 @@ local waffle_root_view = create_view(
          wibox.widget {
             simple_button({
                   icon = gcolor.recolor_image(icons.lock, beautiful.fg_normal),
-                  markup = em("L") .. "ock screen",
-                  key = "l",
+                  markup = "Loc" .. em("k") .. " screen",
+                  key = "k",
                   action = function (alt)
                      shared.action.screen_locker()
                      waffle:hide()
