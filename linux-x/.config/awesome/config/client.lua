@@ -28,14 +28,14 @@ end
 function shared.client.titlebar_show(c)
    local geo = c:geometry()
    awful.titlebar.show(c, shared.var.titlebar_position)
-   c.has_titlebar = true;
+   c.has_titlebar = true
    c:geometry(geo)
 end
 
 function shared.client.titlebar_hide(c)
    local geo = c:geometry()
    awful.titlebar.hide(c, shared.var.titlebar_position)
-   c.has_titlebar = false;
+   c.has_titlebar = false
    c:geometry(geo)
 end
 
