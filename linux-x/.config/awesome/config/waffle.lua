@@ -209,12 +209,12 @@ local waffle_settings_view = create_view(
                action = function (alt)
                   if shared.var.enable_titlebar then
                      for _, c in ipairs(capi.client.get()) do
-                        shared.client.titlebar_hide(c)
+                        shared.client.titlebar_disable(c)
                      end
                      shared.var.enable_titlebar = false
                   else
                      for _, c in ipairs(capi.client.get()) do
-                        shared.client.titlebar_show(c)
+                        shared.client.titlebar_enable(c)
                      end
                      shared.var.enable_titlebar = true
                   end

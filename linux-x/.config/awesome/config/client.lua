@@ -15,14 +15,25 @@ local gtimer = require("gears.timer")
 local machi = require("layout-machi")
 
 function shared.client.titlebar_toggle(c)
-   local geo = c:geometry()
-   if c.has_titlebar then
-      shared.client.titlebar_hide(c)
+   if c.has_titlebar_enabled then
+      shared.client.titlebar_disable(c)
    else
+      shared.client.titlebar_enable(c)
+   end
+end
+
+function shared.client.titlebar_enable(c)
+   c.has_titlebar_enabled = true
+   if not c.maximized then
       shared.client.titlebar_show(c)
    end
+end
 
-   c:geometry(geo)
+function shared.client.titlebar_disable(c)
+   c.has_titlebar_enabled = false
+   if not c.maximized then
+      shared.client.titlebar_hide(c)
+   end
 end
 
 function shared.client.titlebar_show(c)
@@ -208,15 +219,11 @@ capi.client.connect_signal(
    "property::maximized",
    function(c)
       if c.maximized then
-         c.had_titlebar = c.has_titlebar
-         if c.had_titlebar then
-            shared.client.titlebar_hide(c)
-         end
+         shared.client.titlebar_hide(c)
       else
-         if c.had_titlebar then
+         if c.has_titlebar_enabled then
             shared.client.titlebar_show(c)
          end
-         c.had_titlebar = nil
       end
    end
 )
@@ -232,9 +239,12 @@ end
 
 local function manage_cb(c)
    reset_border(c)
-   c.has_titlebar = false;
+   c.has_titlebar = false
+   c.has_titlebar_enabled = shared.var.enable_titlebar
    if shared.var.enable_titlebar then
-      shared.client.titlebar_show(c)
+      shared.client.titlebar_enable(c)
+   else
+      shared.client.titlebar_disable(c)
    end
 end
 
