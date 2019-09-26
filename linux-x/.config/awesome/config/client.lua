@@ -16,19 +16,26 @@ local machi = require("layout-machi")
 
 function shared.client.titlebar_toggle(c)
    local geo = c:geometry()
-   awful.titlebar.toggle(c)
+   if c.has_titlebar then
+      shared.client.titlebar_hide(c)
+   else
+      shared.client.titlebar_show(c)
+   end
+
    c:geometry(geo)
 end
 
 function shared.client.titlebar_show(c)
    local geo = c:geometry()
-   awful.titlebar.show(c)
+   awful.titlebar.show(c, shared.var.titlebar_position)
+   c.has_titlebar = true;
    c:geometry(geo)
 end
 
 function shared.client.titlebar_hide(c)
    local geo = c:geometry()
-   awful.titlebar.hide(c)
+   awful.titlebar.hide(c, shared.var.titlebar_position)
+   c.has_titlebar = false;
    c:geometry(geo)
 end
 
@@ -113,6 +120,13 @@ awful.mouse.resize.add_enter_callback(
       c:raise()
    end, 'mouse.resize')
 
+local opposite_dir = {
+   ["left"] = "right",
+   ["right"] = "left",
+   ["top"] = "bottom",
+   ["bottom"] = "top",
+}
+
 capi.client.connect_signal(
    "request::titlebars",
    function (c)
@@ -155,13 +169,14 @@ capi.client.connect_signal(
             },
             layout = wibox.layout.align.horizontal,
          },
-         bottom = beautiful.border_width,
+         [opposite_dir[shared.var.titlebar_position]] = beautiful.border_width,
          color = capi.client.focus == c and beautiful.border_focus or beautiful.border_normal,
          widget = wibox.container.margin,
       }
       awful.titlebar(
          c,
          {
+            position = shared.var.titlebar_position,
             size = beautiful.titlebar_size + beautiful.border_width,
             font = beautiful.font,
          }
@@ -189,6 +204,22 @@ capi.client.connect_signal(
       end
    end
 )
+capi.client.connect_signal(
+   "property::maximized",
+   function(c)
+      if c.maximized then
+         c.had_titlebar = c.has_titlebar
+         if c.had_titlebar then
+            shared.client.titlebar_hide(c)
+         end
+      else
+         if c.had_titlebar then
+            shared.client.titlebar_show(c)
+         end
+         c.had_titlebar = nil
+      end
+   end
+)
 
 -- remove border for maximized windows
 local function reset_border(c)
@@ -201,6 +232,7 @@ end
 
 local function manage_cb(c)
    reset_border(c)
+   c.has_titlebar = false;
    if shared.var.enable_titlebar then
       shared.client.titlebar_show(c)
    end

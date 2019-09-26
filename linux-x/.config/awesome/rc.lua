@@ -29,9 +29,11 @@ local HOME_DIR = os.getenv("HOME")
 
 os.execute(HOME_DIR .. "/.xdesktoprc.awesome")
 
-require("config")
+local config = require("config")
 require("my-autofocus")
 require("my-menu")
+
+config.start()
 
 require("gears.timer").delayed_call(
    function ()
