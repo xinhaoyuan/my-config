@@ -5,7 +5,7 @@ local shared = {
    var = {
       enable_titlebar = false,
       -- "top"/"bottom"/"left"/"right"
-      titlebar_position = "right", 
+      titlebar_position = "bottom", 
       floating_by_default = false,
    },
    on_start_functions = {},
