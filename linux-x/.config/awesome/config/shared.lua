@@ -1,11 +1,12 @@
--- Methods will be defined in corresponding modules.
+-- Methods exposed externally and also shared across sub-modules.
 -- The default config variables are defined here.
 
 local shared = {
    var = {
       enable_titlebar = false,
+      -- "top"/"bottom"/"left"/"right"
+      titlebar_position = "right", 
       floating_by_default = false,
-      titlebar_position = "bottom",
    },
    on_start_functions = {},
 }

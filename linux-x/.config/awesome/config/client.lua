@@ -160,27 +160,34 @@ capi.client.connect_signal(
       local titlewidget = awful.titlebar.widget.titlewidget(c)
       titlewidget:set_font(beautiful.font)
       local titlebar_container = wibox.widget {
-         {
-            { -- Left
-               awful.titlebar.widget.iconwidget(c),
-               buttons = buttons,
-               layout  = wibox.layout.fixed.horizontal
-            },
-            { -- Space
-               titlewidget,
-               buttons = buttons,
-               layout  = wibox.layout.fixed.horizontal
-            },
-            { -- Right
-               awful.titlebar.widget.floatingbutton (c),
-               awful.titlebar.widget.maximizedbutton(c),
-               awful.titlebar.widget.stickybutton   (c),
-               awful.titlebar.widget.ontopbutton    (c),
-               awful.titlebar.widget.closebutton    (c),
-               layout = wibox.layout.fixed.horizontal()
-            },
-            layout = wibox.layout.align.horizontal,
+         { -- Left
+            awful.titlebar.widget.iconwidget(c),
+            buttons = buttons,
+            layout  = wibox.layout.fixed.horizontal
          },
+         { -- Space
+            titlewidget,
+            buttons = buttons,
+            left = dpi(4),
+            widget = wibox.container.margin,
+         },
+         { -- Right
+            awful.titlebar.widget.floatingbutton (c),
+            awful.titlebar.widget.maximizedbutton(c),
+            awful.titlebar.widget.stickybutton   (c),
+            awful.titlebar.widget.ontopbutton    (c),
+            awful.titlebar.widget.closebutton    (c),
+            layout = wibox.layout.fixed.horizontal()
+         },
+         layout = wibox.layout.align.horizontal,
+      }
+
+      if shared.var.titlebar_position == "left" or shared.var.titlebar_position == "right" then
+         titlebar_container = wibox.container.rotate(titlebar_container, "west")
+      end
+
+      titlebar_container = wibox.widget {
+         titlebar_container,
          [opposite_dir[shared.var.titlebar_position]] = beautiful.border_width,
          color = capi.client.focus == c and beautiful.border_focus or beautiful.border_normal,
          widget = wibox.container.margin,
