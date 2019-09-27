@@ -152,7 +152,8 @@ capi.client.connect_signal(
          end),
          awful.button({ }, 3, function()
                c:emit_signal("request::activate", "titlebar", {raise = true})
-               awful.mouse.client.resize(c)
+               local _, cc = awful.placement.closest_corner(capi.mouse, {parent = c})
+               awful.mouse.client.resize(c, cc)
          end)
       )
 
