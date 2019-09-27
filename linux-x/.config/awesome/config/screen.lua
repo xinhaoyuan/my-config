@@ -154,7 +154,12 @@ local function setup_screen(scr)
    my_widgets[s] = {}
    local tasklist = awful.widget.tasklist {
       screen = s,
-      filter = awful.widget.tasklist.filter.currenttags,
+      filter = function (c, s)
+         if shared.var.hide_clients_with_titlebars and c.has_titlebar then
+            return false
+         end
+         return awful.widget.tasklist.filter.currenttags(c, s)
+      end,
       buttons = my_tasklist_buttons,
       style = { font = beautiful.font },
       layout = beautiful.tasklist_layout,

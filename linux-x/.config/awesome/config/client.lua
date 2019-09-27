@@ -39,14 +39,20 @@ end
 function shared.client.titlebar_show(c)
    local geo = c:geometry()
    awful.titlebar.show(c, shared.var.titlebar_position)
-   c.has_titlebar = true
+   if not c.has_titlebar then
+      c.has_titlebar = true
+      capi.client.emit_signal("list")
+   end
    c:geometry(geo)
 end
 
 function shared.client.titlebar_hide(c)
    local geo = c:geometry()
    awful.titlebar.hide(c, shared.var.titlebar_position)
-   c.has_titlebar = false
+   if c.has_titlebar then
+      c.has_titlebar = false
+      capi.client.emit_signal("list")
+   end
    c:geometry(geo)
 end
 
