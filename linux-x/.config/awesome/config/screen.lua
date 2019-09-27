@@ -155,10 +155,10 @@ local function setup_screen(scr)
    local tasklist = awful.widget.tasklist {
       screen = s,
       filter = function (c, s)
-         if shared.var.hide_clients_with_titlebars and c.has_titlebar then
+         if not awful.widget.tasklist.filter.currenttags(c, s) then
             return false
          end
-         return awful.widget.tasklist.filter.currenttags(c, s)
+         return not (c:isvisible() and shared.var.hide_clients_with_titlebars and c.has_titlebar)
       end,
       buttons = my_tasklist_buttons,
       style = { font = beautiful.font },
