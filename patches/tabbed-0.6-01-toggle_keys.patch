@@ -11,7 +11,7 @@ index defa426..7c16cc4 100644
  static Key keys[] = {
  	/* modifier             key        function     argument */
 +	/* The first key is always enabled */
-+	{ MODKEY|Mod1Mask,      XK_q,      togglekeys,  { 0 } },
++	{ MODKEY|ShiftMask,     XK_q,      togglekeys,  { 0 } },
  	{ MODKEY|ShiftMask,     XK_Return, focusonce,   { 0 } },
  	{ MODKEY|ShiftMask,     XK_Return, spawn,       { 0 } },
  
