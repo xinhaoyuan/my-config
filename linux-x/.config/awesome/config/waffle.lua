@@ -93,8 +93,8 @@ local function simple_button(args)
                widget = wibox.widget.imagebox,
                           },
             textbox,
-            {
-               markup = args.indicator and em(args.indicator) or "",
+            args.indicator and {
+               markup = args.indicator,
                font = font_big,
                forced_height = button_height,
                align = "center",
@@ -176,7 +176,7 @@ local waffle_poweroff_count = 0
 local waffle_poweroff_button = nil
 waffle_poweroff_button = simple_button({
       markup = "",
-      indicator = "p",
+      indicator = em("p"),
       key = "p",
       action = function (alt)
          waffle_poweroff_count = waffle_poweroff_count + 1
@@ -199,7 +199,7 @@ local waffle_settings_view = create_view(
       wibox.widget {
          simple_button({
                markup = "Toggle titlebars",
-               indicator = "t",
+               indicator = em("t"),
                key = "t",
                action = function (alt)
                   if not alt then
@@ -223,7 +223,7 @@ local waffle_settings_view = create_view(
          }),
          simple_button({
                markup = "Screen layout",
-               indicator = "s",
+               indicator = em("s"),
                key = "s",
                action = function (alt)
                   if alt then
@@ -240,7 +240,7 @@ local waffle_settings_view = create_view(
          }),
          simple_button({
                markup = "Pulse audio",
-               indicator = "a",
+               indicator = em("a"),
                key = "a",
                action = function (alt)
                   local cmd = {"pavucontrol"}
@@ -668,7 +668,7 @@ local waffle_root_view = create_view(
             simple_button({
                   icon = gcolor.recolor_image(icons.launcher, beautiful.fg_normal),
                   markup = "Launcher",
-                  indicator = "\\",
+                  indicator = em("\\"),
                   key = {"\\","|"},
                   action = function (alt)
                      if alt then
@@ -682,7 +682,7 @@ local waffle_root_view = create_view(
             simple_button({
                   icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal),
                   markup = "Terminal",
-                  indicator = "↵",
+                  indicator = em("↵"),
                   key = "Return",
                   action = function (alt)
                      if alt then
@@ -696,7 +696,7 @@ local waffle_root_view = create_view(
             simple_button({
                   icon = gcolor.recolor_image(icons.browser, beautiful.fg_normal),
                   markup = "Web browser",
-                  indicator = "w",
+                  indicator = em("w"),
                   key = "w",
                   action = function (alt)
                      shared.action.web_browser()
@@ -706,7 +706,7 @@ local waffle_root_view = create_view(
             simple_button({
                   icon = gcolor.recolor_image(icons.file_manager, beautiful.fg_normal),
                   markup = "File manager",
-                  indicator = "e",
+                  indicator = em("e"),
                   key = "e",
                   action = function (alt)
                      shared.action.file_manager()
@@ -716,7 +716,7 @@ local waffle_root_view = create_view(
             simple_button({
                   icon = gcolor.recolor_image(icons.setup, beautiful.fg_normal),
                   markup = "Settings",
-                  indicator = "s",
+                  indicator = em("s"),
                   key = "s",
                   action = function (alt)
                      waffle:show(waffle_settings_view, true)
@@ -751,7 +751,7 @@ local waffle_root_view = create_view(
             simple_button({
                   icon = gcolor.recolor_image(icons.lock, beautiful.fg_normal),
                   markup = "Lock screen",
-                  indicator = "l",
+                  indicator = em("l"),
                   key = "l",
                   action = function (alt)
                      shared.action.screen_locker()
@@ -761,7 +761,7 @@ local waffle_root_view = create_view(
             simple_button({
                   icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
                   markup = "Suspend",
-                  indicator = "u",
+                  indicator = em("u"),
                   key = "u",
                   action = function (alt)
                      awful.spawn({"systemctl", "suspend"})
@@ -771,7 +771,7 @@ local waffle_root_view = create_view(
             simple_button({
                   icon = gcolor.recolor_image(icons.poweroff, beautiful.fg_normal),
                   markup = "Power off",
-                  indicator = "p",
+                  indicator = em("p"),
                   key = "p",
                   action = function (alt)
                      waffle_poweroff_count = 0
