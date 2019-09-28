@@ -132,16 +132,22 @@ local function simple_button(args)
    )
 
    if args.key ~= nil and action then
-      ret.keys = {
-         [args.key] = function (mod, _, event)
-            for _, m in ipairs(mod) do
-               mod[m] = true
-            end
-            if event == "press" then
-               action(mod["Shift"])
-            end
+      local function cb(mod, _, event)
+         for _, m in ipairs(mod) do
+            mod[m] = true
          end
-      }
+         if event == "press" then
+            action(mod["Shift"])
+         end
+      end
+      ret.keys = {}
+      if type(args.key) == "table" then
+         for _, k in ipairs(args.key) do
+            ret.keys[k] = cb
+         end
+      else
+         ret.keys[args.key] = cb
+      end
    end
 
    ret.textbox = textbox
@@ -662,8 +668,8 @@ local waffle_root_view = create_view(
             simple_button({
                   icon = gcolor.recolor_image(icons.launcher, beautiful.fg_normal),
                   markup = "Launcher",
-                  indicator = "↵",
-                  key = "Return",
+                  indicator = "\\",
+                  key = {"\\","|"},
                   action = function (alt)
                      if alt then
                         shared.action.app_finder()
@@ -676,8 +682,8 @@ local waffle_root_view = create_view(
             simple_button({
                   icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal),
                   markup = "Terminal",
-                  indicator = "t",
-                  key = "t",
+                  indicator = "↵",
+                  key = "Return",
                   action = function (alt)
                      if alt then
                         awful.spawn("xterm")
