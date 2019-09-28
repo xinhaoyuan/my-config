@@ -22,7 +22,6 @@ Xcursor.theme: Breeze
 ! Rxut-unicode setups
 ! Fonts and input method
 URxvt*termName: rxvt-unicode-256color
-
 URxvt*preeditType: OverTheSpot
 ! Disable all perl extentions and iso14755
 URxvt*iso14755: False
