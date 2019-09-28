@@ -92,8 +92,10 @@ local my_tag_list_buttons = awful.util.table.join(
    -- awful.button({ }, 5, function(t) awful.tag.viewprev(awful.tag.getscreen(t)) end)
 )
 
+local client_menu_selected = nil
 local client_menu = awful.menu({
-      { "Close", function () capi.client.focus:kill() end },
+      { "Close", function () client_menu_selected:kill() end },
+      { "(Un)maximize", function () client_menu_selected.maximized = not client_menu_selected.maximized end },
 })
 
 local my_tasklist_buttons = awful.util.table.join(
@@ -117,6 +119,7 @@ local my_tasklist_buttons = awful.util.table.join(
          shared.client.titlebar_toggle(c)
    end),
    awful.button({ }, 3, function (c)
+         client_menu_selected = c
          client_menu:show()
    end)
 )
