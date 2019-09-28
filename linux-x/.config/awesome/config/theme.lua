@@ -56,6 +56,11 @@ theme.tasklist_template = {
    widget = wibox.container.background,
 }
 
+local flexer = require("flexer")
+theme.tasklist_layout = {
+   forced_height = theme.bar_height,
+   layout = flexer.horizontal
+}
 -- theme.tasklist_layout = {
 --    spacing_widget = {
 --       {

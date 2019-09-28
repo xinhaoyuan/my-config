@@ -184,7 +184,7 @@ local function create(config)
 
          for index, tc in ipairs(tablist) do
             if tc.valid then
-               local label = tc.name
+               local label = tc.name or "<Untitled>"
                pl:set_text(label)
                local w, h
                w, h = pl:get_size()
@@ -192,7 +192,7 @@ local function create(config)
                h = h / api.lgi.Pango.SCALE
                local ext = { width = w, height = h, x_bearing = 0, y_bearing = 0 }
                table.insert(exts, ext)
-               table.insert(labels, tc.name)
+               table.insert(labels, label)
                info_height = info_height + ext.height + vpadding
                info_width = max(info_width, w + 2 * vpadding)
             end

@@ -23,6 +23,7 @@ local calendar = require("calendar.calendar")
 local menu = require("my-menu")
 local dpi = require("beautiful.xresources").apply_dpi
 local yams = require("yams")
+local fixed_margin = require("fixed_margin")
 
 -- helper functions
 
@@ -162,7 +163,7 @@ local function setup_screen(scr)
       end,
       buttons = my_tasklist_buttons,
       style = { font = beautiful.font },
-      layout = beautiful.tasklist_layout,
+      layout = shared.var.wibar_style == "simple" and wibox.layout.flex.horizontal() or beautiful.tasklist_layout,
       source = function ()
          -- Sort clients with their constant ids to make the order stable.
          local cls = awful.widget.tasklist.source.all_clients()
@@ -202,7 +203,7 @@ local function setup_screen(scr)
    my_widgets[s].wibar = awful.wibar({
          screen = s,
          fg = beautiful.fg_normal,
-         bg = beautiful.bg_normal,
+         bg = shared.var.wibar_style == "split" and "#00000000" or beautiful.bg_normal,
          height = beautiful.bar_height + beautiful.border_width,
          position = "bottom",
          border_width = 0,
@@ -243,8 +244,8 @@ local function setup_screen(scr)
             awful.mouse.client.resize(c)
          end
       end
-                                        )
-
+                                         )
+   
    local left_layout = wibox.layout.fixed.horizontal()
    local layoutbox = awful.widget.layoutbox(s)
    layoutbox:buttons(
@@ -286,21 +287,93 @@ local function setup_screen(scr)
    right_layout:add(clock)
    right_layout:add(my_widgets[s].indicator)
 
-   local layout = wibox.widget{
-      {
-         left_layout,
+   
+   local layout
+
+   if shared.var.wibar_style == "simple" then
+      layout = wibox.widget {
+         {
+            left_layout,
+            {
+               tasklist,
+               right = dpi(5),
+               widget = wibox.container.margin,
+            },
+            right_layout,
+            layout = wibox.layout.align.horizontal,
+         },
+         top = beautiful.border_width,
+         color = beautiful.border_focus,
+         widget = wibox.container.margin,
+      }
+   elseif shared.var.wibar_style == "split" then
+      local margin = fixed_margin(wibox.widget {
          {
             tasklist,
-            right = dpi(5),
-            widget = wibox.container.margin
+            bg = beautiful.bg_normal,
+            widget = wibox.container.background,
          },
-         right_layout,
+         top = beautiful.border_width,
+         left = beautiful.border_width,
+         right = beautiful.border_width,
+         color = beautiful.border_focus,
+         widget = wibox.container.margin,
+      })
+      layout = wibox.widget {
+         {
+            {
+               left_layout,
+               bg = beautiful.bg_normal,
+               widget = wibox.container.background,
+            },
+            top = beautiful.border_width,
+            right = beautiful.border_width,
+            color = beautiful.border_focus,
+            widget = wibox.container.margin,
+         },
+         {
+            {
+               margin,
+               widget = wibox.container.place,
+            },
+            left = dpi(10),
+            right = dpi(10),
+            widget = wibox.container.margin,
+         },
+         {
+            {
+               right_layout,
+               bg = beautiful.bg_normal,
+               widget = wibox.container.background,
+            },
+            top = beautiful.border_width,
+            left = beautiful.border_width,
+            color = beautiful.border_focus,
+            widget = wibox.container.margin,
+         },
          layout = wibox.layout.align.horizontal,
-      },
-      top = beautiful.border_width,
-      color = beautiful.border_focus,
-      widget = wibox.container.margin,
-   }
+      }
+   else
+      layout = wibox.widget {
+         {
+            left_layout,
+            {
+               {
+                  tasklist,
+                  halign = "left",
+                  widget = wibox.container.place,
+               },
+               right = dpi(5),
+               widget = wibox.container.margin,
+            },
+            right_layout,
+            layout = wibox.layout.align.horizontal,
+         },
+         top = beautiful.border_width,
+         color = beautiful.border_focus,
+         widget = wibox.container.margin,
+      }
+   end
    my_widgets[s].wibar:set_widget(layout)
 end
 
