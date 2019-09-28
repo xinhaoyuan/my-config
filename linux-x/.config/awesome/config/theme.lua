@@ -18,7 +18,7 @@ theme.bar_height = dpi(20)
 theme.menu_width = dpi(150)
 theme.border_width = dpi(2)
 theme.emphasis_color = '#a9444e'
-
+theme.waffle_use_entire_screen = true
 -- theme.tasklist_shape = function(cr, w, h)
 --    offset = h / 4
 --    cr:move_to(0, 0)
@@ -29,17 +29,23 @@ theme.emphasis_color = '#a9444e'
 -- end
 -- theme.tasklist_shape_focus = gshape.powerline
 
+theme.tasklist_plain_task_name = true
 theme.tasklist_template = {
    {
       {
          {
             {
-               id     = "clienticon",
-               widget = awful.widget.clienticon,
+               {
+                  id     = "clienticon",
+                  widget = awful.widget.clienticon,
+               },
+               -- id = "icon_margin_role",
+               top = dpi(1), bottom = dpi(1),
+               widget  = wibox.container.margin,
             },
-            -- id = "icon_margin_role",
-            top = dpi(1), bottom = dpi(1),
-            widget  = wibox.container.margin,
+            width = theme.bar_height - dpi(5),
+            strategy = "min",
+            widget = wibox.container.constraint,
          },
          {
             id     = "text_role",

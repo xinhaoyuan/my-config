@@ -20,6 +20,10 @@ local font_big = beautiful.fontname_normal .. " 10"
 local font_small = beautiful.fontname_normal .. " 7"
 local update_interval_s = 1
 
+local function em(t)
+   return "<span color='" .. beautiful.emphasis_color .. "'>" .. t .. "</span>"
+end
+
 local function create_view(root)
    local checked = {[root] = true}
    local traverse_pool = {root}
@@ -66,63 +70,50 @@ end
 
 local function simple_button(args)
    local action = args.action
-   local width = waffle_width - dpi(10)
-   if args.icon ~= nil then
-      width = width - button_height
-   end
+   local width = waffle_width - button_padding * 2
 
    local textbox = wibox.widget {
       markup = args.markup or nil,
       text = args.text or nil,
       font = font_big,
-      forced_width = width,
       forced_height = button_height,
       align = "center",
       valign = "center",
       widget = wibox.widget.textbox,
    }
 
-   local ret
-
-   if args.icon ~= nil then
-      ret = wibox.widget {
+   local ret = wibox.widget {
+      {
          {
-            {
-               {
-                  image = args.icon,
-                  resize = true,
-                  forced_width = button_height,
-                  forced_height = button_height,
-                  widget = wibox.widget.imagebox,
-               },
-               textbox,
-               layout = wibox.layout.fixed.horizontal
-            },
-            buttons = action and awful.util.table.join(
-                     awful.button({ }, 1, nil, function () action(false) end),
-                     awful.button({ }, 3, nil, function () action(true) end)),
-            margins = button_padding,
-            widget = wibox.container.margin,
-         },
-         fg = beautiful.fg_normal,
-         bg = beautiful.bg_normal,
-         widget = wibox.container.background
-      }
-   else
-      ret = wibox.widget {
-         {
+            args.icon and {
+               image = args.icon,
+               resize = true,
+               forced_width = button_height,
+               forced_height = button_height,
+               widget = wibox.widget.imagebox,
+                          },
             textbox,
-            buttons = action and awful.util.table.join(
-               awful.button({ }, 1, nil, function () action(false) end),
-               awful.button({ }, 3, nil, function () action(true) end)),
-            margins = dpi(5),
-            widget = wibox.container.margin,
+            {
+               markup = args.indicator and em(args.indicator) or "",
+               font = font_big,
+               forced_height = button_height,
+               align = "center",
+               valign = "center",
+               widget = wibox.widget.textbox,
+            },
+            forced_width = width,
+            layout = wibox.layout.align.horizontal,
          },
-         fg = beautiful.fg_normal,
-         bg = beautiful.bg_normal,
-         widget = wibox.container.background
-      }
-   end
+         buttons = action and awful.util.table.join(
+            awful.button({ }, 1, nil, function () action(false) end),
+            awful.button({ }, 3, nil, function () action(true) end)),
+         margins = button_padding,
+         widget = wibox.container.margin,
+      },
+      fg = beautiful.fg_normal,
+      bg = beautiful.bg_normal,
+      widget = wibox.container.background
+   }
 
    ret:connect_signal(
       "mouse::enter",
@@ -158,10 +149,6 @@ local function simple_button(args)
    return ret
 end
 
-local function em(t)
-   return "<span color='" .. beautiful.emphasis_color .. "'>" .. t .. "</span>"
-end
-
 local function decorate(widget)
    return wibox.widget {
       {
@@ -183,6 +170,7 @@ local waffle_poweroff_count = 0
 local waffle_poweroff_button = nil
 waffle_poweroff_button = simple_button({
       markup = "",
+      indicator = "p",
       key = "p",
       action = function (alt)
          waffle_poweroff_count = waffle_poweroff_count + 1
@@ -196,7 +184,7 @@ waffle_poweroff_button = simple_button({
 })
 
 function waffle_poweroff_button:update_text()
-   self.textbox.markup = em("P") .. "ower off <span size='x-small'>(" .. tostring(2 - waffle_poweroff_count) .. " more times)</span>"
+   self.textbox.markup = "Power off <span size='x-small'>(" .. tostring(2 - waffle_poweroff_count) .. " more times)</span>"
 end
 
 local waffle_poweroff_view = create_view(decorate(waffle_poweroff_button))
@@ -204,7 +192,8 @@ local waffle_settings_view = create_view(
    decorate(
       wibox.widget {
          simple_button({
-               markup = "Toggle " .. em("t") .. "itlebars",
+               markup = "Toggle titlebars",
+               indicator = "t",
                key = "t",
                action = function (alt)
                   if not alt then
@@ -227,7 +216,8 @@ local waffle_settings_view = create_view(
                end
          }),
          simple_button({
-               markup = em("S") .. "creen layout",
+               markup = "Screen layout",
+               indicator = "s",
                key = "s",
                action = function (alt)
                   if alt then
@@ -243,7 +233,8 @@ local waffle_settings_view = create_view(
                end
          }),
          simple_button({
-               markup = "Pulse " .. em("a") .. "udio",
+               markup = "Pulse audio",
+               indicator = "a",
                key = "a",
                action = function (alt)
                   local cmd = {"pavucontrol"}
@@ -670,8 +661,9 @@ local waffle_root_view = create_view(
          wibox.widget {
             simple_button({
                   icon = gcolor.recolor_image(icons.launcher, beautiful.fg_normal),
-                  markup = em("L") .. "uncher",
-                  key = "l",
+                  markup = "Launcher",
+                  indicator = "↵",
+                  key = "Return",
                   action = function (alt)
                      if alt then
                         shared.action.app_finder()
@@ -683,7 +675,8 @@ local waffle_root_view = create_view(
             }),
             simple_button({
                   icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal),
-                  markup = em("T") .. "erminal",
+                  markup = "Terminal",
+                  indicator = "t",
                   key = "t",
                   action = function (alt)
                      if alt then
@@ -696,7 +689,8 @@ local waffle_root_view = create_view(
             }),
             simple_button({
                   icon = gcolor.recolor_image(icons.browser, beautiful.fg_normal),
-                  markup = em("W") .. "eb browser",
+                  markup = "Web browser",
+                  indicator = "w",
                   key = "w",
                   action = function (alt)
                      shared.action.web_browser()
@@ -705,7 +699,8 @@ local waffle_root_view = create_view(
             }),
             simple_button({
                   icon = gcolor.recolor_image(icons.file_manager, beautiful.fg_normal),
-                  markup = "Fil" .. em("e") .. " manager",
+                  markup = "File manager",
+                  indicator = "e",
                   key = "e",
                   action = function (alt)
                      shared.action.file_manager()
@@ -714,7 +709,8 @@ local waffle_root_view = create_view(
             }),
             simple_button({
                   icon = gcolor.recolor_image(icons.setup, beautiful.fg_normal),
-                  markup = em("S") .. "ettings",
+                  markup = "Settings",
+                  indicator = "s",
                   key = "s",
                   action = function (alt)
                      waffle:show(waffle_settings_view, true)
@@ -748,8 +744,9 @@ local waffle_root_view = create_view(
          wibox.widget {
             simple_button({
                   icon = gcolor.recolor_image(icons.lock, beautiful.fg_normal),
-                  markup = "Loc" .. em("k") .. " screen",
-                  key = "k",
+                  markup = "Lock screen",
+                  indicator = "l",
+                  key = "l",
                   action = function (alt)
                      shared.action.screen_locker()
                      waffle:hide()
@@ -757,7 +754,8 @@ local waffle_root_view = create_view(
             }),
             simple_button({
                   icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
-                  markup = "S" .. em("u") .. "spend",
+                  markup = "Suspend",
+                  indicator = "u",
                   key = "u",
                   action = function (alt)
                      awful.spawn({"systemctl", "suspend"})
@@ -766,7 +764,8 @@ local waffle_root_view = create_view(
             }),
             simple_button({
                   icon = gcolor.recolor_image(icons.poweroff, beautiful.fg_normal),
-                  markup = em("P") .. "ower off",
+                  markup = "Power off",
+                  indicator = "p",
                   key = "p",
                   action = function (alt)
                      waffle_poweroff_count = 0
