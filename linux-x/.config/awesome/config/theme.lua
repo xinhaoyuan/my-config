@@ -29,6 +29,7 @@ theme.waffle_use_entire_screen = true
 -- end
 -- theme.tasklist_shape_focus = gshape.powerline
 
+theme.tasklist_style = "split"
 theme.tasklist_plain_task_name = true
 theme.tasklist_template = {
    {
@@ -65,22 +66,9 @@ theme.tasklist_template = {
 local flexer = require("flexer")
 theme.tasklist_layout = {
    forced_height = theme.bar_height,
+   fill_space = theme.tasklist_style == "simple",
    layout = flexer.horizontal
 }
--- theme.tasklist_layout = {
---    spacing_widget = {
---       {
---          forced_height = dpi(12),
---          thickness = 1,
---          widget = wibox.widget.separator,
---       },
---       valign = "center",
---       halign = "center",
---       widget = wibox.container.place,
---    },
---    spacing = dpi(6),
---    layout = wibox.layout.flex.horizontal
--- }
 
 theme.titlebar_size = dpi(20)
 

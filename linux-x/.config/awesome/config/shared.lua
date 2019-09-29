@@ -8,7 +8,6 @@ local shared = {
       titlebar_position = "bottom",
       hide_clients_with_titlebars = true,
       floating_by_default = false,
-      wibar_style = "split",
    },
    on_start_functions = {},
 }

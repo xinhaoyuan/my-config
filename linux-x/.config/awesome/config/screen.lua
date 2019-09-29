@@ -166,7 +166,7 @@ local function setup_screen(scr)
       end,
       buttons = my_tasklist_buttons,
       style = { font = beautiful.font },
-      layout = shared.var.wibar_style == "simple" and wibox.layout.flex.horizontal() or beautiful.tasklist_layout,
+      layout = beautiful.tasklist_layout,
       source = function ()
          -- Sort clients with their constant ids to make the order stable.
          local cls = awful.widget.tasklist.source.all_clients()
@@ -206,7 +206,7 @@ local function setup_screen(scr)
    my_widgets[s].wibar = awful.wibar({
          screen = s,
          fg = beautiful.fg_normal,
-         bg = shared.var.wibar_style == "split" and "#00000000" or beautiful.bg_normal,
+         bg = beautiful.tasklist_style == "simple" and beautiful.bg_normal or "#00000000",
          height = beautiful.bar_height + beautiful.border_width,
          position = "bottom",
          border_width = 0,
@@ -293,23 +293,7 @@ local function setup_screen(scr)
    
    local layout
 
-   if shared.var.wibar_style == "simple" then
-      layout = wibox.widget {
-         {
-            left_layout,
-            {
-               tasklist,
-               right = dpi(5),
-               widget = wibox.container.margin,
-            },
-            right_layout,
-            layout = wibox.layout.align.horizontal,
-         },
-         top = beautiful.border_width,
-         color = beautiful.border_focus,
-         widget = wibox.container.margin,
-      }
-   elseif shared.var.wibar_style == "split" then
+   if beautiful.tasklist_style == "split" then
       local margin = fixed_margin(wibox.widget {
          {
             tasklist,
@@ -363,7 +347,6 @@ local function setup_screen(scr)
             {
                {
                   tasklist,
-                  halign = "left",
                   widget = wibox.container.place,
                },
                right = dpi(5),

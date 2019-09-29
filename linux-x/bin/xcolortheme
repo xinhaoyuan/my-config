@@ -22,6 +22,7 @@ pushsel: save the current name selection and set new selection to all names.
 popsel: restore the name selection.
 brightness delta: adjust the brightness of the selected names.
 saturation delta: adjust the saturation of the selected names.
+hue delta: adjust the hue of the selected names.
 set dst_name src_name: set the color of dst_name to the src_name.
 swap name_1 name_2: swap the colors of name_1 and name_2.
 preview: preview the current theme through escape sequence.
@@ -122,6 +123,16 @@ def adjust_saturation(data, selector, amount):
         colors[k] = colors[k].hex_l
     return colors
 
+def adjust_hue(data, selector, amount):
+    colors = {}
+    for k in data:
+        colors[k] = colour.Color(data[k])
+        if k in selector:
+            colors[k].hue = min(1, max(0, (colors[k].hue + amount) % 1))
+    for k in colors:
+        colors[k] = colors[k].hex_l
+    return colors
+
 def save_xres(data, path):
     f = sys.stdout if path is None else open(path, "w")
     for kw in SPECIAL_COLORS:
@@ -185,6 +196,9 @@ while i < len(cmds):
         i += 1
     elif cmd == "saturation" and i < len(cmds):
         data = adjust_saturation(data, selector, float(cmds[i]))
+        i += 1
+    elif cmd == "hue" and i < len(cmds):
+        data = adjust_hue(data, selector, float(cmds[i]))
         i += 1
     elif (cmd == "+" or cmd == "-" or cmd == "=") and i < len(cmds):
         if cmds[i] == "all":

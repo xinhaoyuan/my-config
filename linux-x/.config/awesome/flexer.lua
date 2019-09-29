@@ -1,5 +1,6 @@
 -- Based on wibox.layout.{fixed,flex}
--- Similar to flex, but it will not both stretch and crop children.
+-- Similar to flex, but it will not both stretch and shrink children.
+-- If it stretchs/shrinks, all affected children use the same space.
 
 local base = require("wibox.widget.base")
 local fixed = require("wibox.layout.fixed")
@@ -29,13 +30,12 @@ function flexer:layout(context, width, height)
     end
 
     if num == 0 then return result end
-    local additional_space = is_x and (width - sum_space_used - total_spacing) / num or (height - sum_space_used - total_spacing) / num
     
     local pos, pos_rounded = 0, 0
     for k, v in pairs(self._private.widgets) do
        local x, y, w, h, next_pos, next_pos_rounded
 
-       next_pos = pos + self._private.calculated_space[v] + additional_space
+       next_pos = pos + self._private.calculated_space[v]
        next_pos_rounded = k == num and width or gmath.round(next_pos)
        
        if is_y then
@@ -108,23 +108,44 @@ function flexer:fit(context, width, height)
       table.insert(used_in_dir, self._private.calculated_space[v])
    end
 
-   local calculated_max = nil
-   local left_in_dir = available_in_dir
-   table.sort(used_in_dir)
-   for i = 1, #used_in_dir do
-      local limit = left_in_dir / (#used_in_dir - i + 1)
-      if limit <= used_in_dir[i] then
-         calculated_max = limit
-         break
+   if sum_used_in_dir > available_in_dir then
+      -- This variable should be set in the following loop, but just in case.
+      local calculated_max = available_in_dir / #used_in_dir
+      local left_in_dir = available_in_dir
+      table.sort(used_in_dir)
+      for i = 1, #used_in_dir do
+         local limit = left_in_dir / (#used_in_dir - i + 1)
+         if limit < used_in_dir[i] then
+            calculated_max = limit
+            break
+         end
+         left_in_dir = left_in_dir - used_in_dir[i]
       end
-      left_in_dir = left_in_dir - used_in_dir[i]
-   end
 
-   if calculated_max ~= nil then
       sum_used_in_dir = available_in_dir
       for _, v in pairs(self._private.widgets) do
          if self._private.calculated_space[v] > calculated_max then
-            self._private.calculated_space[v] = calculated_max
+               self._private.calculated_space[v] = calculated_max
+         end
+      end
+   elseif self._private.fill_space then
+      -- This variable should be set in the following loop, but just in case.
+      local calculated_min = available_in_dir / #used_in_dir
+      local left_in_dir = available_in_dir
+      table.sort(used_in_dir)
+      for i = #used_in_dir, 1, -1 do
+         local limit = left_in_dir / i
+         if limit > used_in_dir[i] then
+            calculated_min = limit
+            break
+         end
+         left_in_dir = left_in_dir - used_in_dir[i]
+      end
+
+      sum_used_in_dir = available_in_dir
+      for _, v in pairs(self._private.widgets) do
+         if self._private.calculated_space[v] < calculated_min then
+               self._private.calculated_space[v] = calculated_min
          end
       end
    end
