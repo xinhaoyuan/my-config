@@ -9,6 +9,10 @@ local gtable = require("gears.table")
 
 local flexer = {}
 
+function flexer:set_expand_space(es)
+   self._private.expand_space = es
+end
+
 function flexer:layout(context, width, height)
     local result = {}
     local spacing = self._private.spacing
@@ -20,6 +24,13 @@ function flexer:layout(context, width, height)
     local is_y = self._private.dir == "y"
     local is_x = not is_y
 
+    if (width ~= self._private.calculated_width or
+           height ~= self._private.calculated_height) and
+       self._private.fill_space
+    then
+       self:fit(context, width, height, true)
+    end
+
     local ready = true
     local sum_space_used = 0
     for k, v in pairs(self._private.widgets) do
@@ -30,27 +41,27 @@ function flexer:layout(context, width, height)
     end
 
     if num == 0 then return result end
-    
+
     local pos, pos_rounded = 0, 0
     for k, v in pairs(self._private.widgets) do
        local x, y, w, h, next_pos, next_pos_rounded
 
        next_pos = pos + self._private.calculated_space[v]
        next_pos_rounded = k == num and width or gmath.round(next_pos)
-       
+
        if is_y then
           x, y = 0, pos_rounded
-          w, h = width, next_pos_rounded - pos_rounded  
+          w, h = width, next_pos_rounded - pos_rounded
        else
           x, y = pos_rounded, 0
           w, h = next_pos_rounded - pos_rounded, height
        end
-       
+
        pos = next_pos + spacing
        pos_rounded = next_pos_rounded + spacing
-       
+
        table.insert(result, base.place_widget_at(v, x, y, w, h))
-       
+
        if k > 1 and spacing ~= 0 and spacing_widget then
           table.insert(result, base.place_widget_at(
                           spacing_widget, is_x and (x - spoffset) or x, is_y and (y - spoffset) or y,
@@ -62,7 +73,7 @@ function flexer:layout(context, width, height)
     return result
 end
 
-function flexer:fit(context, width, height)
+function flexer:fit(context, width, height, fill_space)
    local sum_used_in_dir = 0
    local used_in_dir = {}
    local max_used_in_other = 0
@@ -77,7 +88,7 @@ function flexer:fit(context, width, height)
    end
 
    if available_in_dir <= 0 then return 0, 0 end
-   
+
    for _, v in pairs(self._private.widgets) do
       local w, h = base.fit_widget(self, context, v, width, height)
 
@@ -128,7 +139,7 @@ function flexer:fit(context, width, height)
                self._private.calculated_space[v] = calculated_max
          end
       end
-   elseif self._private.fill_space then
+   elseif fill_space or self._private.expand_space then
       -- This variable should be set in the following loop, but just in case.
       local calculated_min = available_in_dir / #used_in_dir
       local left_in_dir = available_in_dir
@@ -151,10 +162,14 @@ function flexer:fit(context, width, height)
    end
 
    if self._private.dir == "y" then
-      return max_used_in_other, sum_used_in_dir + spacing
+      self._private.calculated_width = max_used_in_other
+      self._private.calculated_height = sum_used_in_dir + spacing
    else
-      return sum_used_in_dir + spacing, max_used_in_other
+      self._private.calculated_width = sum_used_in_dir + spacing
+      self._private.calculated_height = max_used_in_other
    end
+
+   return self._private.calculated_width, self._private.calculated_height
 end
 
 function flexer:set_max_widget_size(val)
