@@ -228,13 +228,14 @@ local waffle_settings_view = create_view(
                key = "b",
                action = function (alt)
                   waffle:hide()
-                  if beautiful.bar_style == "simple" then
-                     beautiful.bar_style = "split"
-                  elseif beautiful.bar_style == "split" then
-                     beautiful.bar_style = "minimal"
-                  else
-                     beautiful.bar_style = "simple"
+                  for i, v in ipairs(beautiful.bar_styles) do
+                     if v == beautiful.bar_style then
+                        beautiful.bar_style = beautiful.bar_styles[i % #beautiful.bar_styles + 1]
+                        capi.screen.emit_signal("list")
+                        return
+                     end
                   end
+                  beautiful.bar_style = "simple"
                   capi.screen.emit_signal("list")
                end
          }),

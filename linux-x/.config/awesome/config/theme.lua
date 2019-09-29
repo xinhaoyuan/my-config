@@ -37,6 +37,8 @@ theme.waffle_use_entire_screen = true
 
 -- custom property {"minimal, "simple", "split"}
 theme.bar_style = "simple"
+-- custom property, subset of available styles
+theme.bar_styles = {"simple", "split"}
 theme.tasklist_plain_task_name = true
 theme.tasklist_template = {
    {
