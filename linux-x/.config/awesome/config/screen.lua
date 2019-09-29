@@ -79,6 +79,18 @@ capi.root.buttons(
    )
 )
 
+local fortune_widget = wibox.widget {
+   align = "center",
+   forced_height = beautiful.bar_height,
+   widget = wibox.widget.textbox
+}
+watch({"fortune", "-s"}, 120,
+   function(widget, stdout)
+      local label = " << " .. stdout:gsub("\n", " ") .. " >> "
+      widget:set_text(label)
+   end,
+   fortune_widget)
+
 -- Screen bar
 
 local my_widgets = {}
@@ -193,6 +205,11 @@ local function setup_screen(scr)
          awful.widget.common.list_update(w, b, l, d, objects, args)
       end,
       widget_template = beautiful.tasklist_template,
+   }
+   tasklist = {
+      main = tasklist,
+      alt = fortune_widget,
+      widget = require("placeholder"),
    }
    my_widgets[s].tasklist = tasklist
 
