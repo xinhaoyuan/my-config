@@ -9,15 +9,21 @@ local gears = require("gears")
 local lgi   = require("lgi")
 local cairo = lgi.cairo
 
+-- custom property string
 theme.fontname_normal = "Hack"
+-- custom property string
 theme.fontname_mono = "Hack"
 theme.font = theme.fontname_normal .. " 10"
+-- custom property string font descriptor 
 theme.font_mono = theme.fontname_mono .. " 10"
 theme.useless_gap = dpi(8)
+-- custom property number
 theme.bar_height = dpi(20)
 theme.menu_width = dpi(150)
 theme.border_width = dpi(2)
+-- custom property color
 theme.emphasis_color = '#a9444e'
+-- custom property boolean
 theme.waffle_use_entire_screen = true
 -- theme.tasklist_shape = function(cr, w, h)
 --    offset = h / 4
@@ -29,6 +35,7 @@ theme.waffle_use_entire_screen = true
 -- end
 -- theme.tasklist_shape_focus = gshape.powerline
 
+-- custom property {"minimal, "simple", "split"}
 theme.bar_style = "simple"
 theme.tasklist_plain_task_name = true
 theme.tasklist_template = {
@@ -64,6 +71,7 @@ theme.tasklist_template = {
 }
 
 local flexer = require("flexer")
+-- custom property
 theme.tasklist_layout = {
    minimal = {
       forced_height = theme.bar_height,
@@ -80,6 +88,7 @@ theme.tasklist_layout = {
    },
 }
 
+-- custom property
 theme.titlebar_size = dpi(20)
 
 local function text_to_surface(text, font_desc, color_desc, width, height)
