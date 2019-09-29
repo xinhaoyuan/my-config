@@ -1,6 +1,7 @@
 local shared = require((...):match("(.-)[^%.]+$") .. "shared")
 local capi = {
    client = client,
+   screen = screen,
 }
 
 local awful = require("awful")
@@ -221,6 +222,23 @@ local waffle_settings_view = create_view(
                   waffle:hide()
                end
          }),
+         simple_button({
+               markup = "Cycle bar styles",
+               indicator = em("b"),
+               key = "b",
+               action = function (alt)
+                  waffle:hide()
+                  if beautiful.bar_style == "simple" then
+                     beautiful.bar_style = "split"
+                  elseif beautiful.bar_style == "split" then
+                     beautiful.bar_style = "minimal"
+                  else
+                     beautiful.bar_style = "simple"
+                  end
+                  capi.screen.emit_signal("list")
+               end
+         }),
+
          simple_button({
                markup = "Screen layout",
                indicator = em("s"),
