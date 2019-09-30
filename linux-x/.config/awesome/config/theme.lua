@@ -74,6 +74,18 @@ theme.tasklist_template = {
    },
    id     = "background_role",
    widget = wibox.container.background,
+   create_callback = function (widget, object, index, objects)
+      local tb = widget:get_children_by_id("text_role")
+      if tb[1] then
+         tb[1].is_odd_child = index % 2 == 1
+      end
+   end,
+   update_callback = function (widget, object, index, objects)
+      local tb = widget:get_children_by_id("text_role")
+      if tb[1] then
+         tb[1].is_odd_child = index % 2 == 1
+      end
+   end,
 }
 
 local flexer = require("flexer")

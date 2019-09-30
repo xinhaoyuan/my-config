@@ -163,6 +163,26 @@ local function sort(l, c)
    return ret
 end
 
+local alt_color_cache = {}
+local function alt_color(color)
+   if alt_color_cache[color] == nil then
+      local comp = table.pack(gcolor.parse_color(color))
+      for i = 1, 3 do
+         if comp[i] > 0.5 then
+            comp[i] = comp[i] - 0.08
+         else
+            comp[i] = comp[i] + 0.08
+         end
+      end
+      local ret = "#"
+      for i = 1, 4 do
+         ret = ret .. string.format("%02x", math.min(255, math.floor(comp[i] * 256)))
+      end
+      alt_color_cache[color] = ret
+   end
+   return alt_color_cache[color]
+end
+
 local function setup_screen(scr)
    local s = scr.index
 
@@ -203,7 +223,18 @@ local function setup_screen(scr)
          --    clients[#clients + 1] = obj
          -- end
 
-         awful.widget.common.list_update(w, b, l, d, objects, args)
+         -- A hacky way to alternative the colors of tasklist items
+         awful.widget.common.list_update(
+            w, b,
+            function (object, tb)
+               local ret = table.pack(l(object, tb))
+               -- background is stored in [2]
+               if tb.is_odd_child then
+                  ret[2] = alt_color(ret[2])
+               end
+               return table.unpack(ret)
+            end,
+            d, objects, args)
       end,
       widget_template = beautiful.tasklist_template,
    }
