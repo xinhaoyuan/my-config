@@ -6,7 +6,9 @@ local xresources = require("beautiful.xresources")
 local dpi   = xresources.apply_dpi
 local xrdb  = xresources.get_current_theme()
 local gears = require("gears")
+local placeholder = require("placeholder")
 local lgi   = require("lgi")
+local icons = require("icons")
 local cairo = lgi.cairo
 
 -- custom property string
@@ -40,22 +42,24 @@ theme.bar_style = "simple"
 -- custom property, subset of available styles
 theme.bar_styles = {"simple", "split"}
 theme.tasklist_plain_task_name = true
+local default_icon = gears.color.recolor_image(icons.terminal, theme.fg_normal)
 theme.tasklist_template = {
    {
       {
          {
             {
-               {
-                  id     = "clienticon",
+               main = {
                   widget = awful.widget.clienticon,
                },
-               -- id = "icon_margin_role",
-               top = dpi(1), bottom = dpi(1),
-               widget  = wibox.container.margin,
+               alt = {
+                  image = default_icon,
+                  widget = wibox.widget.imagebox,
+               },
+               widget = placeholder,
             },
-            width = theme.bar_height - dpi(5),
-            strategy = "min",
-            widget = wibox.container.constraint,
+            -- id = "icon_margin_role",
+            top = dpi(1), bottom = dpi(1),
+            widget  = wibox.container.margin,
          },
          {
             id     = "text_role",

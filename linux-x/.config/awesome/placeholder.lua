@@ -37,6 +37,10 @@ function placeholder:fit(context, width, height)
    return w, h
 end
 
+function placeholder:get_children()
+   return {self._private.main, self._private.alt}
+end
+
 function placeholder:get_alt()
    return self._private.alt
 end

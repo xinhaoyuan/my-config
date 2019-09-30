@@ -23,6 +23,7 @@ local calendar = require("calendar.calendar")
 local menu = require("my-menu")
 local dpi = require("beautiful.xresources").apply_dpi
 local yams = require("yams")
+local placeholder = require("placeholder")
 local fixed_margin = require("fixed_margin")
 
 -- helper functions
@@ -209,7 +210,7 @@ local function setup_screen(scr)
    tasklist = {
       main = tasklist,
       alt = fortune_widget,
-      widget = require("placeholder"),
+      widget = placeholder,
    }
    my_widgets[s].tasklist = tasklist
 
