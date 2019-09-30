@@ -223,7 +223,7 @@ local function setup_screen(scr)
          --    clients[#clients + 1] = obj
          -- end
 
-         -- A hacky way to alternative the colors of tasklist items
+         -- A hacky way to alternate the colors of tasklist items
          awful.widget.common.list_update(
             w, b,
             function (object, tb)
