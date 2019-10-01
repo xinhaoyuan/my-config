@@ -92,9 +92,14 @@ function flexer:fit(context, width, height, fill_space)
    for _, v in pairs(self._private.widgets) do
       local w, h = base.fit_widget(self, context, v, width, height)
 
+      -- add one in the direction to compensate the rounding errors.
       if self._private.dir == "y" then
+         if h > 0 then
+            h = h + 1
+         end
+
          if w > max_used_in_other then
-            max_used_in_other = w
+               max_used_in_other = w
          end
 
          if self._private.max_widget_size then
@@ -103,6 +108,10 @@ function flexer:fit(context, width, height, fill_space)
             self._private.calculated_space[v] = h
          end
       else
+         if w > 0 then
+            w = w + 1
+         end
+
          if h > max_used_in_other then
             max_used_in_other = h
          end
