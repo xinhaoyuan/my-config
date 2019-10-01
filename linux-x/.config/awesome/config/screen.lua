@@ -378,7 +378,11 @@ local function setup_screen(scr)
          },
          {
             {
-               right_layout,
+               {
+                  right_layout,
+                  left = dpi(5),
+                  widget = wibox.container.margin,
+               },
                bg = beautiful.bg_normal,
                widget = wibox.container.background,
             },
@@ -394,15 +398,15 @@ local function setup_screen(scr)
          {
             left_layout,
             {
-               {
-                  tasklist,
-                  content_fill_horizontal = true,
-                  widget = wibox.container.place,
-               },
-               right = dpi(5),
+               tasklist,
+               content_fill_horizontal = true,
+               widget = wibox.container.place,
+            },
+            {
+               right_layout,
+               left = dpi(5),
                widget = wibox.container.margin,
             },
-            right_layout,
             layout = wibox.layout.align.horizontal,
          },
          top = beautiful.border_width,
