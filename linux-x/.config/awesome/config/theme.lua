@@ -102,6 +102,7 @@ theme.tasklist_layout = {
    },
    split = {
       forced_height = theme.bar_height,
+      min_widget_size = dpi(300),
       layout = flexer.horizontal
    },
 }
