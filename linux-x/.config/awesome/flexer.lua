@@ -14,63 +14,63 @@ function flexer:set_expand_space(es)
 end
 
 function flexer:layout(context, width, height)
-    local result = {}
-    local spacing = self._private.spacing
-    local num = #self._private.widgets
-    local total_spacing = (spacing * (num - 1))
-    local spacing_widget = self._private.spacing_widget
-    local abspace = math.abs(spacing)
-    local spoffset = spacing < 0 and 0 or spacing
-    local is_y = self._private.dir == "y"
-    local is_x = not is_y
+   local result = {}
+   local spacing = self._private.spacing
+   local num = #self._private.widgets
+   local total_spacing = (spacing * (num - 1))
+   local spacing_widget = self._private.spacing_widget
+   local abspace = math.abs(spacing)
+   local spoffset = spacing < 0 and 0 or spacing
+   local is_y = self._private.dir == "y"
+   local is_x = not is_y
 
-    if (width ~= self._private.calculated_width or
-           height ~= self._private.calculated_height) and
-       self._private.fill_space
-    then
-       self:fit(context, width, height, true)
-    end
+   if (width ~= self._private.calculated_width or
+          height ~= self._private.calculated_height) and
+      self._private.fill_space
+   then
+      self:fit(context, width, height, true)
+   end
 
-    local ready = true
-    local sum_space_used = 0
-    for k, v in pairs(self._private.widgets) do
-       if self._private.calculated_space[v] == nil then
-          self._private.calculated_space[v] = 0
-       end
-       sum_space_used = sum_space_used + self._private.calculated_space[v]
-    end
+   local ready = true
+   local sum_space_used = 0
+   for k, v in pairs(self._private.widgets) do
+      if self._private.calculated_space[v] == nil then
+         self._private.calculated_space[v] = 0
+      end
+      sum_space_used = sum_space_used + self._private.calculated_space[v]
+   end
 
-    if num == 0 then return result end
+   if num == 0 then return result end
 
-    local pos, pos_rounded = 0, 0
-    for k, v in pairs(self._private.widgets) do
-       local x, y, w, h, next_pos, next_pos_rounded
+   local pos, pos_rounded = 0, 0
+   for k, v in pairs(self._private.widgets) do
+      local x, y, w, h, next_pos, next_pos_rounded
 
-       next_pos = pos + self._private.calculated_space[v]
-       next_pos_rounded = k == num and width or gmath.round(next_pos)
+      next_pos = pos + self._private.calculated_space[v]
+      next_pos_rounded = k == num and width or gmath.round(next_pos)
 
-       if is_y then
-          x, y = 0, pos_rounded
-          w, h = width, next_pos_rounded - pos_rounded
-       else
-          x, y = pos_rounded, 0
-          w, h = next_pos_rounded - pos_rounded, height
-       end
+      if is_y then
+         x, y = 0, pos_rounded
+         w, h = width, next_pos_rounded - pos_rounded
+      else
+         x, y = pos_rounded, 0
+         w, h = next_pos_rounded - pos_rounded, height
+      end
 
-       pos = next_pos + spacing
-       pos_rounded = next_pos_rounded + spacing
+      pos = next_pos + spacing
+      pos_rounded = next_pos_rounded + spacing
 
-       table.insert(result, base.place_widget_at(v, x, y, w, h))
+      table.insert(result, base.place_widget_at(v, x, y, w, h))
 
-       if k > 1 and spacing ~= 0 and spacing_widget then
-          table.insert(result, base.place_widget_at(
-                          spacing_widget, is_x and (x - spoffset) or x, is_y and (y - spoffset) or y,
-                          is_x and abspace or w, is_y and abspace or h
-          ))
-       end
-    end
+      if k > 1 and spacing ~= 0 and spacing_widget then
+         table.insert(result, base.place_widget_at(
+                         spacing_widget, is_x and (x - spoffset) or x, is_y and (y - spoffset) or y,
+                         is_x and abspace or w, is_y and abspace or h
+         ))
+      end
+   end
 
-    return result
+   return result
 end
 
 function flexer:fit(context, width, height, fill_space)
@@ -96,32 +96,33 @@ function flexer:fit(context, width, height, fill_space)
       if self._private.dir == "y" then
          if h > 0 then
             h = h + 1
-         end
-
-         if w > max_used_in_other then
+            if self._private.min_widget_size then
+               h = math.max(self._private.min_widget_size, h)
+            end
+            if self._private.max_widget_size then
+               h = math.min(self._private.max_widget_size, h)
+            end
+            if w > max_used_in_other then
                max_used_in_other = w
+            end
          end
 
-         if self._private.max_widget_size then
-            self._private.calculated_space[v] = math.min(self._private.max_widget_size, h)
-         else
-            self._private.calculated_space[v] = h
-         end
+         self._private.calculated_space[v] = h
       else
          if w > 0 then
             w = w + 1
+            if self._private.min_widget_size then
+               w = math.max(self._private.min_widget_size, w)
+            end
+            if self._private.max_widget_size then
+               w = math.min(self._private.max_widget_size, w)
+            end
+            if h > max_used_in_other then
+               max_used_in_other = h
+            end
          end
 
-         if h > max_used_in_other then
-            max_used_in_other = h
-         end
-
-         if self._private.max_widget_size then
-            self._private.calculated_space[v] = math.min(self._private.max_widget_size, w)
-         else
-            self._private.calculated_space[v] = w
-         end
-
+         self._private.calculated_space[v] = w
       end
 
       sum_used_in_dir = sum_used_in_dir + self._private.calculated_space[v]
@@ -145,7 +146,7 @@ function flexer:fit(context, width, height, fill_space)
       sum_used_in_dir = available_in_dir
       for _, v in pairs(self._private.widgets) do
          if self._private.calculated_space[v] > calculated_max then
-               self._private.calculated_space[v] = calculated_max
+            self._private.calculated_space[v] = calculated_max
          end
       end
    elseif fill_space or self._private.expand_space then
@@ -165,7 +166,7 @@ function flexer:fit(context, width, height, fill_space)
       sum_used_in_dir = available_in_dir
       for _, v in pairs(self._private.widgets) do
          if self._private.calculated_space[v] < calculated_min then
-               self._private.calculated_space[v] = calculated_min
+            self._private.calculated_space[v] = calculated_min
          end
       end
    end
@@ -182,30 +183,37 @@ function flexer:fit(context, width, height, fill_space)
 end
 
 function flexer:set_max_widget_size(val)
-    if self._private.max_widget_size ~= val then
-        self._private.max_widget_size = val
-        self:emit_signal("widget::layout_changed")
-    end
+   if self._private.max_widget_size ~= val then
+      self._private.max_widget_size = val
+      self:emit_signal("widget::layout_changed")
+   end
+end
+
+function flexer:set_min_widget_size(val)
+   if self._private.min_widget_size ~= val then
+      self._private.min_widget_size = val
+      self:emit_signal("widget::layout_changed")
+   end
 end
 
 local function get_layout(dir, widget1, ...)
-    local ret = fixed[dir](widget1, ...)
+   local ret = fixed[dir](widget1, ...)
 
-    gtable.crush(ret, flexer, true)
+   gtable.crush(ret, flexer, true)
 
-    ret._private.fill_space = nil
-    ret._private.calculated_space = {}
-    setmetatable(ret._private.calculated_space, { __mode = "k" })
+   ret._private.fill_space = nil
+   ret._private.calculated_space = {}
+   setmetatable(ret._private.calculated_space, { __mode = "k" })
 
-    return ret
+   return ret
 end
 
 function flexer.horizontal(...)
-    return get_layout("horizontal", ...)
+   return get_layout("horizontal", ...)
 end
 
 function flexer.vertical(...)
-    return get_layout("vertical", ...)
+   return get_layout("vertical", ...)
 end
 
 return flexer
