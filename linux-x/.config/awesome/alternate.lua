@@ -10,6 +10,9 @@ function alternate:layout(context, width, height)
    local ret = {}
    for i, v in ipairs(self._private.children) do
       w, h = base.fit_widget(self, context, v, width, height)
+      if self._private.debug_prefix then
+         print(self._private.debug_prefix .. "#" .. tostring(i) .. " " .. tostring(w) .. " " .. tostring(h))
+      end
       if (w > 0 and h > 0) or (i == #self._private.children and self._private.draw_last) then
          table.insert(ret, base.place_widget_at(v, 0, 0, width, height))
          break
@@ -44,6 +47,10 @@ end
 function alternate:set_draw_last(dl)
    self._private.draw_last = dl
    self:emit_signal("widget::layout_changed")
+end
+
+function alternate:set_debug_prefix(prefix)
+   self._private.debug_prefix = prefix
 end
 
 function alternate:new(children, draw_last)

@@ -344,16 +344,17 @@ local function setup_screen(scr)
    local layout
 
    if beautiful.bar_style == "split" then
-      local middle = fixed_margin(wibox.widget {
-         {
-            tasklist,
-            bg = beautiful.bg_normal,
-            widget = wibox.container.background,
-         },
-         draw_empty = false,
-         top = beautiful.border_width,
-         color = beautiful.border_focus,
-         widget = wibox.container.margin,
+      local middle = fixed_margin(
+         wibox.widget {
+            {
+               tasklist,
+               bg = beautiful.bg_normal,
+               widget = wibox.container.background,
+            },
+            draw_empty = false,
+            top = beautiful.border_width,
+            color = beautiful.border_focus,
+            widget = wibox.container.margin,
       })
       middle = {
          {
@@ -368,9 +369,13 @@ local function setup_screen(scr)
                color = beautiful.border_focus,
                widget = wibox.container.margin,
             },
-            middle,
             {
-               wibox.widget {
+               middle,
+               bg = beautiful.bg_normal,
+               widget = wibox.container.background,
+            },
+            {
+               {
                   content_fill_horizontal = true,
                   widget = wibox.container.place,
                },

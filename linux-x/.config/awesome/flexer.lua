@@ -179,7 +179,7 @@ function flexer:fit(context, width, height, fill_space)
       self._private.calculated_height = max_used_in_other
    end
 
-   return self._private.calculated_width, self._private.calculated_height
+   return math.floor(self._private.calculated_width), math.floor(self._private.calculated_height)
 end
 
 function flexer:set_max_widget_size(val)
