@@ -23,8 +23,9 @@ local calendar = require("calendar.calendar")
 local menu = require("my-menu")
 local dpi = require("beautiful.xresources").apply_dpi
 local yams = require("yams")
-local placeholder = require("placeholder")
+local alternate = require("alternate")
 local fixed_margin = require("fixed_margin")
+local fixed_place = require("fixed_place")
 
 -- helper functions
 
@@ -238,11 +239,11 @@ local function setup_screen(scr)
       end,
       widget_template = beautiful.tasklist_template,
    }
-   tasklist = {
-      main = tasklist,
-      alt = fortune_widget,
-      widget = placeholder,
-   }
+   -- tasklist = {
+   --    tasklist,
+   --    fortune_widget,
+   --    widget = alternate,
+   -- }
    my_widgets[s].tasklist = tasklist
 
    my_widgets[s].tag_list = awful.widget.taglist(
@@ -343,16 +344,48 @@ local function setup_screen(scr)
    local layout
 
    if beautiful.bar_style == "split" then
-      local margin = fixed_margin(wibox.widget {
+      local middle = fixed_margin(wibox.widget {
          {
             tasklist,
             bg = beautiful.bg_normal,
             widget = wibox.container.background,
          },
+         draw_empty = false,
          top = beautiful.border_width,
          color = beautiful.border_focus,
          widget = wibox.container.margin,
       })
+      middle = {
+         {
+            {
+               wibox.widget {
+                  content_fill_horizontal = true,
+                  widget = wibox.container.place,
+               },
+               draw_empty = false,
+               left = beautiful.border_width,
+               right = beautiful.border_width,
+               color = beautiful.border_focus,
+               widget = wibox.container.margin,
+            },
+            middle,
+            {
+               wibox.widget {
+                  content_fill_horizontal = true,
+                  widget = wibox.container.place,
+               },
+               draw_empty = false,
+               left = beautiful.border_width,
+               right = beautiful.border_width,
+               color = beautiful.border_focus,
+               widget = wibox.container.margin,
+            },
+            expand = "outside",
+            layout = wibox.layout.align.horizontal,
+         },
+         content_fill_horizontal = true,
+         widget = wibox.container.place,
+      }
       layout = wibox.widget {
          {
             {
@@ -360,24 +393,39 @@ local function setup_screen(scr)
                bg = beautiful.bg_normal,
                widget = wibox.container.background,
             },
+            draw_empty = true,
             top = beautiful.border_width,
             color = beautiful.border_focus,
             widget = wibox.container.margin,
          },
          {
-            margin,
-            widget = wibox.container.place,
+            middle,
+            {
+               {
+                  fill_horizontal = true,
+                  widget = wibox.container.place,
+               },
+               draw_empty = true,
+               left = beautiful.border_width,
+               right = beautiful.border_width,
+               color = beautiful.border_focus,
+               widget = wibox.container.margin,
+            },
+            draw_last = true,
+            widget = alternate,
          },
          {
             {
                {
                   right_layout,
+                  draw_empty = false,
                   left = dpi(5),
                   widget = wibox.container.margin,
                },
                bg = beautiful.bg_normal,
                widget = wibox.container.background,
             },
+            draw_empty = true,
             top = beautiful.border_width,
             color = beautiful.border_focus,
             widget = wibox.container.margin,

@@ -6,7 +6,7 @@ local xresources = require("beautiful.xresources")
 local dpi   = xresources.apply_dpi
 local xrdb  = xresources.get_current_theme()
 local gears = require("gears")
-local placeholder = require("placeholder")
+local alternate = require("alternate")
 local lgi   = require("lgi")
 local icons = require("icons")
 local cairo = lgi.cairo
@@ -48,14 +48,14 @@ theme.tasklist_template = {
       {
          {
             {
-               main = {
+               {
                   widget = awful.widget.clienticon,
                },
-               alt = {
+               {
                   image = default_icon,
                   widget = wibox.widget.imagebox,
                },
-               widget = placeholder,
+               widget = alternate,
             },
             -- id = "icon_margin_role",
             top = dpi(1), bottom = dpi(1),
