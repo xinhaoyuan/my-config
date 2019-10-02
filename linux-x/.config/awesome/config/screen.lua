@@ -340,7 +340,6 @@ local function setup_screen(scr)
    right_layout:add(clock)
    right_layout:add(my_widgets[s].indicator)
 
-
    local layout
 
    if beautiful.bar_style == "split" then
