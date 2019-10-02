@@ -26,6 +26,7 @@ local yams = require("yams")
 local alternate = require("alternate")
 local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
+local fixed_align = require("fixed_align")
 
 -- helper functions
 
@@ -368,11 +369,7 @@ local function setup_screen(scr)
                color = beautiful.border_focus,
                widget = wibox.container.margin,
             },
-            {
-               middle,
-               bg = beautiful.bg_normal,
-               widget = wibox.container.background,
-            },
+            middle,
             {
                {
                   content_fill_horizontal = true,
@@ -385,7 +382,7 @@ local function setup_screen(scr)
                widget = wibox.container.margin,
             },
             expand = "outside",
-            layout = wibox.layout.align.horizontal,
+            layout = fixed_align.horizontal,
          },
          content_fill_horizontal = true,
          widget = wibox.container.place,

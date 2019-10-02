@@ -62,7 +62,7 @@ theme.tasklist_template = {
             widget  = wibox.container.margin,
          },
          {
-            id     = "text_role",
+            id = "text_role",
             widget = wibox.widget.textbox,
          },
          layout = wibox.layout.fixed.horizontal,
@@ -102,7 +102,6 @@ theme.tasklist_layout = {
    },
    split = {
       forced_height = theme.bar_height,
-      min_widget_size = dpi(300),
       layout = flexer.horizontal
    },
 }
