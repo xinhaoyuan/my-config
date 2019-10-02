@@ -58,7 +58,7 @@ theme.tasklist_template = {
                widget = alternate,
             },
             -- id = "icon_margin_role",
-            top = dpi(1), bottom = dpi(1),
+            right = dpi(3),
             widget  = wibox.container.margin,
          },
          {
@@ -67,7 +67,7 @@ theme.tasklist_template = {
          },
          layout = wibox.layout.fixed.horizontal,
       },
-      id = "text_margin_role",
+      -- id = "text_margin_role",
       left  = dpi(5),
       right = dpi(5),
       widget = wibox.container.margin
