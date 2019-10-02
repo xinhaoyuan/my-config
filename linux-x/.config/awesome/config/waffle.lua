@@ -733,6 +733,16 @@ local waffle_root_view = create_view(
                   end
             }),
             simple_button({
+                  icon = gcolor.recolor_image(icons.music, beautiful.fg_normal),
+                  markup = "Music",
+                  indicator = em("m"),
+                  key = "m",
+                  action = function (alt)
+                     shared.action.music_app()
+                     waffle:hide()
+                  end
+            }),
+            simple_button({
                   icon = gcolor.recolor_image(icons.setup, beautiful.fg_normal),
                   markup = "Settings",
                   indicator = em("s"),
