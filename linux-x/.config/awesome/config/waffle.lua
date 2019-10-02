@@ -223,6 +223,15 @@ local waffle_settings_view = create_view(
                end
          }),
          simple_button({
+               markup = "Toggle fortune",
+               indicator = em("f"),
+               key = "f",
+               action = function (alt)
+                  shared.screen.toggle_fortune()
+                  waffle:hide()
+               end
+         }),
+         simple_button({
                markup = "Cycle bar styles",
                indicator = em("b"),
                key = "b",
@@ -739,6 +748,19 @@ local waffle_root_view = create_view(
                   key = "m",
                   action = function (alt)
                      shared.action.music_app()
+                     waffle:hide()
+                  end
+            }),
+            simple_button({
+                  icon = gcolor.recolor_image(icons.fortune, beautiful.fg_normal),
+                  markup = "Fortune",
+                  indicator = em("f"),
+                  key = "f",
+                  action = function (alt)
+                     local fortune = shared.screen.get_fortune()
+                     if fortune then
+                        shared.action.web_browser("? " .. fortune)
+                     end
                      waffle:hide()
                   end
             }),

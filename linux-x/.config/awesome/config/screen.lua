@@ -89,10 +89,20 @@ local fortune_widget = wibox.widget {
 }
 watch({"fortune", "-s"}, 120,
    function(widget, stdout)
-      local label = " << " .. stdout:gsub("\n", " ") .. " >> "
+      local raw = stdout:gsub("\n", " "):gsub("%s+", " ")
+      local label = " << " .. raw .. " >> "
       widget:set_text(label)
+      widget.fortune_raw = raw
    end,
    fortune_widget)
+
+function shared.screen.toggle_fortune()
+   fortune_widget:set_visible(not fortune_widget:get_visible())
+end
+
+function shared.screen.get_fortune()
+   return fortune_widget.fortune_raw
+end
 
 -- Screen bar
 
@@ -240,11 +250,11 @@ local function setup_screen(scr)
       end,
       widget_template = beautiful.tasklist_template,
    }
-   -- tasklist = {
-   --    tasklist,
-   --    fortune_widget,
-   --    widget = alternate,
-   -- }
+   tasklist = {
+      tasklist,
+      fortune_widget,
+      widget = alternate,
+   }
    my_widgets[s].tasklist = tasklist
 
    my_widgets[s].tag_list = awful.widget.taglist(
