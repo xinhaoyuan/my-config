@@ -350,8 +350,6 @@ local function setup_screen(scr)
             widget = wibox.container.background,
          },
          top = beautiful.border_width,
-         left = beautiful.border_width,
-         right = beautiful.border_width,
          color = beautiful.border_focus,
          widget = wibox.container.margin,
       })
@@ -363,18 +361,12 @@ local function setup_screen(scr)
                widget = wibox.container.background,
             },
             top = beautiful.border_width,
-            right = beautiful.border_width,
             color = beautiful.border_focus,
             widget = wibox.container.margin,
          },
          {
-            {
-               margin,
-               widget = wibox.container.place,
-            },
-            left = dpi(10),
-            right = dpi(10),
-            widget = wibox.container.margin,
+            margin,
+            widget = wibox.container.place,
          },
          {
             {
@@ -387,7 +379,6 @@ local function setup_screen(scr)
                widget = wibox.container.background,
             },
             top = beautiful.border_width,
-            left = beautiful.border_width,
             color = beautiful.border_focus,
             widget = wibox.container.margin,
          },

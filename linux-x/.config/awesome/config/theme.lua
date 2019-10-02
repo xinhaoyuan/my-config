@@ -38,7 +38,7 @@ theme.waffle_use_entire_screen = true
 -- theme.tasklist_shape_focus = gshape.powerline
 
 -- custom property {"minimal, "simple", "split"}
-theme.bar_style = "simple"
+theme.bar_style = "split"
 -- custom property, subset of available styles
 theme.bar_styles = {"simple", "split"}
 theme.tasklist_plain_task_name = true
