@@ -23,7 +23,7 @@ local calendar = require("calendar.calendar")
 local menu = require("my-menu")
 local dpi = require("beautiful.xresources").apply_dpi
 local yams = require("yams")
-local alternate = require("alternate")
+local fallback = require("fallback")
 local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
 local fixed_align = require("fixed_align")
@@ -253,7 +253,7 @@ local function setup_screen(scr)
    tasklist = {
       tasklist,
       fortune_widget,
-      widget = alternate,
+      widget = fallback,
    }
    my_widgets[s].tasklist = tasklist
 
@@ -424,7 +424,7 @@ local function setup_screen(scr)
                widget = wibox.container.margin,
             },
             draw_last = true,
-            widget = alternate,
+            widget = fallback,
          },
          {
             {
