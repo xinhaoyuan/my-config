@@ -53,8 +53,12 @@ shared.action = {
          end
       end
    end,
-   wallpaper_setup = function ()
-      awful.spawn("nitrogen --restore", false)
+   wallpaper_setup = function (restore)
+      if restore then
+         awful.spawn("nitrogen --restore", false)
+      else
+         awful.spawn("nitrogen", false)
+      end
    end,
    music_app = function ()
       shared.action.terminal({"ncmpcpp"})

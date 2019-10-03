@@ -479,7 +479,7 @@ local function reset_widgets_for_screens()
       setup_screen(scr)
    end
 
-   shared.action.wallpaper_setup()
+   shared.action.wallpaper_setup(true)
 end
 
 table.insert(shared.on_start_functions, reset_widgets_for_screens)

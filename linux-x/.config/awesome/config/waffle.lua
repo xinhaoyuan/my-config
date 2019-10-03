@@ -248,7 +248,15 @@ local waffle_settings_view = create_view(
                   capi.screen.emit_signal("list")
                end
          }),
-
+         simple_button({
+               markup = "Wallpaper",
+               indicator = em("w"),
+               key = "w",
+               action = function (alt)
+                  shared.action.wallpaper_setup()
+                  waffle:hide()
+               end
+         }),
          simple_button({
                markup = "Screen layout",
                indicator = em("s"),
