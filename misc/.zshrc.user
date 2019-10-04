@@ -91,6 +91,11 @@ fi
 
 autoload -Uz add-zsh-hook
 
+local DATE_FORMAT="+%y%m%d%H%M%S"
+local DATE_FORMAT_WITH_STYLE="+$fg_bold[green]%y$fg_no_bold[green]%m$fg_bold[green]%d$fg_no_bold[cyan]%H$fg_bold[cyan]%M$fg_no_bold[cyan]%S"
+local DATE_PLACEHOLDER="000000000000"
+local DATE_FORMAT_LEN=12
+
 preexec_date() {
     emulate -L zsh
     setopt extended_glob
@@ -98,8 +103,8 @@ preexec_date() {
     # cmd name only, or if this is sudo or ssh, the next cmd
     local CMD=${1[(wr)^(*=*|sudo|ssh|mosh|rake|-*)]:gs/%/%%}
     local LINE="${2:gs/%/%%}"
-    local DATE="$(date '+%H:%M:%S %y-%m-%d')"
-
+    local DATE=$(date "${DATE_FORMAT}")
+    local STYLED_DATE=$(date "${DATE_FORMAT_WITH_STYLE}")
     my_title '$CMD' '[$DATE] %100>...>$LINE%<<'
 
     if [[ "$1" == *$'\n'* ]]; then
@@ -109,13 +114,13 @@ preexec_date() {
         # Assume expr length S calculate the char width of S on terminal.
         # This would work only for regular ascii cmd ...
         local temp="$1$(print -P %c)"
-        C=$(( ( ${#temp} + 20 ) / $COLUMNS + 1 ))
-        echo -ne "\033[${C}A$fg_bold[green][${DATE}]$reset_color\033[${C}B\r"
+        C=$(( ( ${#temp} + ${DATE_FORMAT_LEN} + 3 ) / $COLUMNS + 1 ))
+        echo -ne "\033[${C}A$fg_bold[black][${STYLED_DATE}$fg_bold[black]]$reset_color\033[${C}B\r"
         # export TIME_PREEXEC=`date +%s`
     else
         # similar to above, but don't count the pwd in
-        C=$(( ( ${#1} + 19 ) / $COLUMNS + 1 ))
-        echo -ne "\033[${C}A$fg_bold[green][${DATE}]$reset_color\033[${C}B\r"
+        C=$(( ( ${#1} + ${DATE_FORMAT_LEN} + 2 ) / $COLUMNS + 1 ))
+        echo -ne "\033[${C}A$fg_bold[black][${STYLED_DATE}$fg_bold[black]]$reset_color\033[${C}B\r"
     fi
 }
 
@@ -123,7 +128,7 @@ precmd_date() {
     emulate -L zsh
 
     # export TIME_PRECMD=`date +%s`
-    export DATE_PRECMD="$(date '+%H:%M:%S %y-%m-%d')"
+    export DATE_PRECMD=$(date "$DATE_FORMAT_WITH_STYLE")
 
     my_title $ZSH_THEME_TERM_TAB_TITLE_IDLE $ZSH_THEME_TERM_TITLE_IDLE
 }
@@ -137,13 +142,13 @@ add-zsh-hook preexec preexec_date
 add-zsh-hook precmd precmd_date
 
 set_prompt() {
-  if [[ "$MY_PROMPT_MODE" = "1" ]]; then
-    PROMPT=' ${ret_status}%{$fg_bold[green]%}:${SSH_TTY:+%n@%m:}%j%{$fg_bold[blue]%} %{$fg_bold[cyan]%}%~%{$fg_bold[blue]%}$(LSPACE $(git_prompt_info))%{$reset_color%}
- %{$fg_bold[green]%}${DATE_PRECMD} %{$reset_color%}'
-    RPROMPT=''
-  else
+  if [[ "$MY_PROMPT_MODE" = "0" ]]; then
+    PROMPT=' %{$DATE_PRECMD%'$DATE_FORMAT_LEN'G%} %{$fg_bold[cyan]%}%c%{$reset_color%} '
     RPROMPT=' %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%} ${ret_status}%{$fg_bold[green]%}%p:${SSH_TTY:+%n@%m:}%j%{$reset_color%}'
-    PROMPT=' %{$fg_bold[green]%}${DATE_PRECMD} %{$fg_bold[cyan]%}%c%{$reset_color%} '
+  else
+    PROMPT=' ${ret_status}%{$fg_bold[green]%}:${SSH_TTY:+%n@%m:}%j%{$fg_bold[blue]%} %{$fg_bold[cyan]%}%~%{$fg_bold[blue]%}$(LSPACE $(git_prompt_info))%{$reset_color%}
+ %{$DATE_PRECMD%'$DATE_FORMAT_LEN'G%} %{$reset_color%}'
+    RPROMPT=''
   fi
 
   if [[ -n "$MC_SID" ]]; then
