@@ -215,7 +215,13 @@ local function setup_screen(scr)
       source = function ()
          -- Sort clients with their constant ids to make the order stable.
          local cls = awful.widget.tasklist.source.all_clients()
-         table.sort(cls, function (a, b) return a.window < b.window end)
+         table.sort(cls,
+                    function (a, b)
+                       -- this makes minimized windows appear at last
+                       -- if a.minimized ~= b.minimized then return b.minimized else return a.window < b.window end
+                       return a.window < b.window
+                    end
+         )
          return cls
       end,
       update_function = function (w, b, l, d, objects, args)
