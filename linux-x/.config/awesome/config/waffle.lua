@@ -321,7 +321,7 @@ do
 
    cpu_widget = wibox.widget {
       {
-         wibox.container.mirror(cpugraph_widget, { horizontal = true }),
+         cpugraph_widget,
          cpu_text_shadow_widget,
          cpu_text_widget,
          layout = wibox.layout.manual
@@ -407,7 +407,7 @@ do
 
    ram_widget = wibox.widget {
       {
-         wibox.container.mirror(ramgraph_widget, { horizontal = true }),
+         ramgraph_widget,
          ram_text_shadow_widget,
          ram_text_widget,
          layout = wibox.layout.manual
@@ -463,7 +463,7 @@ do
    }
 
    local net_rx_widget = wibox.widget {
-      wibox.container.mirror(netgraph_rx_widget, { horizontal = true }),
+      netgraph_rx_widget,
       point = {x = 0, y = 0},
       widget = wibox.container.margin
    }
@@ -508,7 +508,7 @@ do
    }
 
    local net_tx_widget = wibox.widget {
-      wibox.container.mirror(netgraph_tx_widget, { horizontal = true }),
+      netgraph_tx_widget,
       widget = wibox.container.margin
    }
 
@@ -525,8 +525,6 @@ do
    }
 
    net_widget = wibox.widget {
-      net_rx_layout,
-      net_tx_layout,
       {
          {
             image = gcolor.recolor_image(icons.ethernet, beautiful.fg_normal),
@@ -537,6 +535,8 @@ do
          margins = dpi(4),
          widget = wibox.container.margin,
       },
+      net_rx_layout,
+      net_tx_layout,
       layout = wibox.layout.fixed.horizontal,
    }
 
@@ -607,7 +607,7 @@ do
       shape = gshape.bar,
       clip = true,
       margins = {
-         left = dpi(4),
+         right = dpi(4),
          top = dpi(11),
          bottom = dpi(11),
       },
@@ -668,7 +668,6 @@ local waffle_root_view = create_view(
          wibox.widget {
             {
                {
-                  cpu_widget,
                   {
                      {
                         image = gcolor.recolor_image(icons.cpu, beautiful.fg_normal),
@@ -679,7 +678,7 @@ local waffle_root_view = create_view(
                      margins = dpi(4),
                      widget = wibox.container.margin,
                   },
-                  ram_widget,
+                  cpu_widget,
                   {
                      {
                         image = gcolor.recolor_image(icons.ram, beautiful.fg_normal),
@@ -690,6 +689,7 @@ local waffle_root_view = create_view(
                      margins = dpi(4),
                      widget = wibox.container.margin,
                   },
+                  ram_widget,
                   layout = wibox.layout.fixed.horizontal,
                },
                net_widget,
@@ -787,7 +787,6 @@ local waffle_root_view = create_view(
          wibox.widget {
             {
                {
-                  volumebar_widget,
                   {
                      {
                         image = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
@@ -798,6 +797,7 @@ local waffle_root_view = create_view(
                      margins = dpi(4),
                      widget = wibox.container.margin,
                   },
+                  volumebar_widget,
                   layout = wibox.layout.fixed.horizontal,
                },
                layout = wibox.layout.fixed.vertical,
