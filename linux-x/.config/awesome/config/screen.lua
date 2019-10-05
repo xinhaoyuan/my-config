@@ -82,17 +82,18 @@ capi.root.buttons(
    )
 )
 
-local fortune = require("fortune").create(nil, 120)
+local fortune = require("watchcommand").create({"fortune", "-s"}, 120)
 local fortune_widget = wibox.widget {
    align = "center",
    forced_height = beautiful.bar_height,
    widget = wibox.widget.textbox
 }
 fortune:connect_signal(
-   "property::fortune",
+   "property::output",
    function ()
-      fortune_widget:set_text(" << " .. fortune.fortune .. " >> ")
-      fortune_widget.fortune_raw = fortune.fortune
+      local raw = fortune.output:gsub("\n", " "):gsub("%s+", " "):match("^%s*(.-)%s*$")
+      fortune_widget:set_text(" << " .. raw .. " >> ")
+      fortune_widget.fortune_raw = raw
    end
 )
 
@@ -351,7 +352,7 @@ local function setup_screen(scr)
    -- right_layout:add(volumearc_widget)
    -- right_layout:add(battery_widget)
    -- local clock = wibox.widget.textclock("%y%m%d%a%H%M")
-   local clock = wibox.widget.textclock("%H<b>%M</b>")
+   local clock = wibox.widget.textclock("<span color='" .. beautiful.border_focus .. "'>%m<b>%d</b></span>%H<b>%M</b>")
    clock:set_font(beautiful.font)
    local calendar_widget = calendar({ fdow = 7, html = "<span font_desc='" .. beautiful.font_mono .. "'>\n%s</span>", today_color = beautiful.emphasis_color, position = "bottom_right" })
    calendar_widget:attach(clock)

@@ -4,8 +4,8 @@ local gobject = require("gears.object")
 local mod = {}
 
 function mod.create(command, timeout)
-   command = command or {"fortune", "-s"}
-   timeout = timeout or 120
+   assert(command)
+   timeout = timeout or 1
 
    local obj = gobject {}
    local t
@@ -21,8 +21,8 @@ function mod.create(command, timeout)
             function(stdout, stderr, exitreason, exitcode)
                if obj_ptr[1] then
                   if exitcode == 0 then
-                     obj_ptr[1].fortune = stdout:gsub("\n", " "):gsub("%s+", " "):match("^%s*(.-)%s*$")
-                     obj_ptr[1]:emit_signal("property::fortune", obj_ptr[1])
+                     obj_ptr[1].output = stdout
+                     obj_ptr[1]:emit_signal("property::output", obj_ptr[1])
                   end
                   t:again()
                end

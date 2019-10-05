@@ -579,7 +579,7 @@ do
       widget = wibox.widget.progressbar
    }
 
-   local update_graphic = function(widget, stdout, _, _, _)
+   local update_graphic = function (widget, stdout, _, _, _)
       local mute = string.match(stdout, "%[(o%D%D?)%]")
       local volume = string.match(stdout, "(%d?%d?%d)%%")
       volume = tonumber(string.format("% 3d", volume))
@@ -590,39 +590,50 @@ do
 
    end
 
-   volumebar_widget:connect_signal("button::press", function(_,_,_,button)
-                                      local cmd
-                                      if (button == 4)     then cmd = INC_VOLUME_CMD
-                                      elseif (button == 5) then cmd = DEC_VOLUME_CMD
-                                      elseif (button == 1) then cmd = TOG_VOLUME_CMD
-                                      end
+   volumebar_widget:connect_signal(
+      "button::press",
+      function(_, _, _, button)
+         local cmd
+         if (button == 4)     then cmd = INC_VOLUME_CMD
+         elseif (button == 5) then cmd = DEC_VOLUME_CMD
+         elseif (button == 1) then cmd = TOG_VOLUME_CMD
+         end
 
-                                      awful.spawn.easy_async_with_shell(
-                                         cmd .. ">/dev/null&&" .. GET_VOLUME_CMD, function(stdout, stderr, exitreason, exitcode)
-                                            update_graphic(volumebar_widget, stdout, stderr, exitreason, exitcode)
-                                      end)
-   end)
+         awful.spawn.easy_async_with_shell(
+            cmd .. ">/dev/null&&" .. GET_VOLUME_CMD,
+            function (stdout, stderr, exitreason, exitcode)
+               update_graphic(volumebar_widget, stdout, stderr, exitreason, exitcode)
+            end
+         )
+      end
+   )
 
    watch(GET_VOLUME_CMD, 1, update_graphic, volumebar_widget)
 
    volumebar_widget.keys = {
       ["-"] = function (mod, _, event)
          awful.spawn.easy_async_with_shell(
-            DEC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD, function(stdout, stderr, exitreason, exitcode)
+            DEC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
+            function (stdout, stderr, exitreason, exitcode)
                update_graphic(volumebar_widget, stdout, stderr, exitreason, exitcode)
-         end)
+            end
+         )
       end,
       ["_"] = function ()
          awful.spawn.easy_async_with_shell(
-            TOG_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD, function(stdout, stderr, exitreason, exitcode)
+            TOG_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
+            function (stdout, stderr, exitreason, exitcode)
                update_graphic(volumebar_widget, stdout, stderr, exitreason, exitcode)
-         end)
+            end
+         )
       end,
       ["="] = function ()
          awful.spawn.easy_async_with_shell(
-            INC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD, function(stdout, stderr, exitreason, exitcode)
+            INC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
+            function (stdout, stderr, exitreason, exitcode)
                update_graphic(volumebar_widget, stdout, stderr, exitreason, exitcode)
-         end)
+            end
+         )
       end,
    }
 end
@@ -635,7 +646,7 @@ local waffle_root_view = create_view(
       --       format = "<span size='x-large'>%y-%m-%d %a %H:%M</span>",
       --       widget = wibox.widget.textclock,
       --    },
-      --    beautiful.bg_normal, dpi(4)
+      --    beautiful.bg_normal, dpi(2)
       -- ),
       decorate(
          wibox.widget {
