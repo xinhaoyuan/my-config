@@ -311,7 +311,7 @@ do
          align = "center",
          point = {x = 0, y = 0},
          widget = wibox.widget.textbox,
-      }, beautiful.bg_normal, dpi(1))
+      }, beautiful.bg_normal, dpi(2))
 
    cpu_widget = wibox.widget {
       {
@@ -388,7 +388,7 @@ do
          align = "center",
          point = {x = 0, y = 0},
          widget = wibox.widget.textbox,
-      }, beautiful.bg_normal, dpi(1))
+      }, beautiful.bg_normal, dpi(2))
 
    ram_widget = wibox.widget {
       {
@@ -436,7 +436,7 @@ do
          align = "center",
          point = {x = 0, y = 0},
          widget = wibox.widget.textbox,
-      }, beautiful.bg_normal, dpi(1))
+      }, beautiful.bg_normal, dpi(2))
 
    local net_rx_widget = wibox.widget {
       netgraph_rx_widget,
@@ -473,7 +473,7 @@ do
          align = "center",
          point = { x = 0, y = 0 },
          widget = wibox.widget.textbox,
-      }, beautiful.bg_normal, dpi(1))
+      }, beautiful.bg_normal, dpi(2))
 
    local net_tx_widget = wibox.widget {
       netgraph_tx_widget,
@@ -629,6 +629,14 @@ end
 
 local waffle_root_view = create_view(
    wibox.widget {
+      highlighted_textbox(
+         wibox.widget {
+            align = "center",
+            format = "<span size='x-large'>%y-%m-%d %a %H:%M</span>",
+            widget = wibox.widget.textclock,
+         },
+         beautiful.bg_normal, dpi(4)
+      ),
       decorate(
          wibox.widget {
             {
