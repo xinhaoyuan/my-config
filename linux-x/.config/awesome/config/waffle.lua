@@ -629,14 +629,14 @@ end
 
 local waffle_root_view = create_view(
    wibox.widget {
-      highlighted_textbox(
-         wibox.widget {
-            align = "center",
-            format = "<span size='x-large'>%y-%m-%d %a %H:%M</span>",
-            widget = wibox.widget.textclock,
-         },
-         beautiful.bg_normal, dpi(4)
-      ),
+      -- highlighted_textbox(
+      --    wibox.widget {
+      --       align = "center",
+      --       format = "<span size='x-large'>%y-%m-%d %a %H:%M</span>",
+      --       widget = wibox.widget.textclock,
+      --    },
+      --    beautiful.bg_normal, dpi(4)
+      -- ),
       decorate(
          wibox.widget {
             {

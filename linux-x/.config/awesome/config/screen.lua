@@ -82,19 +82,19 @@ capi.root.buttons(
    )
 )
 
+local fortune = require("fortune").create(nil, 120)
 local fortune_widget = wibox.widget {
    align = "center",
    forced_height = beautiful.bar_height,
    widget = wibox.widget.textbox
 }
-watch({"fortune", "-s"}, 120,
-   function(widget, stdout)
-      local raw = stdout:gsub("\n", " "):gsub("%s+", " ")
-      local label = " << " .. raw .. " >> "
-      widget:set_text(label)
-      widget.fortune_raw = raw
-   end,
-   fortune_widget)
+fortune:connect_signal(
+   "property::fortune",
+   function ()
+      fortune_widget:set_text(" << " .. fortune.fortune .. " >> ")
+      fortune_widget.fortune_raw = fortune.fortune
+   end
+)
 
 function shared.screen.toggle_fortune()
    fortune_widget:set_visible(not fortune_widget:get_visible())
