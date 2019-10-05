@@ -61,7 +61,8 @@ shared.action = {
       end
    end,
    music_app = function ()
-      awful.spawn("cantata")
+      -- cantata does not respect startup on the activating existing window
+      awful.spawn("cantata", false)
    end,
 }
 
