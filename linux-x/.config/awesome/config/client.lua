@@ -15,25 +15,21 @@ local gtimer = require("gears.timer")
 local machi = require("layout-machi")
 
 function shared.client.titlebar_toggle(c)
-   if c.has_titlebar_enabled then
-      shared.client.titlebar_disable(c)
-   else
+   if c.maximized or not c.has_titlebar_enabled then
       shared.client.titlebar_enable(c)
+   else
+      shared.client.titlebar_disable(c)
    end
 end
 
 function shared.client.titlebar_enable(c)
    c.has_titlebar_enabled = true
-   if not c.maximized then
-      shared.client.titlebar_show(c)
-   end
+   shared.client.titlebar_show(c)
 end
 
 function shared.client.titlebar_disable(c)
    c.has_titlebar_enabled = false
-   if not c.maximized then
-      shared.client.titlebar_hide(c)
-   end
+   shared.client.titlebar_hide(c)
 end
 
 function shared.client.titlebar_show(c)

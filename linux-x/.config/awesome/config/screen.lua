@@ -17,7 +17,6 @@ local gtimer  = require("gears.timer")
 local gshape = require("gears.shape")
 local gcolor = require("gears.color")
 local gmath = require("gears.math")
-local vicious = require("vicious")
 local waffle = require("waffle")
 local calendar = require("calendar.calendar")
 local menu = require("my-menu")
@@ -27,6 +26,9 @@ local fallback = require("fallback")
 local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
 local fixed_align = require("fixed_align")
+local revelation = require("revelation")
+revelation.init()
+revelation.property_to_watch.maximized = false
 
 -- helper functions
 
@@ -310,7 +312,7 @@ local function setup_screen(scr)
                          }, true)
             awful.mouse.client.move(c)
          elseif b == 2 then
-            awful.titlebar.toggle(c)
+            revelation{curr_tag_only = true}
          elseif b == 3 then
             awful.mouse.client.resize(c)
          end
@@ -551,7 +553,7 @@ local global_keys = table_join(
    awful.key({ }, "XF86AudioMute",          function () shared.action.audio_setup("mute-toggle") end),
    awful.key({ }, "XF86MonBrightnessUp",    function () awful.spawn("xbacklight -inc 5", false) end),
    awful.key({ }, "XF86MonBrightnessDown",  function () awful.spawn("xbacklight -dec 5", false) end),
-   awful.key({ "Mod4" }, "Escape",          function () menu:show() end),
+   awful.key({ "Mod4" }, "Escape",          function () revelation{curr_tag_only = true} end),
    awful.key({ "Mod4" }, "Return",          function () shared.action.terminal() end),
    awful.key({ "Mod4" }, "w",               function () shared.action.web_browser() end),
    awful.key({ "Mod4" }, "e",               function () shared.action.file_manager() end),
