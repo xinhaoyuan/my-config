@@ -61,7 +61,7 @@ shared.action = {
       end
    end,
    music_app = function ()
-      shared.action.terminal({"ncmpcpp"})
+      awful.spawn("cantata")
    end,
 }
 
