@@ -835,6 +835,15 @@ local waffle_root_view = create_view(
       layout = wibox.layout.fixed.vertical,
    }
 )
+waffle_root_view.keys[']'] = function ()
+   waffle:hide()
+   awful.spawn({"mpc", "next"}, false)
+end
+
+waffle_root_view.keys['['] = function ()
+   waffle:hide()
+   awful.spawn({"mpc", "prev"}, false)
+end
 
 waffle:set_root_view(waffle_root_view)
 
