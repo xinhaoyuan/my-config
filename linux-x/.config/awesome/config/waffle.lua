@@ -12,6 +12,7 @@ local watch = require("awful.widget.watch")
 local gshape = require("gears.shape")
 local gcolor = require("gears.color")
 local icons = require("icons")
+local highlighted_textbox = require("highlighted_textbox")
 local dpi = require("beautiful.xresources").apply_dpi
 
 local waffle_width = beautiful.waffle_width or dpi(240)
@@ -303,26 +304,18 @@ do
    }
 
 
-   local cpu_text_widget = wibox.widget {
-      forced_width = cpu_widget_width,
-      forced_height = dpi(24),
-      align = "center",
-      point = {x = 0, y = 0},
-      widget = wibox.widget.textbox,
-   }
-
-   local cpu_text_shadow_widget = wibox.widget {
-      forced_width = cpu_widget_width,
-      forced_height = dpi(24),
-      align = "center",
-      point = {x = 1, y = 1},
-      widget = wibox.widget.textbox,
-   }
+   local cpu_text_widget = highlighted_textbox(
+      wibox.widget {
+         forced_width = cpu_widget_width,
+         forced_height = dpi(24),
+         align = "center",
+         point = {x = 0, y = 0},
+         widget = wibox.widget.textbox,
+      }, beautiful.bg_normal, dpi(1))
 
    cpu_widget = wibox.widget {
       {
          cpugraph_widget,
-         cpu_text_shadow_widget,
          cpu_text_widget,
          layout = wibox.layout.manual
       },
@@ -347,7 +340,6 @@ do
 
          local markup = "<span font_desc='" .. font_small .. "'>" .. tostring(math.floor(diff_usage)) .. "%</span>"
          cpu_text_widget:set_markup(markup)
-         cpu_text_shadow_widget:set_markup("<span color='" .. beautiful.bg_normal .. "'>" .. markup .. "</span>")
 
          cpugraph_widget:add_value(diff_usage)
 
@@ -389,26 +381,18 @@ do
       color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5,#74aeab"
    }
 
-   local ram_text_widget = wibox.widget {
-      forced_width = ram_widget_width,
-      forced_height = dpi(24),
-      align = "center",
-      point = {x = 0, y = 0},
-      widget = wibox.widget.textbox,
-   }
-
-   local ram_text_shadow_widget = wibox.widget {
-      forced_width = ram_widget_width,
-      forced_height = dpi(24),
-      align = "center",
-      point = {x = 1, y = 1},
-      widget = wibox.widget.textbox,
-   }
+   local ram_text_widget = highlighted_textbox(
+      wibox.widget {
+         forced_width = ram_widget_width,
+         forced_height = dpi(24),
+         align = "center",
+         point = {x = 0, y = 0},
+         widget = wibox.widget.textbox,
+      }, beautiful.bg_normal, dpi(1))
 
    ram_widget = wibox.widget {
       {
          ramgraph_widget,
-         ram_text_shadow_widget,
          ram_text_widget,
          layout = wibox.layout.manual
       },
@@ -424,7 +408,6 @@ do
 
          local markup = "<span font_desc='" .. font_small .. "'>" .. format_size((total - available) * 1000) .. "B</span>"
          ram_text_widget:set_markup(markup)
-         ram_text_shadow_widget:set_markup("<span color='" .. beautiful.bg_normal .. "'>" .. markup .. "</span>")
 
          ramgraph_widget:add_value(usage)
       end,
@@ -446,21 +429,14 @@ do
       color = "#74aeab"
    }
 
-   local rx_text_widget = wibox.widget {
-      forced_width = net_widget_width,
-      forced_height = dpi(24),
-      align = "center",
-      point = {x = 0, y = 0},
-      widget = wibox.widget.textbox,
-   }
-
-   local rx_text_shadow_widget = wibox.widget {
-      forced_width = net_widget_width,
-      forced_height = dpi(24),
-      align = "center",
-      point = {x = 1, y = 1},
-      widget = wibox.widget.textbox,
-   }
+   local rx_text_widget = highlighted_textbox(
+      wibox.widget {
+         forced_width = net_widget_width,
+         forced_height = dpi(24),
+         align = "center",
+         point = {x = 0, y = 0},
+         widget = wibox.widget.textbox,
+      }, beautiful.bg_normal, dpi(1))
 
    local net_rx_widget = wibox.widget {
       netgraph_rx_widget,
@@ -471,7 +447,6 @@ do
    local net_rx_layout = wibox.widget {
       {
          net_rx_widget,
-         rx_text_shadow_widget,
          rx_text_widget,
          layout = wibox.layout.manual,
       },
@@ -491,21 +466,14 @@ do
       color = "#74aeab"
    }
 
-   local tx_text_widget = wibox.widget {
-      forced_width = net_widget_width,
-      forced_height = dpi(24),
-      align = "center",
-      point = { x = 0, y = 0 },
-      widget = wibox.widget.textbox,
-   }
-
-   local tx_text_shadow_widget = wibox.widget {
-      forced_width = net_widget_width,
-      forced_height = dpi(24),
-      align = "center",
-      point = { x = 1, y = 1 },
-      widget = wibox.widget.textbox,
-   }
+   local tx_text_widget = highlighted_textbox(
+      wibox.widget {
+         forced_width = net_widget_width,
+         forced_height = dpi(24),
+         align = "center",
+         point = { x = 0, y = 0 },
+         widget = wibox.widget.textbox,
+      }, beautiful.bg_normal, dpi(1))
 
    local net_tx_widget = wibox.widget {
       netgraph_tx_widget,
@@ -515,7 +483,6 @@ do
    local net_tx_layout = wibox.widget {
       {
          net_tx_widget,
-         tx_text_shadow_widget,
          tx_text_widget,
          layout = wibox.layout.manual,
       },
@@ -565,7 +532,6 @@ do
             local rx = (recv - prev_recv) / update_interval_s
             local markup = "<span font_desc='" .. font_small .. "'>RX " .. format_size(rx) .. "B/s</span>"
             rx_text_widget:set_markup(markup)
-            rx_text_shadow_widget:set_markup("<span color='" .. beautiful.bg_normal .. "'>" .. markup .. "</span>")
             netgraph_rx_widget.max_value = 256 * 1024
             netgraph_rx_widget:add_value(rx)
          end
@@ -574,7 +540,6 @@ do
             local tx = (send - prev_send) / update_interval_s
             local markup = "<span font_desc='" .. font_small .. "'>TX " .. format_size(tx) .. "B/s</span>"
             tx_text_widget:set_markup(markup)
-            tx_text_shadow_widget:set_markup("<span color='" .. beautiful.bg_normal .. "'>" .. markup .. "</span>")
             netgraph_tx_widget.max_value = 256 * 1024
             netgraph_tx_widget:add_value(tx)
          end
@@ -699,6 +664,13 @@ local waffle_root_view = create_view(
             bg = beautiful.bg_normal,
             widget = wibox.container.background,
       }),
+      -- decorate(
+      --    wibox.widget {
+      --       wibox.widget.calendar.month(os.date('*t'), beautiful.font_mono),
+      --       top = dpi(10), right = dpi(10),
+      --       widget = wibox.container.margin,
+      --    }
+      -- ),
       decorate(
          wibox.widget {
             simple_button({
