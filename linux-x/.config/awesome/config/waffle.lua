@@ -835,14 +835,28 @@ local waffle_root_view = create_view(
       layout = wibox.layout.fixed.vertical,
    }
 )
-waffle_root_view.keys[']'] = function ()
-   waffle:hide()
-   awful.spawn({"mpc", "next"}, false)
+waffle_root_view.keys['Left'] = function (mod)
+   for _, m in ipairs(mod) do mod[m] = true end
+   if mod["Shift"] then
+      waffle:hide()
+      awful.spawn({"mpc", "prev"}, false)
+   end
 end
 
-waffle_root_view.keys['['] = function ()
-   waffle:hide()
-   awful.spawn({"mpc", "prev"}, false)
+waffle_root_view.keys['Right'] = function (mod)
+   for _, m in ipairs(mod) do mod[m] = true end
+   if mod["Shift"] then
+      waffle:hide()
+      awful.spawn({"mpc", "next"}, false)
+   end
+end
+
+waffle_root_view.keys['Up'] = function (mod)
+   for _, m in ipairs(mod) do mod[m] = true end
+   if mod["Shift"] then
+      waffle:hide()
+      awful.spawn({"mpc", "toggle"}, false)
+   end
 end
 
 waffle:set_root_view(waffle_root_view)
