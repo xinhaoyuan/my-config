@@ -1,4 +1,5 @@
 local gcolor = require("gears.color")
+local lgi = require("lgi")
 
 return function(textbox, highlight_color, highlight_width)
    highlight_color = gcolor(highlight_color)
@@ -15,6 +16,7 @@ return function(textbox, highlight_color, highlight_width)
                cr:layout_path(layout)
                cr:set_source(highlight_color)
                cr:set_line_width(highlight_width)
+               cr:set_line_join("ROUND")
                cr:stroke()
                cr:restore()
                cr:new_path()
