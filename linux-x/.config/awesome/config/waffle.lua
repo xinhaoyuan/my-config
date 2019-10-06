@@ -684,21 +684,18 @@ do
       ["Left"] = function (mod)
          for _, m in ipairs(mod) do mod[m] = true end
          if mod["Shift"] then
-            waffle:hide()
             awful.spawn(PREV_CMD, false)
          end
       end,
       ["Right"] = function (mod)
          for _, m in ipairs(mod) do mod[m] = true end
          if mod["Shift"] then
-            waffle:hide()
             awful.spawn(NEXT_CMD, false)
          end
       end,
       ["Up"] = function (mod)
          for _, m in ipairs(mod) do mod[m] = true end
          if mod["Shift"] then
-            waffle:hide()
             awful.spawn(TOGGLE_CMD, false)
          end
       end,
