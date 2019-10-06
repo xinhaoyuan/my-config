@@ -678,7 +678,7 @@ do
       mpd_status_widget:set_text(stdout:match('^(.+)\n$'))
    end
 
-   watch(GET_STATUS_CMD, 1, update_status, mpd_widget)
+   watch(GET_STATUS_CMD, 3, update_status, mpd_widget)
 
    mpd_widget.keys = {
       ["Left"] = function (mod)
