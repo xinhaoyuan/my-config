@@ -20,7 +20,7 @@ local waffle_width = beautiful.waffle_width or dpi(240)
 local button_height = dpi(20)
 local button_padding = dpi(4)
 local font_big = beautiful.fontname_normal .. " 10"
-local font_small = beautiful.fontname_normal .. " 7"
+local font_small = beautiful.fontname_mono .. " 7"
 local update_interval_s = 1
 
 local function em(t)
@@ -503,7 +503,7 @@ do
             widget = wibox.widget.imagebox,
          },
          left = dpi(4),
-         up = dpi(4),
+         top = dpi(4),
          bottom = dpi(4),
          widget = wibox.container.margin,
       },

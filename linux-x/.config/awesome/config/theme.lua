@@ -12,10 +12,11 @@ local icons = require("icons")
 local cairo = lgi.cairo
 
 -- custom property string
-theme.fontname_normal = "Hack"
+-- Interesting fonts: Lato, Quicksand, Lobster Two, Purisa, Dosis
+theme.fontname_normal = "Purisa Bold"
 -- custom property string
 theme.fontname_mono = "Hack"
-theme.font = theme.fontname_normal .. " 10"
+theme.font = theme.fontname_normal .. " 9"
 -- custom property string font descriptor 
 theme.font_mono = theme.fontname_mono .. " 10"
 theme.useless_gap = dpi(8)
@@ -27,6 +28,8 @@ theme.border_width = dpi(2)
 theme.emphasis_color = '#a9444e'
 -- custom property boolean
 theme.waffle_use_entire_screen = true
+-- custom property color
+theme.waffle_background = "#00000000"
 -- custom property
 theme.waffle_width = dpi(240)
 -- theme.tasklist_shape = function(cr, w, h)
@@ -109,7 +112,7 @@ theme.tasklist_layout = {
 }
 
 -- custom property
-theme.titlebar_size = dpi(20)
+theme.titlebar_size = theme.bar_height
 
 local function text_to_surface(text, font_desc, color_desc, width, height)
    local surf = lgi.cairo.ImageSurface.create(cairo.Format.ARGB32, width, height)
