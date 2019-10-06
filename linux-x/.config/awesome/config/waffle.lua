@@ -108,9 +108,11 @@ local function simple_button(args)
             forced_width = width,
             layout = wibox.layout.align.horizontal,
          },
-         buttons = action and awful.util.table.join(
-            awful.button({ }, 1, nil, function () action(false) end),
-            awful.button({ }, 3, nil, function () action(true) end)),
+         buttons = args.buttons or
+            (action and
+                awful.util.table.join(
+                   awful.button({ }, 1, nil, function () action(false) end),
+                   awful.button({ }, 3, nil, function () action(true) end))),
          margins = button_padding,
          widget = wibox.container.margin,
       },
@@ -678,6 +680,11 @@ do
          waffle:hide()
          shared.action.music_app()
       end,
+      buttons = awful.util.table.join(
+         awful.button({ }, 1, nil, function () waffle:hide(); shared.action.music_app() end),
+         awful.button({ }, 3, nil, function () awful.spawn.spawn(TOGGLE_CMD, false) end),
+         awful.button({ }, 4, nil, function () awful.spawn.spawn(NEXT_CMD, false) end),
+         awful.button({ }, 5, nil, function () awful.spawn.spawn(PREV_CMD, false) end)),
    }
 
    local update_status = function (widget, stdout, _, _, exitcode)
