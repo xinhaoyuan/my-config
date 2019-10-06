@@ -356,7 +356,12 @@ local function setup_screen(scr)
    -- local clock = wibox.widget.textclock("%y%m%d%a%H%M")
    local clock = wibox.widget.textclock("<span color='" .. beautiful.border_focus .. "'>%m<b>%d</b></span>%H<b>%M</b>")
    clock:set_font(beautiful.font)
-   local calendar_widget = calendar({ fdow = 7, html = "<span font_desc='" .. beautiful.font_mono .. "'>\n%s</span>", today_color = beautiful.emphasis_color, position = "bottom_right" })
+   local calendar_widget = calendar({
+         fdow = 7,
+         html = "<span font_desc='" .. beautiful.font_mono .. "'>\n%s</span>",
+         today_color = beautiful.emphasis_color,
+         position = "bottom_right",
+   })
    calendar_widget:attach(clock)
    right_layout:add(clock)
    right_layout:add(my_widgets[s].indicator)
