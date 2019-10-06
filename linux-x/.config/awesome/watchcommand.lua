@@ -22,8 +22,10 @@ function mod.create(command, timeout)
                if obj_ptr[1] then
                   if exitcode == 0 then
                      obj_ptr[1].output = stdout
-                     obj_ptr[1]:emit_signal("property::output", obj_ptr[1])
+                  else
+                     obj_ptr[1].output = nil
                   end
+                  obj_ptr[1]:emit_signal("property::output", obj_ptr[1])
                   t:again()
                end
             end

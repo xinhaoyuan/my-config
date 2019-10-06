@@ -12,6 +12,7 @@ local watch = require("awful.widget.watch")
 local gshape = require("gears.shape")
 local gcolor = require("gears.color")
 local icons = require("icons")
+local fallback = require("fallback")
 local highlighted_textbox = require("highlighted_textbox")
 local dpi = require("beautiful.xresources").apply_dpi
 
@@ -74,15 +75,16 @@ local function simple_button(args)
    local action = args.action
    local width = waffle_width - button_padding * 2
 
-   local textbox = wibox.widget {
-      markup = args.markup or nil,
-      text = args.text or nil,
-      font = font_big,
-      forced_height = button_height,
-      align = "center",
-      valign = "center",
-      widget = wibox.widget.textbox,
-   }
+   local label = args.label_widget or
+      wibox.widget {
+         markup = args.markup or nil,
+         text = args.text or nil,
+         font = font_big,
+         forced_height = button_height,
+         align = "center",
+         valign = "center",
+         widget = wibox.widget.textbox,
+      }
 
    local ret = wibox.widget {
       {
@@ -94,7 +96,7 @@ local function simple_button(args)
                forced_height = button_height,
                widget = wibox.widget.imagebox,
                           },
-            textbox,
+            label,
             args.indicator and {
                markup = args.indicator,
                font = font_big,
@@ -152,7 +154,7 @@ local function simple_button(args)
       end
    end
 
-   ret.textbox = textbox
+   ret.label = label
 
    return ret
 end
@@ -192,7 +194,7 @@ waffle_poweroff_button = simple_button({
 })
 
 function waffle_poweroff_button:update_text()
-   self.textbox.markup = "Power off <span size='x-small'>(" .. tostring(2 - waffle_poweroff_count) .. " more times)</span>"
+   self.label.markup = "Power off <span size='x-small'>(" .. tostring(2 - waffle_poweroff_count) .. " more times)</span>"
 end
 
 local waffle_poweroff_view = create_view(decorate(waffle_poweroff_button))
@@ -302,7 +304,6 @@ do
       widget = wibox.widget.graph,
       color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5,#74aeab"
    }
-
 
    local cpu_text_widget = highlighted_textbox(
       wibox.widget {
@@ -654,56 +655,56 @@ do
       forced_height = button_height,
       widget = wibox.widget.textbox
    }
-   mpd_widget = wibox.widget {
-      {
-         {
-            image = gcolor.recolor_image(icons.music, beautiful.fg_normal),
-            forced_height = button_height,
-            forced_width = button_height,
-            widget = wibox.widget.imagebox,
-         },
+
+   mpd_widget = simple_button {
+      icon = gcolor.recolor_image(icons.music, beautiful.fg_normal),
+      label_widget = wibox.widget {
          mpd_status_widget,
          {
-            markup = em("m"),
+            text = "Music",
+            align = "center",
+            valign = "center",
+            forced_height = button_height,
             widget = wibox.widget.textbox,
          },
-         forced_width = waffle_width - button_padding * 2,
-         widget = wibox.layout.align.horizontal,
+         widget = fallback,
       },
-      margins = button_padding,
-      widget = wibox.container.margin,
-   }
-
-   local update_status = function (widget, stdout, _, _, _)
-      mpd_status_widget:set_text(stdout:match('^(.+)\n$'))
-   end
-
-   watch(GET_STATUS_CMD, 3, update_status, mpd_widget)
-
-   mpd_widget.keys = {
-      ["Left"] = function (mod)
-         for _, m in ipairs(mod) do mod[m] = true end
-         if mod["Shift"] then
-            awful.spawn(PREV_CMD, false)
-         end
-      end,
-      ["Right"] = function (mod)
-         for _, m in ipairs(mod) do mod[m] = true end
-         if mod["Shift"] then
-            awful.spawn(NEXT_CMD, false)
-         end
-      end,
-      ["Up"] = function (mod)
-         for _, m in ipairs(mod) do mod[m] = true end
-         if mod["Shift"] then
-            awful.spawn(TOGGLE_CMD, false)
-         end
-      end,
-      ["m"] = function ()
+      indicator = em("m"),
+      key = "m",
+      action = function (alt)
          waffle:hide()
          shared.action.music_app()
       end,
    }
+
+   local update_status = function (widget, stdout, _, _, exitcode)
+      if exitcode == 0 then
+         mpd_status_widget:set_text(stdout:match('^(.+)\n$') or "")
+      else
+         mpd_status_widget:set_text("")
+      end
+   end
+
+   watch(GET_STATUS_CMD, 3, update_status, mpd_widget)
+
+   mpd_widget.keys["Left"] = function (mod)
+      for _, m in ipairs(mod) do mod[m] = true end
+      if mod["Shift"] then
+         awful.spawn(PREV_CMD, false)
+      end
+   end
+   mpd_widget.keys["Right"] = function (mod)
+      for _, m in ipairs(mod) do mod[m] = true end
+      if mod["Shift"] then
+         awful.spawn(NEXT_CMD, false)
+      end
+   end
+   mpd_widget.keys["Up"] = function (mod)
+      for _, m in ipairs(mod) do mod[m] = true end
+      if mod["Shift"] then
+         awful.spawn(TOGGLE_CMD, false)
+      end
+   end
 
 end
    
@@ -835,7 +836,14 @@ local waffle_root_view = create_view(
       }),
       decorate(
          wibox.widget {
-            mpd_widget,
+            {
+               mpd_widget,
+               {
+                  text = "Music",
+                  widget = wibox.widget.textbox,
+               },
+               widget = fallback,
+            },
             {
                {
                   {
