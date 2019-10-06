@@ -84,16 +84,16 @@ capi.root.buttons(
    )
 )
 
-local fortune = require("watchcommand").create({"fortune", "-s"}, 300)
 local fortune_widget = wibox.widget {
    align = "center",
    forced_height = beautiful.bar_height,
    widget = wibox.widget.textbox
 }
-fortune:connect_signal(
+fortune_widget.watch = require("watchcommand").create({"fortune", "-s"}, 300)
+fortune_widget.watch:connect_signal(
    "property::output",
-   function ()
-      local raw = fortune.output:gsub("\n", " "):gsub("%s+", " "):match("^%s*(.-)%s*$")
+   function (watch)
+      local raw = watch.output:gsub("\n", " "):gsub("%s+", " "):match("^%s*(.-)%s*$")
       fortune_widget:set_text(" << " .. raw .. " >> ")
       fortune_widget.fortune_raw = raw
    end
