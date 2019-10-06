@@ -549,7 +549,7 @@ do
    )
 end
 
-local volumebar_widget_width = waffle_width - dpi(24)
+local volumebar_widget_width = waffle_width - button_height
 local volumebar_widget
 do
    local GET_VOLUME_CMD = 'amixer -D pulse sget Master'
@@ -564,17 +564,18 @@ do
    volumebar_widget = wibox.widget {
       max_value = 1,
       forced_width = volumebar_widget_width,
-      forced_height = dpi(24),
+      forced_height = button_height,
       paddings = 0,
-      border_width = 0.5,
+      border_width = 0,
       color = bar_color,
       background_color = background_color,
       shape = gshape.bar,
       clip = true,
       margins = {
+         left = dpi(4) + button_padding,
          right = dpi(4),
-         top = dpi(11),
-         bottom = dpi(11),
+         top = button_height / 2 - dpi(1),
+         bottom = button_height / 2 - dpi(1),
       },
       widget = wibox.widget.progressbar
    }
@@ -638,6 +639,77 @@ do
    }
 end
 
+local mpd_widget
+do
+   local GET_STATUS_CMD = 'mpc current -f "%title% - %artist%" -q'
+   local NEXT_CMD = 'mpc next -q'
+   local PREV_CMD = 'mpc prev -q'
+   local TOGGLE_CMD = 'mpc toggle -q'
+
+   mpd_status_widget = wibox.widget {
+      text = "",
+      align = "center",
+      valign = "center",
+      ellipsize = "end",
+      forced_height = button_height,
+      widget = wibox.widget.textbox
+   }
+   mpd_widget = wibox.widget {
+      {
+         {
+            image = gcolor.recolor_image(icons.music, beautiful.fg_normal),
+            forced_height = button_height,
+            forced_width = button_height,
+            widget = wibox.widget.imagebox,
+         },
+         mpd_status_widget,
+         {
+            markup = em("m"),
+            widget = wibox.widget.textbox,
+         },
+         forced_width = waffle_width - button_padding * 2,
+         widget = wibox.layout.align.horizontal,
+      },
+      margins = button_padding,
+      widget = wibox.container.margin,
+   }
+
+   local update_status = function (widget, stdout, _, _, _)
+      mpd_status_widget:set_text(stdout:match('^(.+)\n$'))
+   end
+
+   watch(GET_STATUS_CMD, 1, update_status, mpd_widget)
+
+   mpd_widget.keys = {
+      ["Left"] = function (mod)
+         for _, m in ipairs(mod) do mod[m] = true end
+         if mod["Shift"] then
+            waffle:hide()
+            awful.spawn(PREV_CMD, false)
+         end
+      end,
+      ["Right"] = function (mod)
+         for _, m in ipairs(mod) do mod[m] = true end
+         if mod["Shift"] then
+            waffle:hide()
+            awful.spawn(NEXT_CMD, false)
+         end
+      end,
+      ["Up"] = function (mod)
+         for _, m in ipairs(mod) do mod[m] = true end
+         if mod["Shift"] then
+            waffle:hide()
+            awful.spawn(TOGGLE_CMD, false)
+         end
+      end,
+      ["m"] = function ()
+         waffle:hide()
+         shared.action.music_app()
+      end,
+   }
+
+end
+   
 local waffle_root_view = create_view(
    wibox.widget {
       -- highlighted_textbox(
@@ -741,16 +813,6 @@ local waffle_root_view = create_view(
                   end
             }),
             simple_button({
-                  icon = gcolor.recolor_image(icons.music, beautiful.fg_normal),
-                  markup = "Music",
-                  indicator = em("m"),
-                  key = "m",
-                  action = function (alt)
-                     shared.action.music_app()
-                     waffle:hide()
-                  end
-            }),
-            simple_button({
                   icon = gcolor.recolor_image(icons.fortune, beautiful.fg_normal),
                   markup = "Fortune",
                   indicator = em("f"),
@@ -776,25 +838,23 @@ local waffle_root_view = create_view(
       }),
       decorate(
          wibox.widget {
+            mpd_widget,
             {
                {
                   {
-                     {
-                        image = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
-                        forced_height = dpi(16),
-                        forced_width = dpi(16),
-                        widget = wibox.widget.imagebox,
-                     },
-                     margins = dpi(4),
-                     widget = wibox.container.margin,
+                     image = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
+                     forced_height = button_height,
+                     forced_width = button_height,
+                     widget = wibox.widget.imagebox,
                   },
                   volumebar_widget,
+                  forced_width = waffle_width - button_padding * 2,
                   layout = wibox.layout.fixed.horizontal,
                },
-               layout = wibox.layout.fixed.vertical,
+               margins = button_padding,
+               widget = wibox.container.margin,
             },
-            bg = beautiful.bg_normal,
-            widget = wibox.container.background,
+            layout = wibox.layout.fixed.vertical,
       }),
       decorate(
          wibox.widget {
@@ -835,29 +895,6 @@ local waffle_root_view = create_view(
       layout = wibox.layout.fixed.vertical,
    }
 )
-waffle_root_view.keys['Left'] = function (mod)
-   for _, m in ipairs(mod) do mod[m] = true end
-   if mod["Shift"] then
-      waffle:hide()
-      awful.spawn({"mpc", "prev"}, false)
-   end
-end
-
-waffle_root_view.keys['Right'] = function (mod)
-   for _, m in ipairs(mod) do mod[m] = true end
-   if mod["Shift"] then
-      waffle:hide()
-      awful.spawn({"mpc", "next"}, false)
-   end
-end
-
-waffle_root_view.keys['Up'] = function (mod)
-   for _, m in ipairs(mod) do mod[m] = true end
-   if mod["Shift"] then
-      waffle:hide()
-      awful.spawn({"mpc", "toggle"}, false)
-   end
-end
 
 waffle:set_root_view(waffle_root_view)
 

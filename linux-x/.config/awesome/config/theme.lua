@@ -27,6 +27,8 @@ theme.border_width = dpi(2)
 theme.emphasis_color = '#a9444e'
 -- custom property boolean
 theme.waffle_use_entire_screen = true
+-- custom property
+theme.waffle_width = dpi(240)
 -- theme.tasklist_shape = function(cr, w, h)
 --    offset = h / 4
 --    cr:move_to(0, 0)
