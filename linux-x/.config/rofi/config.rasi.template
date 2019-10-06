@@ -28,7 +28,7 @@
     selected-active-foreground:  @x-color11;
     selected-active-background:  @x-color8;
 
-    border-color:                @foreground;
+    border-color:                @x-color12;
     separatorcolor:              @foreground;
     background-color:            @background;
     foreground-color:            @foreground;
@@ -38,6 +38,7 @@ window {
     background-color: @background;
     border:           0.15em;
     padding:          0.15em;
+    width:            20em;
 }
 mainbox {
     border:  0;

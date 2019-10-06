@@ -31,6 +31,7 @@ shared.action = {
    launcher = function ()
       local cmd = {"rofi", "show",
                    "-combi-modi", "window,drun",
+                   "-show-icons",
                    "-show", "combi",
                    "-modi", "combi",
                    "-font", be.font}
