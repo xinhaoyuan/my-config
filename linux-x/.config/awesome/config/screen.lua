@@ -84,7 +84,7 @@ capi.root.buttons(
    )
 )
 
-local fortune = require("watchcommand").create({"fortune", "-s"}, 120)
+local fortune = require("watchcommand").create({"fortune", "-s"}, 300)
 local fortune_widget = wibox.widget {
    align = "center",
    forced_height = beautiful.bar_height,
