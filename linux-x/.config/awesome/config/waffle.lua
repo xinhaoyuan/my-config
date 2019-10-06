@@ -416,7 +416,7 @@ do
    )
 end
 
-local net_widget_width = (waffle_width - dpi(24)) / 2
+local net_widget_width = (waffle_width - dpi(24) - dpi(4)) / 2
 local net_widget
 do
    local netgraph_rx_widget = wibox.widget {
@@ -500,11 +500,14 @@ do
             forced_width = dpi(16),
             widget = wibox.widget.imagebox,
          },
-         margins = dpi(4),
+         left = dpi(4),
+         up = dpi(4),
+         bottom = dpi(4),
          widget = wibox.container.margin,
       },
       net_rx_layout,
       net_tx_layout,
+      spacing = dpi(4),
       layout = wibox.layout.fixed.horizontal,
    }
 
