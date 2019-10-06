@@ -302,7 +302,7 @@ do
       step_width = dpi(2),
       step_spacing = dpi(1),
       widget = wibox.widget.graph,
-      color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5,#74aeab"
+      color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5," .. beautiful.border_focus
    }
 
    local cpu_text_widget = highlighted_textbox(
@@ -379,7 +379,7 @@ do
       step_width = dpi(2),
       step_spacing = dpi(1),
       widget = wibox.widget.graph,
-      color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5,#74aeab"
+      color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5," .. beautiful.border_focus
    }
 
    local ram_text_widget = highlighted_textbox(
@@ -427,7 +427,7 @@ do
       step_spacing = dpi(1),
       widget = wibox.widget.graph,
       -- scale = true,
-      color = "#74aeab"
+      color = beautiful.border_focus
    }
 
    local rx_text_widget = highlighted_textbox(
@@ -464,7 +464,7 @@ do
       step_spacing = dpi(1),
       widget = wibox.widget.graph,
       -- scale = true,
-      color = "#74aeab"
+      color = beautiful.border_focus
    }
 
    local tx_text_widget = highlighted_textbox(
@@ -558,9 +558,9 @@ do
    local DEC_VOLUME_CMD = 'amixer -D pulse sset Master 5%-'
    local TOG_VOLUME_CMD = 'amixer -D pulse sset Master toggle'
 
-   local bar_color = "#74aeab"
+   local bar_color = beautiful.border_focus
    local mute_color = "#ff0000"
-   local background_color = "#3a3a3a"
+   local background_color = beautiful.border_normal
 
    volumebar_widget = wibox.widget {
       max_value = 1,
