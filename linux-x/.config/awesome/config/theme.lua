@@ -25,7 +25,7 @@ theme.bar_height = dpi(20)
 theme.menu_width = dpi(150)
 theme.border_width = dpi(2)
 -- custom property color
-theme.emphasis_color = '#a9444e'
+theme.emphasis_color = xrdb.color1
 -- custom property boolean
 theme.waffle_use_entire_screen = true
 -- custom property color
