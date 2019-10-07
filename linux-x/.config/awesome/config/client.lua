@@ -55,6 +55,27 @@ end
 local table_join = awful.util.table.join
 local delayed = gtimer.delayed_call
 
+function shared.client.enlarge(c)
+   if c.fullscreen then
+   elseif c.minimized then
+      c.minimized = false
+   elseif not c.maximized then
+      c.maximized = true
+   else
+      c.fullscreen = true
+   end
+end
+
+function shared.client.shrink(c)
+   if c.fullscreen then
+      c.fullscreen = false
+   elseif c.maximized then
+      c.maximized = false
+   elseif not c.minimized then
+      c.minimized = true
+   end
+end
+
 local client_keys = table_join(
    awful.key({ "Mod4" }, "Tab", function (c)
          c.maximized = false
@@ -70,26 +91,8 @@ local client_keys = table_join(
          )
    end),
 
-   awful.key({ "Mod4" }, "=", function (c)
-         if c.fullscreen then
-         elseif c.minimized then
-            c.minimized = false
-         elseif not c.maximized then
-            c.maximized = true
-         else
-            c.fullscreen = true
-         end
-   end),
-
-   awful.key({ "Mod4" }, "-", function (c)
-         if c.fullscreen then
-            c.fullscreen = false
-         elseif c.maximized then
-            c.maximized = false
-         elseif not c.minimized then
-            c.minimized = true
-         end
-   end),
+   awful.key({ "Mod4" }, "=", shared.client.enlarge),
+   awful.key({ "Mod4" }, "-", shared.client.shrink),
 
    awful.key({ "Mod4" }, "t", function (c) shared.client.titlebar_toggle(c) end),
 

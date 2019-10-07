@@ -143,13 +143,23 @@ local my_tasklist_buttons = awful.util.table.join(
             c:raise()
          end
    end),
-   awful.button({ }, 2, function (c)
+   awful.button({ }, 2,
+      function (c)
          shared.client.titlebar_toggle(c)
-   end),
-   awful.button({ }, 3, function (c)
-         client_menu_selected = c
-         client_menu:show()
-   end)
+      end
+   ),
+   awful.button({ }, 4,
+      function (c)
+         if not c.maximized then
+            shared.client.enlarge(c)
+         end
+      end
+   ),
+   awful.button({ }, 5,
+      function (c)
+         shared.client.shrink(c)
+      end
+   )
 )
 
 local current_screen = nil
