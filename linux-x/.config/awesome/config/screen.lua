@@ -145,7 +145,7 @@ local my_tasklist_buttons = awful.util.table.join(
    end),
    awful.button({ }, 2,
       function (c)
-         shared.client.titlebar_toggle(c)
+         shared.client.titlebar_enable(c)
       end
    ),
    awful.button({ }, 3,
