@@ -148,6 +148,13 @@ local my_tasklist_buttons = awful.util.table.join(
          shared.client.titlebar_toggle(c)
       end
    ),
+   awful.button({ }, 3,
+      function (c)
+         if c.minimized then
+            c:kill()
+         end
+      end
+   ),
    awful.button({ }, 4,
       function (c)
          if not c.maximized then
