@@ -1,3 +1,5 @@
+-- A textbox Hack to draw a outline.
+
 local gcolor = require("gears.color")
 local lgi = require("lgi")
 
