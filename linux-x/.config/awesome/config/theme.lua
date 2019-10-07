@@ -13,7 +13,7 @@ local cairo = lgi.cairo
 
 -- custom property string
 -- Interesting fonts: Lato, Quicksand, Lobster Two, Purisa, Dosis
-theme.fontname_normal = "Hack"
+theme.fontname_normal = "Lobster Two"
 -- custom property string
 theme.fontname_mono = "Hack"
 theme.font = theme.fontname_normal .. " 10"
