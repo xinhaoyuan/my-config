@@ -16,7 +16,7 @@ local cairo = lgi.cairo
 theme.fontname_normal = "Hack"
 -- custom property string
 theme.fontname_mono = "Hack"
-theme.font = theme.fontname_normal .. " 9"
+theme.font = theme.fontname_normal .. " 10"
 -- custom property string font descriptor 
 theme.font_mono = theme.fontname_mono .. " 10"
 theme.useless_gap = dpi(8)
