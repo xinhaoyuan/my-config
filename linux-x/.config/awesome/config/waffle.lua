@@ -293,14 +293,14 @@ local waffle_settings_view = create_view(
    })
 )
 
-local cpu_widget_width = waffle_width / 2 - dpi(24)
+local cpu_widget_width = waffle_width / 2 - button_height - button_padding * 2
 local cpu_widget
 do
    local cpugraph_widget = wibox.widget {
       max_value = 100,
       background_color = "#00000000",
       forced_width = cpu_widget_width,
-      forced_height = dpi(24),
+      forced_height = button_height,
       step_width = dpi(2),
       step_spacing = dpi(1),
       widget = wibox.widget.graph,
@@ -310,7 +310,7 @@ do
    local cpu_text_widget = highlighted_textbox(
       wibox.widget {
          forced_width = cpu_widget_width,
-         forced_height = dpi(24),
+         forced_height = button_height,
          align = "center",
          point = {x = 0, y = 0},
          widget = wibox.widget.textbox,
@@ -323,7 +323,7 @@ do
          layout = wibox.layout.manual
       },
       width = cpu_widget_width,
-      height = dpi(24),
+      height = button_height,
       widget = wibox.container.constraint,
    }
 
@@ -370,14 +370,14 @@ local function format_size(s)
    return tostring(s) .. unit
 end
 
-local ram_widget_width = waffle_width / 2 - dpi(24)
+local ram_widget_width = waffle_width / 2 - button_height - button_padding * 2
 local ram_widget
 do
    local ramgraph_widget = wibox.widget {
       max_value = 100,
       background_color = "#00000000",
       forced_width = ram_widget_width,
-      forced_height = dpi(24),
+      forced_height = button_height,
       step_width = dpi(2),
       step_spacing = dpi(1),
       widget = wibox.widget.graph,
@@ -387,7 +387,7 @@ do
    local ram_text_widget = highlighted_textbox(
       wibox.widget {
          forced_width = ram_widget_width,
-         forced_height = dpi(24),
+         forced_height = button_height,
          align = "center",
          point = {x = 0, y = 0},
          widget = wibox.widget.textbox,
@@ -400,7 +400,7 @@ do
          layout = wibox.layout.manual
       },
       width = ram_widget_width,
-      height = dpi(24),
+      height = button_height,
       widget = wibox.container.constraint,
    }
 
@@ -418,13 +418,13 @@ do
    )
 end
 
-local net_widget_width = (waffle_width - dpi(24) - dpi(4)) / 2
+local net_widget_width = (waffle_width - button_height - button_padding * 3) / 2
 local net_widget
 do
    local netgraph_rx_widget = wibox.widget {
       background_color = "#00000000",
       forced_width = net_widget_width,
-      forced_height = dpi(24),
+      forced_height = button_height,
       step_width = dpi(2),
       step_spacing = dpi(1),
       widget = wibox.widget.graph,
@@ -435,7 +435,7 @@ do
    local rx_text_widget = highlighted_textbox(
       wibox.widget {
          forced_width = net_widget_width,
-         forced_height = dpi(24),
+         forced_height = button_height,
          align = "center",
          point = {x = 0, y = 0},
          widget = wibox.widget.textbox,
@@ -454,14 +454,14 @@ do
          layout = wibox.layout.manual,
       },
       width = net_widget_width,
-      height = dpi(24),
+      height = button_height,
       widget = wibox.container.constraint,
    }
 
    local netgraph_tx_widget = wibox.widget {
       background_color = "#00000000",
       forced_width = net_widget_width,
-      forced_height = dpi(24),
+      forced_height = button_height,
       step_width = dpi(2),
       step_spacing = dpi(1),
       widget = wibox.widget.graph,
@@ -472,7 +472,7 @@ do
    local tx_text_widget = highlighted_textbox(
       wibox.widget {
          forced_width = net_widget_width,
-         forced_height = dpi(24),
+         forced_height = button_height,
          align = "center",
          point = { x = 0, y = 0 },
          widget = wibox.widget.textbox,
@@ -490,7 +490,7 @@ do
          layout = wibox.layout.manual,
       },
       width = net_widget_width,
-      height = dpi(24),
+      height = button_height,
       widget = wibox.container.constraint,
    }
 
@@ -498,18 +498,16 @@ do
       {
          {
             image = gcolor.recolor_image(icons.ethernet, beautiful.fg_normal),
-            forced_height = dpi(16),
-            forced_width = dpi(16),
+            forced_height = button_height,
+            forced_width = button_height,
             widget = wibox.widget.imagebox,
          },
-         left = dpi(4),
-         top = dpi(4),
-         bottom = dpi(4),
+         left = button_padding,
          widget = wibox.container.margin,
       },
       net_rx_layout,
       net_tx_layout,
-      spacing = dpi(4),
+      spacing = button_padding,
       layout = wibox.layout.fixed.horizontal,
    }
 
@@ -738,33 +736,36 @@ local waffle_root_view = create_view(
                   {
                      {
                         image = gcolor.recolor_image(icons.cpu, beautiful.fg_normal),
-                        forced_height = dpi(16),
-                        forced_width = dpi(16),
+                        forced_height = button_height,
+                        forced_width = button_height,
                         widget = wibox.widget.imagebox,
                      },
-                     margins = dpi(4),
+                     left = button_padding,
+                     right = button_padding,
                      widget = wibox.container.margin,
                   },
                   cpu_widget,
                   {
                      {
                         image = gcolor.recolor_image(icons.ram, beautiful.fg_normal),
-                        forced_height = dpi(16),
-                        forced_width = dpi(16),
+                        forced_height = button_height,
+                        forced_width = button_height,
                         widget = wibox.widget.imagebox,
                      },
-                     margins = dpi(4),
+                     left = button_padding,
+                     right = button_padding,
                      widget = wibox.container.margin,
                   },
                   ram_widget,
                   layout = wibox.layout.fixed.horizontal,
                },
                net_widget,
-               spacing = dpi(2),
+               spacing = button_padding,
                layout = wibox.layout.fixed.vertical,
             },
-            bg = beautiful.bg_normal,
-            widget = wibox.container.background,
+            top = button_padding,
+            bottom = button_padding,
+            widget = wibox.container.margin,
       }),
       -- decorate(
       --    wibox.widget {
