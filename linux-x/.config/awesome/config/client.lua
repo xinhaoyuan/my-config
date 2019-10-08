@@ -159,7 +159,19 @@ capi.client.connect_signal(
                c:emit_signal("request::activate", "titlebar", {raise = true})
                local _, cc = awful.placement.closest_corner(capi.mouse, {parent = c})
                awful.mouse.client.resize(c, cc)
-         end)
+         end),
+         awful.button({ }, 4,
+            function ()
+               if not c.maximized then
+                  shared.client.enlarge(c)
+               end
+            end
+         ),
+         awful.button({ }, 5,
+            function ()
+               shared.client.shrink(c)
+            end
+         )
       )
 
       local titlewidget = awful.titlebar.widget.titlewidget(c)
@@ -231,7 +243,7 @@ capi.client.connect_signal(
 capi.client.connect_signal(
    "property::maximized",
    function(c)
-      if c.maximized then
+      if c.maximized and not shared.var.enable_titlebar then
          shared.client.titlebar_hide(c)
       else
          if c.has_titlebar_enabled then
