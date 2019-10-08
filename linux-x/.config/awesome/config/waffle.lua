@@ -164,17 +164,20 @@ end
 local function decorate(widget)
    return wibox.widget {
       {
-         widget,
-         bg = beautiful.bg_normal,
-         fg = beautiful.fg_normal,
-         widget = wibox.container.background,
+         {
+            widget,
+            bg = beautiful.bg_normal,
+            fg = beautiful.fg_normal,
+            widget = wibox.container.background,
+         },
+         top = beautiful.border_width,
+         bottom = beautiful.border_width,
+         left = beautiful.border_width,
+         right = beautiful.border_width,
+         widget = wibox.container.margin,
       },
-      top = beautiful.border_width,
-      bottom = beautiful.border_width,
-      left = beautiful.border_width,
-      right = beautiful.border_width,
-      color = beautiful.border_focus,
-      widget = wibox.container.margin,
+      bg = beautiful.border_focus,
+      widget = wibox.container.background,
    }
 end
 
