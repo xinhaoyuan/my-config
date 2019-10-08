@@ -144,6 +144,22 @@ def save_xres(data, path):
             f.write("*{}: {}\n".format(kw, data[kw]))
     if f is not sys.stdout:
         f.close()
+        pass
+    pass
+        
+def save_json(data, path):
+    f = sys.stdout if path is None else open(path, "w")
+    out = { "special" : {}, "colors" : {} }
+    for kw in SPECIAL_COLORS:
+        if kw in data:
+            out["special"][kw] = data[kw]
+    for i in range(16):
+        kw = "color{}".format(i)
+        if kw in data:
+            out["colors"][kw] = data[kw]
+    f.write(json.dumps(out, indent=4, sort_keys=True))
+    if f is not sys.stdout:
+        f.close()
 
 def save_rofi(data, path):
     f = sys.stdout if path is None else open(path, "w")
@@ -189,6 +205,8 @@ while i < len(cmds):
         i += 2
         if kind == "xres":
             save_xres(data, None if source == "-" else source)
+        elif kind == "wal":
+            save_json(data, None if source == "-" else source)
         elif kind == "rofi":
             save_rofi(data, None if source == "-" else source)
     elif cmd == "brightness" and i < len(cmds):
