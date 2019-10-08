@@ -683,11 +683,11 @@ do
          shared.action.music_app()
       end,
       buttons = awful.util.table.join(
-         awful.button({ }, 1, nil, function () waffle:hide(); shared.action.music_app() end),
-         awful.button({ }, 3, nil, function () awful.spawn.spawn(TOGGLE_CMD, false) end),
+         awful.button({ }, 1, function () waffle:hide(); shared.action.music_app() end),
+         awful.button({ }, 3, function () awful.spawn.spawn(TOGGLE_CMD, false) end),
          -- Avoid accidental multi prev/next actions
-         awful.button({ }, 4, nil, function () if not mpd_need_update then mpd_need_update = true; awful.spawn.spawn(NEXT_CMD, false) end end),
-         awful.button({ }, 5, nil, function () if not mpd_need_update then mpd_need_update = true; awful.spawn.spawn(PREV_CMD, false) end end)),
+         awful.button({ }, 4, function () if not mpd_need_update then mpd_need_update = true; awful.spawn.spawn(NEXT_CMD, false) end end),
+         awful.button({ }, 5, function () if not mpd_need_update then mpd_need_update = true; awful.spawn.spawn(PREV_CMD, false) end end)),
    }
 
    local update_status = function (widget, stdout, _, _, exitcode)
