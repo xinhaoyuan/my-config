@@ -79,7 +79,8 @@ alayout.layouts = {
 
 capi.root.buttons(
    awful.util.table.join(
-      awful.button({ }, 3, nil, function () waffle:set_gravity("center"); waffle:show() end),
+      awful.button({ }, 1, function () waffle:set_gravity("center"); waffle:show() end),
+      awful.button({ }, 3, function () menu:show() end),
       capi.root.buttons()
    )
 )

@@ -111,8 +111,8 @@ local function simple_button(args)
          buttons = args.buttons or
             (action and
                 awful.util.table.join(
-                   awful.button({ }, 1, nil, function () action(false) end),
-                   awful.button({ }, 3, nil, function () action(true) end))),
+                   awful.button({ }, 1, function () action(false) end),
+                   awful.button({ }, 3, function () action(true) end))),
          margins = button_padding,
          widget = wibox.container.margin,
       },
