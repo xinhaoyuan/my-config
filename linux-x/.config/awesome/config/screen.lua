@@ -26,6 +26,7 @@ local fallback = require("fallback")
 local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
 local fixed_align = require("fixed_align")
+require("manage_ticket")
 local revelation = require("revelation")
 revelation.init()
 revelation.property_to_watch.maximized = false
@@ -240,7 +241,7 @@ local function setup_screen(scr)
                     function (a, b)
                        -- this makes minimized windows appear at last
                        -- if a.minimized ~= b.minimized then return b.minimized else return a.window < b.window end
-                       return a.window < b.window
+                       return a.manage_ticket < b.manage_ticket
                     end
          )
          return cls
