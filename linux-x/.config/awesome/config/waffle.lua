@@ -22,6 +22,7 @@ local button_height = dpi(20)
 local button_padding = dpi(4)
 local font_big = beautiful.fontname_normal .. " 10"
 local font_small = beautiful.fontname_mono .. " 7"
+local graph_background = "#00000000"
 local update_interval_s = 1
 
 local function em(t)
@@ -302,7 +303,7 @@ local cpu_widget
 do
    local cpugraph_widget = wibox.widget {
       max_value = 100,
-      background_color = "#00000000",
+      background_color = graph_background,
       forced_width = cpu_widget_width,
       forced_height = button_height,
       step_width = dpi(2),
@@ -379,7 +380,7 @@ local ram_widget
 do
    local ramgraph_widget = wibox.widget {
       max_value = 100,
-      background_color = "#00000000",
+      background_color = graph_background,
       forced_width = ram_widget_width,
       forced_height = button_height,
       step_width = dpi(2),
@@ -426,7 +427,7 @@ local net_widget_width = (waffle_width - button_height - button_padding * 4) / 2
 local net_widget
 do
    local netgraph_rx_widget = wibox.widget {
-      background_color = "#00000000",
+      background_color = graph_background,
       forced_width = net_widget_width,
       forced_height = button_height,
       step_width = dpi(2),
@@ -463,7 +464,7 @@ do
    }
 
    local netgraph_tx_widget = wibox.widget {
-      background_color = "#00000000",
+      background_color = graph_background,
       forced_width = net_widget_width,
       forced_height = button_height,
       step_width = dpi(2),
