@@ -358,20 +358,6 @@ local function setup_screen(scr)
       right_layout:add(my_tray)
    end
 
-   -- local volume_widget = wibox.widget.textbox()
-   -- volume_widget:set_font(beautiful.font)
-   -- vicious.register(volume_widget, vicious.widgets.volume,
-   --                  function (widget, args)
-   --                     local label = {["♫"] = "O", ["♩"] = "M"}
-   --                     return ("V[%d%% %s]"):format(
-   --                        args[1], label[args[2]])
-   --                  end, 2, "Master")
-   -- right_layout:add(volume_widget)
-   -- volumearc_widget:set_forced_height(beautiful.bar_height - dpi(4))
-   -- volumearc_widget:set_forced_width(beautiful.bar_height - dpi(4))
-   -- right_layout:add(volumearc_widget)
-   -- right_layout:add(battery_widget)
-   -- local clock = wibox.widget.textclock("%y%m%d%a%H%M")
    local clock = wibox.widget.textclock("<span color='" .. beautiful.border_focus .. "'>%m<b>%d</b></span>%H<b>%M</b>")
    clock:set_font(beautiful.font)
    local calendar_widget = calendar({
