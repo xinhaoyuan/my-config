@@ -14,6 +14,7 @@ local gcolor = require("gears.color")
 local icons = require("icons")
 local fallback = require("fallback")
 local highlighted_textbox = require("highlighted_textbox")
+local centered_graph = require("centered_graph")
 local dpi = require("beautiful.xresources").apply_dpi
 
 local waffle_width = beautiful.waffle_width or dpi(240)
@@ -296,7 +297,7 @@ local waffle_settings_view = create_view(
    })
 )
 
-local cpu_widget_width = waffle_width / 2 - button_height - button_padding * 2
+local cpu_widget_width = (waffle_width - button_padding) / 2 - button_height - button_padding * 2
 local cpu_widget
 do
    local cpugraph_widget = wibox.widget {
@@ -306,7 +307,7 @@ do
       forced_height = button_height,
       step_width = dpi(2),
       step_spacing = dpi(1),
-      widget = wibox.widget.graph,
+      widget = centered_graph,
       color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5," .. beautiful.border_focus
    }
 
@@ -373,7 +374,7 @@ local function format_size(s)
    return tostring(s) .. unit
 end
 
-local ram_widget_width = waffle_width / 2 - button_height - button_padding * 2
+local ram_widget_width = (waffle_width - button_padding) / 2 - button_height - button_padding * 2
 local ram_widget
 do
    local ramgraph_widget = wibox.widget {
@@ -383,7 +384,7 @@ do
       forced_height = button_height,
       step_width = dpi(2),
       step_spacing = dpi(1),
-      widget = wibox.widget.graph,
+      widget = centered_graph,
       color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5," .. beautiful.border_focus
    }
 
@@ -421,7 +422,7 @@ do
    )
 end
 
-local net_widget_width = (waffle_width - button_height - button_padding * 3) / 2
+local net_widget_width = (waffle_width - button_height - button_padding * 4) / 2
 local net_widget
 do
    local netgraph_rx_widget = wibox.widget {
@@ -430,7 +431,7 @@ do
       forced_height = button_height,
       step_width = dpi(2),
       step_spacing = dpi(1),
-      widget = wibox.widget.graph,
+      widget = centered_graph,
       -- scale = true,
       color = beautiful.border_focus
    }
@@ -467,7 +468,7 @@ do
       forced_height = button_height,
       step_width = dpi(2),
       step_spacing = dpi(1),
-      widget = wibox.widget.graph,
+      widget = centered_graph,
       -- scale = true,
       color = beautiful.border_focus
    }
@@ -499,14 +500,10 @@ do
 
    net_widget = wibox.widget {
       {
-         {
-            image = gcolor.recolor_image(icons.ethernet, beautiful.fg_normal),
-            forced_height = button_height,
-            forced_width = button_height,
-            widget = wibox.widget.imagebox,
-         },
-         left = button_padding,
-         widget = wibox.container.margin,
+         image = gcolor.recolor_image(icons.ethernet, beautiful.fg_normal),
+         forced_height = button_height,
+         forced_width = button_height,
+         widget = wibox.widget.imagebox,
       },
       net_rx_layout,
       net_tx_layout,
@@ -737,37 +734,27 @@ local waffle_root_view = create_view(
             {
                {
                   {
-                     {
-                        image = gcolor.recolor_image(icons.cpu, beautiful.fg_normal),
-                        forced_height = button_height,
-                        forced_width = button_height,
-                        widget = wibox.widget.imagebox,
-                     },
-                     left = button_padding,
-                     right = button_padding,
-                     widget = wibox.container.margin,
+                     image = gcolor.recolor_image(icons.cpu, beautiful.fg_normal),
+                     forced_height = button_height,
+                     forced_width = button_height,
+                     widget = wibox.widget.imagebox,
                   },
                   cpu_widget,
                   {
-                     {
-                        image = gcolor.recolor_image(icons.ram, beautiful.fg_normal),
-                        forced_height = button_height,
-                        forced_width = button_height,
-                        widget = wibox.widget.imagebox,
-                     },
-                     left = button_padding,
-                     right = button_padding,
-                     widget = wibox.container.margin,
+                     image = gcolor.recolor_image(icons.ram, beautiful.fg_normal),
+                     forced_height = button_height,
+                     forced_width = button_height,
+                     widget = wibox.widget.imagebox,
                   },
                   ram_widget,
+                  spacing = button_padding,
                   layout = wibox.layout.fixed.horizontal,
                },
                net_widget,
                spacing = button_padding,
                layout = wibox.layout.fixed.vertical,
             },
-            top = button_padding,
-            bottom = button_padding,
+            margins = button_padding,
             widget = wibox.container.margin,
       }),
       -- decorate(
