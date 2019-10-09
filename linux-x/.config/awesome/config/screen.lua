@@ -77,13 +77,13 @@ alayout.layouts = {
 
 -- Define the tag list upfront for keybindings
 
-capi.root.buttons(
-   awful.util.table.join(
-      awful.button({ }, 1, function () waffle:set_gravity("center"); waffle:show() end),
-      awful.button({ }, 3, function () menu:show() end),
-      capi.root.buttons()
-   )
+local root_buttons = awful.util.table.join(
+   awful.button({ }, 1, function () waffle:set_gravity("center"); waffle:show() end),
+   awful.button({ }, 3, function () menu:show() end),
+   capi.root.buttons()
 )
+
+capi.root.buttons(root_buttons)
 
 local fortune_widget = wibox.widget {
    align = "center",
@@ -403,6 +403,7 @@ local function setup_screen(scr)
          {
             {
                wibox.widget {
+                  buttons = root_buttons,
                   content_fill_horizontal = true,
                   widget = wibox.container.place,
                },
@@ -415,6 +416,7 @@ local function setup_screen(scr)
             middle,
             {
                {
+                  buttons = root_buttons,
                   content_fill_horizontal = true,
                   widget = wibox.container.place,
                },
@@ -446,6 +448,7 @@ local function setup_screen(scr)
             middle,
             {
                {
+                  buttons = root_buttons,
                   fill_horizontal = true,
                   widget = wibox.container.place,
                },
