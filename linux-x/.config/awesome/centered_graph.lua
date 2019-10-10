@@ -1,6 +1,7 @@
 local gtable = require("gears.table")
 local gcolor = require("gears.color")
 local graph = require("wibox.widget.graph")
+local beautiful = require("beautiful")
 
 local centered_graph = {mt={}}
 

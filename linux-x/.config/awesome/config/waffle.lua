@@ -23,6 +23,7 @@ local button_padding = dpi(4)
 local font_big = beautiful.fontname_normal .. " 10"
 local font_small = beautiful.fontname_mono .. " 7"
 local graph_background = "#00000000"
+local graph_color = beautiful.border_focus
 local update_interval_s = 1
 
 local function em(t)
@@ -309,7 +310,7 @@ do
       step_width = dpi(2),
       step_spacing = dpi(1),
       widget = centered_graph,
-      color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5," .. beautiful.border_focus
+      color = graph_color
    }
 
    local cpu_text_widget = highlighted_textbox(
@@ -386,7 +387,7 @@ do
       step_width = dpi(2),
       step_spacing = dpi(1),
       widget = centered_graph,
-      color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5," .. beautiful.border_focus
+      color = graph_color
    }
 
    local ram_text_widget = highlighted_textbox(
@@ -434,7 +435,7 @@ do
       step_spacing = dpi(1),
       widget = centered_graph,
       -- scale = true,
-      color = beautiful.border_focus
+      color = graph_color
    }
 
    local rx_text_widget = highlighted_textbox(
@@ -471,7 +472,7 @@ do
       step_spacing = dpi(1),
       widget = centered_graph,
       -- scale = true,
-      color = beautiful.border_focus
+      color = graph_color
    }
 
    local tx_text_widget = highlighted_textbox(
