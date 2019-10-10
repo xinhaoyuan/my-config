@@ -11,7 +11,7 @@ function centered_graph:new(...)
    return ret
 end
 
--- copied from wibox.widget.graph
+-- mostly copied from wibox.widget.graph
 function centered_graph.draw(self, _, cr, width, height)
     local max_value = self._private.max_value
     local min_value = self._private.min_value or (
