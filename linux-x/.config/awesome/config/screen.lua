@@ -80,7 +80,7 @@ alayout.layouts = {
 
 local root_buttons = awful.util.table.join(
    awful.button({ }, 1, function () waffle:set_gravity("center"); waffle:show() end),
-   awful.button({ }, 3, function () menu:show() end),
+   -- awful.button({ }, 3, function () menu:show() end),
    capi.root.buttons()
 )
 
@@ -343,7 +343,7 @@ local function setup_screen(scr)
    layoutbox:buttons(
       awful.util.table.join(
          awful.button({ }, 1, function () waffle:set_gravity("southwest"); waffle:show() end),
-         awful.button({ }, 3, function () menu:show() end),
+         -- awful.button({ }, 3, function () menu:show() end),
          awful.button({ }, 4, function () awful.layout.inc( 1) end),
          awful.button({ }, 5, function () awful.layout.inc(-1) end)))
    left_layout:add(layoutbox)
