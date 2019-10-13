@@ -134,13 +134,13 @@ local function create(config)
 
          for i = #tablist, 1, -1 do
             local c = tablist[i]
-            c.saved_layer_info = {c.ontop, c.above, c.below}
+            c.saved = {ontop = c.ontop, above = c.above, below = c.below}
             c.ontop = false
             c.above = false
             c.below = false
-            if c.saved_layer_info[1] or c.saved_layer_info[2] then
+            if c.saved.ontop or c.saved.above then
                c:raise()
-            elseif c.saved_layer_info[3] then
+            elseif c.saved.below then
                c:lower()
             end
          end
@@ -151,10 +151,10 @@ local function create(config)
       local function finalize()
          for i = 1, #tablist do
             local c = tablist[i]
-            c.ontop = c.saved_layer_info[1]
-            c.above = c.saved_layer_info[2]
-            c.below = c.saved_layer_info[3]
-            c.saved_layer_info = nil
+            c.ontop = c.saved.ontop
+            c.above = c.saved.above
+            c.below = c.saved.below
+            c.saved = nil
          end
 
          if #tablist > 0 then
@@ -229,9 +229,9 @@ local function create(config)
       local function switch()
          maintain_tablist()
          if #tablist > 0 then
-            tablist[tablist_index].ontop = false
+            tablist[tablist_index].above = false
             tablist_index = tablist_index % #tablist + 1
-            tablist[tablist_index].ontop = true
+            tablist[tablist_index].above = true
             activate(tablist[tablist_index])
          end
       end

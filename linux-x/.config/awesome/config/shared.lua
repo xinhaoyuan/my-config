@@ -7,7 +7,7 @@ local shared = {
       -- "top"/"bottom"/"left"/"right"
       titlebar_position = "bottom",
       hide_clients_with_titlebars = true,
-      floating_by_default = false,
+      floating_by_default = true,
    },
    on_start_functions = {},
 }

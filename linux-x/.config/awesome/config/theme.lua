@@ -55,14 +55,14 @@ local function tasklist_update_function(widget, c, index, objects)
       tb[1].is_odd_child = index % 2 == 1
    end
    local sb = widget:get_children_by_id("status_role")
-   local status_markup = "" 
-   if c.sticky then
+   local status_markup = ""
+   if c.sticky or (c.saved and c.saved.sticky) then
       status_markup = status_markup .. "S"
    end
-   if c.above or c.ontop then
+   if c.ontop or (c.saved and c.saved.ontop) then
       status_markup = status_markup .. "T"
    end
-   if c.maximized then
+   if c.maximized or (c.saved and c.saved.maximized) then
       status_markup = status_markup .. "M"
    end
    if #status_markup > 0 then
