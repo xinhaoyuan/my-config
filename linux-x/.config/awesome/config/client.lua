@@ -77,7 +77,7 @@ function shared.client.shrink(c)
 end
 
 local client_keys = table_join(
-   awful.key({ "Mod4" }, "Tab", function (c)
+   awful.key({ "Mod4" }, ".", function (c)
          c.maximized = false
          c.maximized_vertical = false
          c.maximized_horizontal = false
@@ -87,6 +87,20 @@ local client_keys = table_join(
          delayed(
             function ()
                machi.switcher.start(c)
+            end
+         )
+   end),
+
+   awful.key({ "Mod4" }, "Tab", function (c)
+         c.maximized = false
+         c.maximized_vertical = false
+         c.maximized_horizontal = false
+         c.fullscreen = false
+         c.floating = false
+         c:raise()
+         delayed(
+            function ()
+               machi.switcher.start(c, {["Super_L"] = true})
             end
          )
    end),
