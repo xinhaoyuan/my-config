@@ -24,7 +24,7 @@ local button_padding = dpi(4)
 local font_big = beautiful.fontname_normal .. " 10"
 local font_small = beautiful.fontname_mono .. " 7"
 local graph_background = "#00000000"
-local graph_color = aux.color.rgba_to_string(aux.color.blend(beautiful.border_focus, 0.75, beautiful.bg_normal, 0.25))
+local graph_color = aux.color.rgba_to_string(aux.color.blend(beautiful.border_focus, 0.75, beautiful.bg_normal))
 local update_interval_s = 1
 
 local function em(t)
@@ -564,7 +564,7 @@ do
    local DEC_VOLUME_CMD = 'amixer -D pulse sset Master 5%-'
    local TOG_VOLUME_CMD = 'amixer -D pulse sset Master toggle'
 
-   local bar_color = beautiful.border_focus
+   local bar_color = graph_color
    local mute_color = "#ff0000"
    local background_color = beautiful.border_normal
 

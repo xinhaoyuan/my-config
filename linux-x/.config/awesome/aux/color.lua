@@ -16,6 +16,7 @@ end
 function mod.blend(c1, w1, c2, w2)
    c1 = type(c1) == "string" and mod.string_to_rgba(c1) or c1
    c2 = type(c2) == "string" and mod.string_to_rgba(c2) or c2
+   w2 = w2 or 1 - w1
    local ret = {}
    for i = 1, 4 do
       ret[i] = (c1[i] * w1 + c2[i] * w2) / (w1 + w2)
