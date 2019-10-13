@@ -15,6 +15,7 @@ local icons = require("icons")
 local fallback = require("fallback")
 local highlighted_textbox = require("highlighted_textbox")
 local centered_graph = require("centered_graph")
+local aux = require("aux")
 local dpi = require("beautiful.xresources").apply_dpi
 
 local waffle_width = beautiful.waffle_width or dpi(240)
@@ -23,7 +24,7 @@ local button_padding = dpi(4)
 local font_big = beautiful.fontname_normal .. " 10"
 local font_small = beautiful.fontname_mono .. " 7"
 local graph_background = "#00000000"
-local graph_color = beautiful.border_focus
+local graph_color = aux.color.rgba_to_string(aux.color.blend(beautiful.border_focus, 0.75, beautiful.bg_normal, 0.25))
 local update_interval_s = 1
 
 local function em(t)

@@ -26,6 +26,7 @@ local fallback = require("fallback")
 local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
 local fixed_align = require("fixed_align")
+local aux = require("aux")
 require("manage_ticket")
 local revelation = require("revelation")
 revelation.init()
@@ -200,7 +201,7 @@ end
 local alt_color_cache = {}
 local function alt_color(color)
    if alt_color_cache[color] == nil then
-      local comp = table.pack(gcolor.parse_color(color))
+      local comp = aux.color.string_to_rgba(color)
       for i = 1, 3 do
          if comp[i] > 0.5 then
             comp[i] = comp[i] - 0.08
@@ -208,11 +209,7 @@ local function alt_color(color)
             comp[i] = comp[i] + 0.08
          end
       end
-      local ret = "#"
-      for i = 1, 4 do
-         ret = ret .. string.format("%02x", math.min(255, math.floor(comp[i] * 256)))
-      end
-      alt_color_cache[color] = ret
+      alt_color_cache[color] = aux.color.rgba_to_string(comp)
    end
    return alt_color_cache[color]
 end
