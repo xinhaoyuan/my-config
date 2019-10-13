@@ -25,7 +25,9 @@ theme.bar_height = dpi(20)
 theme.menu_width = dpi(150)
 theme.border_width = dpi(2)
 -- custom property color
-theme.emphasis_color = xrdb.color1
+theme.special_normal = xrdb.color1
+-- custom property color
+theme.special_focus = xrdb.color11
 -- custom property boolean
 theme.waffle_use_entire_screen = true
 -- custom property color
@@ -66,7 +68,7 @@ local function tasklist_update_function(widget, c, index, objects)
       status_markup = status_markup .. "M"
    end
    if #status_markup > 0 then
-      sb[1].markup = "<span color='" .. theme.emphasis_color .. "'>" .. status_markup .. "</span>"
+      sb[1].markup = "<span color='" .. (client.focus == c and theme.special_focus or theme.special_normal) .. "'>" .. status_markup .. "</span>"
    else
       sb[1].markup = ""
    end

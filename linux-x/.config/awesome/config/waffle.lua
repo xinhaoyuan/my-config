@@ -28,7 +28,7 @@ local graph_color = aux.color.rgba_to_string(aux.color.blend(beautiful.border_fo
 local update_interval_s = 1
 
 local function em(t)
-   return "<span color='" .. beautiful.emphasis_color .. "'>" .. t .. "</span>"
+   return "<span color='" .. beautiful.special_normal .. "'>" .. t .. "</span>"
 end
 
 local function create_view(root)

@@ -361,7 +361,7 @@ local function setup_screen(scr)
    local calendar_widget = calendar({
          fdow = 7,
          html = "<span font_desc='" .. beautiful.font_mono .. "'>\n%s</span>",
-         today_color = beautiful.emphasis_color,
+         today_color = beautiful.special_normal,
          position = "bottom_right",
    })
    calendar_widget:attach(clock)
