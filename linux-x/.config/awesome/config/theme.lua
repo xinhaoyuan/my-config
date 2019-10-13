@@ -48,6 +48,30 @@ theme.bar_style = "split"
 theme.bar_styles = {"simple", "split"}
 theme.tasklist_plain_task_name = true
 local default_icon = gears.color.recolor_image(icons.terminal, theme.fg_normal)
+
+local function tasklist_update_function(widget, c, index, objects)
+   local tb = widget:get_children_by_id("text_role")
+   if tb[1] then
+      tb[1].is_odd_child = index % 2 == 1
+   end
+   local sb = widget:get_children_by_id("status_role")
+   local status_markup = "" 
+   if c.sticky then
+      status_markup = status_markup .. "S"
+   end
+   if c.above or c.ontop then
+      status_markup = status_markup .. "T"
+   end
+   if c.maximized then
+      status_markup = status_markup .. "M"
+   end
+   if #status_markup > 0 then
+      sb[1].markup = "<span color='" .. theme.emphasis_color .. "'>" .. status_markup .. "</span>"
+   else
+      sb[1].markup = ""
+   end
+end
+
 theme.tasklist_template = {
    {
       {
@@ -62,15 +86,22 @@ theme.tasklist_template = {
                },
                widget = fallback,
             },
-            -- id = "icon_margin_role",
             right = dpi(3),
-            widget  = wibox.container.margin,
+            widget = wibox.container.margin,
          },
          {
             id = "text_role",
             widget = wibox.widget.textbox,
          },
-         layout = wibox.layout.fixed.horizontal,
+         {
+            {
+               id = "status_role",
+               widget = wibox.widget.textbox,
+            },
+            left = dpi(3),
+            widget = wibox.container.margin,
+         },
+         layout = wibox.layout.align.horizontal,
       },
       -- id = "text_margin_role",
       left  = dpi(5),
@@ -79,18 +110,8 @@ theme.tasklist_template = {
    },
    id     = "background_role",
    widget = wibox.container.background,
-   create_callback = function (widget, object, index, objects)
-      local tb = widget:get_children_by_id("text_role")
-      if tb[1] then
-         tb[1].is_odd_child = index % 2 == 1
-      end
-   end,
-   update_callback = function (widget, object, index, objects)
-      local tb = widget:get_children_by_id("text_role")
-      if tb[1] then
-         tb[1].is_odd_child = index % 2 == 1
-      end
-   end,
+   create_callback = tasklist_update_function,
+   update_callback = tasklist_update_function,
 }
 
 local flexer = require("flexer")
