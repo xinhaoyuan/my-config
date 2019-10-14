@@ -51,6 +51,13 @@ theme.bar_styles = {"simple", "split"}
 theme.tasklist_plain_task_name = true
 local default_icon = gears.color.recolor_image(icons.terminal, theme.fg_normal)
 
+local property_to_text = {
+   maximized = "S",
+   ontop = "T",
+   maximized = "M",
+   floating = "F"
+}
+
 local function tasklist_update_function(widget, c, index, objects)
    local tb = widget:get_children_by_id("text_role")
    if tb[1] then
@@ -58,14 +65,10 @@ local function tasklist_update_function(widget, c, index, objects)
    end
    local sb = widget:get_children_by_id("status_role")
    local status_markup = ""
-   if c.sticky or (c.saved and c.saved.sticky) then
-      status_markup = status_markup .. "S"
-   end
-   if c.ontop or (c.saved and c.saved.ontop) then
-      status_markup = status_markup .. "T"
-   end
-   if c.maximized or (c.saved and c.saved.maximized) then
-      status_markup = status_markup .. "M"
+   for key, text in pairs(property_to_text) do
+      if c[key] or (c.saved and c.saved[key]) then
+         status_markup = status_markup .. text
+      end
    end
    if #status_markup > 0 then
       sb[1].markup = "<span color='" .. (client.focus == c and theme.special_focus or theme.special_normal) .. "'>" .. status_markup .. "</span>"
