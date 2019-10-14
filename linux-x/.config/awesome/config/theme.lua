@@ -52,10 +52,10 @@ theme.tasklist_plain_task_name = true
 local default_icon = gears.color.recolor_image(icons.terminal, theme.fg_normal)
 
 local property_to_text = {
-   maximized = "S",
-   ontop = "T",
-   maximized = "M",
-   floating = "F"
+   {"sticky", "S"},
+   {"ontop", "T"},
+   {"maximized", "M"},
+   {"floating", "F"},
 }
 
 local function tasklist_update_function(widget, c, index, objects)
@@ -65,7 +65,8 @@ local function tasklist_update_function(widget, c, index, objects)
    end
    local sb = widget:get_children_by_id("status_role")
    local status_markup = ""
-   for key, text in pairs(property_to_text) do
+   for _, pp in ipairs(property_to_text) do
+      local key, text = table.unpack(pp)
       if c[key] or (c.saved and c.saved[key]) then
          status_markup = status_markup .. text
       end

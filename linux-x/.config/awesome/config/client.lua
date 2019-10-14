@@ -105,10 +105,10 @@ local client_keys = table_join(
          )
    end),
 
-   awful.key({ "Mod4" }, "=", shared.client.enlarge),
-   awful.key({ "Mod4" }, "-", shared.client.shrink),
-   awful.key({ "Mod4", "Shift" }, "=", function (c) c.ontop = not c.ontop end),
-   awful.key({ "Mod4", "Shift" }, "-", function (c) c.sticky = not c.sticky end),
+   awful.key({ "Mod4" }, "Prior", shared.client.enlarge),
+   awful.key({ "Mod4" }, "Next", shared.client.shrink),
+   awful.key({ "Mod4" }, "=", function (c) c.ontop = not c.ontop end),
+   awful.key({ "Mod4" }, "-", function (c) c.sticky = not c.sticky end),
    
    awful.key({ "Mod4" }, "t", function (c) shared.client.titlebar_toggle(c) end),
 
