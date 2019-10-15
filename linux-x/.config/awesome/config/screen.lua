@@ -330,7 +330,7 @@ local function setup_screen(scr)
          elseif b == 2 then
             revelation{curr_tag_only = true}
          elseif b == 3 then
-            awful.mouse.client.resize(c)
+            awful.mouse.client.resize(c, "bottom_right")
          end
       end
                                          )
