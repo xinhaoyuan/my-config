@@ -634,6 +634,15 @@
   )
 ;; }}}
 
+;; Lua mode {{{
+(if (require 'lua-mode nil 'noerror)
+    (progn
+      (add-hook 'lua-mode-hook (lambda ()
+			       (setq lua-indent-level 4)
+			       (setq indent-tabs-mode nil)))
+      ))
+;; }}}
+
 ;; imaxima {{{
 ;; display configure of imaxima
 (add-hook 'imaxima-startup-hook
