@@ -5,24 +5,24 @@
 -- Need to do this before everything, so that signal handler fires before standard ones.
 
 local capi = {
-   client = client,
+    client = client,
 }
 
 capi.client.connect_signal(
-   "unmanage",
-   function (c)
-      c.tomb_floating = c.floating
-      c.tomb_class = c.class
-      c.tomb_pid = c.pid
-   end
+    "unmanage",
+    function (c)
+	c.tomb_floating = c.floating
+	c.tomb_class = c.class
+	c.tomb_pid = c.pid
+    end
 )
 
 -- Print the error message to .xsession-errors.
 awesome.connect_signal(
-   "debug::error",
-   function (msg)
-      print(msg)
-   end
+    "debug::error",
+    function (msg)
+	print(msg)
+    end
 )
 
 local HOME_DIR = os.getenv("HOME")
@@ -36,9 +36,9 @@ require("my-menu")
 config.start()
 
 require("gears.timer").delayed_call(
-   function ()
-      if capi.client.focus then
-         capi.client.focus:emit_signal("request::activate", "mouse.move", {raise=true})
-      end
-   end
+    function ()
+	if capi.client.focus then
+	    capi.client.focus:emit_signal("request::activate", "mouse.move", {raise=true})
+	end
+    end
 )
