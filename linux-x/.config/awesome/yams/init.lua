@@ -134,7 +134,7 @@ local function create(config)
 
          for i = #tablist, 1, -1 do
             local c = tablist[i]
-            c.saved = {ontop = c.ontop, above = c.above, below = c.below}
+            c.saved = {ontop = c.ontop, above = c.above, below = c.below, minimized = c.minimized}
             c.ontop = false
             c.above = false
             c.below = false
@@ -229,9 +229,13 @@ local function create(config)
       local function switch()
          maintain_tablist()
          if #tablist > 0 then
-            tablist[tablist_index].above = false
+            local cc = tablist[tablist_index]
+            cc.above = false
+            cc.minimized = cc.saved.minimized
             tablist_index = tablist_index % #tablist + 1
-            tablist[tablist_index].above = true
+            cc = tablist[tablist_index]
+            cc.minimized = false
+            cc.above = true
             activate(tablist[tablist_index])
          end
       end

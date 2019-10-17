@@ -228,8 +228,9 @@ local waffle_settings_view = create_view(
                         shared.var.enable_titlebar = true
                      end
                   else
-                     shared.var.hide_clients_with_titlebars = not shared.var.hide_clients_with_titlebars
-                     capi.client.emit_signal("list")
+                      shared.var.hide_clients_with_titlebars =
+                          not shared.var.hide_clients_with_titlebars
+                      capi.client.emit_signal("list")
                   end
                   waffle:hide()
                end
