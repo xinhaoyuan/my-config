@@ -59,23 +59,34 @@ local property_to_text = {
 }
 
 local function tasklist_update_function(widget, c, index, objects)
-   local tb = widget:get_children_by_id("text_role")
-   if tb[1] then
-      tb[1].is_odd_child = index % 2 == 1
-   end
-   local sb = widget:get_children_by_id("status_role")
-   local status_markup = ""
-   for _, pp in ipairs(property_to_text) do
-      local key, text = table.unpack(pp)
-      if c[key] or (c.saved and c.saved[key]) then
-         status_markup = status_markup .. text
-      end
-   end
-   if #status_markup > 0 then
-      sb[1].markup = "<span color='" .. (client.focus == c and theme.special_focus or theme.special_normal) .. "'>" .. status_markup .. "</span>"
-   else
-      sb[1].markup = ""
-   end
+    local tb = widget:get_children_by_id("text_role")
+    if tb[1] then
+        tb[1].is_odd_child = index % 2 == 1
+    end
+    local sb = widget:get_children_by_id("status_role")
+    local status_markup = ""
+    local prop = {}
+    for _, pp in ipairs(property_to_text) do
+        local key = pp[1]
+        if c.saved and c.saved[key] ~= nil then
+            prop[key] = c.saved[key]
+        elseif c[key] ~= nil then
+            prop[key] = c[key]
+        end
+    end
+    for _, pp in ipairs(property_to_text) do
+        local key, text = table.unpack(pp)
+        if prop[key] == true then
+            if key ~= "floating" or not prop.maximized then 
+                status_markup = status_markup .. text
+            end
+        end
+    end
+    if #status_markup > 0 then
+        sb[1].markup = "<span color='" .. (client.focus == c and theme.special_focus or theme.special_normal) .. "'>" .. status_markup .. "</span>"
+    else
+        sb[1].markup = ""
+    end
 end
 
 theme.tasklist_template = {
