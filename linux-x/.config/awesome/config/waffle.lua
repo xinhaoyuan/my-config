@@ -25,7 +25,7 @@ local font_big = beautiful.fontname_normal .. " 10"
 local font_small = beautiful.fontname_mono .. " 7"
 local graph_background = "#00000000"
 local graph_normal_color = aux.color.rgba_to_string(aux.color.blend(beautiful.border_focus, 0.75, beautiful.bg_normal))
-local graph_color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5," .. graph_normal_color
+local graph_color = "linear:0,0:0,22:0,#FF0000:0.5," .. graph_normal_color
 local update_interval_s = 1
 
 local function em(t)
