@@ -24,7 +24,8 @@ local button_padding = dpi(4)
 local font_big = beautiful.fontname_normal .. " 10"
 local font_small = beautiful.fontname_mono .. " 7"
 local graph_background = "#00000000"
-local graph_color = aux.color.rgba_to_string(aux.color.blend(beautiful.border_focus, 0.75, beautiful.bg_normal))
+local graph_normal_color = aux.color.rgba_to_string(aux.color.blend(beautiful.border_focus, 0.75, beautiful.bg_normal))
+local graph_color = "linear:0,0:0,22:0,#FF0000:0.3,#FFFF00:0.5," .. graph_normal_color
 local update_interval_s = 1
 
 local function em(t)
@@ -308,10 +309,10 @@ do
       max_value = 100,
       background_color = graph_background,
       forced_width = cpu_widget_width,
-      forced_height = button_height,
+      forced_height = button_height / 2,
       step_width = dpi(2),
       step_spacing = dpi(1),
-      widget = centered_graph,
+      widget = wibox.widget.graph,
       color = graph_color
    }
 
@@ -326,7 +327,18 @@ do
 
    cpu_widget = wibox.widget {
       {
-         cpugraph_widget,
+          {
+              cpugraph_widget,
+              {
+                  cpugraph_widget,
+                  reflection = {
+                      horizontal = false,
+                      vertical = true,
+                  },
+                  widget = wibox.container.mirror,
+              },
+              layout = wibox.layout.fixed.vertical,
+          },
          cpu_text_widget,
          layout = wibox.layout.manual
       },
@@ -385,10 +397,10 @@ do
       max_value = 100,
       background_color = graph_background,
       forced_width = ram_widget_width,
-      forced_height = button_height,
+      forced_height = button_height / 2,
       step_width = dpi(2),
       step_spacing = dpi(1),
-      widget = centered_graph,
+      widget = wibox.widget.graph,
       color = graph_color
    }
 
@@ -402,14 +414,25 @@ do
       }, beautiful.bg_normal, dpi(2))
 
    ram_widget = wibox.widget {
-      {
-         ramgraph_widget,
-         ram_text_widget,
-         layout = wibox.layout.manual
-      },
-      width = ram_widget_width,
-      height = button_height,
-      widget = wibox.container.constraint,
+       {
+           {
+               ramgraph_widget,
+               {
+                   ramgraph_widget,
+                   reflection = {
+                       horizontal = false,
+                       vertical = true,
+                   },
+                   widget = wibox.container.mirror,
+               },
+               layout = wibox.layout.fixed.vertical,
+           },
+           ram_text_widget,
+           layout = wibox.layout.manual
+       },
+       width = ram_widget_width,
+       height = button_height,
+       widget = wibox.container.constraint,
    }
 
    watch({"egrep", "-e", "MemTotal:|MemAvailable:", "/proc/meminfo"}, update_interval_s,
@@ -432,10 +455,10 @@ do
    local netgraph_rx_widget = wibox.widget {
       background_color = graph_background,
       forced_width = net_widget_width,
-      forced_height = button_height,
+      forced_height = button_height / 2,
       step_width = dpi(2),
       step_spacing = dpi(1),
-      widget = centered_graph,
+      widget = wibox.widget.graph,
       -- scale = true,
       color = graph_color
    }
@@ -457,7 +480,18 @@ do
 
    local net_rx_layout = wibox.widget {
       {
-         net_rx_widget,
+          {
+              net_rx_widget,
+              {
+                  net_rx_widget,
+                  reflection = {
+                      horizontal = false,
+                      vertical = true,
+                  },
+                  widget = wibox.container.mirror,
+              },
+              layout = wibox.layout.fixed.vertical,
+          },
          rx_text_widget,
          layout = wibox.layout.manual,
       },
@@ -469,10 +503,10 @@ do
    local netgraph_tx_widget = wibox.widget {
       background_color = graph_background,
       forced_width = net_widget_width,
-      forced_height = button_height,
+      forced_height = button_height / 2,
       step_width = dpi(2),
       step_spacing = dpi(1),
-      widget = centered_graph,
+      widget = wibox.widget.graph,
       -- scale = true,
       color = graph_color
    }
@@ -492,14 +526,25 @@ do
    }
 
    local net_tx_layout = wibox.widget {
-      {
-         net_tx_widget,
-         tx_text_widget,
-         layout = wibox.layout.manual,
-      },
-      width = net_widget_width,
-      height = button_height,
-      widget = wibox.container.constraint,
+       {
+           {
+               net_tx_widget,
+               {
+                   net_tx_widget,
+                   reflection = {
+                       horizontal = false,
+                       vertical = true,
+                   },
+                   widget = wibox.container.mirror,
+               },
+               layout = wibox.layout.fixed.vertical,
+           },
+           tx_text_widget,
+           layout = wibox.layout.manual,
+       },
+       width = net_widget_width,
+       height = button_height,
+       widget = wibox.container.constraint,
    }
 
    net_widget = wibox.widget {
@@ -565,8 +610,8 @@ do
    local DEC_VOLUME_CMD = 'amixer -D pulse sset Master 5%-'
    local TOG_VOLUME_CMD = 'amixer -D pulse sset Master toggle'
 
-   local bar_color = graph_color
-   local mute_color = "#ff0000"
+   local bar_color = graph_normal_color
+   local mute_color = beautiful.special_normal
    local background_color = beautiful.border_normal
 
    volumebar_widget = wibox.widget {
