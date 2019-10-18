@@ -65,7 +65,7 @@ local function create(config)
       switch_key = "Tab"
    end
 
-   local function start(screen)
+   local function start(screen, no_panel)
       local tablist_font_desc = api.beautiful.get_merged_font(
          api.beautiful.font, api.dpi(10))
       local font_color = with_alpha(api.gears.color(api.beautiful.fg_normal), 1)
@@ -85,17 +85,21 @@ local function create(config)
       local start_x = screen.workarea.x
       local start_y = screen.workarea.y
 
-      local panel = api.wibox({
-            screen = screen,
-            x = screen.workarea.x,
-            y = screen.workarea.y,
-            width = screen.workarea.width,
-            height = screen.workarea.height,
-            bg = "#00000000",
-            opacity = 1,
-            ontop = true,
-            type = "dock",
-      })
+      local panel = nil
+
+      if not no_panel then
+          panel = api.wibox({
+                  screen = screen,
+                  x = screen.workarea.x,
+                  y = screen.workarea.y,
+                  width = screen.workarea.width,
+                  height = screen.workarea.height,
+                  bg = "#00000000",
+                  opacity = 1,
+                  ontop = true,
+                  type = "dock",
+          })
+      end
 
       local tablist = nil
       local tablist_index = nil
@@ -262,7 +266,9 @@ local function create(config)
             api.awful.client.focus.history.add(tablist[tablist_index])
          end
          api.awful.client.focus.history.enable_tracking()
-         panel.visible = false
+         if panel then
+             panel.visible = false
+         end
          if kg ~= nil then
             api.awful.keygrabber.stop(kg)
             kg = nil
@@ -270,8 +276,10 @@ local function create(config)
          finalize()
       end
 
-      panel.bgimage = draw_info
-      panel.visible = true
+      if panel then
+          panel.bgimage = draw_info
+          panel.visible = true
+      end
 
       kg = api.awful.keygrabber.run(
          function (mod, key, event)
@@ -280,8 +288,10 @@ local function create(config)
                   stop()
                end
             elseif key == switch_key then
-               switch()
-               panel.bgimage = draw_info
+                switch()
+                if panel then
+                    panel.bgimage = draw_info
+                end
             end
             return true
          end

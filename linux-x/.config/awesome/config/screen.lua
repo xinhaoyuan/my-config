@@ -545,7 +545,7 @@ gtimer {
 local global_keys = table_join(
    awful.key({ "Mod1" }, "Tab",
       function ()
-         yams.default.start()
+         yams.default.start(nil, true)
    end),
    awful.key({ "Mod4" }, "/",               function () machi.default_editor.start_interactive() end),
    awful.key({ "Mod4" }, "[",               function () alayout.inc(alayout.layouts, -1) end),
