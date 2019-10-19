@@ -715,6 +715,7 @@ do
           fixed_margin(
               wibox.widget {
                   mpd_status_widget,
+                  draw_empty = false,
                   left = dpi(5),
                   right = dpi(5),
                   widget = wibox.container.margin,
