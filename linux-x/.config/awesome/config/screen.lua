@@ -455,9 +455,10 @@ local function setup_screen(scr)
    my_widgets[s].wibar:set_widget(layout)
 end
 
+-- Avoid nested call of reset_widgets
 local reset_widgets_flag = false
 
-local function reset_widgets_for_screens()
+local function reset_widgets()
     for _, w in ipairs(my_widgets) do
         w.wibar:remove()
     end
@@ -476,7 +477,7 @@ end
 function schedule_reset_widgets()
     if reset_widgets_flag then return end
     reset_widgets_flag = true
-    delayed(reset_widgets_for_screens)
+    delayed(reset_widgets)
 end
 
 table.insert(shared.on_start_functions, schedule_reset_widgets)
