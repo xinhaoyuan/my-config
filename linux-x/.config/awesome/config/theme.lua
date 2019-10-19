@@ -140,15 +140,14 @@ theme.tasklist_layout = {
     },
     simple = {
         forced_height = theme.bar_height,
-        min_widget_size = dpi(300),
+        size_transform = function (size) return math.min(math.max(math.ceil(size / dpi(60)), 5), 10) * dpi(60) end,
         max_widget_size = dpi(600),
         fill_space = true,
         layout = flexer.horizontal
     },
     split = {
         forced_height = theme.bar_height,
-        min_widget_size = dpi(300),
-        max_widget_size = dpi(600),
+        size_transform = function (size) return math.min(math.max(math.ceil(size / dpi(60)), 5), 10) * dpi(60) end,
         layout = flexer.horizontal
     },
 }

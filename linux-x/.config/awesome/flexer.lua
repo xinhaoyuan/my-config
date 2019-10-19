@@ -96,11 +96,8 @@ function flexer:fit(context, width, height, fill_space)
       if self._private.dir == "y" then
          if h > 0 then
             h = h + 2
-            if self._private.min_widget_size then
-               h = math.max(self._private.min_widget_size, h)
-            end
-            if self._private.max_widget_size then
-               h = math.min(self._private.max_widget_size, h)
+            if self._private.size_transform then
+                h = self._private.size_transform(h, v)
             end
             if w > max_used_in_other then
                max_used_in_other = w
@@ -111,11 +108,8 @@ function flexer:fit(context, width, height, fill_space)
       else
          if w > 0 then
             w = w + 2
-            if self._private.min_widget_size then
-               w = math.max(self._private.min_widget_size, w)
-            end
-            if self._private.max_widget_size then
-               w = math.min(self._private.max_widget_size, w)
+            if self._private.size_transform then
+                w = self._private.size_transform(w, v)
             end
             if h > max_used_in_other then
                max_used_in_other = h
@@ -182,16 +176,9 @@ function flexer:fit(context, width, height, fill_space)
    return math.floor(self._private.calculated_width), math.floor(self._private.calculated_height)
 end
 
-function flexer:set_max_widget_size(val)
-   if self._private.max_widget_size ~= val then
-      self._private.max_widget_size = val
-      self:emit_signal("widget::layout_changed")
-   end
-end
-
-function flexer:set_min_widget_size(val)
-   if self._private.min_widget_size ~= val then
-      self._private.min_widget_size = val
+function flexer:set_size_transform(sf)
+   if self._private.size_transform ~= sf then
+      self._private.size_transform = sf
       self:emit_signal("widget::layout_changed")
    end
 end
