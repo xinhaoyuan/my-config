@@ -13,6 +13,7 @@ local gshape = require("gears.shape")
 local gcolor = require("gears.color")
 local icons = require("icons")
 local fallback = require("fallback")
+local fixed_margin = require("fixed_margin")
 local highlighted_textbox = require("highlighted_textbox")
 local centered_graph = require("centered_graph")
 local aux = require("aux")
@@ -712,15 +713,22 @@ do
    mpd_widget = simple_button {
       icon = gcolor.recolor_image(icons.music, beautiful.fg_normal),
       label_widget = wibox.widget {
-         mpd_status_widget,
-         {
-            text = "Music",
-            align = "center",
-            valign = "center",
-            forced_height = button_height,
-            widget = wibox.widget.textbox,
-         },
-         widget = fallback,
+          fixed_margin(
+              wibox.widget {
+                  mpd_status_widget,
+                  left = dpi(5),
+                  right = dpi(5),
+                  widget = wibox.container.margin,
+              }
+          ),
+          {
+              text = "Music",
+              align = "center",
+              valign = "center",
+              forced_height = button_height,
+              widget = wibox.widget.textbox,
+          },
+          widget = fallback,
       },
       indicator = em("m"),
       key = "m",
