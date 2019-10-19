@@ -201,7 +201,7 @@ end
 local alt_color_cache = {}
 local function alt_color(color)
    if alt_color_cache[color] == nil then
-      local comp = aux.color.string_to_rgba(color)
+      local comp = aux.color.from_string(color)
       for i = 1, 3 do
          if comp[i] > 0.5 then
             comp[i] = comp[i] - 0.08
@@ -209,7 +209,7 @@ local function alt_color(color)
             comp[i] = comp[i] + 0.08
          end
       end
-      alt_color_cache[color] = aux.color.rgba_to_string(comp)
+      alt_color_cache[color] = comp:to_string()
    end
    return alt_color_cache[color]
 end

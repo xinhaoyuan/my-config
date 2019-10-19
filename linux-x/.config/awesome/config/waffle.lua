@@ -24,8 +24,8 @@ local button_padding = dpi(4)
 local font_big = beautiful.fontname_normal .. " 10"
 local font_small = beautiful.fontname_mono .. " 7"
 local graph_background = "#00000000"
-local graph_normal_color = aux.color.rgba_to_string(aux.color.blend(beautiful.border_focus, 0.75, beautiful.bg_normal))
-local graph_color = "linear:0,0:0,22:0,#FF0000:0.5," .. graph_normal_color
+local graph_normal_color = aux.color.from_string(beautiful.border_focus):blend_with(beautiful.bg_normal, 0.25):to_string()
+local graph_color = graph_normal_color -- "linear:0,0:0,22:0,#FF0000:0.5," .. graph_normal_color
 local update_interval_s = 1
 
 local function em(t)
@@ -122,7 +122,7 @@ local function simple_button(args)
          widget = wibox.container.margin,
       },
       fg = beautiful.fg_normal,
-      bg = beautiful.bg_normal,
+      -- bg = beautiful.bg_normal,
       widget = wibox.container.background
    }
 
@@ -138,7 +138,7 @@ local function simple_button(args)
       "mouse::leave",
       function ()
          ret.fg = beautiful.fg_normal
-         ret.bg = beautiful.bg_normal
+         ret.bg = nil
       end
    )
 
