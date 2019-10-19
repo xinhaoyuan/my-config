@@ -12,10 +12,10 @@ local icons = require("icons")
 local cairo = lgi.cairo
 
 -- custom property string
--- Interesting fonts: Lato, Quicksand, Lobster Two, Purisa, Dosis
-theme.fontname_normal = "Hack"
+-- Interesting fonts: Hack, Iosevka SS08, Lato, Quicksand, Lobster Two, Purisa, Dosis
+theme.fontname_normal = "Iosevka SS08"
 -- custom property string
-theme.fontname_mono = "Hack"
+theme.fontname_mono = "Iosevka SS08"
 theme.font = theme.fontname_normal .. " 10"
 -- custom property string font descriptor
 theme.font_mono = theme.fontname_mono .. " 10"
@@ -33,7 +33,7 @@ theme.waffle_use_entire_screen = true
 -- custom property color
 theme.waffle_background = "#00000000"
 -- custom property
-theme.waffle_width = dpi(240)
+theme.waffle_width = dpi(200)
 -- theme.tasklist_shape = function(cr, w, h)
 --    offset = h / 4
 --    cr:move_to(0, 0)

@@ -173,6 +173,7 @@ local my_tasklist_buttons = awful.util.table.join(
 )
 
 local current_screen = nil
+local primary_screen = nil
 
 -- a basic stable sort
 local function sort(l, c)
@@ -299,51 +300,20 @@ local function setup_screen(scr)
          cursor = "cross",
    })
 
-   local wc_button = wibox.widget{
-      markup = '☯',
-      font = beautiful.font,
-      widget = wibox.widget.textbox
-   }
-
-   my_widgets[s].indicator = wibox.widget {
-      {
-         wc_button,
-         left = dpi(5),
-         right = dpi(5),
-         widget = wibox.container.margin
-      },
-      widget = wibox.container.background
-   }
-
-   my_widgets[s].indicator:connect_signal(
-      "button::press",
-      function (_, _, _, b)
-         local c = capi.client.focus
-         if c == nil then return end
-         if b == 1 then
-            -- move the mouse to the center of the client before movement
-            capi.mouse.coords({
-                  x = c.x + c.width / 2,
-                  y = c.y + c.height / 2,
-                         }, true)
-            awful.mouse.client.move(c)
-         elseif b == 2 then
-            revelation{curr_tag_only = true}
-         elseif b == 3 then
-            awful.mouse.client.resize(c, "bottom_right")
-         end
-      end
-                                         )
-
    local left_layout = wibox.layout.fixed.horizontal()
-   local layoutbox = awful.widget.layoutbox(s)
-   layoutbox:buttons(
+   my_widgets[s].indicator = wibox.widget {
+       awful.widget.layoutbox(s),
+       widget = wibox.container.background
+   }
+   print(tostring(s) .. " " .. tostring(my_widgets[s].indicator))
+   my_widgets[s].indicator:buttons(
       awful.util.table.join(
-         awful.button({ }, 3, function () waffle:set_gravity("southwest"); waffle:show() end),
-         -- awful.button({ }, 3, function () menu:show() end),
-         awful.button({ }, 4, function () awful.layout.inc( 1) end),
-         awful.button({ }, 5, function () awful.layout.inc(-1) end)))
-   left_layout:add(layoutbox)
+          awful.button({ }, 1, function () revelation{curr_tag_only = true} end),
+          awful.button({ }, 3, function () waffle:set_gravity("southwest"); waffle:show() end),
+          -- awful.button({ }, 3, function () menu:show() end),
+          awful.button({ }, 4, function () awful.layout.inc( 1) end),
+          awful.button({ }, 5, function () awful.layout.inc(-1) end)))
+   left_layout:add(my_widgets[s].indicator)
    left_layout:add(my_widgets[s].tag_list)
    left_layout:add(scr.mypromptbox)
    local right_layout = wibox.widget {
@@ -352,7 +322,7 @@ local function setup_screen(scr)
       layout         = wibox.layout.fixed.horizontal
    }
 
-   if scr == capi.screen.primary then
+   if scr == primary_screen then
       right_layout:add(my_tray)
    end
 
@@ -366,7 +336,6 @@ local function setup_screen(scr)
    })
    calendar_widget:attach(clock)
    right_layout:add(clock)
-   right_layout:add(my_widgets[s].indicator)
 
    local layout
 
@@ -451,6 +420,7 @@ local function setup_screen(scr)
                   right_layout,
                   draw_empty = false,
                   left = dpi(5),
+                  right = dpi(5),
                   widget = wibox.container.margin,
                },
                bg = beautiful.bg_normal,
@@ -487,24 +457,34 @@ local function setup_screen(scr)
    my_widgets[s].wibar:set_widget(layout)
 end
 
+local reset_widgets_flag = false
+
 local function reset_widgets_for_screens()
-   for _, w in ipairs(my_widgets) do
-      w.wibar:remove()
-   end
-   my_widgets = {}
-   current_screen = nil
+    for _, w in ipairs(my_widgets) do
+        w.wibar:remove()
+    end
+    my_widgets = {}
+    current_screen = nil
+    primary_screen = capi.screen.primary
 
-   for scr in capi.screen do
-      setup_screen(scr)
-   end
+    for scr in capi.screen do
+        setup_screen(scr)
+    end
 
-   shared.action.wallpaper_setup(true)
+    shared.action.wallpaper_setup(true)
+    reset_widgets_flag = false
 end
 
-table.insert(shared.on_start_functions, reset_widgets_for_screens)
+function schedule_reset_widgets()
+    if reset_widgets_flag then return end
+    reset_widgets_flag = true
+    delayed(reset_widgets_for_screens)
+end
 
-capi.screen.connect_signal("list", reset_widgets_for_screens)
-capi.screen.connect_signal("primary_changed", reset_widgets_for_screens)
+table.insert(shared.on_start_functions, schedule_reset_widgets)
+
+capi.screen.connect_signal("list", schedule_reset_widgets)
+capi.screen.connect_signal("primary_changed", schedule_reset_widgets)
 
 capi.root.keys(
    awful.util.table.join(
@@ -524,21 +504,21 @@ capi.root.keys(
 ))
 
 gtimer {
-   timeout = 0.5,
-   autostart = true,
-   callback = function()
-      local nscreen = capi.mouse.screen.index
-      if nscreen ~= current_screen then
-         if current_screen ~= nil then
-            my_widgets[current_screen].indicator:set_bg(beautiful.bg_normal)
-            my_widgets[current_screen].indicator:set_fg(beautiful.fg_normal)
-         end
-         my_widgets[nscreen].indicator:set_bg(beautiful.bg_focus)
-         my_widgets[nscreen].indicator:set_fg(beautiful.fg_focus)
-         -- switch active screen
-         current_screen = nscreen
-      end
-   end
+    timeout = 0.5,
+    autostart = true,
+    callback = function()
+        local nscreen = capi.mouse.screen.index
+        if nscreen ~= current_screen then
+            if current_screen ~= nil then
+                my_widgets[current_screen].indicator:set_bg(beautiful.bg_normal)
+                my_widgets[current_screen].indicator:set_fg(beautiful.fg_normal)
+            end
+            my_widgets[nscreen].indicator:set_bg(beautiful.bg_focus)
+            my_widgets[nscreen].indicator:set_fg(beautiful.fg_focus)
+            -- switch active screen
+            current_screen = nscreen
+        end
+    end
 }
 
 -- base keys and buttons
