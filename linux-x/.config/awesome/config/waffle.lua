@@ -15,7 +15,6 @@ local icons = require("icons")
 local fallback = require("fallback")
 local fixed_margin = require("fixed_margin")
 local highlighted_textbox = require("highlighted_textbox")
-local centered_graph = require("centered_graph")
 local aux = require("aux")
 local dpi = require("beautiful.xresources").apply_dpi
 
