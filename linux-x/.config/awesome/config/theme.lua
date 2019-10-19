@@ -134,19 +134,23 @@ theme.tasklist_template = {
 local flexer = require("flexer")
 -- custom property
 theme.tasklist_layout = {
-   minimal = {
-      forced_height = theme.bar_height,
-      layout = wibox.layout.flex.horizontal
-   },
-   simple = {
-      forced_height = theme.bar_height,
-      fill_space = true,
-      layout = flexer.horizontal
-   },
-   split = {
-      forced_height = theme.bar_height,
-      layout = flexer.horizontal
-   },
+    minimal = {
+        forced_height = theme.bar_height,
+        layout = wibox.layout.flex.horizontal
+    },
+    simple = {
+        forced_height = theme.bar_height,
+        min_widget_size = dpi(300),
+        max_widget_size = dpi(600),
+        fill_space = true,
+        layout = flexer.horizontal
+    },
+    split = {
+        forced_height = theme.bar_height,
+        min_widget_size = dpi(300),
+        max_widget_size = dpi(600),
+        layout = flexer.horizontal
+    },
 }
 
 -- custom property
