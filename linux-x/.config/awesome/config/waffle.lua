@@ -648,9 +648,12 @@ do
       "button::press",
       function(_, _, _, button)
          local cmd
-         if (button == 4)     then cmd = INC_VOLUME_CMD
+         if (button == 1)     then
+             awful.spawn({"pavucontrol"})
+             waffle:hide()
+         elseif (button == 3) then cmd = TOG_VOLUME_CMD
+         elseif (button == 4) then cmd = INC_VOLUME_CMD
          elseif (button == 5) then cmd = DEC_VOLUME_CMD
-         elseif (button == 1) then cmd = TOG_VOLUME_CMD
          end
 
          awful.spawn.easy_async_with_shell(
