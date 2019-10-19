@@ -142,11 +142,12 @@ local function create(config)
             c.ontop = false
             c.above = false
             c.below = false
-            if c.saved.ontop or c.saved.above then
-               c:raise()
-            elseif c.saved.below then
-               c:lower()
-            end
+            c.minimized = true
+            -- if c.saved.ontop or c.saved.above then
+            --    c:raise()
+            -- elseif c.saved.below then
+            --    c:lower()
+            -- end
          end
 
          tablist_index = 1
@@ -158,6 +159,7 @@ local function create(config)
             c.ontop = c.saved.ontop
             c.above = c.saved.above
             c.below = c.saved.below
+            c.minimized = c.saved.minimized
             c.saved = nil
          end
 
@@ -235,7 +237,7 @@ local function create(config)
          if #tablist > 0 then
             local cc = tablist[tablist_index]
             cc.above = false
-            cc.minimized = cc.saved.minimized
+            cc.minimized = true
             tablist_index = tablist_index % #tablist + 1
             cc = tablist[tablist_index]
             cc.minimized = false

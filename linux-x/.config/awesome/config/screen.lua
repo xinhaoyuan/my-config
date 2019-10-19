@@ -264,9 +264,15 @@ local function setup_screen(scr)
          -- A hacky way to alternate the colors of tasklist items
          awful.widget.common.list_update(
             w, b,
-            function (object, tb)
-               local ret = table.pack(l(object, tb))
-               -- background is stored in [2]
+            function (c, tb)
+               local ret = table.pack(l(c, tb))
+               -- bg is stored as [2]
+               -- fg is embedded as color='...' in [1]
+               if c.minimized and c.saved and not c.saved.minimized then
+                   local fg = beautiful.tasklist_fg_normal or beautiful.fg_normal
+                   ret[1] = ret[1]:gsub("'#(%w+)'", "'" .. fg .. "'")
+                   ret[2] = beautiful.tasklist_bg_normal or beautiful.bg_normal
+               end
                if tb.is_odd_child then
                   ret[2] = alt_color(ret[2])
                end

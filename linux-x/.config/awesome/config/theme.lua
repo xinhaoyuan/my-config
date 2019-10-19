@@ -83,7 +83,7 @@ local function tasklist_update_function(widget, c, index, objects)
         end
     end
     if #status_markup > 0 then
-        sb[1].markup = "<span color='" .. ((client.focus == c or c.minimized) and theme.special_focus or theme.special_normal) .. "'>" .. status_markup .. "</span>"
+        sb[1].markup = "<span color='" .. ((client.focus == c) and theme.special_focus or theme.special_normal) .. "'>" .. status_markup .. "</span>"
     else
         sb[1].markup = ""
     end
