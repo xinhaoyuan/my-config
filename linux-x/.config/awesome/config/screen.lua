@@ -305,7 +305,6 @@ local function setup_screen(scr)
        awful.widget.layoutbox(s),
        widget = wibox.container.background
    }
-   print(tostring(s) .. " " .. tostring(my_widgets[s].indicator))
    my_widgets[s].indicator:buttons(
       awful.util.table.join(
           awful.button({ }, 1, function () revelation{curr_tag_only = true} end),
