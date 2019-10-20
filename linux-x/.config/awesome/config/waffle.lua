@@ -15,6 +15,7 @@ local icons = require("icons")
 local fallback = require("fallback")
 local fixed_margin = require("fixed_margin")
 local highlighted_textbox = require("highlighted_textbox")
+local cbg = require("contextual_background")
 local masked_imagebox = require("masked_imagebox")
 local aux = require("aux")
 local dpi = require("beautiful.xresources").apply_dpi
@@ -30,7 +31,8 @@ local graph_color = graph_normal_color -- "linear:0,0:0,22:0,#FF0000:0.5," .. gr
 local update_interval_s = 1
 
 local function em(t)
-   return "<span color='" .. beautiful.special_normal .. "'>" .. t .. "</span>"
+    -- return "<span color='" .. beautiful.special_normal .. "'>" .. t .. "</span>"
+    return t
 end
 
 local function create_view(root)
@@ -77,6 +79,10 @@ local function create_view(root)
    return view
 end
 
+local function context_focused(context)
+    context.focus = true
+end
+
 local function simple_button(args)
    local action = args.action
    local width = waffle_width - button_padding * 2
@@ -106,12 +112,16 @@ local function simple_button(args)
                                           ),
             label,
             args.indicator and {
-               markup = args.indicator,
-               font = font_big,
-               forced_height = button_height,
-               align = "center",
-               valign = "center",
-               widget = wibox.widget.textbox,
+                {
+                    text = args.indicator,
+                    font = font_big,
+                    forced_height = button_height,
+                    align = "center",
+                    valign = "center",
+                    widget = wibox.widget.textbox,
+                },
+                fg_function = {"special_"},
+                widget = cbg
             },
             forced_width = width,
             layout = wibox.layout.align.horizontal,
@@ -124,24 +134,22 @@ local function simple_button(args)
          margins = button_padding,
          widget = wibox.container.margin,
       },
-      fg = beautiful.fg_normal,
-      -- bg = beautiful.bg_normal,
-      widget = wibox.container.background
+      fg_function = {"fg_"},
+      bg_function = {"bg_"},
+      widget = cbg
    }
 
    ret:connect_signal(
       "mouse::enter",
       function ()
-         ret.fg = beautiful.fg_focus
-         ret.bg = beautiful.bg_focus
+          ret:set_context_transform_function({focus = true})
       end
    )
 
    ret:connect_signal(
       "mouse::leave",
       function ()
-         ret.fg = beautiful.fg_normal
-         ret.bg = nil
+          ret:set_context_transform_function(nil)
       end
    )
 

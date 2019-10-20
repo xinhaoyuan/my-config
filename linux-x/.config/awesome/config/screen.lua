@@ -28,6 +28,7 @@ local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
 local fixed_align = require("fixed_align")
 local masked_imagebox = require("masked_imagebox")
+local cbg = require("contextual_background")
 local aux = require("aux")
 require("manage_ticket")
 local revelation = require("revelation")
@@ -313,7 +314,9 @@ local function setup_screen(scr)
    masked_imagebox(layoutbox.imagebox)
    my_widgets[s].indicator = wibox.widget {
        layoutbox,
-       widget = wibox.container.background
+       fg_function = {"fg_"},
+       bg_function = {"bg_"},
+       widget = cbg
    }
    my_widgets[s].indicator:buttons(
       awful.util.table.join(
@@ -518,11 +521,9 @@ gtimer {
         local nscreen = capi.mouse.screen.index
         if nscreen ~= current_screen then
             if current_screen ~= nil then
-                my_widgets[nscreen].indicator:set_fg(beautiful.fg_normal)
-                my_widgets[nscreen].indicator:set_bg(beautiful.bg_normal)
+                my_widgets[current_screen].indicator:set_context_transform_function(nil)
             end
-            my_widgets[nscreen].indicator:set_fg(beautiful.fg_focus)
-            my_widgets[nscreen].indicator:set_bg(beautiful.bg_focus)
+            my_widgets[nscreen].indicator:set_context_transform_function({focus = true})
             -- switch active screen
             current_screen = nscreen
         end
