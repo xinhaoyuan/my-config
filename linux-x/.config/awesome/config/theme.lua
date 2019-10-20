@@ -8,6 +8,7 @@ local xrdb  = xresources.get_current_theme()
 local gears = require("gears")
 local fallback = require("fallback")
 local masked_imagebox = require("masked_imagebox")
+local cbg = require("contextual_background")
 local lgi   = require("lgi")
 local icons = require("icons")
 local cairo = lgi.cairo
@@ -66,8 +67,8 @@ local function tasklist_update_function(widget, c, index, objects)
         tb.is_odd_child = index % 2 == 1
     end
     local sb = widget:get_children_by_id("status_role")[1]
-    local bgb = widget:get_children_by_id("background_role")[1]
-    local status_markup = ""
+    local bgb = widget:get_children_by_id("my_background_role")[1]
+    local status_text = ""
     local prop = {}
     for _, pp in ipairs(property_to_text) do
         local key = pp[1]
@@ -81,21 +82,18 @@ local function tasklist_update_function(widget, c, index, objects)
         local key, text = table.unpack(pp)
         if prop[key] == true then
             if key ~= "floating" or not prop.maximized then 
-                status_markup = status_markup .. text
+                status_text = status_text .. text
             end
         end
     end
     if sb then
-        if #status_markup > 0 then
-            sb.markup = "<span color='" .. ((client.focus == c or c.minimized) and theme.special_focus or theme.special_normal) .. "'>" .. status_markup .. "</span>"
+        if #status_text > 0 then
+            sb.text = status_text
         else
-            sb.markup = ""
+            sb.text = ""
         end
     end
-    -- tasklist does not set foreground color ...
-    if bgb then
-        bgb:set_fg((client.focus == c or c.minimized) and theme.fg_focus or theme.fg_normal)
-    end
+    bgb:set_context_transform_function({focus = client.focus == c, minimized = c.minimized})
 end
 
 local function tasklist_create_function(widget, c, index, objects)
@@ -127,12 +125,22 @@ theme.tasklist_template = {
             widget = wibox.widget.textbox,
          },
          {
-            {
-               id = "status_role",
-               widget = wibox.widget.textbox,
-            },
-            left = dpi(3),
-            widget = wibox.container.margin,
+             {
+                 {
+                     id = "status_role",
+                     widget = wibox.widget.textbox,
+                 },
+                 fg_function = function (context)
+                     if context.focus or context.minimized then
+                         return beautiful.special_focus
+                     else
+                         return beautiful.special_normal
+                     end
+                 end,
+                 widget = cbg
+             },
+             left = dpi(3),
+             widget = wibox.container.margin,
          },
          layout = wibox.layout.align.horizontal,
       },
@@ -141,8 +149,24 @@ theme.tasklist_template = {
       right = dpi(5),
       widget = wibox.container.margin
    },
-   id     = "background_role",
-   widget = wibox.container.background,
+   id     = "my_background_role",
+   fg_function = function (context)
+       if context.focus or context.minimized then
+           return beautiful.fg_focus
+       else
+           return beautiful.fg_normal
+       end
+   end,
+   bg_function = function (context)
+       if context.focus then
+           return beautiful.bg_focus
+       elseif context.minimized then
+           return beautiful.bg_minimize
+       else
+           return beautiful.bg_normal
+       end
+   end,
+   widget = cbg,
    create_callback = tasklist_create_function,
    update_callback = tasklist_update_function,
 }
