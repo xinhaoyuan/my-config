@@ -8,6 +8,7 @@ local xrdb  = xresources.get_current_theme()
 local gears = require("gears")
 local fallback = require("fallback")
 local masked_imagebox = require("masked_imagebox")
+local aux = require("aux")
 local cbg = require("contextual_background")
 local lgi   = require("lgi")
 local icons = require("icons")
@@ -62,10 +63,6 @@ local property_to_text = {
 
 local function tasklist_update_function(widget, c, index, objects)
     assert(widget:get_children_by_id("default_icon")[1].is_masked_imagebox)
-    local tb = widget:get_children_by_id("text_role")[1]
-    if tb then
-        tb.is_odd_child = index % 2 == 1
-    end
     local sb = widget:get_children_by_id("status_role")[1]
     local bgb = widget:get_children_by_id("my_background_role")[1]
     local status_text = ""
@@ -93,13 +90,29 @@ local function tasklist_update_function(widget, c, index, objects)
             sb.text = ""
         end
     end
-    bgb:set_context_transform_function({focus = client.focus == c, minimized = c.minimized})
+    bgb:set_context_transform_function({focus = client.focus == c, minimized = c.minimized, is_odd = index % 2 == 1})
 end
 
 local function tasklist_create_function(widget, c, index, objects)
     local ib = widget:get_children_by_id("default_icon")[1]
     masked_imagebox(ib)
     tasklist_update_function(widget, c, index, objects)
+end
+
+local alt_color_cache = {}
+local function alt_color(color)
+   if alt_color_cache[color] == nil then
+      local comp = aux.color.from_string(color)
+      for i = 1, 3 do
+         if comp[i] > 0.5 then
+            comp[i] = comp[i] - 0.05
+         else
+            comp[i] = comp[i] + 0.05
+         end
+      end
+      alt_color_cache[color] = comp:to_string()
+   end
+   return alt_color_cache[color]
 end
 
 theme.tasklist_template = {
@@ -158,13 +171,18 @@ theme.tasklist_template = {
        end
    end,
    bg_function = function (context)
+       local ret
        if context.focus then
-           return beautiful.bg_focus
+           ret = beautiful.bg_focus
        elseif context.minimized then
-           return beautiful.bg_minimize
+           ret = beautiful.bg_minimize
        else
-           return beautiful.bg_normal
+           ret = beautiful.bg_normal
        end
+       if context.is_odd then
+           ret = alt_color(ret)
+       end
+       return ret
    end,
    widget = cbg,
    create_callback = tasklist_create_function,

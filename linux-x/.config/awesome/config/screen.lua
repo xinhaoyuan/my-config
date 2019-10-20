@@ -247,42 +247,42 @@ local function setup_screen(scr)
          )
          return cls
       end,
-      update_function = function (w, b, l, d, objects, args)
-         -- not used any more. just for future reference
+      -- update_function = function (w, b, l, d, objects, args)
+      --    -- not used any more. just for future reference
 
-         -- -- Reorder the clients so that floating clients are on the right side
-         -- fl_clients = {}
-         -- clients = {}
-         -- for i, obj in ipairs(objects) do
-         --    if obj.floating or obj.maximized or obj.maximized_horizontal or obj.maximized_vertical then
-         --       fl_clients[#fl_clients + 1] = obj
-         --    else
-         --       clients[#clients + 1] = obj
-         --    end
-         -- end
-         -- for i, obj in ipairs(fl_clients) do
-         --    clients[#clients + 1] = obj
-         -- end
+      --    -- -- Reorder the clients so that floating clients are on the right side
+      --    -- fl_clients = {}
+      --    -- clients = {}
+      --    -- for i, obj in ipairs(objects) do
+      --    --    if obj.floating or obj.maximized or obj.maximized_horizontal or obj.maximized_vertical then
+      --    --       fl_clients[#fl_clients + 1] = obj
+      --    --    else
+      --    --       clients[#clients + 1] = obj
+      --    --    end
+      --    -- end
+      --    -- for i, obj in ipairs(fl_clients) do
+      --    --    clients[#clients + 1] = obj
+      --    -- end
 
-         -- A hacky way to alternate the colors of tasklist items
-         awful.widget.common.list_update(
-            w, b,
-            function (c, tb)
-               local ret = table.pack(l(c, tb))
-               -- bg is stored as [2]
-               -- fg is embedded as color='...' in [1]
-               if c.minimized and c.saved and not c.saved.minimized then
-                   local fg = beautiful.tasklist_fg_normal or beautiful.fg_normal
-                   ret[1] = ret[1]:gsub("'#(%w+)'", "'" .. fg .. "'")
-                   ret[2] = beautiful.tasklist_bg_normal or beautiful.bg_normal
-               end
-               if tb.is_odd_child then
-                  ret[2] = alt_color(ret[2])
-               end
-               return table.unpack(ret)
-            end,
-            d, objects, args)
-      end,
+      --    -- A hacky way to alternate the colors of tasklist items
+      --    awful.widget.common.list_update(
+      --       w, b,
+      --       function (c, tb)
+      --          local ret = table.pack(l(c, tb))
+      --          -- bg is stored as [2]
+      --          -- fg is embedded as color='...' in [1]
+      --          if c.minimized and c.saved and not c.saved.minimized then
+      --              local fg = beautiful.tasklist_fg_normal or beautiful.fg_normal
+      --              ret[1] = ret[1]:gsub("'#(%w+)'", "'" .. fg .. "'")
+      --              ret[2] = beautiful.tasklist_bg_normal or beautiful.bg_normal
+      --          end
+      --          if tb.is_odd_child then
+      --             ret[2] = alt_color(ret[2])
+      --          end
+      --          return table.unpack(ret)
+      --       end,
+      --       d, objects, args)
+      -- end,
       widget_template = beautiful.tasklist_template,
    }
    tasklist = {

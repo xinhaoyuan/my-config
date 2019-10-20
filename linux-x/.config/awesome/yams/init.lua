@@ -242,9 +242,11 @@ local function create(config)
             local cc = tablist[tablist_index]
             cc.above = false
             cc.opacity = config.opacity_other
+            cc.minimized = cc.saved.minimized
             tablist_index = tablist_index % #tablist + 1
             cc = tablist[tablist_index]
             cc.opacity = config.opacity_selected
+            cc.minimized = false
             cc.above = true
             activate(tablist[tablist_index])
          end
