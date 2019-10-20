@@ -15,6 +15,7 @@ local icons = require("icons")
 local fallback = require("fallback")
 local fixed_margin = require("fixed_margin")
 local highlighted_textbox = require("highlighted_textbox")
+local masked_imagebox = require("masked_imagebox")
 local aux = require("aux")
 local dpi = require("beautiful.xresources").apply_dpi
 
@@ -94,13 +95,15 @@ local function simple_button(args)
    local ret = wibox.widget {
       {
          {
-            args.icon and {
-               image = args.icon,
-               resize = true,
-               forced_width = button_height,
-               forced_height = button_height,
-               widget = wibox.widget.imagebox,
-                          },
+             args.icon and masked_imagebox(
+                 wibox.widget {
+                     image = args.icon,
+                     resize = true,
+                     forced_width = button_height,
+                     forced_height = button_height,
+                     widget = wibox.widget.imagebox,
+                 }
+                                          ),
             label,
             args.indicator and {
                markup = args.indicator,

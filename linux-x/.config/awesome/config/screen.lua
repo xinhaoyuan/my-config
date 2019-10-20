@@ -26,7 +26,7 @@ local fallback = require("fallback")
 local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
 local fixed_align = require("fixed_align")
-local layoutbox_alt = require("layoutbox_alt") 
+local masked_imagebox = require("masked_imagebox")
 local aux = require("aux")
 require("manage_ticket")
 local revelation = require("revelation")
@@ -308,7 +308,12 @@ local function setup_screen(scr)
    })
 
    local left_layout = wibox.layout.fixed.horizontal()
-   my_widgets[s].indicator = layoutbox_alt(s)
+   local layoutbox = awful.widget.layoutbox(s)
+   layoutbox.imagebox = masked_imagebox(layoutbox.imagebox)
+   my_widgets[s].indicator = wibox.widget {
+       layoutbox,
+       widget = wibox.container.background
+   }
    my_widgets[s].indicator:buttons(
       awful.util.table.join(
           awful.button({ }, 1, function () revelation{curr_tag_only = true} end),
@@ -513,11 +518,11 @@ gtimer {
         local nscreen = capi.mouse.screen.index
         if nscreen ~= current_screen then
             if current_screen ~= nil then
-                my_widgets[current_screen].indicator.focus = false
-                my_widgets[current_screen].indicator:emit_signal("update")                
+                my_widgets[nscreen].indicator:set_fg(beautiful.fg_normal)
+                my_widgets[nscreen].indicator:set_bg(beautiful.bg_normal)
             end
-            my_widgets[nscreen].indicator.focus = true
-            my_widgets[nscreen].indicator:emit_signal("update")
+            my_widgets[nscreen].indicator:set_fg(beautiful.fg_focus)
+            my_widgets[nscreen].indicator:set_bg(beautiful.bg_focus)
             -- switch active screen
             current_screen = nscreen
         end
