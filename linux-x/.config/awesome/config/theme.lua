@@ -7,6 +7,7 @@ local dpi   = xresources.apply_dpi
 local xrdb  = xresources.get_current_theme()
 local gears = require("gears")
 local fallback = require("fallback")
+local masked_imagebox = require("masked_imagebox")
 local lgi   = require("lgi")
 local icons = require("icons")
 local cairo = lgi.cairo
@@ -59,11 +60,13 @@ local property_to_text = {
 }
 
 local function tasklist_update_function(widget, c, index, objects)
-    local tb = widget:get_children_by_id("text_role")
-    if tb[1] then
-        tb[1].is_odd_child = index % 2 == 1
+    assert(widget:get_children_by_id("default_icon")[1].is_masked_imagebox)
+    local tb = widget:get_children_by_id("text_role")[1]
+    if tb then
+        tb.is_odd_child = index % 2 == 1
     end
-    local sb = widget:get_children_by_id("status_role")
+    local sb = widget:get_children_by_id("status_role")[1]
+    local bgb = widget:get_children_by_id("background_role")[1]
     local status_markup = ""
     local prop = {}
     for _, pp in ipairs(property_to_text) do
@@ -82,11 +85,23 @@ local function tasklist_update_function(widget, c, index, objects)
             end
         end
     end
-    if #status_markup > 0 then
-        sb[1].markup = "<span color='" .. ((client.focus == c) and theme.special_focus or theme.special_normal) .. "'>" .. status_markup .. "</span>"
-    else
-        sb[1].markup = ""
+    if sb then
+        if #status_markup > 0 then
+            sb.markup = "<span color='" .. ((client.focus == c or c.minimized) and theme.special_focus or theme.special_normal) .. "'>" .. status_markup .. "</span>"
+        else
+            sb.markup = ""
+        end
     end
+    -- tasklist does not set foreground color ...
+    if bgb then
+        bgb:set_fg((client.focus == c or c.minimized) and theme.fg_focus or theme.fg_normal)
+    end
+end
+
+local function tasklist_create_function(widget, c, index, objects)
+    local ib = widget:get_children_by_id("default_icon")[1]
+    masked_imagebox(ib)
+    tasklist_update_function(widget, c, index, objects)
 end
 
 theme.tasklist_template = {
@@ -98,8 +113,9 @@ theme.tasklist_template = {
                   widget = awful.widget.clienticon,
                },
                {
-                  image = default_icon,
-                  widget = wibox.widget.imagebox,
+                   id = "default_icon", 
+                   image = default_icon,
+                   widget = wibox.widget.imagebox,
                },
                widget = fallback,
             },
@@ -127,7 +143,7 @@ theme.tasklist_template = {
    },
    id     = "background_role",
    widget = wibox.container.background,
-   create_callback = tasklist_update_function,
+   create_callback = tasklist_create_function,
    update_callback = tasklist_update_function,
 }
 

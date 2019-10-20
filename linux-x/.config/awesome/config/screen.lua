@@ -309,7 +309,7 @@ local function setup_screen(scr)
 
    local left_layout = wibox.layout.fixed.horizontal()
    local layoutbox = awful.widget.layoutbox(s)
-   layoutbox.imagebox = masked_imagebox(layoutbox.imagebox)
+   masked_imagebox(layoutbox.imagebox)
    my_widgets[s].indicator = wibox.widget {
        layoutbox,
        widget = wibox.container.background

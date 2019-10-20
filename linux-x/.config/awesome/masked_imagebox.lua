@@ -1,4 +1,6 @@
 return function (ib)
+    if ib.is_masked_imagebox then return ib end
+    ib.is_masked_imagebox = true
     function ib:draw(_, cr, width, height)
         if width == 0 or height == 0 or not self._private.default then return end
 
