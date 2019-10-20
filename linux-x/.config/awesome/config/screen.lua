@@ -22,6 +22,7 @@ local calendar = require("calendar.calendar")
 local menu = require("my-menu")
 local dpi = require("beautiful.xresources").apply_dpi
 local yams = require("yams")
+local yams_switcher = yams.create{panel = false}
 local fallback = require("fallback")
 local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
@@ -532,7 +533,7 @@ gtimer {
 local global_keys = table_join(
    awful.key({ "Mod1" }, "Tab",
       function ()
-         yams.default.start(nil, true)
+         yams_switcher.start(nil)
    end),
    awful.key({ "Mod4" }, "/",               function () machi.default_editor.start_interactive() end),
    awful.key({ "Mod4" }, "[",               function () alayout.inc(alayout.layouts, -1) end),

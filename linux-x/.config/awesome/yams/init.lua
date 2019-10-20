@@ -32,7 +32,7 @@ end
 
 local function create(config)
    -- the default filter will get all focusable client with any selected tags
-   local function filter(c)
+   local function default_filter(c)
       if not api.awful.client.focus.filter(c) then return false end
       for _, t in ipairs(c:tags()) do
          if t.selected then
@@ -42,30 +42,33 @@ local function create(config)
       return false
    end
 
-   if config and config.filter ~= nil then
-      filter = config.filter
+   config = config or {}
+   if config.same_screen == nil then
+       config.same_screen = true
    end
 
-   local same_screen = true
-   if config and config.same_screen ~= nil then
-      same_screen = config.same_screen
+   if config.filter == nil then
+       config.filter = default_filter
    end
 
-   local to_release = { }
-   if config and config.release_key ~= nil then
-      to_release[config.release_key] = true
-   else
-      to_release["Alt_L"] = true
+   config.to_release = config.to_release or { ["Alt_L"] = true }
+   if config.switch_key == nil then
+       config.switch_key = "Tab"
    end
 
-   local switch_key
-   if config and config.switch_key ~= nil then
-      switch_key = config.switch_key
-   else
-      switch_key = "Tab"
+   if config.opacity_other == nil then
+       config.opacity_other = 0.5
    end
 
-   local function start(screen, no_panel)
+   if config.opacity_selected == nil then
+       config.opacity_selected = 1
+   end
+
+   if config.panel == nil then
+       config.panel = true
+   end
+   
+   local function start(screen)
       local tablist_font_desc = api.beautiful.get_merged_font(
          api.beautiful.font, api.dpi(10))
       local font_color = with_alpha(api.gears.color(api.beautiful.fg_normal), 1)
@@ -87,7 +90,7 @@ local function create(config)
 
       local panel = nil
 
-      if not no_panel then
+      if config.panel then
           panel = api.wibox({
                   screen = screen,
                   x = screen.workarea.x,
@@ -122,7 +125,7 @@ local function create(config)
 
       local function initialize()
          tablist = {}
-         for c in api.awful.client.iterate(filter, nil, same_screen and screen or nil) do
+         for c in api.awful.client.iterate(config.filter, nil, config.same_screen and screen or nil) do
             tablist[#tablist + 1] = c
          end
          table.sort(
@@ -138,11 +141,11 @@ local function create(config)
 
          for i = #tablist, 1, -1 do
             local c = tablist[i]
-            c.saved = {ontop = c.ontop, above = c.above, below = c.below, minimized = c.minimized}
+            c.saved = {ontop = c.ontop, above = c.above, below = c.below, minimized = c.minimized, opacity = c.opacity}
             c.ontop = false
             c.above = false
             c.below = false
-            c.minimized = true
+            c.opacity = config.opacity_other
             -- if c.saved.ontop or c.saved.above then
             --    c:raise()
             -- elseif c.saved.below then
@@ -160,6 +163,7 @@ local function create(config)
             c.above = c.saved.above
             c.below = c.saved.below
             c.minimized = c.saved.minimized
+            c.opacity = c.saved.opacity
             c.saved = nil
          end
 
@@ -237,10 +241,10 @@ local function create(config)
          if #tablist > 0 then
             local cc = tablist[tablist_index]
             cc.above = false
-            cc.minimized = true
+            cc.opacity = config.opacity_other
             tablist_index = tablist_index % #tablist + 1
             cc = tablist[tablist_index]
-            cc.minimized = false
+            cc.opacity = config.opacity_selected
             cc.above = true
             activate(tablist[tablist_index])
          end
@@ -286,10 +290,10 @@ local function create(config)
       kg = api.awful.keygrabber.run(
          function (mod, key, event)
             if event == "release" then
-               if to_release[key] then
+               if config.to_release[key] then
                   stop()
                end
-            elseif key == switch_key then
+            elseif key == config.switch_key then
                 switch()
                 if panel then
                     panel.bgimage = draw_info
