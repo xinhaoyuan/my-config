@@ -452,6 +452,7 @@ local function setup_screen(scr)
             {
                right_layout,
                left = dpi(5),
+               right = dpi(5),
                widget = wibox.container.margin,
             },
             layout = wibox.layout.align.horizontal,
