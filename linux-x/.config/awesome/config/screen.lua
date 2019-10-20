@@ -333,7 +333,7 @@ local function setup_screen(scr)
       right_layout:add(my_tray)
    end
 
-   local clock = wibox.widget.textclock("<span color='" .. beautiful.border_focus .. "'>%m<b>%d</b></span>%H<b>%M</b>")
+   local clock = wibox.widget.textclock("<span color='" .. beautiful.border_focus .. "'>%m<b>%d</b></span>%H<b>%M</b> ")
    clock:set_font(beautiful.font)
    local calendar_widget = calendar({
          fdow = 7,
@@ -427,7 +427,6 @@ local function setup_screen(scr)
                   right_layout,
                   draw_empty = false,
                   left = dpi(5),
-                  right = dpi(5),
                   widget = wibox.container.margin,
                },
                bg = beautiful.bg_normal,
@@ -452,7 +451,6 @@ local function setup_screen(scr)
             {
                right_layout,
                left = dpi(5),
-               right = dpi(5),
                widget = wibox.container.margin,
             },
             layout = wibox.layout.align.horizontal,
