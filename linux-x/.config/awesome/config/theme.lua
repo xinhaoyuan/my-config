@@ -14,7 +14,7 @@ local lgi   = require("lgi")
 local icons = require("icons")
 local cairo = lgi.cairo
 
-theme.notification_icon_size = dpi(64)
+theme.notification_icon_size = dpi(48)
 
 -- custom property string
 -- Interesting fonts: Hack, Iosevka SS08, Lato, Quicksand, Lobster Two, Purisa, Dosis
