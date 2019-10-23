@@ -133,46 +133,52 @@ local client_menu = awful.menu({
 })
 
 local my_tasklist_buttons = awful.util.table.join(
-   awful.button({ }, 1, function (c)
-         if c == capi.client.focus then
-            c.minimized = true
-         else
-            -- Without this, the following
-            -- :isvisible() makes no sense
-            c.minimized = false
-            if not c:isvisible() then
-               awful.tag.viewonly(c:tags()[1])
+    awful.button({ }, 1, function (c)
+            if c == capi.client.focus then
+                capi.mouse.coords({
+                        x = c.x + c.width / 2,
+                        y = c.y + c.height / 2,
+                                  }, true)
+                awful.mouse.client.move(c)
+            else
+                -- Without this, the following
+                -- :isvisible() makes no sense
+                c.minimized = false
+                if not c:isvisible() then
+                    awful.tag.viewonly(c:tags()[1])
+                end
+                -- This will also un-minimize
+                -- the client, if needed
+                capi.client.focus = c
+                c:raise()
             end
-            -- This will also un-minimize
-            -- the client, if needed
-            capi.client.focus = c
-            c:raise()
-         end
-   end),
-   awful.button({ }, 2,
-      function (c)
-         shared.client.titlebar_enable(c)
-      end
-   ),
-   awful.button({ }, 3,
-      function (c)
-         if c.minimized then
-            c:kill()
-         end
-      end
-   ),
-   awful.button({ }, 4,
-      function (c)
-         if not c.maximized then
-            shared.client.enlarge(c)
-         end
-      end
-   ),
-   awful.button({ }, 5,
-      function (c)
-         shared.client.shrink(c)
-      end
-   )
+    end),
+    awful.button({ }, 2,
+        function (c)
+            shared.client.titlebar_enable(c)
+        end
+    ),
+    awful.button({ }, 3,
+        function (c)
+            if c == capi.client.focus then
+                awful.mouse.client.resize(c, "bottom_right")
+            elseif c.minimized then
+                c:kill()
+            end
+        end
+    ),
+    awful.button({ }, 4,
+        function (c)
+            if not c.maximized then
+                shared.client.enlarge(c)
+            end
+        end
+    ),
+    awful.button({ }, 5,
+        function (c)
+            shared.client.shrink(c)
+        end
+    )
 )
 
 local current_screen = nil
