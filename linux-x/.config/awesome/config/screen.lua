@@ -324,26 +324,39 @@ local tasklist_template = {
         {
             {
                 {
+                    nil,
                     {
                         id = "base_action",
+                        content_fill_horizontal = true,
                         widget = fixed_place,
                     },
                     {
-                        id = "action_container",
-                        layout = wibox.layout.fixed.horizontal,
+                        {
+                            {
+                                id = "action_container",
+                                layout = wibox.layout.fixed.horizontal,
+                            },
+                            left = dpi(10),
+                            widget = wibox.container.margin,
+                        },
+                        shape = gshape.rectangular_tag,
+                        bg_function = function (context)
+                            local ret
+                            ret = beautiful.bg_normal
+                            if context.is_odd then
+                                ret = alt_color(ret)
+                            end
+                            return ret
+                        end,
+                        widget = cbg,
                     },
-                    {
-                        id = "base_action",
-                        widget = fixed_place,
-                    },
-                    expand = "outside",
+                    expand = "inside",
                     widget = wibox.layout.align.horizontal,
                 },
                 id = "action_layer",
                 visible = false,
                 bg_function = function (context)
                     local ret
-                    ret = beautiful.bg_normal
                     if context.focus then
                         ret = beautiful.bg_focus
                     elseif context.minimized then
@@ -474,9 +487,9 @@ local function alt_color(color)
       local comp = aux.color.from_string(color)
       for i = 1, 3 do
          if comp[i] > 0.5 then
-            comp[i] = comp[i] - 0.08
+            comp[i] = comp[i] - 0.10
          else
-            comp[i] = comp[i] + 0.08
+            comp[i] = comp[i] + 0.10
          end
       end
       alt_color_cache[color] = comp:to_string()
