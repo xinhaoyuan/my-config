@@ -327,21 +327,28 @@ local tasklist_template = {
                     nil,
                     {
                         id = "base_action",
-                        content_fill_horizontal = true,
+                        {
+                            forced_height = beautiful.bar_height,
+                            forced_width = dpi(20),
+                            bg_function = function (context)
+                                local to
+                                to = beautiful.bg_normal
+                                if context.is_odd then
+                                    to = alt_color(to)
+                                end
+                                local ret = "linear:0,0:" .. tostring(dpi(20)) .. ",0:0," .. to:sub(1, 7) .. "00" .. ":0.9," .. to:sub(1, 7) .. "ff"
+                                return ret
+                            end,
+                            widget = cbg,
+                        },
+                        halign = "right",
                         widget = fixed_place,
                     },
                     {
                         {
-                            {
-                                id = "action_container",
-                                layout = wibox.layout.fixed.horizontal,
-                            },
-                            left = dpi(5),
-                            widget = wibox.container.margin,
+                            id = "action_container",
+                            layout = wibox.layout.fixed.horizontal,
                         },
-                        shape = function (cr, width, height)
-                            gshape.rectangular_tag(cr, width, height, height / 4)
-                        end,
                         bg_function = function (context)
                             local ret
                             ret = beautiful.bg_normal
@@ -357,20 +364,20 @@ local tasklist_template = {
                 },
                 id = "action_layer",
                 visible = false,
-                bg_function = function (context)
-                    local ret
-                    if context.focus then
-                        ret = beautiful.bg_focus
-                    elseif context.minimized then
-                        ret = beautiful.bg_minimize
-                    else
-                        ret = beautiful.bg_normal
-                    end
-                    if context.is_odd then
-                        ret = alt_color(ret)
-                    end
-                    return ret
-                end,
+                -- bg_function = function (context)
+                --     local ret
+                --     if context.focus then
+                --         ret = beautiful.bg_focus
+                --     elseif context.minimized then
+                --         ret = beautiful.bg_minimize
+                --     else
+                --         ret = beautiful.bg_normal
+                --     end
+                --     if context.is_odd then
+                --         ret = alt_color(ret)
+                --     end
+                --     return ret
+                -- end,
                 widget = cbg,
             },
             content_fill_horizontal = true,
