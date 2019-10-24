@@ -341,19 +341,11 @@ local tasklist_template = {
                 },
                 id = "action_layer",
                 visible = false,
-                fg_function = function (context)
-                    if context.focus then
-                        return beautiful.fg_focus
-                    else
-                        return beautiful.fg_normal
-                    end
-                end,
                 bg_function = function (context)
                     local ret
-                    if context.focus then
-                        ret = beautiful.bg_focus
-                    else
-                        ret = beautiful.bg_normal
+                    ret = beautiful.bg_normal
+                    if context.is_odd then
+                        ret = alt_color(ret)
                     end
                     return ret
                 end,
