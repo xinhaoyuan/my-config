@@ -150,14 +150,15 @@ end
 -- set_titlebar_onetime_button("close", "x", "X")
 
 local function shape(cr, size)
-    gshape.circle(cr, size, size)
-    -- gshape.losange(cr, size, size, size)
+    -- gshape.rectangle(cr, size, size)
+    -- gshape.circle(cr, size, size)
+    gshape.losange(cr, size, size)
 end
-set_titlebar_toggle_button_shape("floating", shape, 0.4, 0.7, xrdb.color13)
-set_titlebar_toggle_button_shape("maximized", shape, 0.4, 0.7, xrdb.color10)
-set_titlebar_toggle_button_shape("sticky", shape, 0.4, 0.7, xrdb.color11)
-set_titlebar_toggle_button_shape("ontop", shape, 0.4, 0.7, xrdb.color12)
-set_titlebar_onetime_button_shape("close", shape, 0.6, xrdb.color9)
+set_titlebar_toggle_button_shape("floating", shape, 0.3, 0.6, xrdb.color13)
+set_titlebar_toggle_button_shape("maximized", shape, 0.3, 0.6, xrdb.color10)
+set_titlebar_toggle_button_shape("sticky", shape, 0.3, 0.6, xrdb.color11)
+set_titlebar_toggle_button_shape("ontop", shape, 0.3, 0.6, xrdb.color12)
+set_titlebar_onetime_button_shape("close", shape, 0.5, xrdb.color9)
 
 -- theme.tasklist_shape = function(cr, w, h)
 --    offset = h / 4
