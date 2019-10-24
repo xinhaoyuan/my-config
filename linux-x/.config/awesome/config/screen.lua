@@ -324,18 +324,19 @@ local tasklist_template = {
         {
             {
                 {
-                    nil,
                     {
                         id = "base_action",
-                        content_fill_horizontal = true,
-                        fill_horizontal = true,
                         widget = fixed_place,
                     },
                     {
                         id = "action_container",
                         layout = wibox.layout.fixed.horizontal,
                     },
-                    expand = "inside",
+                    {
+                        id = "base_action",
+                        widget = fixed_place,
+                    },
+                    expand = "outside",
                     widget = wibox.layout.align.horizontal,
                 },
                 id = "action_layer",
