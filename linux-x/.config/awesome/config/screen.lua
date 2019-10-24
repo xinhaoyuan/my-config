@@ -344,6 +344,13 @@ local tasklist_template = {
                 bg_function = function (context)
                     local ret
                     ret = beautiful.bg_normal
+                    if context.focus then
+                        ret = beautiful.bg_focus
+                    elseif context.minimized then
+                        ret = beautiful.bg_minimize
+                    else
+                        ret = beautiful.bg_normal
+                    end
                     if context.is_odd then
                         ret = alt_color(ret)
                     end
