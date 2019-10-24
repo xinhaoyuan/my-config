@@ -1,3 +1,4 @@
+local capi = { mouse = mouse, client = client }
 local theme = dofile("/usr/share/awesome/themes/xresources/theme.lua")
 local awful = require("awful")
 local wibox = require("wibox")
@@ -8,6 +9,7 @@ local xrdb  = xresources.get_current_theme()
 local gears = require("gears")
 local fallback = require("fallback")
 local masked_imagebox = require("masked_imagebox")
+local fixed_place = require("fixed_place")
 local aux = require("aux")
 local cbg = require("contextual_background")
 local lgi   = require("lgi")
@@ -39,178 +41,6 @@ theme.waffle_use_entire_screen = true
 theme.waffle_background = "#00000000"
 -- custom property
 theme.waffle_width = dpi(200)
--- theme.tasklist_shape = function(cr, w, h)
---    offset = h / 4
---    cr:move_to(0, 0)
---    cr:line_to(w, 0)
---    cr:line_to(w - offset, h)
---    cr:line_to(offset, h)
---    cr:close_path()
--- end
--- theme.tasklist_shape_focus = gshape.powerline
-
--- custom property {"minimal, "simple", "split"}
-theme.bar_style = "split"
--- custom property, subset of available styles
-theme.bar_styles = {"simple", "split"}
-theme.tasklist_plain_task_name = true
-local default_icon = gears.color.recolor_image(icons.terminal, theme.fg_normal)
-
-local property_to_text = {
-   {"sticky", "S"},
-   {"ontop", "T"},
-   {"maximized", "M"},
-   {"floating", "F"},
-}
-
-local function tasklist_update_function(widget, c, index, objects)
-    assert(widget:get_children_by_id("default_icon")[1].is_masked_imagebox)
-    local sb = widget:get_children_by_id("status_role")[1]
-    local bgb = widget:get_children_by_id("my_background_role")[1]
-    local status_text = ""
-    local prop = {}
-    for _, pp in ipairs(property_to_text) do
-        local key = pp[1]
-        if c.saved and c.saved[key] ~= nil then
-            prop[key] = c.saved[key]
-        elseif c[key] ~= nil then
-            prop[key] = c[key]
-        end
-    end
-    for _, pp in ipairs(property_to_text) do
-        local key, text = table.unpack(pp)
-        if prop[key] == true then
-            if key ~= "floating" or not prop.maximized then 
-                status_text = status_text .. text
-            end
-        end
-    end
-    if sb then
-        if #status_text > 0 then
-            sb.text = status_text
-        else
-            sb.text = ""
-        end
-    end
-    bgb:set_context_transform_function({focus = client.focus == c, minimized = c.minimized, is_odd = index % 2 == 1})
-end
-
-local function tasklist_create_function(widget, c, index, objects)
-    local ib = widget:get_children_by_id("default_icon")[1]
-    masked_imagebox(ib)
-    tasklist_update_function(widget, c, index, objects)
-end
-
-local alt_color_cache = {}
-local function alt_color(color)
-   if alt_color_cache[color] == nil then
-      local comp = aux.color.from_string(color)
-      for i = 1, 3 do
-         if comp[i] > 0.5 then
-            comp[i] = comp[i] - 0.05
-         else
-            comp[i] = comp[i] + 0.05
-         end
-      end
-      alt_color_cache[color] = comp:to_string()
-   end
-   return alt_color_cache[color]
-end
-
-theme.tasklist_template = {
-   {
-      {
-         {
-            {
-               {
-                  widget = awful.widget.clienticon,
-               },
-               {
-                   id = "default_icon", 
-                   image = default_icon,
-                   widget = wibox.widget.imagebox,
-               },
-               widget = fallback,
-            },
-            right = dpi(3),
-            widget = wibox.container.margin,
-         },
-         {
-            id = "text_role",
-            widget = wibox.widget.textbox,
-         },
-         {
-             {
-                 {
-                     id = "status_role",
-                     widget = wibox.widget.textbox,
-                 },
-                 fg_function = function (context)
-                     if context.focus or context.minimized then
-                         return beautiful.special_focus
-                     else
-                         return beautiful.special_normal
-                     end
-                 end,
-                 widget = cbg
-             },
-             left = dpi(3),
-             widget = wibox.container.margin,
-         },
-         layout = wibox.layout.align.horizontal,
-      },
-      -- id = "text_margin_role",
-      left  = dpi(5),
-      right = dpi(5),
-      widget = wibox.container.margin
-   },
-   id     = "my_background_role",
-   fg_function = function (context)
-       if context.focus or context.minimized then
-           return beautiful.fg_focus
-       else
-           return beautiful.fg_normal
-       end
-   end,
-   bg_function = function (context)
-       local ret
-       if context.focus then
-           ret = beautiful.bg_focus
-       elseif context.minimized then
-           ret = beautiful.bg_minimize
-       else
-           ret = beautiful.bg_normal
-       end
-       if context.is_odd then
-           ret = alt_color(ret)
-       end
-       return ret
-   end,
-   widget = cbg,
-   create_callback = tasklist_create_function,
-   update_callback = tasklist_update_function,
-}
-
-local flexer = require("flexer")
--- custom property
-theme.tasklist_layout = {
-    minimal = {
-        forced_height = theme.bar_height,
-        layout = wibox.layout.flex.horizontal
-    },
-    simple = {
-        forced_height = theme.bar_height,
-        size_transform = function (size) return math.min(size, dpi(600)) end,
-        max_widget_size = dpi(600),
-        fill_space = true,
-        layout = flexer.horizontal
-    },
-    split = {
-        forced_height = theme.bar_height,
-        size_transform = function (size) return math.min(size, dpi(600)) end,
-        layout = flexer.horizontal
-    },
-}
 
 -- custom property
 theme.titlebar_size = theme.bar_height
@@ -273,5 +103,42 @@ set_titlebar_toggle_button("floating", "f", "F")
 set_titlebar_toggle_button("sticky", "s", "S")
 set_titlebar_toggle_button("ontop", "t", "T")
 set_titlebar_onetime_button("close", "x", "X")
+
+-- theme.tasklist_shape = function(cr, w, h)
+--    offset = h / 4
+--    cr:move_to(0, 0)
+--    cr:line_to(w, 0)
+--    cr:line_to(w - offset, h)
+--    cr:line_to(offset, h)
+--    cr:close_path()
+-- end
+-- theme.tasklist_shape_focus = gshape.powerline
+
+-- custom property {"minimal, "simple", "split"}
+theme.bar_style = "split"
+-- custom property, subset of available styles
+theme.bar_styles = {"simple", "split"}
+theme.tasklist_plain_task_name = true
+
+local flexer = require("flexer")
+-- custom property
+theme.tasklist_layout = {
+    minimal = {
+        forced_height = theme.bar_height,
+        layout = wibox.layout.flex.horizontal
+    },
+    simple = {
+        forced_height = theme.bar_height,
+        size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
+        max_widget_size = dpi(600),
+        fill_space = true,
+        layout = flexer.horizontal
+    },
+    split = {
+        forced_height = theme.bar_height,
+        size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
+        layout = flexer.horizontal
+    },
+}
 
 return theme
