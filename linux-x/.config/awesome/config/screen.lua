@@ -252,6 +252,7 @@ local function tasklist_create_function(widget, c, index, objects)
                 awful.titlebar.widget.maximizedbutton(c),
                 awful.titlebar.widget.stickybutton   (c),
                 awful.titlebar.widget.ontopbutton    (c),
+                awful.titlebar.widget.closebutton    (c),
                 layout = wibox.layout.fixed.horizontal()
         })
     end
