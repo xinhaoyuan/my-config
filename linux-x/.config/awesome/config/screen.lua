@@ -336,10 +336,12 @@ local tasklist_template = {
                                 id = "action_container",
                                 layout = wibox.layout.fixed.horizontal,
                             },
-                            left = dpi(10),
+                            left = dpi(5),
                             widget = wibox.container.margin,
                         },
-                        shape = gshape.rectangular_tag,
+                        shape = function (cr, width, height)
+                            gshape.rectangular_tag(cr, width, height, height / 4)
+                        end,
                         bg_function = function (context)
                             local ret
                             ret = beautiful.bg_normal
