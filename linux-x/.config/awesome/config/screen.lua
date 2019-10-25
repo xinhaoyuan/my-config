@@ -334,14 +334,14 @@ local tasklist_template = {
                         id = "base_action",
                         {
                             forced_height = beautiful.bar_height,
-                            forced_width = dpi(20),
+                            forced_width = dpi(30),
                             bg_function = function (context)
                                 local to
                                 to = beautiful.bg_normal
                                 if context.is_odd then
                                     to = alt_color(to)
                                 end
-                                local ret = "linear:0,0:" .. tostring(dpi(20)) .. ",0:0," .. to:sub(1, 7) .. "00" .. ":0.9," .. to:sub(1, 7) .. "ff"
+                                local ret = "linear:0,0:" .. tostring(dpi(30)) .. ",0:0," .. to:sub(1, 7) .. "00" .. ":1," .. to:sub(1, 7) .. "ff"
                                 return ret
                             end,
                             widget = cbg,
