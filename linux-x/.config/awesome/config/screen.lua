@@ -295,8 +295,12 @@ local tasklist_template = {
                     widget = wibox.container.margin,
                 },
                 {
-                    id = "text_role",
-                    widget = wibox.widget.textbox,
+                    {
+                        id = "text_role",
+                        widget = wibox.widget.textbox,
+                    },
+                    halign = "left",
+                    widget = wibox.container.place,
                 },
                 {
                     {
