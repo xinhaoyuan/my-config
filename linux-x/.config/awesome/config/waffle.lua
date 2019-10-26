@@ -483,7 +483,7 @@ do
        point = {x = 0, y = 0},
        outline_color = beautiful.bg_normal,
        outline_size = dpi(2),
-       widget = wibox.widget.textbox,
+       widget = outlined_textbox,
    }
 
    local net_rx_widget = wibox.widget {
@@ -532,7 +532,7 @@ do
        point = { x = 0, y = 0 },
        outline_color = beautiful.bg_normal,
        outline_size = dpi(2),
-       widget = wibox.widget.textbox,
+       widget = outlined_textbox,
    }
 
    local net_tx_widget = wibox.widget {

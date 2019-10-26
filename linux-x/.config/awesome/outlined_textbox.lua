@@ -9,7 +9,7 @@ local lgi = require("lgi")
 local mod = {mt = {}}
 
 function mod:draw(context, cr, width, height)
-    local outline_color = self._private.outline_color or beautiful.bg_normal
+    local outline_color = self._private.outline_color or gcolor(beautiful.bg_normal)
     local outline_size = self._private.outline_size or 0
 
     local ncr = {}
