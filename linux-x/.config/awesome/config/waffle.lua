@@ -14,7 +14,7 @@ local gcolor = require("gears.color")
 local icons = require("icons")
 local fallback = require("fallback")
 local fixed_margin = require("fixed_margin")
-local highlighted_textbox = require("highlighted_textbox")
+local outlined_textbox = require("outlined_textbox")
 local cbg = require("contextual_background")
 local masked_imagebox = require("masked_imagebox")
 local aux = require("aux")
@@ -327,14 +327,15 @@ do
       color = graph_color
    }
 
-   local cpu_text_widget = highlighted_textbox(
-      wibox.widget {
-         forced_width = cpu_widget_width,
-         forced_height = button_height,
-         align = "center",
-         point = {x = 0, y = 0},
-         widget = wibox.widget.textbox,
-      }, beautiful.bg_normal, dpi(2))
+   local cpu_text_widget = wibox.widget {
+       forced_width = cpu_widget_width,
+       forced_height = button_height,
+       align = "center",
+       point = {x = 0, y = 0},
+       outline_color = beautiful.bg_normal,
+       outline_size = dpi(2),
+       widget = outlined_textbox,
+   }
 
    cpu_widget = wibox.widget {
       {
@@ -415,14 +416,15 @@ do
       color = graph_color
    }
 
-   local ram_text_widget = highlighted_textbox(
-      wibox.widget {
-         forced_width = ram_widget_width,
-         forced_height = button_height,
-         align = "center",
-         point = {x = 0, y = 0},
-         widget = wibox.widget.textbox,
-      }, beautiful.bg_normal, dpi(2))
+   local ram_text_widget = wibox.widget {
+       forced_width = ram_widget_width,
+       forced_height = button_height,
+       align = "center",
+       point = {x = 0, y = 0},
+       outline_color = beautiful.bg_normal,
+       outline_size = dpi(2),
+       widget = outlined_textbox,
+   }
 
    ram_widget = wibox.widget {
        {
@@ -474,14 +476,15 @@ do
       color = graph_color
    }
 
-   local rx_text_widget = highlighted_textbox(
-      wibox.widget {
-         forced_width = net_widget_width,
-         forced_height = button_height,
-         align = "center",
-         point = {x = 0, y = 0},
-         widget = wibox.widget.textbox,
-      }, beautiful.bg_normal, dpi(2))
+   local rx_text_widget = wibox.widget {
+       forced_width = net_widget_width,
+       forced_height = button_height,
+       align = "center",
+       point = {x = 0, y = 0},
+       outline_color = beautiful.bg_normal,
+       outline_size = dpi(2),
+       widget = wibox.widget.textbox,
+   }
 
    local net_rx_widget = wibox.widget {
       netgraph_rx_widget,
@@ -522,14 +525,15 @@ do
       color = graph_color
    }
 
-   local tx_text_widget = highlighted_textbox(
-      wibox.widget {
-         forced_width = net_widget_width,
-         forced_height = button_height,
-         align = "center",
-         point = { x = 0, y = 0 },
-         widget = wibox.widget.textbox,
-      }, beautiful.bg_normal, dpi(2))
+   local tx_text_widget = wibox.widget {
+       forced_width = net_widget_width,
+       forced_height = button_height,
+       align = "center",
+       point = { x = 0, y = 0 },
+       outline_color = beautiful.bg_normal,
+       outline_size = dpi(2),
+       widget = wibox.widget.textbox,
+   }
 
    local net_tx_widget = wibox.widget {
       netgraph_tx_widget,
@@ -789,17 +793,14 @@ do
    end
 
 end
-   
+
 local waffle_root_view = create_view(
    wibox.widget {
-      -- highlighted_textbox(
       --    wibox.widget {
       --       align = "center",
       --       format = "<span size='x-large'>%y-%m-%d %a %H:%M</span>",
       --       widget = wibox.widget.textclock,
       --    },
-      --    beautiful.bg_normal, dpi(2)
-      -- ),
       decorate(
          wibox.widget {
             {
