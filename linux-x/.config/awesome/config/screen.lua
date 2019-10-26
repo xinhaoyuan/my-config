@@ -143,7 +143,6 @@ local property_to_text = {
 }
 
 local function tasklist_update_function(widget, c, index, objects)
-    assert(widget:get_children_by_id("default_icon")[1].is_masked_imagebox)
     local sb = widget:get_children_by_id("status_role")[1]
     local bgb = widget:get_children_by_id("my_background_role")[1]
     local status_text = ""
@@ -175,9 +174,6 @@ local function tasklist_update_function(widget, c, index, objects)
 end
 
 local function tasklist_create_function(widget, c, index, objects)
-    local ib = widget:get_children_by_id("default_icon")[1]
-    masked_imagebox(ib)
-
     local al = widget:get_children_by_id("action_layer")[1]
     local ac = widget:get_children_by_id("action_container")[1]
 
@@ -287,7 +283,7 @@ local tasklist_template = {
                         {
                             id = "default_icon",
                             image = default_icon,
-                            widget = wibox.widget.imagebox,
+                            widget = masked_imagebox,
                         },
                         widget = fallback,
                     },
@@ -604,7 +600,7 @@ local function setup_screen(scr)
 
    local left_layout = wibox.layout.fixed.horizontal()
    local layoutbox = awful.widget.layoutbox(s)
-   masked_imagebox(layoutbox.imagebox)
+   masked_imagebox.convert(layoutbox.imagebox)
    my_widgets[s].indicator = wibox.widget {
        layoutbox,
        fg_function = {"fg_"},

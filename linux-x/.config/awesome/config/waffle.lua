@@ -101,15 +101,14 @@ local function simple_button(args)
    local ret = wibox.widget {
       {
          {
-             args.icon and masked_imagebox(
+             args.icon and
                  wibox.widget {
                      image = args.icon,
                      resize = true,
                      forced_width = button_height,
                      forced_height = button_height,
-                     widget = wibox.widget.imagebox,
-                 }
-                                          ),
+                     widget = masked_imagebox,
+                 },
             label,
             args.indicator and {
                 {
