@@ -513,7 +513,8 @@ local function setup_screen(scr)
    scr.mypromptbox = awful.widget.prompt()
 
    my_widgets[s] = {}
-   local tasklist = awful.widget.tasklist {
+   local tasklist -- leave it there for reference inside its definition.
+   tasklist = awful.widget.tasklist {
       screen = s,
       filter = function (c, s)
          if not awful.widget.tasklist.filter.currenttags(c, s) then
@@ -536,50 +537,62 @@ local function setup_screen(scr)
          )
          return cls
       end,
-      -- update_function = function (w, b, l, d, objects, args)
-      --    -- not used any more. just for future reference
+      update_function = function (w, b, l, d, clients, args)
+          if beautiful.bar_style == "auto" then
+              local should_expand = false
+              for _, c in ipairs(clients) do
+                  if c:isvisible() and c.maximized then
+                      should_expand = true
+                      break
+                  end
+              end
+              tasklist.expand_space = should_expand
+          end
+          awful.widget.common.list_update(w, b, l, d, clients, args)
 
-      --    -- -- Reorder the clients so that floating clients are on the right side
-      --    -- fl_clients = {}
-      --    -- clients = {}
-      --    -- for i, obj in ipairs(objects) do
-      --    --    if obj.floating or obj.maximized or obj.maximized_horizontal or obj.maximized_vertical then
-      --    --       fl_clients[#fl_clients + 1] = obj
-      --    --    else
-      --    --       clients[#clients + 1] = obj
-      --    --    end
-      --    -- end
-      --    -- for i, obj in ipairs(fl_clients) do
-      --    --    clients[#clients + 1] = obj
-      --    -- end
+         -- below are not used any more. just for future reference
 
-      --    -- A hacky way to alternate the colors of tasklist items
-      --    awful.widget.common.list_update(
-      --       w, b,
-      --       function (c, tb)
-      --          local ret = table.pack(l(c, tb))
-      --          -- bg is stored as [2]
-      --          -- fg is embedded as color='...' in [1]
-      --          if c.minimized and c.saved and not c.saved.minimized then
-      --              local fg = beautiful.tasklist_fg_normal or beautiful.fg_normal
-      --              ret[1] = ret[1]:gsub("'#(%w+)'", "'" .. fg .. "'")
-      --              ret[2] = beautiful.tasklist_bg_normal or beautiful.bg_normal
-      --          end
-      --          if tb.is_odd_child then
-      --             ret[2] = alt_color(ret[2])
-      --          end
-      --          return table.unpack(ret)
-      --       end,
-      --       d, objects, args)
-      -- end,
+         -- -- Reorder the clients so that floating clients are on the right side
+         -- fl_clients = {}
+         -- clients = {}
+         -- for i, obj in ipairs(objects) do
+         --    if obj.floating or obj.maximized or obj.maximized_horizontal or obj.maximized_vertical then
+         --       fl_clients[#fl_clients + 1] = obj
+         --    else
+         --       clients[#clients + 1] = obj
+         --    end
+         -- end
+         -- for i, obj in ipairs(fl_clients) do
+         --    clients[#clients + 1] = obj
+         -- end
+
+         -- A hacky way to alternate the colors of tasklist items
+         -- awful.widget.common.list_update(
+         --    w, b,
+         --    function (c, tb)
+         --       local ret = table.pack(l(c, tb))
+         --       -- bg is stored as [2]
+         --       -- fg is embedded as color='...' in [1]
+         --       if c.minimized and c.saved and not c.saved.minimized then
+         --           local fg = beautiful.tasklist_fg_normal or beautiful.fg_normal
+         --           ret[1] = ret[1]:gsub("'#(%w+)'", "'" .. fg .. "'")
+         --           ret[2] = beautiful.tasklist_bg_normal or beautiful.bg_normal
+         --       end
+         --       if tb.is_odd_child then
+         --          ret[2] = alt_color(ret[2])
+         --       end
+         --       return table.unpack(ret)
+         --    end,
+         --    d, clients, args)
+      end,
       widget_template = tasklist_template,
    }
-   tasklist = {
+   local tasklist_with_fallback = {
       tasklist,
       fortune_widget,
       widget = fallback,
    }
-   my_widgets[s].tasklist = tasklist
+   my_widgets[s].tasklist = tasklist_with_fallback
 
    my_widgets[s].tag_list = awful.widget.taglist(
       s, function (t) return true end, my_tag_list_buttons,
@@ -591,7 +604,7 @@ local function setup_screen(scr)
    my_widgets[s].wibar = awful.wibar({
          screen = s,
          fg = beautiful.fg_normal,
-         bg = beautiful.bar_style == "split" and "#00000000" or beautiful.bg_normal,
+         bg = "#00000000",
          height = beautiful.bar_height + beautiful.border_width,
          position = "bottom",
          border_width = 0,
@@ -639,119 +652,123 @@ local function setup_screen(scr)
 
    local layout
 
-   if beautiful.bar_style == "split" then
-      local middle = fixed_margin(
-         wibox.widget {
-            {
-               tasklist,
-               bg = beautiful.bg_normal,
-               widget = wibox.container.background,
-            },
-            draw_empty = false,
-            top = beautiful.border_width,
-            color = beautiful.border_focus,
-            widget = wibox.container.margin,
-      })
-      middle = {
-         {
-            {
-               wibox.widget {
-                  buttons = root_buttons,
-                  content_fill_horizontal = true,
-                  widget = wibox.container.place,
+   if beautiful.bar_style == "minimal" then
+       layout = wibox.widget {
+           {
+               {
+                   left_layout,
+                   {
+                       tasklist_with_fallback,
+                       content_fill_horizontal = true,
+                       widget = wibox.container.place,
+                   },
+                   {
+                       right_layout,
+                       left = dpi(5),
+                       widget = wibox.container.margin,
+                   },
+                   layout = wibox.layout.align.horizontal,
                },
-               draw_empty = false,
-               left = beautiful.border_width,
-               right = beautiful.border_width,
+               top = beautiful.border_width,
                color = beautiful.border_focus,
                widget = wibox.container.margin,
-            },
-            middle,
-            {
+           },
+           bg = beautiful.bg_normal,
+           widget = wibox.container.background,
+       }
+   else
+       local middle = fixed_margin(
+           wibox.widget {
                {
-                  buttons = root_buttons,
-                  content_fill_horizontal = true,
-                  widget = wibox.container.place,
+                   tasklist_with_fallback,
+                   bg = beautiful.bg_normal,
+                   widget = wibox.container.background,
                },
                draw_empty = false,
-               left = beautiful.border_width,
-               right = beautiful.border_width,
+               top = beautiful.border_width,
                color = beautiful.border_focus,
                widget = wibox.container.margin,
-            },
-            expand = "outside",
-            layout = fixed_align.horizontal,
-         },
-         content_fill_horizontal = true,
-         widget = wibox.container.place,
-      }
-      layout = wibox.widget {
-         {
-            {
-               left_layout,
-               bg = beautiful.bg_normal,
-               widget = wibox.container.background,
-            },
-            draw_empty = true,
-            top = beautiful.border_width,
-            color = beautiful.border_focus,
-            widget = wibox.container.margin,
-         },
-         {
-            middle,
-            {
+       })
+       middle = {
+           {
                {
-                  buttons = root_buttons,
-                  fill_horizontal = true,
-                  widget = wibox.container.place,
+                   wibox.widget {
+                       buttons = root_buttons,
+                       content_fill_horizontal = true,
+                       widget = wibox.container.place,
+                   },
+                   draw_empty = false,
+                   left = beautiful.border_width,
+                   right = beautiful.border_width,
+                   color = beautiful.border_focus,
+                   widget = wibox.container.margin,
+               },
+               middle,
+               {
+                   {
+                       buttons = root_buttons,
+                       content_fill_horizontal = true,
+                       widget = wibox.container.place,
+                   },
+                   draw_empty = false,
+                   left = beautiful.border_width,
+                   right = beautiful.border_width,
+                   color = beautiful.border_focus,
+                   widget = wibox.container.margin,
+               },
+               expand = "outside",
+               layout = fixed_align.horizontal,
+           },
+           content_fill_horizontal = true,
+           widget = wibox.container.place,
+       }
+       layout = wibox.widget {
+           {
+               {
+                   left_layout,
+                   bg = beautiful.bg_normal,
+                   widget = wibox.container.background,
                },
                draw_empty = true,
-               left = beautiful.border_width,
-               right = beautiful.border_width,
+               top = beautiful.border_width,
                color = beautiful.border_focus,
                widget = wibox.container.margin,
-            },
-            draw_last = true,
-            widget = fallback,
-         },
-         {
-            {
+           },
+           {
+               middle,
                {
-                  right_layout,
-                  draw_empty = false,
-                  left = dpi(5),
-                  widget = wibox.container.margin,
+                   {
+                       buttons = root_buttons,
+                       fill_horizontal = true,
+                       widget = wibox.container.place,
+                   },
+                   draw_empty = true,
+                   left = beautiful.border_width,
+                   right = beautiful.border_width,
+                   color = beautiful.border_focus,
+                   widget = wibox.container.margin,
                },
-               bg = beautiful.bg_normal,
-               widget = wibox.container.background,
-            },
-            draw_empty = true,
-            top = beautiful.border_width,
-            color = beautiful.border_focus,
-            widget = wibox.container.margin,
-         },
-         layout = wibox.layout.align.horizontal,
-      }
-   else
-      layout = wibox.widget {
-         {
-            left_layout,
-            {
-               tasklist,
-               content_fill_horizontal = true,
-               widget = wibox.container.place,
-            },
-            {
-               right_layout,
-               left = dpi(5),
+               draw_last = true,
+               widget = fallback,
+           },
+           {
+               {
+                   {
+                       right_layout,
+                       draw_empty = false,
+                       left = dpi(5),
+                       widget = wibox.container.margin,
+                   },
+                   bg = beautiful.bg_normal,
+                   widget = wibox.container.background,
+               },
+               draw_empty = true,
+               top = beautiful.border_width,
+               color = beautiful.border_focus,
                widget = wibox.container.margin,
-            },
-            layout = wibox.layout.align.horizontal,
-         },
-         top = beautiful.border_width,
-         color = beautiful.border_focus,
-         widget = wibox.container.margin,
-      }
+           },
+           layout = wibox.layout.align.horizontal,
+       }
    end
    my_widgets[s].wibar:set_widget(layout)
 end

@@ -170,10 +170,10 @@ set_titlebar_onetime_button_shape("close", shape, 0.5, xrdb.color1)
 -- end
 -- theme.tasklist_shape_focus = gshape.powerline
 
--- custom property {"minimal, "simple", "split"}
-theme.bar_style = "split"
+-- custom property {"simple", "split", "auto"}
+theme.bar_style = "auto"
 -- custom property, subset of available styles
-theme.bar_styles = {"simple", "split"}
+theme.bar_styles = {"simple", "split", "auto"}
 theme.tasklist_plain_task_name = true
 
 local flexer = require("flexer")
@@ -187,6 +187,7 @@ theme.tasklist_layout = {
         forced_height = theme.bar_height,
         size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
         fill_space = true,
+        expand_space = true,
         layout = flexer.horizontal
     },
     split = {
@@ -194,6 +195,12 @@ theme.tasklist_layout = {
         size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
         layout = flexer.horizontal
     },
+    auto = {
+        forced_height = theme.bar_height,
+        size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
+        fill_space = true,
+        layout = flexer.horizontal
+    },  
 }
 
 return theme

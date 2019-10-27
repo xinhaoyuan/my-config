@@ -268,7 +268,7 @@ local waffle_settings_view = create_view(
                         return
                      end
                   end
-                  beautiful.bar_style = "simple"
+                  beautiful.bar_style = "auto"
                   capi.screen.emit_signal("list")
                end
          }),
