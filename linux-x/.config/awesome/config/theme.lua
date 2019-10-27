@@ -157,7 +157,7 @@ end
 set_titlebar_toggle_button_shape("floating", shape, 0.4, 0.6, xrdb.color5)
 set_titlebar_toggle_button_shape("maximized", shape, 0.4, 0.6, xrdb.color2)
 set_titlebar_toggle_button_shape("sticky", shape, 0.4, 0.6, xrdb.color3)
-set_titlebar_toggle_button_shape("ontop", shape, 0.4, 0.6, xrdb.color4)
+set_titlebar_toggle_button_shape("ontop", shape, 0.4, 0.6, xrdb.color6)
 set_titlebar_onetime_button_shape("close", shape, 0.5, xrdb.color1)
 
 -- theme.tasklist_shape = function(cr, w, h)

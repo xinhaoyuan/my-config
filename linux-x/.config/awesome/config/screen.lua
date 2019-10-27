@@ -261,9 +261,9 @@ local function alt_color(color)
       local comp = aux.color.from_string(color)
       for i = 1, 3 do
          if comp[i] > 0.5 then
-            comp[i] = comp[i] - 0.05
+            comp[i] = comp[i] - 0.1
          else
-            comp[i] = comp[i] + 0.05
+            comp[i] = comp[i] + 0.1
          end
       end
       alt_color_cache[color] = comp:to_string()
@@ -404,7 +404,7 @@ local tasklist_template = {
         else
             ret = beautiful.bg_normal
         end
-        if context.is_odd then
+        if context.is_odd and not context.focus then
             ret = alt_color(ret)
         end
         return ret
