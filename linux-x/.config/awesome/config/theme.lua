@@ -186,7 +186,6 @@ theme.tasklist_layout = {
     simple = {
         forced_height = theme.bar_height,
         size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
-        max_widget_size = dpi(600),
         fill_space = true,
         layout = flexer.horizontal
     },
