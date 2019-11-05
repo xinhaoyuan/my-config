@@ -379,7 +379,7 @@ local tasklist_template = {
                         widget = fixed_place,
                     },
                     expand = "outside",
-                    widget = wibox.layout.align.horizontal,
+                    widget = fixed_align.horizontal,
                 },
                 id = "action_layer",
                 visible = false,
