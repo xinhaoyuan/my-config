@@ -81,7 +81,7 @@
            ;; For rxvt-unicode-256color, the current theme detection does not work because COLORFGBG returns "default".
            ;; We have to use the xterm way but modified to make it fast
            (let ((term (getenv-internal "TERM" initial-environment)))
-             (if (string-prefix-p "rxvt" term)
+             (if (or (string-prefix-p "rxvt" term) (string-equal "xst-256color" term))
                  (progn
                    ;; for xterm-query
                    (load "term/xterm")
