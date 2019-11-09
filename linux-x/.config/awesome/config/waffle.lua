@@ -11,6 +11,7 @@ local waffle = require("waffle")
 local watch = require("awful.widget.watch")
 local gshape = require("gears.shape")
 local gcolor = require("gears.color")
+local gtimer = require("gears.timer")
 local icons = require("icons")
 local fallback = require("fallback")
 local fixed_margin = require("fixed_margin")
@@ -18,6 +19,7 @@ local outlined_textbox = require("outlined_textbox")
 local cbg = require("contextual_background")
 local masked_imagebox = require("masked_imagebox")
 local aux = require("aux")
+local mpc = require("mpc")
 local dpi = require("beautiful.xresources").apply_dpi
 
 local waffle_width = beautiful.waffle_width or dpi(240)
@@ -101,14 +103,16 @@ local function simple_button(args)
    local ret = wibox.widget {
       {
          {
-             args.icon and
-                 wibox.widget {
-                     image = args.icon,
-                     resize = true,
-                     forced_width = button_height,
-                     forced_height = button_height,
-                     widget = masked_imagebox,
-                 },
+             args.icon_widget or (
+                 args.icon and
+                     wibox.widget {
+                         image = args.icon,
+                         resize = true,
+                         forced_width = button_height,
+                         forced_height = button_height,
+                         widget = masked_imagebox,
+                     }
+                                 ),
             label,
             args.indicator and {
                 {
@@ -711,86 +715,141 @@ end
 
 local mpd_widget
 do
-   local GET_STATUS_CMD = 'mpc current -f "%title% - %artist%" -q'
-   local NEXT_CMD = 'mpc next -q'
-   local PREV_CMD = 'mpc prev -q'
-   local TOGGLE_CMD = 'mpc toggle -q'
-   local mpd_need_update = false
+    -- Not used anymore
+    -- local GET_STATUS_CMD = 'mpc current -f "%title% - %artist%" -q'
+    -- local NEXT_CMD = 'mpc next -q'
+    -- local PREV_CMD = 'mpc prev -q'
+    -- local TOGGLE_CMD = 'mpc toggle -q'
 
-   mpd_status_widget = wibox.widget {
-      text = "",
-      align = "center",
-      valign = "center",
-      ellipsize = "end",
-      forced_height = button_height,
-      widget = wibox.widget.textbox
-   }
+    local mpd_status_widget = wibox.widget {
+        text = "",
+        forced_height = button_height,
+        widget = wibox.widget.textbox
+    }
 
-   mpd_widget = simple_button {
-      icon = gcolor.recolor_image(icons.music, beautiful.fg_normal),
-      label_widget = wibox.widget {
-          fixed_margin(
-              wibox.widget {
-                  mpd_status_widget,
-                  draw_empty = false,
-                  left = dpi(5),
-                  right = dpi(5),
-                  widget = wibox.container.margin,
-              }
-          ),
-          {
-              text = "Music",
-              align = "center",
-              valign = "center",
-              forced_height = button_height,
-              widget = wibox.widget.textbox,
-          },
-          widget = fallback,
-      },
-      indicator = em("m"),
-      key = "m",
-      action = function (alt)
-         waffle:hide()
-         shared.action.music_app()
-      end,
-      buttons = awful.util.table.join(
-         awful.button({ }, 1, function () waffle:hide(); shared.action.music_app() end),
-         awful.button({ }, 3, function () awful.spawn.spawn(TOGGLE_CMD, false) end),
-         -- Avoid accidental multi prev/next actions
-         awful.button({ }, 4, function () if not mpd_need_update then mpd_need_update = true; awful.spawn.spawn(NEXT_CMD, false) end end),
-         awful.button({ }, 5, function () if not mpd_need_update then mpd_need_update = true; awful.spawn.spawn(PREV_CMD, false) end end)),
-   }
+    local mpd_text_widget = wibox.widget {
+        text = "",
+        align = "center",
+        valign = "center",
+        ellipsize = "end",
+        forced_height = button_height,
+        widget = wibox.widget.textbox
+    }
 
-   local update_status = function (widget, stdout, _, _, exitcode)
-      mpd_need_update = false
-      if exitcode == 0 then
-         mpd_status_widget:set_text(stdout:match('^(.+)\n$') or "")
-      else
-         mpd_status_widget:set_text("")
-      end
-   end
+    local mpd_icon_widget =
+        wibox.widget {
+            image = gcolor.recolor_image(icons.music, beautiful.fg_normal),
+            resize = true,
+            forced_width = button_height,
+            forced_height = button_height,
+            widget = masked_imagebox,
+        }
 
-   watch(GET_STATUS_CMD, 3, update_status, mpd_widget)
+    local mpd_need_update = false
+    local mpc_conn
+    local function mpc_error_handler(err)
+        mpd_status_widget:set_text("✖")
+        mpd_text_widget:set_text(tostring(err))
+        -- Try a reconnect soon-ish
+        gtimer.start_new(3,
+                        function()
+                            mpc_conn:send("ping")
+                        end
+        )
+    end
+    mpc_conn = mpc.new(
+        nil, nil, nil, mpc_error_handler,
+        "status",
+        function(_, result)
+            if result.state == "play" then
+                mpd_status_widget:set_text("▶ ")
+            elseif result.state == "pause" then
+                mpd_status_widget:set_text("# ")
+            elseif result.state == "stop" then
+                mpd_status_widget:set_text("Stopped")
+            else
+                mpd_status_widget:set_text(result.state)
+            end
+        end,
+        "currentsong",
+        function(_, result)
+            local title, artist, file = result.title, result.artist, result.file
+            local text = "" 
+            if title then
+                text = title
+            end
+            if artist then
+                text = text.." - "..artist
+            end
+            mpd_text_widget:set_text(text)
+        end
+    )
 
-   mpd_widget.keys["Left"] = function (mod)
-      for _, m in ipairs(mod) do mod[m] = true end
-      if mod["Shift"] then
-         awful.spawn(PREV_CMD, false)
-      end
-   end
-   mpd_widget.keys["Right"] = function (mod)
-      for _, m in ipairs(mod) do mod[m] = true end
-      if mod["Shift"] then
-         awful.spawn(NEXT_CMD, false)
-      end
-   end
-   mpd_widget.keys["Up"] = function (mod)
-      for _, m in ipairs(mod) do mod[m] = true end
-      if mod["Shift"] then
-         awful.spawn(TOGGLE_CMD, false)
-      end
-   end
+    mpd_widget = simple_button {
+        icon_widget = mpd_icon_widget,
+        label_widget = wibox.widget {
+            fixed_margin(
+                wibox.widget {
+                    {
+                        {
+                            mpd_status_widget,
+                            mpd_text_widget,
+                            layout = wibox.layout.fixed.horizontal
+                        },
+                        widget = wibox.container.place,
+                    },
+                    draw_empty = false,
+                    left = dpi(5),
+                    right = dpi(5),
+                    widget = wibox.container.margin,
+                }
+            ),
+            {
+                text = "Music",
+                align = "center",
+                valign = "center",
+                forced_height = button_height,
+                widget = wibox.widget.textbox,
+            },
+            widget = fallback,
+        },
+        indicator = em("m"),
+        key = "m",
+        action = function (alt)
+            waffle:hide()
+            shared.action.music_app()
+        end,
+        buttons = awful.util.table.join(
+            awful.button({ }, 1, function () waffle:hide(); shared.action.music_app() end),
+            awful.button({ }, 3, function () mpc_conn:toggle_play() end),
+            -- Avoid accidental multi prev/next actions
+            awful.button({ }, 4, function ()
+                    mpc_conn:send("next")
+            end),
+            awful.button({ }, 5, function ()
+                    mpc_conn:send("previous")
+            end)
+        ),
+    }
 
+    mpd_widget.keys["Left"] = function (mod)
+        for _, m in ipairs(mod) do mod[m] = true end
+        if mod["Shift"] then
+            mpc_conn:send("previous")
+        end
+    end
+    mpd_widget.keys["Right"] = function (mod)
+        for _, m in ipairs(mod) do mod[m] = true end
+        if mod["Shift"] then
+            mpc_conn:send("next")
+        end
+    end
+    mpd_widget.keys["Up"] = function (mod)
+        for _, m in ipairs(mod) do mod[m] = true end
+        if mod["Shift"] then
+            mpc_conn:toggle_play()
+        end
+    end
 end
 
 local waffle_root_view = create_view(

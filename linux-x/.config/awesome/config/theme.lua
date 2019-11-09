@@ -150,8 +150,8 @@ end
 -- set_titlebar_onetime_button("close", "x", "X")
 
 local function shape(cr, size)
-    gshape.rectangle(cr, size, size)
-    -- gshape.circle(cr, size, size)
+    -- gshape.rectangle(cr, size, size)
+    gshape.circle(cr, size, size)
     -- gshape.losange(cr, size, size)
 end
 set_titlebar_toggle_button_shape("floating", shape, 0.4, 0.6, xrdb.color5)
