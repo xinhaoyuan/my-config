@@ -25,7 +25,8 @@ URxvt*termName: rxvt-unicode-256color
 URxvt*preeditType: OverTheSpot
 ! Disable all perl extentions and iso14755
 URxvt*iso14755: False
-URxvt*perl-ext-common:
+URxvt*perl-ext-common: resize-font
+URxvt.resize-font.use_mouse: 1
 URxvt*perl-ext:
 ! Scroll to bottom only when key presses
 URxvt*scrollTtyOutput: false

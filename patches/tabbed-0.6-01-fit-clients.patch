@@ -1,0 +1,24 @@
+diff --git a/tabbed.c b/tabbed.c
+index ff3ada0..6edbb98 100644
+--- a/tabbed.c
++++ b/tabbed.c
+@@ -266,18 +266,10 @@ void
+ configurerequest(const XEvent *e)
+ {
+ 	const XConfigureRequestEvent *ev = &e->xconfigurerequest;
+-	XWindowChanges wc;
+ 	int c;
+ 
+ 	if ((c = getclient(ev->window)) > -1) {
+-		wc.x = 0;
+-		wc.y = bh;
+-		wc.width = ww;
+-		wc.height = wh - bh;
+-		wc.border_width = 0;
+-		wc.sibling = ev->above;
+-		wc.stack_mode = ev->detail;
+-		XConfigureWindow(dpy, clients[c]->win, ev->value_mask, &wc);
++		fit(c);
+ 	}
+ }
+ 
