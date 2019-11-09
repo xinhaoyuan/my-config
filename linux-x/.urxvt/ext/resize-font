@@ -80,7 +80,7 @@ sub bind_hotkeys {
   }
 }
 
-sub on_button_press {
+sub on_button_release {
     my ($self, $event) = @_;
 
     if (!$self->{use_mouse}) {
