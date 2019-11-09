@@ -767,6 +767,7 @@ do
                 mpd_status_widget:set_text("# ")
             elseif result.state == "stop" then
                 mpd_status_widget:set_text("Stopped")
+                mpd_text_widget:set_text("")
             else
                 mpd_status_widget:set_text(result.state)
             end

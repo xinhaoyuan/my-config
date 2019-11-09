@@ -174,3 +174,7 @@ URxvt.keysym.C-Left:             \033[1;5D
 URxvt.keysym.C-S-Left:           \033[1;6D
 URxvt.keysym.C-M-Left:           \033[1;7D
 URxvt.keysym.C-M-S-Left:         \033[1;8D
+
+st.font: Iosevka SS08:size=10
+st.borderpx: 0
+st.cursorshape: 2
