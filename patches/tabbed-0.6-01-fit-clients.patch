@@ -1,8 +1,8 @@
 diff --git a/tabbed.c b/tabbed.c
-index ff3ada0..6edbb98 100644
+index ff3ada0..ba21cf1 100644
 --- a/tabbed.c
 +++ b/tabbed.c
-@@ -266,18 +266,10 @@ void
+@@ -266,18 +266,17 @@ void
  configurerequest(const XEvent *e)
  {
  	const XConfigureRequestEvent *ev = &e->xconfigurerequest;
@@ -18,6 +18,13 @@ index ff3ada0..6edbb98 100644
 -		wc.sibling = ev->above;
 -		wc.stack_mode = ev->detail;
 -		XConfigureWindow(dpy, clients[c]->win, ev->value_mask, &wc);
++		long supplied_return;
++		if (XGetWMNormalHints(dpy, clients[c]->win, clients[c]->size_hints, &supplied_return) == 0) {
++			clients[c]->size_hints->flags = 0;
++		}
++		else {
++			clients[c]->size_hints->flags &= supplied_return;
++		}
 +		fit(c);
  	}
  }
