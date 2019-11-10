@@ -128,10 +128,25 @@ local my_tag_list_buttons = awful.util.table.join(
 )
 
 local client_menu_selected = nil
-local client_menu = awful.menu({
+local client_menu
+client_menu = awful.menu({
       { "Close", function () client_menu_selected:kill() end },
       { "(Un)maximize", function () client_menu_selected.maximized = not client_menu_selected.maximized end },
 })
+
+-- client_menu = awful.popup {
+--     widget = wibox.widget {
+--         {
+--             text = "hello",
+--             widget = wibox.widget.textbox
+--         },
+--         bg = beautiful.bg_normal,
+--         widget = wibox.container.background
+--     },
+--     placement = awful.placement.next_to,
+--     ontop = true,
+--     visible = false,
+-- }
 
 local default_icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal)
 
@@ -174,84 +189,84 @@ local function tasklist_update_function(widget, c, index, objects)
 end
 
 local function tasklist_create_function(widget, c, index, objects)
-    local al = widget:get_children_by_id("action_layer")[1]
-    local ac = widget:get_children_by_id("action_container")[1]
+    -- local al = widget:get_children_by_id("action_layer")[1]
+    -- local ac = widget:get_children_by_id("action_container")[1]
 
-    for _, b in ipairs(widget:get_children_by_id("base_action")) do
-        b:buttons(awful.util.table.join(
-                       awful.button({ }, 1, function ()
-                               if c == capi.client.focus then
-                                   capi.mouse.coords({
-                                           x = c.x + c.width / 2,
-                                           y = c.y + c.height / 2,
-                                                     }, true)
-                                   delayed(function () awful.mouse.client.move(c) end)
-                               else
-                                   -- Without this, the following
-                                   -- :isvisible() makes no sense
-                                   c.minimized = false
-                                   if not c:isvisible() then
-                                       awful.tag.viewonly(c:tags()[1])
-                                   end
-                                   -- This will also un-minimize
-                                   -- the client, if needed
-                                   capi.client.focus = c
-                                   c:raise()
-                               end
-                       end),
-                       awful.button({ }, 2,
-                           function ()
-                               shared.client.titlebar_enable(c)
-                           end
-                       ),
-                       awful.button({ }, 3,
-                           function ()
-                               if c == capi.client.focus then
-                                   delayed(function () awful.mouse.client.resize(c, "bottom_right") end)
-                               elseif c.minimized then
-                                   c:kill()
-                               end
-                           end
-                       ),
-                       awful.button({ }, 4,
-                           function ()
-                               if not c.maximized then
-                                   shared.client.enlarge(c)
-                               end
-                           end
-                       ),
-                       awful.button({ }, 5,
-                           function ()
-                               shared.client.shrink(c)
-                           end
-                       )
-        ))
-    end
+    -- for _, b in ipairs(widget:get_children_by_id("base_action")) do
+    --     b:buttons(awful.util.table.join(
+    --                    awful.button({ }, 1, function ()
+    --                            if c == capi.client.focus then
+    --                                capi.mouse.coords({
+    --                                        x = c.x + c.width / 2,
+    --                                        y = c.y + c.height / 2,
+    --                                                  }, true)
+    --                                delayed(function () awful.mouse.client.move(c) end)
+    --                            else
+    --                                -- Without this, the following
+    --                                -- :isvisible() makes no sense
+    --                                c.minimized = false
+    --                                if not c:isvisible() then
+    --                                    awful.tag.viewonly(c:tags()[1])
+    --                                end
+    --                                -- This will also un-minimize
+    --                                -- the client, if needed
+    --                                capi.client.focus = c
+    --                                c:raise()
+    --                            end
+    --                    end),
+    --                    awful.button({ }, 2,
+    --                        function ()
+    --                            shared.client.titlebar_enable(c)
+    --                        end
+    --                    ),
+    --                    awful.button({ }, 3,
+    --                        function ()
+    --                            if c == capi.client.focus then
+    --                                delayed(function () awful.mouse.client.resize(c, "bottom_right") end)
+    --                            elseif c.minimized then
+    --                                c:kill()
+    --                            end
+    --                        end
+    --                    ),
+    --                    awful.button({ }, 4,
+    --                        function ()
+    --                            if not c.maximized then
+    --                                shared.client.enlarge(c)
+    --                            end
+    --                        end
+    --                    ),
+    --                    awful.button({ }, 5,
+    --                        function ()
+    --                            shared.client.shrink(c)
+    --                        end
+    --                    )
+    --     ))
+    -- end
 
-    if al then
-        widget:connect_signal(
-            "mouse::enter",
-            function (w)
-                al.visible = true
-            end
-        )
-        widget:connect_signal(
-            "mouse::leave",
-            function (w)
-                al.visible = false
-            end
-        )
-    end
-    if ac then
-        ac:set_children({
-                awful.titlebar.widget.floatingbutton (c),
-                awful.titlebar.widget.maximizedbutton(c),
-                awful.titlebar.widget.stickybutton   (c),
-                awful.titlebar.widget.ontopbutton    (c),
-                awful.titlebar.widget.closebutton    (c),
-                layout = wibox.layout.fixed.horizontal()
-        })
-    end
+    -- if al then
+    --     widget:connect_signal(
+    --         "mouse::enter",
+    --         function (w)
+    --             al.visible = true
+    --         end
+    --     )
+    --     widget:connect_signal(
+    --         "mouse::leave",
+    --         function (w)
+    --             al.visible = false
+    --         end
+    --     )
+    -- end
+    -- if ac then
+    --     ac:set_children({
+    --             awful.titlebar.widget.floatingbutton (c),
+    --             awful.titlebar.widget.maximizedbutton(c),
+    --             awful.titlebar.widget.stickybutton   (c),
+    --             awful.titlebar.widget.ontopbutton    (c),
+    --             awful.titlebar.widget.closebutton    (c),
+    --             layout = wibox.layout.fixed.horizontal()
+    --     })
+    -- end
     tasklist_update_function(widget, c, index, objects)
 end
 
@@ -322,87 +337,87 @@ local tasklist_template = {
             right = dpi(5),
             widget = wibox.container.margin
         },
-        {
-            {
-                {
-                    {
-                        id = "base_action",
-                        {
-                            forced_height = beautiful.bar_height,
-                            forced_width = dpi(30),
-                            bg_function = function (context)
-                                local to
-                                to = beautiful.bg_normal
-                                if context.is_odd then
-                                    to = alt_color(to)
-                                end
-                                local ret = "linear:0,0:" .. tostring(dpi(30)) .. ",0:0," .. to:sub(1, 7) .. "00" .. ":1," .. to:sub(1, 7) .. "ff"
-                                return ret
-                            end,
-                            widget = cbg,
-                        },
-                        halign = "right",
-                        widget = fixed_place,
-                    },
-                    {
-                        {
-                            id = "action_container",
-                            layout = wibox.layout.fixed.horizontal,
-                        },
-                        bg_function = function (context)
-                            local ret
-                            ret = beautiful.bg_normal
-                            if context.is_odd then
-                                ret = alt_color(ret)
-                            end
-                            return ret
-                        end,
-                        widget = cbg,
-                    },
-                    {
-                        id = "base_action",
-                        {
-                            forced_height = beautiful.bar_height,
-                            forced_width = dpi(30),
-                            bg_function = function (context)
-                                local to
-                                to = beautiful.bg_normal
-                                if context.is_odd then
-                                    to = alt_color(to)
-                                end
-                                local ret = "linear:0,0:" .. tostring(dpi(30)) .. ",0:0," .. to:sub(1, 7) .. "ff" .. ":1," .. to:sub(1, 7) .. "00"
-                                return ret
-                            end,
-                            widget = cbg,
-                        },
-                        halign = "left",
-                        widget = fixed_place,
-                    },
-                    expand = "outside",
-                    widget = fixed_align.horizontal,
-                },
-                id = "action_layer",
-                visible = false,
-                -- bg_function = function (context)
-                --     local ret
-                --     if context.focus then
-                --         ret = beautiful.bg_focus
-                --     elseif context.minimized then
-                --         ret = beautiful.bg_minimize
-                --     else
-                --         ret = beautiful.bg_normal
-                --     end
-                --     if context.is_odd then
-                --         ret = alt_color(ret)
-                --     end
-                --     return ret
-                -- end,
-                widget = cbg,
-            },
-            content_fill_horizontal = true,
-            --- fill_horizontal = true,
-            widget = fixed_place,
-        },
+        -- {
+        --     {
+        --         {
+        --             {
+        --                 id = "base_action",
+        --                 {
+        --                     forced_height = beautiful.bar_height,
+        --                     forced_width = dpi(30),
+        --                     bg_function = function (context)
+        --                         local to
+        --                         to = beautiful.bg_normal
+        --                         if context.is_odd then
+        --                             to = alt_color(to)
+        --                         end
+        --                         local ret = "linear:0,0:" .. tostring(dpi(30)) .. ",0:0," .. to:sub(1, 7) .. "00" .. ":1," .. to:sub(1, 7) .. "ff"
+        --                         return ret
+        --                     end,
+        --                     widget = cbg,
+        --                 },
+        --                 halign = "right",
+        --                 widget = fixed_place,
+        --             },
+        --             {
+        --                 {
+        --                     id = "action_container",
+        --                     layout = wibox.layout.fixed.horizontal,
+        --                 },
+        --                 bg_function = function (context)
+        --                     local ret
+        --                     ret = beautiful.bg_normal
+        --                     if context.is_odd then
+        --                         ret = alt_color(ret)
+        --                     end
+        --                     return ret
+        --                 end,
+        --                 widget = cbg,
+        --             },
+        --             {
+        --                 id = "base_action",
+        --                 {
+        --                     forced_height = beautiful.bar_height,
+        --                     forced_width = dpi(30),
+        --                     bg_function = function (context)
+        --                         local to
+        --                         to = beautiful.bg_normal
+        --                         if context.is_odd then
+        --                             to = alt_color(to)
+        --                         end
+        --                         local ret = "linear:0,0:" .. tostring(dpi(30)) .. ",0:0," .. to:sub(1, 7) .. "ff" .. ":1," .. to:sub(1, 7) .. "00"
+        --                         return ret
+        --                     end,
+        --                     widget = cbg,
+        --                 },
+        --                 halign = "left",
+        --                 widget = fixed_place,
+        --             },
+        --             expand = "outside",
+        --             widget = fixed_align.horizontal,
+        --         },
+        --         id = "action_layer",
+        --         visible = false,
+        --         -- bg_function = function (context)
+        --         --     local ret
+        --         --     if context.focus then
+        --         --         ret = beautiful.bg_focus
+        --         --     elseif context.minimized then
+        --         --         ret = beautiful.bg_minimize
+        --         --     else
+        --         --         ret = beautiful.bg_normal
+        --         --     end
+        --         --     if context.is_odd then
+        --         --         ret = alt_color(ret)
+        --         --     end
+        --         --     return ret
+        --         -- end,
+        --         widget = cbg,
+        --     },
+        --     content_fill_horizontal = true,
+        --     --- fill_horizontal = true,
+        --     widget = fixed_place,
+        -- },
         layout = wibox.layout.stack,
     },
     id     = "my_background_role",
@@ -433,54 +448,43 @@ local tasklist_template = {
 }
 
 
--- local my_tasklist_buttons = awful.util.table.join(
---     awful.button({ }, 1, function (c)
---             if c == capi.client.focus then
---                 capi.mouse.coords({
---                         x = c.x + c.width / 2,
---                         y = c.y + c.height / 2,
---                                   }, true)
---                 awful.mouse.client.move(c)
---             else
---                 -- Without this, the following
---                 -- :isvisible() makes no sense
---                 c.minimized = false
---                 if not c:isvisible() then
---                     awful.tag.viewonly(c:tags()[1])
---                 end
---                 -- This will also un-minimize
---                 -- the client, if needed
---                 capi.client.focus = c
---                 c:raise()
---             end
---     end),
---     awful.button({ }, 2,
---         function (c)
---             shared.client.titlebar_enable(c)
---         end
---     ),
---     awful.button({ }, 3,
---         function (c)
---             if c == capi.client.focus then
---                 awful.mouse.client.resize(c, "bottom_right")
---             elseif c.minimized then
---                 c:kill()
---             end
---         end
---     ),
---     awful.button({ }, 4,
---         function (c)
---             if not c.maximized then
---                 shared.client.enlarge(c)
---             end
---         end
---     ),
---     awful.button({ }, 5,
---         function (c)
---             shared.client.shrink(c)
---         end
---     )
--- )
+local my_tasklist_buttons = awful.util.table.join(
+    awful.button({ }, 1, function (c)
+            -- Without this, the following
+            -- :isvisible() makes no sense
+            c.minimized = false
+            if not c:isvisible() then
+                awful.tag.viewonly(c:tags()[1])
+            end
+            -- This will also un-minimize
+            -- the client, if needed
+            capi.client.focus = c
+            c:raise()
+    end),
+    awful.button({ }, 2,
+        function (c)
+            shared.client.titlebar_enable(c)
+        end
+    ),
+    awful.button({ }, 3,
+        function (c)
+            client_menu_selected = c
+            client_menu:show()
+        end
+    ),
+    awful.button({ }, 4,
+        function (c)
+            if not c.maximized then
+                shared.client.enlarge(c)
+            end
+        end
+    ),
+    awful.button({ }, 5,
+        function (c)
+            shared.client.shrink(c)
+        end
+    )
+)
 
 local current_screen = nil
 local primary_screen = nil
@@ -540,7 +544,7 @@ local function setup_screen(scr)
          end
          return not (c:isvisible() and shared.var.hide_clients_with_titlebars and c.has_titlebar)
       end,
-      -- buttons = my_tasklist_buttons,
+      buttons = my_tasklist_buttons,
       style = { font = beautiful.font },
       layout = beautiful.tasklist_layout[beautiful.bar_style],
       source = function ()
