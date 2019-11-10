@@ -724,6 +724,10 @@ do
     local mpd_status_widget = wibox.widget {
         text = "",
         forced_height = button_height,
+        font = beautiful.fontname_normal.." 14",
+        -- outline_color = beautiful.bg_normal,
+        -- outline_size = dpi(2),
+        -- widget = outlined_textbox
         widget = wibox.widget.textbox
     }
 
@@ -736,13 +740,26 @@ do
         widget = wibox.widget.textbox
     }
 
+    local lighter_fg_normal = aux.color.from_string(beautiful.fg_normal):blend_with(beautiful.bg_normal, 0.75):to_string() 
+    local lighter_fg_focus = aux.color.from_string(beautiful.fg_focus):blend_with(beautiful.bg_focus, 0.75):to_string() 
+
     local mpd_icon_widget =
         wibox.widget {
-            image = gcolor.recolor_image(icons.music, beautiful.fg_normal),
-            resize = true,
-            forced_width = button_height,
-            forced_height = button_height,
-            widget = masked_imagebox,
+            {
+                image = gcolor.recolor_image(icons.music, beautiful.fg_normal),
+                resize = true,
+                forced_width = button_height,
+                forced_height = button_height,
+                widget = masked_imagebox,
+            },
+            fg_function = function (context)
+                if context.focus then
+                    return lighter_fg_focus
+                else
+                    return lighter_fg_normal
+                end
+            end,
+            widget = cbg
         }
 
     local mpd_need_update = false
@@ -762,12 +779,11 @@ do
         "status",
         function(_, result)
             if result.state == "play" then
-                mpd_status_widget:set_text("▶ ")
+                mpd_status_widget:set_text("▶")
             elseif result.state == "pause" then
-                mpd_status_widget:set_text("# ")
+                mpd_status_widget:set_text("⏸")
             elseif result.state == "stop" then
-                mpd_status_widget:set_text("Stopped")
-                mpd_text_widget:set_text("")
+                mpd_status_widget:set_text("⏹")
             else
                 mpd_status_widget:set_text(result.state)
             end
@@ -787,18 +803,18 @@ do
     )
 
     mpd_widget = simple_button {
-        icon_widget = mpd_icon_widget,
+        icon_widget = wibox.widget {
+            mpd_icon_widget,
+            {
+                mpd_status_widget,
+                widget = wibox.container.place
+            },
+            layout = wibox.layout.stack
+        },
         label_widget = wibox.widget {
             fixed_margin(
                 wibox.widget {
-                    {
-                        {
-                            mpd_status_widget,
-                            mpd_text_widget,
-                            layout = wibox.layout.fixed.horizontal
-                        },
-                        widget = wibox.container.place,
-                    },
+                    mpd_text_widget,
                     draw_empty = false,
                     left = dpi(5),
                     right = dpi(5),
