@@ -468,156 +468,156 @@ end
 local net_widget_width = (waffle_width - button_height - button_padding * 4) / 2
 local net_widget
 do
-   local netgraph_rx_widget = wibox.widget {
-      background_color = graph_background,
-      forced_width = net_widget_width,
-      forced_height = button_height / 2,
-      step_width = dpi(2),
-      step_spacing = dpi(1),
-      widget = wibox.widget.graph,
-      -- scale = true,
-      color = graph_color
-   }
+    local netgraph_rx_widget = wibox.widget {
+        background_color = graph_background,
+        forced_width = net_widget_width,
+        forced_height = button_height / 2,
+        step_width = dpi(2),
+        step_spacing = dpi(1),
+        widget = wibox.widget.graph,
+        -- scale = true,
+        color = graph_color
+    }
 
-   local rx_text_widget = wibox.widget {
-       forced_width = net_widget_width,
-       forced_height = button_height,
-       align = "center",
-       point = {x = 0, y = 0},
-       outline_color = beautiful.bg_normal,
-       outline_size = dpi(2),
-       widget = outlined_textbox,
-   }
+    local rx_text_widget = wibox.widget {
+        forced_width = net_widget_width,
+        forced_height = button_height,
+        align = "center",
+        point = {x = 0, y = 0},
+        outline_color = beautiful.bg_normal,
+        outline_size = dpi(2),
+        widget = outlined_textbox,
+    }
 
-   local net_rx_widget = wibox.widget {
-      netgraph_rx_widget,
-      point = {x = 0, y = 0},
-      widget = wibox.container.margin
-   }
+    local net_rx_widget = wibox.widget {
+        netgraph_rx_widget,
+        point = {x = 0, y = 0},
+        widget = wibox.container.margin
+    }
 
-   local net_rx_layout = wibox.widget {
-      {
-          {
-              net_rx_widget,
-              {
-                  net_rx_widget,
-                  reflection = {
-                      horizontal = false,
-                      vertical = true,
-                  },
-                  widget = wibox.container.mirror,
-              },
-              layout = wibox.layout.fixed.vertical,
-          },
-         rx_text_widget,
-         layout = wibox.layout.manual,
-      },
-      width = net_widget_width,
-      height = button_height,
-      widget = wibox.container.constraint,
-   }
+    local net_rx_layout = wibox.widget {
+        {
+            {
+                net_rx_widget,
+                {
+                    net_rx_widget,
+                    reflection = {
+                        horizontal = false,
+                        vertical = true,
+                    },
+                    widget = wibox.container.mirror,
+                },
+                layout = wibox.layout.fixed.vertical,
+            },
+            rx_text_widget,
+            layout = wibox.layout.manual,
+        },
+        width = net_widget_width,
+        height = button_height,
+        widget = wibox.container.constraint,
+    }
 
-   local netgraph_tx_widget = wibox.widget {
-      background_color = graph_background,
-      forced_width = net_widget_width,
-      forced_height = button_height / 2,
-      step_width = dpi(2),
-      step_spacing = dpi(1),
-      widget = wibox.widget.graph,
-      -- scale = true,
-      color = graph_color
-   }
+    local netgraph_tx_widget = wibox.widget {
+        background_color = graph_background,
+        forced_width = net_widget_width,
+        forced_height = button_height / 2,
+        step_width = dpi(2),
+        step_spacing = dpi(1),
+        widget = wibox.widget.graph,
+        -- scale = true,
+        color = graph_color
+    }
 
-   local tx_text_widget = wibox.widget {
-       forced_width = net_widget_width,
-       forced_height = button_height,
-       align = "center",
-       point = { x = 0, y = 0 },
-       outline_color = beautiful.bg_normal,
-       outline_size = dpi(2),
-       widget = outlined_textbox,
-   }
+    local tx_text_widget = wibox.widget {
+        forced_width = net_widget_width,
+        forced_height = button_height,
+        align = "center",
+        point = { x = 0, y = 0 },
+        outline_color = beautiful.bg_normal,
+        outline_size = dpi(2),
+        widget = outlined_textbox,
+    }
 
-   local net_tx_widget = wibox.widget {
-      netgraph_tx_widget,
-      widget = wibox.container.margin
-   }
+    local net_tx_widget = wibox.widget {
+        netgraph_tx_widget,
+        widget = wibox.container.margin
+    }
 
-   local net_tx_layout = wibox.widget {
-       {
-           {
-               net_tx_widget,
-               {
-                   net_tx_widget,
-                   reflection = {
-                       horizontal = false,
-                       vertical = true,
-                   },
-                   widget = wibox.container.mirror,
-               },
-               layout = wibox.layout.fixed.vertical,
-           },
-           tx_text_widget,
-           layout = wibox.layout.manual,
-       },
-       width = net_widget_width,
-       height = button_height,
-       widget = wibox.container.constraint,
-   }
+    local net_tx_layout = wibox.widget {
+        {
+            {
+                net_tx_widget,
+                {
+                    net_tx_widget,
+                    reflection = {
+                        horizontal = false,
+                        vertical = true,
+                    },
+                    widget = wibox.container.mirror,
+                },
+                layout = wibox.layout.fixed.vertical,
+            },
+            tx_text_widget,
+            layout = wibox.layout.manual,
+        },
+        width = net_widget_width,
+        height = button_height,
+        widget = wibox.container.constraint,
+    }
 
-   net_widget = wibox.widget {
-      {
-         image = gcolor.recolor_image(icons.ethernet, beautiful.fg_normal),
-         forced_height = button_height,
-         forced_width = button_height,
-         widget = wibox.widget.imagebox,
-      },
-      net_rx_layout,
-      net_tx_layout,
-      spacing = button_padding,
-      layout = wibox.layout.fixed.horizontal,
-   }
+    net_widget = wibox.widget {
+        {
+            image = gcolor.recolor_image(icons.ethernet, beautiful.fg_normal),
+            forced_height = button_height,
+            forced_width = button_height,
+            widget = wibox.widget.imagebox,
+        },
+        net_rx_layout,
+        net_tx_layout,
+        spacing = button_padding,
+        layout = wibox.layout.fixed.horizontal,
+    }
 
-   local prev_recv = nil
-   local prev_send = nil
+    local prev_recv = nil
+    local prev_send = nil
 
-   watch({"egrep", "-e", "[[:alnum:]]+:", "/proc/net/dev"}, update_interval_s,
-      function(widget, stdout, stderr, exitreason, exitcode)
-         local recv = 0
-         local send = 0
-         for line in stdout:gmatch("[^\r\n]+") do
-            local items = {}
-            for item in line:gmatch("[^ \t:]+") do
-               if #item > 0 then
-                  table.insert(items, item)
-               end
+    watch({"egrep", "-e", "[[:alnum:]]+:", "/proc/net/dev"}, update_interval_s,
+        function(widget, stdout, stderr, exitreason, exitcode)
+            local recv = 0
+            local send = 0
+            for line in stdout:gmatch("[^\r\n]+") do
+                local items = {}
+                for item in line:gmatch("[^ \t:]+") do
+                    if #item > 0 then
+                        table.insert(items, item)
+                    end
+                end
+                if items[1]:match("^tun[0-9]*$") == nil then
+                    -- Skips VPN for avoiding double-couting
+                    recv = recv + tonumber(items[2])
+                    send = send + tonumber(items[10])
+                end
             end
-            if items[1]:match("^tun[0-9]*$") == nil then
-               -- Skips VPN for avoiding double-couting
-               recv = recv + tonumber(items[2])
-               send = send + tonumber(items[10])
-            end
-         end
 
-         if prev_recv ~= nil then
-            local rx = (recv - prev_recv) / update_interval_s
-            local markup = "<span font_desc='" .. font_small .. "'>RX " .. format_size(rx) .. "B/s</span>"
-            rx_text_widget:set_markup(markup)
-            netgraph_rx_widget.max_value = 256 * 1024
-            netgraph_rx_widget:add_value(rx)
-         end
-         prev_recv = recv
-         if prev_send ~= nil then
-            local tx = (send - prev_send) / update_interval_s
-            local markup = "<span font_desc='" .. font_small .. "'>TX " .. format_size(tx) .. "B/s</span>"
-            tx_text_widget:set_markup(markup)
-            netgraph_tx_widget.max_value = 256 * 1024
-            netgraph_tx_widget:add_value(tx)
-         end
-         prev_send = send
-      end,
-      netgraph_widget
-   )
+            if prev_recv ~= nil then
+                local rx = (recv - prev_recv) / update_interval_s
+                local markup = "<span font_desc='" .. font_small .. "'>RX " .. format_size(rx) .. "B/s</span>"
+                rx_text_widget:set_markup(markup)
+                netgraph_rx_widget.max_value = 256 * 1024
+                netgraph_rx_widget:add_value(rx)
+            end
+            prev_recv = recv
+            if prev_send ~= nil then
+                local tx = (send - prev_send) / update_interval_s
+                local markup = "<span font_desc='" .. font_small .. "'>TX " .. format_size(tx) .. "B/s</span>"
+                tx_text_widget:set_markup(markup)
+                netgraph_tx_widget.max_value = 256 * 1024
+                netgraph_tx_widget:add_value(tx)
+            end
+            prev_send = send
+        end,
+        netgraph_widget
+    )
 end
 
 local volumebar_widget_width = waffle_width - button_height
@@ -764,16 +764,17 @@ do
 
     local mpd_need_update = false
     local mpc_conn
+    local mpc_ping_timer = gtimer {
+        timeout = 3,
+        callback = function ()
+            mpc_conn:send("ping")
+        end
+    }
     local function mpc_error_handler(err)
         mpd_status_widget:set_text("✖")
         mpd_text_widget:set_text(tostring(err))
-        -- Try a reconnect soon-ish
-        gtimer.start_new(3,
-                        function()
-                            mpc_conn:send("ping")
-                        end
-        )
     end
+
     mpc_conn = mpc.new(
         nil, nil, nil, mpc_error_handler,
         "status",
@@ -801,6 +802,7 @@ do
             mpd_text_widget:set_text(text)
         end
     )
+    mpc_ping_timer:start()
 
     mpd_widget = simple_button {
         icon_widget = wibox.widget {
