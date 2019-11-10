@@ -740,8 +740,8 @@ do
         widget = wibox.widget.textbox
     }
 
-    local lighter_fg_normal = aux.color.from_string(beautiful.fg_normal):blend_with(beautiful.bg_normal, 0.75):to_string() 
-    local lighter_fg_focus = aux.color.from_string(beautiful.fg_focus):blend_with(beautiful.bg_focus, 0.75):to_string() 
+    local lighter_fg_normal = aux.color.from_string(beautiful.fg_normal):blend_with(beautiful.bg_normal, 0.75):to_string()
+    local lighter_fg_focus = aux.color.from_string(beautiful.fg_focus):blend_with(beautiful.bg_focus, 0.75):to_string()
 
     local mpd_icon_widget =
         wibox.widget {
@@ -792,7 +792,7 @@ do
         "currentsong",
         function(_, result)
             local title, artist, file = result.title, result.artist, result.file
-            local text = "" 
+            local text = ""
             if title then
                 text = title
             end
