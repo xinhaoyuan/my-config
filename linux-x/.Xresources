@@ -176,5 +176,6 @@ URxvt.keysym.C-M-Left:           \033[1;7D
 URxvt.keysym.C-M-S-Left:         \033[1;8D
 
 st.font: Iosevka SS08:size=10
+st.bold_font: 1
 st.borderpx: 0
 st.cursorshape: 2

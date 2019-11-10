@@ -67,7 +67,7 @@ index ff3ada0..ccc6283 100644
  		XSync(dpy, False);
  	}
  }
-@@ -266,18 +276,11 @@ void
+@@ -266,18 +276,10 @@ void
  configurerequest(const XEvent *e)
  {
  	const XConfigureRequestEvent *ev = &e->xconfigurerequest;
@@ -83,7 +83,6 @@ index ff3ada0..ccc6283 100644
 -		wc.sibling = ev->above;
 -		wc.stack_mode = ev->detail;
 -		XConfigureWindow(dpy, clients[c]->win, ev->value_mask, &wc);
-+		updatesizehints(clients[c]);
 +		fit(c);
  	}
  }
