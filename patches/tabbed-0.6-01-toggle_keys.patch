@@ -1,5 +1,5 @@
 diff --git a/config.def.h b/config.def.h
-index defa426..7c16cc4 100644
+index defa426..0eca9ae 100644
 --- a/config.def.h
 +++ b/config.def.h
 @@ -33,9 +33,12 @@ static Bool npisrelative  = False;
@@ -16,21 +16,19 @@ index defa426..7c16cc4 100644
  	{ MODKEY|ShiftMask,     XK_Return, spawn,       { 0 } },
  
 diff --git a/tabbed.c b/tabbed.c
-index ff3ada0..0c1c0a5 100644
+index ff3ada0..d9af61c 100644
 --- a/tabbed.c
 +++ b/tabbed.c
-@@ -112,7 +112,10 @@ static int getfirsttab(void);
+@@ -112,5 +112,8 @@ static int getfirsttab(void);
  static Bool gettextprop(Window w, Atom atom, char *text, unsigned int size);
  static void initfont(const char *fontstr);
  static Bool isprotodel(int c);
 +static void togglekeys(const Arg *arg);
- static void keypress(const XEvent *e);
 +static void grabkey(Window w, int i);
 +static void updatekeys(Window w);
+ static void keypress(const XEvent *e);
  static void killclient(const Arg *arg);
- static void manage(Window win);
- static void maprequest(const XEvent *e);
-@@ -648,6 +651,16 @@ isprotodel(int c)
+@@ -648,6 +651,43 @@ isprotodel(int c)
  	return ret;
  }
  
@@ -44,21 +42,6 @@ index ff3ada0..0c1c0a5 100644
 +	}
 +}
 +
- void
- keypress(const XEvent *e)
- {
-@@ -661,6 +674,7 @@ keypress(const XEvent *e)
- 		    CLEANMASK(keys[i].mod) == CLEANMASK(ev->state) &&
- 		    keys[i].func)
- 			keys[i].func(&(keys[i].arg));
-+		if (!keysenabled) break;
- 	}
- }
- 
-@@ -686,15 +700,39 @@ killclient(const Arg *arg)
- 	}
- }
- 
 +void
 +grabkey(Window w, int i)
 +{
@@ -87,7 +70,17 @@ index ff3ada0..0c1c0a5 100644
 +}
 +
  void
- manage(Window w)
+ keypress(const XEvent *e)
+ {
+@@ -661,6 +701,7 @@ keypress(const XEvent *e)
+ 		    CLEANMASK(keys[i].mod) == CLEANMASK(ev->state) &&
+ 		    keys[i].func)
+ 			keys[i].func(&(keys[i].arg));
++		if (!keysenabled) break;
+ 	}
+ }
+ 
+@@ -691,10 +732,7 @@ manage(Window w)
  {
  	updatenumlockmask();
  	{
