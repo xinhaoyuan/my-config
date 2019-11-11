@@ -792,6 +792,9 @@ do
         "currentsong",
         function(_, result)
             local title, artist, file = result.title, result.artist, result.file
+            -- for k, v in pairs(result) do
+            --     print(tostring(k)..":"..tostring(v))
+            -- end
             local text = ""
             if title then
                 text = title

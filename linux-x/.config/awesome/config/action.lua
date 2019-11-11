@@ -6,17 +6,41 @@ local gshape = require("gears.shape")
 local wi     = require("wibox")
 local beautiful = require("beautiful")
 local dpi    = require("beautiful.xresources").apply_dpi
+local unpack = unpack or table.unpack
+
+
+local term_cmd
+do
+    local term_prog
+    if os.execute("command -v xst") then
+        term_prog = "xst"
+    elseif os.execute("command -v urxvt") then
+        term_prog = "urxvt"
+    else
+        term_prog = "x-termninal-emulator"
+        print("Warning: no suitable terminal program found. Fallback to x-terminal-emulator.")
+    end
+    local has_tabbed = os.execute("command -v tabbed")
+
+    if has_tabbed and term_prog == "xst" then
+        term_cmd = {"tabbed", "-c", "-F", beautiful.fontname_normal .. ":size=10", "-M", beautiful.fg_normal, "-m", beautiful.bg_normal, "-r", "2", "--", "xst", "-w", "--"}
+    elseif has_tabbed and term_prog == "urxvt" then
+        term_cmd = {"tabbed", "-c", "-F", beautiful.fontname_normal .. ":size=10", "-M", beautiful.fg_normal, "-m", beautiful.bg_normal, "-r", "2", "--", "urxvt", "-embed", "--"}
+    else
+        term_cmd = {term_prog}
+    end
+end
 
 shared.action = {
    terminal = function (extra_cmd)
-      local cmd = {"tabbed", "-c", "-F", be.fontname_normal .. ":size=10", "-M", beautiful.fg_normal, "-m", beautiful.bg_normal, "-r", "2", "--", "urxvt", "-embed", "--"}
-      if type(extra_cmd) == "table" then
-         table.insert(cmd, "-e")
-         for i = 1, #extra_cmd do
-            table.insert(cmd, extra_cmd[i])
-         end
-      end
-      awful.spawn(cmd)
+       local cmd = {unpack(term_cmd)}
+       if type(extra_cmd) == "table" then
+           table.insert(cmd, "-e")
+           for i = 1, #extra_cmd do
+               table.insert(cmd, extra_cmd[i])
+           end
+       end
+       awful.spawn(cmd)
    end,
    web_browser = function (url)
       local cmd = {"x-www-browser"}
@@ -34,7 +58,7 @@ shared.action = {
                    "-show-icons",
                    "-show", "combi",
                    "-modi", "combi",
-                   "-font", be.font}
+                   "-font", beautiful.font}
       awful.spawn(cmd)
    end,
    app_finder = function ()
