@@ -193,9 +193,9 @@ index ff3ada0..ccc6283 100644
 +	    clients[c]->size_hints->height_inc > 0) {
 +		unsigned int dx = w;
 +		unsigned int dy = h;
-+		if (clients[c]->size_hints->flags & PMinSize) {
-+			dx -= clients[c]->size_hints->min_width;
-+			dy -= clients[c]->size_hints->min_height;
++		if (clients[c]->size_hints->flags & PBaseSize) {
++			dx -= clients[c]->size_hints->base_width;
++			dy -= clients[c]->size_hints->base_height;
 +		}
 +
 +		dx %= clients[c]->size_hints->width_inc;
