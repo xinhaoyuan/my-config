@@ -8,6 +8,7 @@ local shared = {
       titlebar_position = "bottom",
       hide_clients_with_titlebars = true,
       floating_by_default = true,
+      bar_position = "left",
    },
    on_start_functions = {},
 }

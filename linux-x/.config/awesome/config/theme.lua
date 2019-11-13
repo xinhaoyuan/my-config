@@ -170,7 +170,7 @@ set_titlebar_onetime_button_shape("close", shape, 0.5, xrdb.color1)
 -- end
 -- theme.tasklist_shape_focus = gshape.powerline
 
--- custom property {"simple", "split", "auto"}
+-- custom property {"minimal", "simple", "split", "auto"}
 theme.bar_style = "auto"
 -- custom property, subset of available styles
 theme.bar_styles = {"simple", "split", "auto"}
@@ -179,28 +179,54 @@ theme.tasklist_plain_task_name = true
 local flexer = require("flexer")
 -- custom property
 theme.tasklist_layout = {
-    minimal = {
-        forced_height = theme.bar_height,
-        layout = wibox.layout.flex.horizontal
+    horizontal = {
+        minimal = {
+            forced_height = theme.bar_height,
+            layout = wibox.layout.flex.horizontal
+        },
+        simple = {
+            forced_height = theme.bar_height,
+            size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
+            fill_space = true,
+            expand_space = true,
+            layout = flexer.horizontal
+        },
+        split = {
+            forced_height = theme.bar_height,
+            size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
+            layout = flexer.horizontal
+        },
+        auto = {
+            forced_height = theme.bar_height,
+            size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
+            fill_space = true,
+            layout = flexer.horizontal
+        },
     },
-    simple = {
-        forced_height = theme.bar_height,
-        size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
-        fill_space = true,
-        expand_space = true,
-        layout = flexer.horizontal
-    },
-    split = {
-        forced_height = theme.bar_height,
-        size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
-        layout = flexer.horizontal
-    },
-    auto = {
-        forced_height = theme.bar_height,
-        size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
-        fill_space = true,
-        layout = flexer.horizontal
-    },  
+    vertical = {
+        minimal = {
+            forced_width = theme.bar_height,
+            layout = wibox.layout.flex.vertical
+        },
+        simple = {
+            forced_width = theme.bar_height,
+            size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
+            fill_space = true,
+            expand_space = true,
+            layout = flexer.vertical
+        },
+        split = {
+            forced_width = theme.bar_height,
+            size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
+            layout = flexer.vertical
+        },
+        auto = {
+            forced_width = theme.bar_height,
+            size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
+            fill_space = true,
+            layout = flexer.vertical
+        },
+    }
 }
 
 return theme
