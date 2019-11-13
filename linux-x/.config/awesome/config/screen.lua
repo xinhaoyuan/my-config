@@ -92,6 +92,13 @@ local direction_index = {
     ["right"] = "vertical",
 }
 
+local gravity_index = {
+    ["top"] = "northwest",
+    ["bottom"] = "southwest",
+    ["left"] = "northwest",
+    ["right"] = "northeast",
+}
+
 -- add machi layout
 
 local machi = require("layout-machi")
@@ -713,7 +720,7 @@ local function setup_screen(scr)
    my_widgets[s].indicator:buttons(
       awful.util.table.join(
           awful.button({ }, 1, function () revelation{curr_tag_only = true} end),
-          awful.button({ }, 3, function () waffle:set_gravity("southwest"); waffle:show() end),
+          awful.button({ }, 3, function () waffle:set_gravity(gravity_index[shared.var.bar_position]); waffle:show() end),
           awful.button({ }, 4, function () awful.layout.inc( 1) end),
           awful.button({ }, 5, function () awful.layout.inc(-1) end)))
    left_layout:add(my_widgets[s].indicator)
