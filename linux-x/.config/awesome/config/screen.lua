@@ -775,7 +775,7 @@ local function setup_screen(scr)
                    },
                    {
                        right_layout,
-                       [left_index[shared.var.bar_position]] = dpi(5),
+                       [direction_index[shared.var.bar_position] == "horizontal" and "left" or "top"] = dpi(5),
                        widget = wibox.container.margin,
                    },
                    layout = wibox.layout.align[direction_index[shared.var.bar_position]],
@@ -867,7 +867,7 @@ local function setup_screen(scr)
                    {
                        right_layout,
                        draw_empty = false,
-                       [left_index[shared.var.bar_position]] = dpi(5),
+                       [direction_index[shared.var.bar_position] == "horizontal" and "left" or "top"] = dpi(5),
                        widget = wibox.container.margin,
                    },
                    bg = beautiful.bg_normal,
