@@ -20,7 +20,7 @@ index defa426..46068ee 100644
  	{ MODKEY|ShiftMask,     XK_h,      rotate,      { .i = -1 } },
  	{ MODKEY|ShiftMask,     XK_j,      movetab,     { .i = -1 } },
 diff --git a/tabbed.c b/tabbed.c
-index ff3ada0..ccc6283 100644
+index ff3ada0..31d283c 100644
 --- a/tabbed.c
 +++ b/tabbed.c
 @@ -84,6 +84,7 @@ typedef struct {
@@ -31,22 +31,28 @@ index ff3ada0..ccc6283 100644
  } Client;
  
  /* function declarations */
-@@ -114,10 +115,15 @@ static void initfont(const char *fontstr);
- static void killclient(const Arg *arg);
-+static void updatesizehints(Client *c);
- static void manage(Window win);
- static void maprequest(const XEvent *e);
+@@ -114,7 +115,12 @@ static void initfont(const char *fontstr);
  static void move(const Arg *arg);
  static void movetab(const Arg *arg);
  static void propertynotify(const XEvent *e);
++static void updatesizehints(Client *c);
 +static void fit(int c);
 +static void setgeo(int c, int x, int y, int w, int h);
++static void togglebar(const Arg *arg);
 +/* Deprecated. Left for compatibility. */
  static void resize(int c, int w, int h);
-+static void togglebar(const Arg *arg);
  static void rotate(const Arg *arg);
  static void run(void);
  static void sendxembed(int c, long msg, long detail, long d1, long d2);
+@@ -160,7 +166,7 @@ static Bool running = True, nextfocus, doinitspawn = True,
+ static Display *dpy;
+ static DC dc;
+ static Atom wmatom[WMLast];
+-static Window root, win;
++static Window root, win, bgwin;
+ static Client **clients;
+ static int nclients, sel = -1, lastsel = -1;
+ static int (*xerrorxlib)(Display *, XErrorEvent *);
 @@ -178,6 +184,10 @@ char *argv0;
  void
  buttonpress(const XEvent *e)
@@ -87,12 +93,32 @@ index ff3ada0..ccc6283 100644
  	}
  }
  
-@@ -318,11 +321,11 @@ drawbar(void)
+@@ -311,6 +313,18 @@ die(const char *errstr, ...)
+ 	exit(EXIT_FAILURE);
+ }
+ 
++void
++place_bgwin(Bool withbar) {
++	XWindowChanges wc;
++
++	wc.x = 0;
++	wc.y = withbar ? bh : 0;
++	wc.width = ww;
++	wc.height = withbar ? (wh - bh) : wh;
++
++	XConfigureWindow(dpy, bgwin, CWX | CWY | CWWidth | CWHeight, &wc);
++}
++
+ void
+ drawbar(void)
+ {
+@@ -318,17 +332,20 @@ drawbar(void)
  	int c, cc, fc, width;
  	char *name = NULL;
  
 -	if (nclients == 0) {
 +	if (nclients == 0 || hidebar || (nclients == 1 && hidebarifalone)) {
++		place_bgwin(False);
  		dc.x = 0;
  		dc.w = ww;
  		XFetchName(dpy, win, &name);
@@ -101,7 +127,15 @@ index ff3ada0..ccc6283 100644
  		XCopyArea(dpy, dc.drawable, win, dc.gc, 0, 0, ww, bh, 0, 0);
  		XSync(dpy, False);
  
-@@ -454,7 +457,7 @@ focus(int c)
+ 		return;
+ 	}
+ 
++	place_bgwin(True);
++
+ 	width = ww;
+ 	cc = ww / tabwidth;
+ 	if (nclients > cc)
+@@ -454,7 +471,7 @@ focus(int c)
  	if (c < 0 || c >= nclients)
  		return;
  
@@ -110,7 +144,16 @@ index ff3ada0..ccc6283 100644
  	XRaiseWindow(dpy, clients[c]->win);
  	XSetInputFocus(dpy, clients[c]->win, RevertToParent, CurrentTime);
  	sendxembed(c, XEMBED_FOCUS_IN, XEMBED_FOCUS_CURRENT, 0, 0);
-@@ -686,6 +689,17 @@ killclient(const Arg *arg)
+@@ -462,6 +479,8 @@ focus(int c)
+ 	xsettitle(win, clients[c]->name);
+ 
+ 	if (sel != c) {
++		if (0 <= sel && sel < nclients)
++			XLowerWindow(dpy, clients[sel]->win);
+ 		lastsel = sel;
+ 		sel = c;
+ 	}
+@@ -686,6 +705,17 @@ killclient(const Arg *arg)
  	}
  }
  
@@ -128,7 +171,7 @@ index ff3ada0..ccc6283 100644
  void
  manage(Window w)
  {
-@@ -716,8 +730,13 @@ manage(Window w)
+@@ -716,8 +746,13 @@ manage(Window w)
  
  		c = ecalloc(1, sizeof *c);
  		c->win = w;
@@ -142,7 +185,7 @@ index ff3ada0..ccc6283 100644
  		clients = erealloc(clients, sizeof(Client *) * nclients);
  
  		if(npisrelative) {
-@@ -859,6 +878,10 @@ propertynotify(const XEvent *e)
+@@ -859,6 +894,10 @@ propertynotify(const XEvent *e)
  			}
  		}
  		XFree(wmh);
@@ -153,7 +196,7 @@ index ff3ada0..ccc6283 100644
  	} else if (ev->state != PropertyDelete && ev->atom == XA_WM_NAME &&
  	           (c = getclient(ev->window)) > -1) {
  		updatetitle(c);
-@@ -867,12 +890,27 @@ propertynotify(const XEvent *e)
+@@ -867,12 +906,27 @@ propertynotify(const XEvent *e)
  
  void
  resize(int c, int w, int h)
@@ -183,7 +226,7 @@ index ff3ada0..ccc6283 100644
  	ce.width = wc.width = w;
  	ce.height = wc.height = h;
  	ce.type = ConfigureNotify;
-@@ -883,11 +921,47 @@ resize(int c, int w, int h)
+@@ -883,11 +937,47 @@ resize(int c, int w, int h)
  	ce.override_redirect = False;
  	ce.border_width = 0;
  
@@ -232,7 +275,19 @@ index ff3ada0..ccc6283 100644
  void
  rotate(const Arg *arg)
  {
-@@ -1128,15 +1202,18 @@ unmanage(int c)
+@@ -1033,7 +1123,11 @@ setup(void)
+ 
+ 	win = XCreateSimpleWindow(dpy, root, wx, wy, ww, wh, 0,
+ 	                          dc.norm[ColFG].pixel, dc.norm[ColBG].pixel);
++	bgwin = XCreateSimpleWindow(dpy, win, 0, 0, ww, wh, 0,
++				    dc.norm[ColFG].pixel, dc.norm[ColBG].pixel);
++	XMapRaised(dpy, bgwin);
+ 	XMapRaised(dpy, win);
++
+ 	XSelectInput(dpy, win, SubstructureNotifyMask | FocusChangeMask |
+ 	             ButtonPressMask | ExposureMask | KeyPressMask |
+ 	             PropertyChangeMask | StructureNotifyMask |
+@@ -1128,15 +1222,18 @@ unmanage(int c)
  	if (c == 0) {
  		/* First client. */
  		nclients--;
