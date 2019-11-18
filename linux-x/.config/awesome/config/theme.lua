@@ -39,8 +39,8 @@ theme.bg_urgent     = c_red[2]
 theme.bg_minimize   = c_black[2]
 theme.bg_systray    = theme.bg_normal
 
-theme.fg_normal     = c_black[1]
-theme.fg_focus      = c_black[1]
+theme.fg_normal     = xrdb.foreground
+theme.fg_focus      = theme.bg_normal
 theme.fg_urgent     = theme.bg_normal
 theme.fg_minimize   = theme.bg_normal
 
