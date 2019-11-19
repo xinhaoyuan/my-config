@@ -34,7 +34,7 @@ local c_white  = { xrdb.color7, xrdb.color15 }
 local theme = dofile(themes_path.."default/theme.lua")
 
 theme.bg_normal     = xrdb.background
-theme.bg_focus      = c_cyan[2]
+theme.bg_focus      = c_cyan[1]
 theme.bg_urgent     = c_red[2]
 theme.bg_minimize   = c_black[2]
 theme.bg_systray    = theme.bg_normal
@@ -47,7 +47,7 @@ theme.fg_minimize   = theme.bg_normal
 theme.useless_gap   = dpi(3)
 theme.border_width  = dpi(2)
 theme.border_normal = c_black[1]
-theme.border_focus  = c_cyan[2]
+theme.border_focus  = c_cyan[1]
 theme.border_marked = c_green[2]
 
 -- There are other variable sets
