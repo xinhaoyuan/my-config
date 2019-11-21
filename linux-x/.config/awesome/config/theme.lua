@@ -14,7 +14,7 @@ local gshape = require("gears.shape")
 local fallback = require("fallback")
 local masked_imagebox = require("masked_imagebox")
 local fixed_place = require("fixed_place")
-local aux = require("aux")
+local acolor = require("aux").color
 local cbg = require("contextual_background")
 local lgi   = require("lgi")
 local icons = require("icons")
@@ -46,7 +46,7 @@ theme.fg_minimize   = theme.bg_normal
 
 theme.useless_gap   = dpi(3)
 theme.border_width  = dpi(2)
-theme.border_normal = c_black[1]
+theme.border_normal = acolor.from_string(theme.bg_normal):blend_with(acolor.from_string(c_cyan[1]), 0.3):to_string()
 theme.border_focus  = c_cyan[1]
 theme.border_marked = c_green[2]
 
