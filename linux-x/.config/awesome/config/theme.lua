@@ -37,6 +37,7 @@ theme.bg_normal     = xrdb.background
 theme.bg_focus      = c_cyan[1]
 theme.bg_urgent     = c_red[2]
 theme.bg_minimize   = c_black[2]
+
 theme.bg_systray    = theme.bg_normal
 
 theme.fg_normal     = xrdb.foreground
@@ -46,9 +47,9 @@ theme.fg_minimize   = theme.bg_normal
 
 theme.useless_gap   = dpi(3)
 theme.border_width  = dpi(2)
-theme.border_normal = acolor.from_string(theme.bg_normal):blend_with(acolor.from_string(c_cyan[1]), 0.3):to_string()
-theme.border_focus  = c_cyan[1]
-theme.border_marked = c_green[2]
+theme.border_normal = acolor.from_string(theme.bg_normal):blend_with(acolor.from_string(theme.bg_focus), 0.3):to_string()
+theme.border_focus  = theme.bg_focus
+theme.border_marked = theme.bg_urgent
 
 -- There are other variable sets
 -- overriding the default one when
