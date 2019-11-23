@@ -12,6 +12,7 @@ local wibox = require("wibox")
 local beautiful = require("beautiful")
 local dpi = require("beautiful.xresources").apply_dpi
 local gtimer = require("gears.timer")
+local gshape = require("gears.shape")
 local machi = require("layout-machi")
 
 function shared.client.titlebar_toggle(c)
@@ -273,17 +274,16 @@ capi.client.connect_signal(
    end
 )
 
--- remove border for maximized windows
-local function reset_border(c)
-   if not c.borderless and not c.maximized then
-      c.border_width = beautiful.border_width
-   else
-      c.border_width = 0
-   end
+local function reset_decoration(c)
+    if not c.borderless and not c.maximized then
+        c.border_width = beautiful.border_width
+    else
+        c.border_width = 0
+    end
 end
 
 local function manage_cb(c)
-   reset_border(c)
+   reset_decoration(c)
    c.has_titlebar = false
    c.has_titlebar_enabled = shared.var.enable_titlebar
    if shared.var.enable_titlebar then
@@ -294,7 +294,7 @@ local function manage_cb(c)
 end
 
 capi.client.connect_signal("manage", manage_cb)
-capi.client.connect_signal("property::maximized", reset_border)
+capi.client.connect_signal("property::maximized", reset_decoration)
 
 -- rules
 
