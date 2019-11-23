@@ -244,10 +244,10 @@ index ff3ada0..31d283c 100644
 +		dx %= clients[c]->size_hints->width_inc;
 +		dy %= clients[c]->size_hints->height_inc;
 +
-+		wc.x += dx >> 1;
-+		wc.width -= dx;
-+		wc.y += dy >> 1;
-+		wc.height -= dy;
++		ce.y = wc.x = wc.x + (dx >> 1);
++		ce.width = wc.width = wc.width - dx;
++		ce.y = wc.y = wc.y + (dy >> 1);
++		ce.height = wc.height = wc.height - dy;
 +	}
 +
 +	XConfigureWindow(dpy, clients[c]->win, CWX | CWY | CWWidth | CWHeight, &wc);
