@@ -138,7 +138,9 @@ local client_buttons = table_join(
    awful.button({ "Mod4" }, 3, function (c)
          local _, cc = awful.placement.closest_corner(capi.mouse, {parent = c})
          awful.mouse.client.resize(c, cc)
-   end)
+   end),
+   awful.button({ "Mod4" }, 4, shared.client.enlarge),
+   awful.button({ "Mod4" }, 5, shared.client.shrink)
 )
 
 -- gain focus and raise before moving

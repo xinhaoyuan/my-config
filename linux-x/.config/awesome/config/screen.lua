@@ -507,16 +507,20 @@ local tasklist_template = {
 
 local my_tasklist_buttons = awful.util.table.join(
     awful.button({ }, 1, function (c)
-            -- Without this, the following
-            -- :isvisible() makes no sense
-            c.minimized = false
-            if not c:isvisible() then
-                awful.tag.viewonly(c:tags()[1])
+            if capi.client.focus == c then
+                c.minimized = true
+            else
+                -- Without this, the following
+                -- :isvisible() makes no sense
+                c.minimized = false
+                if not c:isvisible() then
+                    awful.tag.viewonly(c:tags()[1])
+                end
+                -- This will also un-minimize
+                -- the client, if needed
+                capi.client.focus = c
+                c:raise()
             end
-            -- This will also un-minimize
-            -- the client, if needed
-            capi.client.focus = c
-            c:raise()
     end),
     awful.button({ }, 2,
         function (c)
