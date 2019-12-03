@@ -39,6 +39,7 @@
 (if (require 'highlight-indent-guides nil 'noerror)
     (progn
       (setq highlight-indent-guides-method 'character)
+      (setq highlight-indent-guides-character ?┊)
       (setq highlight-indent-guides-auto-enabled nil)
       (set-face-background 'highlight-indent-guides-odd-face "darkgray")
       (set-face-background 'highlight-indent-guides-even-face "dimgray")
