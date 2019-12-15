@@ -11,15 +11,15 @@ local unpack = unpack or table.unpack
 
 local term_cmd
 do
-    local term_prog
-    if os.execute("command -v xst") then
-        term_prog = "xst"
-    elseif os.execute("command -v urxvt") then
-        term_prog = "urxvt"
-    else
-        term_prog = "x-termninal-emulator"
-        print("Warning: no suitable terminal program found. Fallback to x-terminal-emulator.")
-    end
+    local term_prog = "urxvt"
+    -- if os.execute("command -v xst") then
+    --     term_prog = "xst"
+    -- elseif os.execute("command -v urxvt") then
+    --     term_prog = "urxvt"
+    -- else
+    --     term_prog = "x-termninal-emulator"
+    --     print("Warning: no suitable terminal program found. Fallback to x-terminal-emulator.")
+    -- end
     local has_tabbed = os.execute("command -v tabbed")
 
     if has_tabbed and term_prog == "xst" then
