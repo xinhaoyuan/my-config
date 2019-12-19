@@ -21,7 +21,7 @@ if args.target is None and args.search is None:
     sys.stderr.write("Need -t or -s\n")
     sys.exit(1)
 
-logging.basicConfig(level = logging.INFO)
+logging.basicConfig(level = logging.DEBUG)
 logger = logging.getLogger(__file__)
 
 def find_in_paths(filename, paths):
@@ -39,7 +39,7 @@ if len(results) == 0:
     sys.stderr.write("Cannot find mimeinfo.cache in {}\n".format(dirs))
     sys.exit(1)
 
-data = RawConfigParser()
+data = RawConfigParser(strict = False)
 with open(results[1], "r") as f:
     data.read_file(f)
 
@@ -58,7 +58,7 @@ for mime, apps_str in data.items("MIME Cache"):
 
     if not found:
         continue
-    if args.target is None or args.replace is None:
+    if args.target is None and args.replace is None:
         sys.stdout.write("{}:{}\n".format(mime, " ".join(apps)))
     else:
         logger.debug("Found mimetype {} with apps {}".format(mime, apps))
