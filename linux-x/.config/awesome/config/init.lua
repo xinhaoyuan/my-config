@@ -7,5 +7,6 @@ require(... .. ".action")
 require(... .. ".screen")
 require(... .. ".client")
 require(... .. ".waffle")
+require(... .. ".autolocker")
 
 return require(... .. ".shared")

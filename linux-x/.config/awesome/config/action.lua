@@ -7,7 +7,7 @@ local wi     = require("wibox")
 local beautiful = require("beautiful")
 local dpi    = require("beautiful.xresources").apply_dpi
 local unpack = unpack or table.unpack
-
+local autolocker = require("autolocker")
 
 local term_cmd
 do
