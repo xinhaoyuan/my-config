@@ -3,9 +3,9 @@
 
 local shared = {
    var = {
-      enable_titlebar = false,
+      enable_titlebar = true,
       -- "top"/"bottom"/"left"/"right"
-      titlebar_position = "bottom",
+      -- titlebar_position = "top",
       hide_clients_with_titlebars = true,
       floating_by_default = true,
       bar_position = "bottom",

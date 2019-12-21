@@ -46,8 +46,12 @@ theme.fg_urgent     = theme.bg_normal
 theme.fg_minimize   = theme.bg_normal
 
 theme.useless_gap   = dpi(3)
+
 theme.border_width  = dpi(2)
-theme.border_normal = acolor.from_string(theme.bg_normal):blend_with(acolor.from_string(theme.bg_focus), 0.3):to_string()
+theme.border_outer_space = dpi(1)
+theme.border_inner_space = dpi(1)
+-- theme.border_normal = acolor.from_string(theme.bg_normal):blend_with(acolor.from_string(theme.bg_focus), 0.3):to_string()
+theme.border_normal = theme.bg_normal
 theme.border_focus  = theme.bg_focus
 theme.border_marked = theme.bg_urgent
 
@@ -113,7 +117,6 @@ theme.useless_gap = dpi(8)
 -- custom property number
 theme.bar_height = dpi(24)
 theme.menu_width = dpi(150)
-theme.border_width = dpi(2)
 -- custom property color
 theme.special_normal = xrdb.color1
 -- custom property color

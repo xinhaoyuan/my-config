@@ -603,7 +603,9 @@ local function setup_screen(scr)
          if not awful.widget.tasklist.filter.currenttags(c, s) then
             return false
          end
-         return not (c:isvisible() and shared.var.hide_clients_with_titlebars and c.has_titlebar)
+         -- WIP - disable the hiding for now
+         -- return not (c:isvisible() and shared.var.hide_clients_with_titlebars and c.has_titlebar)
+         return true
       end,
       buttons = my_tasklist_buttons,
       style = { font = beautiful.font },

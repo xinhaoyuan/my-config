@@ -13,6 +13,7 @@ local beautiful = require("beautiful")
 local dpi = require("beautiful.xresources").apply_dpi
 local gtimer = require("gears.timer")
 local gshape = require("gears.shape")
+local gcolor = require("gears.color")
 local machi = require("layout-machi")
 
 function shared.client.titlebar_toggle(c)
@@ -34,27 +35,31 @@ function shared.client.titlebar_disable(c)
 end
 
 function shared.client.titlebar_show(c)
-   local geo = c:geometry()
-   awful.titlebar.show(c, shared.var.titlebar_position)
-   if not c.has_titlebar then
-       c.has_titlebar = true
-       if shared.var.hide_clients_with_titlebars then
-           capi.client.emit_signal("list")
-       end
-   end
-   c:geometry(geo)
+    local geo = c:geometry()
+    for _, d in ipairs({"top", "bottom", "left", "right"}) do
+        awful.titlebar.show(c, d)
+    end
+    if not c.has_titlebar then
+        c.has_titlebar = true
+        if shared.var.hide_clients_with_titlebars then
+            capi.client.emit_signal("list")
+        end
+    end
+    c:geometry(geo)
 end
 
 function shared.client.titlebar_hide(c)
-   local geo = c:geometry()
-   awful.titlebar.hide(c, shared.var.titlebar_position)
-   if c.has_titlebar then
-       c.has_titlebar = false
-       if shared.var.hide_clients_with_titlebars then
-           capi.client.emit_signal("list")
-       end
-   end
-   c:geometry(geo)
+    local geo = c:geometry()
+    for _, d in ipairs({"top", "bottom", "left", "right"}) do
+        awful.titlebar.hide(c, d)
+    end
+    if c.has_titlebar then
+        c.has_titlebar = false
+        if shared.var.hide_clients_with_titlebars then
+            capi.client.emit_signal("list")
+        end
+    end
+    c:geometry(geo)
 end
 
 local table_join = awful.util.table.join
@@ -166,83 +171,162 @@ local opposite_dir = {
    ["bottom"] = "top",
 }
 
-capi.client.connect_signal(
-   "request::titlebars",
-   function (c)
-      -- buttons for the titlebar
-      local buttons = awful.util.table.join(
-         awful.button({ }, 1, function()
-               c:emit_signal("request::activate", "titlebar", {raise = true})
-               awful.mouse.client.move(c)
-         end),
-         awful.button({ }, 2, function()
-               shared.client.titlebar_toggle(c)
-         end),
-         awful.button({ }, 3, function()
-               c:emit_signal("request::activate", "titlebar", {raise = true})
-               local _, cc = awful.placement.closest_corner(capi.mouse, {parent = c})
-               awful.mouse.client.resize(c, cc)
-         end),
-         awful.button({ }, 4,
-            function ()
-               if not c.maximized then
-                  shared.client.enlarge(c)
-               end
-            end
-         ),
-         awful.button({ }, 5,
-            function ()
-               shared.client.shrink(c)
-            end
-         )
-      )
+-- function create_titlebars(c)
+--     -- buttons for the titlebar
+--     local buttons = awful.util.table.join(
+--         awful.button({ }, 1, function()
+--                 c:emit_signal("request::activate", "titlebar", {raise = true})
+--                 awful.mouse.client.move(c)
+--         end),
+--         awful.button({ }, 2, function()
+--                 shared.client.titlebar_toggle(c)
+--         end),
+--         awful.button({ }, 3, function()
+--                 c:emit_signal("request::activate", "titlebar", {raise = true})
+--                 local _, cc = awful.placement.closest_corner(capi.mouse, {parent = c})
+--                 awful.mouse.client.resize(c, cc)
+--         end),
+--         awful.button({ }, 4,
+--             function ()
+--                 if not c.maximized then
+--                     shared.client.enlarge(c)
+--                 end
+--             end
+--         ),
+--         awful.button({ }, 5,
+--             function ()
+--                 shared.client.shrink(c)
+--             end
+--         )
+--     )
 
-      local titlewidget = awful.titlebar.widget.titlewidget(c)
-      titlewidget:set_font(beautiful.font)
-      local titlebar_container = wibox.widget {
-         { -- Left
-            awful.titlebar.widget.iconwidget(c),
-            buttons = buttons,
-            layout  = wibox.layout.fixed.horizontal
-         },
-         { -- Space
-            titlewidget,
-            buttons = buttons,
-            left = dpi(4),
-            widget = wibox.container.margin,
-         },
-         { -- Right
-            awful.titlebar.widget.floatingbutton (c),
-            awful.titlebar.widget.maximizedbutton(c),
-            awful.titlebar.widget.stickybutton   (c),
-            awful.titlebar.widget.ontopbutton    (c),
-            awful.titlebar.widget.closebutton    (c),
-            layout = wibox.layout.fixed.horizontal()
-         },
-         layout = wibox.layout.align.horizontal,
-      }
+--     local titlewidget = awful.titlebar.widget.titlewidget(c)
+--     titlewidget:set_font(beautiful.font)
+--     local titlebar_container = wibox.widget {
+--         { -- Left
+--             awful.titlebar.widget.iconwidget(c),
+--             buttons = buttons,
+--             layout  = wibox.layout.fixed.horizontal
+--         },
+--         { -- Space
+--             titlewidget,
+--             buttons = buttons,
+--             left = dpi(4),
+--             widget = wibox.container.margin,
+--         },
+--         { -- Right
+--             awful.titlebar.widget.floatingbutton (c),
+--             awful.titlebar.widget.maximizedbutton(c),
+--             awful.titlebar.widget.stickybutton   (c),
+--             awful.titlebar.widget.ontopbutton    (c),
+--             awful.titlebar.widget.closebutton    (c),
+--             layout = wibox.layout.fixed.horizontal()
+--         },
+--         layout = wibox.layout.align.horizontal,
+--     }
 
-      if shared.var.titlebar_position == "left" or shared.var.titlebar_position == "right" then
-         titlebar_container = wibox.container.rotate(titlebar_container, "west")
-      end
+--     if shared.var.titlebar_position == "left" or shared.var.titlebar_position == "right" then
+--         titlebar_container = wibox.container.rotate(titlebar_container, "west")
+--     end
 
-      titlebar_container = wibox.widget {
-         titlebar_container,
-         [opposite_dir[shared.var.titlebar_position]] = beautiful.border_width,
-         color = capi.client.focus == c and beautiful.border_focus or beautiful.border_normal,
-         widget = wibox.container.margin,
-      }
-      awful.titlebar(
-         c,
-         {
-            position = shared.var.titlebar_position,
-            size = beautiful.titlebar_size + beautiful.border_width,
-            font = beautiful.font,
-         }
-      ):setup({ titlebar_container, widget = wibox.container.margin })
-      c.titlebar_container = titlebar_container
-   end
-)
+--     titlebar_container = wibox.widget {
+--         titlebar_container,
+--         [opposite_dir[shared.var.titlebar_position]] = beautiful.border_width,
+--         color = capi.client.focus == c and beautiful.border_focus or beautiful.border_normal,
+--         widget = wibox.container.margin,
+--     }
+--     awful.titlebar(
+--         c,
+--         {
+--             position = shared.var.titlebar_position,
+--             size = beautiful.titlebar_size + beautiful.border_width,
+--             font = beautiful.font,
+--         }
+--     ):setup({ titlebar_container, widget = wibox.container.margin })
+--     c.titlebar_container = titlebar_container
+-- end
+
+local function draw_tb_border_bgimage_top(context, cr, width, height)
+    local c = context["client"]
+    local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
+    local padding = beautiful.border_outer_space + beautiful.border_width / 2
+    cr:move_to(padding, height)
+    cr:line_to(padding, padding)
+    cr:line_to(width - padding, padding)
+    cr:line_to(width - padding, height)
+    cr:set_source(border_color)
+    cr:set_line_width(beautiful.border_width)
+    cr:stroke()
+end
+
+local function draw_tb_border_bgimage_bottom(context, cr, width, height)
+    local c = context["client"]
+    local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
+    local padding = beautiful.border_outer_space + beautiful.border_width / 2
+    cr:move_to(padding, 0)
+    cr:line_to(padding, height - padding)
+    cr:line_to(width - padding, height - padding)
+    cr:line_to(width - padding, 0)
+    cr:set_source(border_color)
+    cr:set_line_width(beautiful.border_width)
+    cr:stroke()
+end
+
+local function draw_tb_border_bgimage_left(context, cr, width, height)
+    local c = context["client"]
+    local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
+    local padding = beautiful.border_outer_space + beautiful.border_width / 2
+    cr:move_to(padding, 0)
+    cr:line_to(padding, height)
+    cr:set_source(border_color)
+    cr:set_line_width(beautiful.border_width)
+    cr:stroke()
+end
+
+local function draw_tb_border_bgimage_right(context, cr, width, height)
+    local c = context["client"]
+    local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
+    local padding = beautiful.border_outer_space + beautiful.border_width / 2
+    cr:move_to(width - padding, 0)
+    cr:line_to(width - padding, height)
+    cr:set_source(border_color)
+    cr:set_line_width(beautiful.border_width)
+    cr:stroke()
+end
+
+local function create_titlebars(c)
+    local total_size = beautiful.border_outer_space + beautiful.border_width + beautiful.border_inner_space
+    awful.titlebar(c,
+                   {
+                       position = "top",
+                       size = total_size,
+                       bgimage = draw_tb_border_bgimage_top,
+                   }
+    ) : setup({ widget = wibox.container.background })
+    awful.titlebar(c,
+                   {
+                       position = "bottom",
+                       size = total_size,
+                       bgimage = draw_tb_border_bgimage_bottom,
+                   }
+    ) : setup({ widget = wibox.container.background })
+    awful.titlebar(c,
+                   {
+                       position = "left",
+                       size = total_size,
+                       bgimage = draw_tb_border_bgimage_left,
+                   }
+    ) : setup({ widget = wibox.container.background })
+    awful.titlebar(c,
+                   {
+                       position = "right",
+                       size = total_size,
+                       bgimage = draw_tb_border_bgimage_right,
+                   }
+    ) : setup({ widget = wibox.container.background })
+end
+
+capi.client.connect_signal("request::titlebars", create_titlebars)
 
 -- change border color based on focus
 capi.client.connect_signal(
@@ -266,7 +350,8 @@ capi.client.connect_signal(
 capi.client.connect_signal(
    "property::maximized",
    function(c)
-      if c.maximized and not shared.var.enable_titlebar then
+      if c.maximized -- and not shared.var.enable_titlebar 
+      then
          shared.client.titlebar_hide(c)
       else
          if c.has_titlebar_enabled then
@@ -278,7 +363,7 @@ capi.client.connect_signal(
 
 local function reset_decoration(c)
     if not c.borderless and not c.maximized then
-        c.border_width = beautiful.border_width
+        c.border_width = 0
     else
         c.border_width = 0
     end
