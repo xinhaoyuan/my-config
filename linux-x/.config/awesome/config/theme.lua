@@ -20,6 +20,7 @@ local lgi   = require("lgi")
 local icons = require("icons")
 local cairo = lgi.cairo
 
+local c_normal = { xrdb.foreground, xrdb.background }
 local c_black  = { xrdb.color0, xrdb.color8 }
 local c_red    = { xrdb.color1, xrdb.color9 }
 local c_green  = { xrdb.color2, xrdb.color10 }
@@ -33,7 +34,7 @@ local c_white  = { xrdb.color7, xrdb.color15 }
 
 local theme = dofile(themes_path.."default/theme.lua")
 
-theme.bg_normal     = xrdb.background
+theme.bg_normal     = c_normal[2]
 theme.bg_focus      = c_cyan[1]
 theme.bg_urgent     = c_red[2]
 theme.bg_minimize   = c_black[2]
