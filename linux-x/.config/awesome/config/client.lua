@@ -248,6 +248,9 @@ local opposite_dir = {
 
 local function draw_tb_border_bgimage_top(context, cr, width, height)
     local c = context["client"]
+    local space_color = gcolor(beautiful.border_space)
+    cr:set_source(space_color)
+    cr:paint()
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
     local padding = beautiful.border_outer_space + beautiful.border_width / 2
     cr:move_to(padding, height)
@@ -261,6 +264,9 @@ end
 
 local function draw_tb_border_bgimage_bottom(context, cr, width, height)
     local c = context["client"]
+    local space_color = gcolor(beautiful.border_space)
+    cr:set_source(space_color)
+    cr:paint()
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
     local padding = beautiful.border_outer_space + beautiful.border_width / 2
     cr:move_to(padding, 0)
@@ -274,6 +280,9 @@ end
 
 local function draw_tb_border_bgimage_left(context, cr, width, height)
     local c = context["client"]
+    local space_color = gcolor(beautiful.border_space)
+    cr:set_source(space_color)
+    cr:paint()
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
     local padding = beautiful.border_outer_space + beautiful.border_width / 2
     cr:move_to(padding, 0)
@@ -285,6 +294,9 @@ end
 
 local function draw_tb_border_bgimage_right(context, cr, width, height)
     local c = context["client"]
+    local space_color = gcolor(beautiful.border_space)
+    cr:set_source(space_color)
+    cr:paint()
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
     local padding = beautiful.border_outer_space + beautiful.border_width / 2
     cr:move_to(width - padding, 0)
