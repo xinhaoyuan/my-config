@@ -119,7 +119,7 @@ local client_keys = table_join(
    awful.key({ "Mod4" }, "Next", shared.client.shrink),
    awful.key({ "Mod4" }, "=", function (c) c.ontop = not c.ontop end),
    awful.key({ "Mod4" }, "-", function (c) c.sticky = not c.sticky end),
-   
+
    awful.key({ "Mod4" }, "t", function (c) shared.client.titlebar_toggle(c) end),
 
    awful.key({ "Mod4" }, "f", function (c)
@@ -328,56 +328,26 @@ end
 
 capi.client.connect_signal("request::titlebars", create_titlebars)
 
--- change border color based on focus
-capi.client.connect_signal(
-   "focus",
-   function (c)
-      c.border_color = beautiful.border_focus
-      if c.titlebar_container then
-         c.titlebar_container.color = beautiful.border_focus
-      end
-   end
-)
-capi.client.connect_signal(
-   "unfocus",
-   function (c)
-      c.border_color = beautiful.border_normal
-      if c.titlebar_container then
-         c.titlebar_container.color = beautiful.border_normal
-      end
-   end
-)
-capi.client.connect_signal(
-   "property::maximized",
-   function(c)
-      if c.maximized -- and not shared.var.enable_titlebar 
-      then
-         shared.client.titlebar_hide(c)
-      else
-         if c.has_titlebar_enabled then
-            shared.client.titlebar_show(c)
-         end
-      end
-   end
-)
-
 local function reset_decoration(c)
     if not c.borderless and not c.maximized then
         c.border_width = 0
     else
         c.border_width = 0
     end
+    if c.maximized -- and not shared.var.enable_titlebar
+    then
+        shared.client.titlebar_hide(c)
+    else
+        if c.has_titlebar_enabled then
+            shared.client.titlebar_show(c)
+        end
+    end
 end
 
 local function manage_cb(c)
+    c.has_titlebar = false
+    c.has_titlebar_enabled = shared.var.enable_titlebar
    reset_decoration(c)
-   c.has_titlebar = false
-   c.has_titlebar_enabled = shared.var.enable_titlebar
-   if shared.var.enable_titlebar then
-      shared.client.titlebar_enable(c)
-   else
-      shared.client.titlebar_disable(c)
-   end
 end
 
 capi.client.connect_signal("manage", manage_cb)

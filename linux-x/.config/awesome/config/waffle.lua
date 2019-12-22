@@ -985,7 +985,7 @@ local waffle_root_view = create_view(
                   indicator = em("s"),
                   key = "s",
                   action = function (alt)
-                     waffle:show(waffle_settings_view, true)
+                      waffle:show(waffle_settings_view, { push = true })
                   end
             }),
             layout = wibox.layout.fixed.vertical,
@@ -1047,7 +1047,7 @@ local waffle_root_view = create_view(
                   action = function (alt)
                      waffle_poweroff_count = 0
                      waffle_poweroff_button:update_text()
-                     waffle:show(waffle_poweroff_view, true)
+                     waffle:show(waffle_poweroff_view, { push = true })
                   end
             }),
             layout = wibox.layout.fixed.vertical,

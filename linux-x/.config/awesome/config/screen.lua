@@ -127,9 +127,9 @@ alayout.layouts = {
 -- Define the tag list upfront for keybindings
 
 local root_buttons = awful.util.table.join(
-   awful.button({ }, 3, function () waffle:set_gravity("center"); waffle:show() end),
-   -- awful.button({ }, 3, function () menu:show() end),
-   capi.root.buttons()
+    awful.button({ }, 3, function () waffle:show() end),
+    -- awful.button({ }, 3, function () menu:show() end),
+    capi.root.buttons()
 )
 
 capi.root.buttons(root_buttons)
@@ -726,7 +726,7 @@ local function setup_screen(scr)
    my_widgets[s].indicator:buttons(
       awful.util.table.join(
           awful.button({ }, 1, function () revelation{curr_tag_only = true} end),
-          awful.button({ }, 3, function () waffle:set_gravity(gravity_index[shared.var.bar_position]); waffle:show() end),
+          awful.button({ }, 3, function () waffle:show() end),
           awful.button({ }, 4, function () awful.layout.inc( 1) end),
           awful.button({ }, 5, function () awful.layout.inc(-1) end)))
    left_layout:add(my_widgets[s].indicator)
@@ -924,7 +924,7 @@ capi.screen.connect_signal("primary_changed", schedule_reset_widgets)
 capi.root.keys(
    awful.util.table.join(
       capi.root.keys(),
-      awful.key({ "Mod4" }, "F12", function () waffle:set_gravity("center"); waffle:show() end),
+      awful.key({ "Mod4" }, "F12", function () waffle:show(nil, { anchor = false }) end),
       awful.key({ "Mod4" }, ";",
          function ()
             awful.prompt.run {

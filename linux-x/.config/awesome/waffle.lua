@@ -1,11 +1,13 @@
 local capi = {
-   screen = screen,
-   client = client,
+    mouse = mouse,
+    screen = screen,
+    client = client,
 }
 local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local gears = require("gears")
+local gtable = require("gears.table")
 local lgi = require("lgi")
 local dpi = require("beautiful.xresources").apply_dpi
 
@@ -14,160 +16,212 @@ local dpi = require("beautiful.xresources").apply_dpi
 --   .key_handler (optional) -- the key handling function. It returns a boolean if the key event is captured.
 
 local waffle = {
-   gravity_ = "southwest",
+    -- TODO: Gravity is deprecated.
+    gravity_ = "southwest",
 }
 
+local PlacementLayout = {mt = {}}
+
+function PlacementLayout:fit(context, width, height)
+    return width, height
+end
+
+function PlacementLayout:layout(context, width, height)
+    if self._private.widget == nil then
+        return
+    end
+
+    local w, h = wibox.widget.base.fit_widget(self, context, self._private.widget, width, height)
+    local place_func = self._private.place_func or self.default_place_func
+    local x, y = place_func(self, context, width, height, w, h)
+    return { wibox.widget.base.place_widget_at(self._private.widget, x, y, w, h) }
+end
+
+function PlacementLayout:default_place_func(context, parent_w, parent_h, child_w, child_h)
+    local drawable = context["wibox"]
+    local geo = { x = drawable.anchor and (drawable.anchor.x - child_w / 2) or 0,
+                  y = drawable.anchor and (drawable.anchor.y - child_h / 2) or 0,
+                  width = child_w, height = child_h }
+    local obj = {
+        geometry = function(_, new_geo)
+            if new_geo then
+                geo.x = new_geo.x
+                geo.y = new_geo.y
+            end
+            return geo
+        end
+    }
+    local dgeo = drawable:geometry()
+    awful.placement.no_offscreen(obj,
+                                 {
+                                     screen = drawable.screen,
+                                 }
+    )
+    return geo.x - dgeo.x, geo.y - dgeo.y
+end
+
+PlacementLayout.set_widget = wibox.widget.base.set_widget_common
+
+function PlacementLayout:get_widget()
+    return self._private.widget
+end
+
+function PlacementLayout:get_children()
+    return {self._private.widget}
+end
+
+function PlacementLayout:set_children(children)
+    self:set_widget(children[1])
+end
+
+function PlacementLayout:new(widget)
+    local ret = wibox.widget.base.make_widget(nil, nil, {enable_properties = true})
+
+    gtable.crush(ret, self, true)
+
+    ret:set_widget(widget)
+
+    return ret
+end
+
+function PlacementLayout.mt.__call(self, ...)
+    return self:new(...)
+end
+
+setmetatable(PlacementLayout, PlacementLayout.mt)
+
 waffle.widget_container = wibox.widget {
-   fill_vertical = false,
-   fill_horizontal = false,
-   widget = wibox.container.place,
+    widget = PlacementLayout,
 }
 waffle.widget_container:connect_signal(
-   "button::press",
-   function (_, x, y, button, _, info)
-      local f = info.drawable:find_widgets(x, y)
-      if #f == 1 then
-         -- Only happens only if clicking the empty area
-         waffle:hide()
-      end
+    "button::press",
+    function (_, x, y, button, _, info)
+        local f = info.drawable:find_widgets(x, y)
+        if #f == 1 then
+            -- Only happens only if clicking the empty area
+            waffle:hide()
+        end
 end)
 
 function waffle:update_layout(screen)
-   screen = screen or (self.wibox_ and self.wibox_.screen)
-   if screen then
-      if beautiful.waffle_use_entire_screen then
-         self.wibox_:geometry({
-               x = screen.geometry.x,
-               y = screen.geometry.y,
-               width = screen.geometry.width,
-               height = screen.geometry.height,
-         })
-      else
-         self.wibox_:geometry({
-               x = screen.workarea.x,
-               y = screen.workarea.y,
-               width = screen.workarea.width,
-               height = screen.workarea.height,
-         })
-      end
-   end
+    screen = screen or (self.wibox_ and self.wibox_.screen)
+    if screen then
+        if beautiful.waffle_use_entire_screen then
+            self.wibox_:geometry({
+                    x = screen.geometry.x,
+                    y = screen.geometry.y,
+                    width = screen.geometry.width,
+                    height = screen.geometry.height,
+            })
+        else
+            self.wibox_:geometry({
+                    x = screen.workarea.x,
+                    y = screen.workarea.y,
+                    width = screen.workarea.width,
+                    height = screen.workarea.height,
+            })
+        end
+    end
 
-   if self.wibox_ and self.wibox_.widget == nil then
-      self.wibox_.widget = self.widget_container
-   end
-
-   if self.gravity_ == "center" then
-      self.widget_container.valign = "center"
-      self.widget_container.halign = "center"
-   elseif self.gravity_ == "north" then
-      self.widget_container.valign = "top"
-      self.widget_container.halign = "center"
-   elseif self.gravity_ == "south" then
-      self.widget_container.valign = "bottom"
-      self.widget_container.halign = "center"
-   elseif self.gravity_ == "west" then
-      self.widget_container.valign = "center"
-      self.widget_container.halign = "left"
-   elseif self.gravity_ == "east" then
-      self.widget_container.valign = "center"
-      self.widget_container.halign = "right"
-   elseif self.gravity_ == "northeast" then
-      self.widget_container.valign = "top"
-      self.widget_container.halign = "right"
-   elseif self.gravity_ == "northwest" then
-      self.widget_container.valign = "top"
-      self.widget_container.halign = "left"
-   elseif self.gravity_ == "southeast" then
-      self.widget_container.valign = "bottom"
-      self.widget_container.halign = "right"
-   elseif self.gravity_ == "southwest" then
-      self.widget_container.valign = "bottom"
-      self.widget_container.halign = "left"
-   end
+    if self.wibox_ and self.wibox_.widget == nil then
+        self.wibox_.widget = self.widget_container
+    end
 end
 
 function waffle:set_gravity(gravity)
-   if self.gravity_ ~= gravity then
-      self.gravity_ = gravity
-      self:update_layout()
-   end
+    if self.gravity_ ~= gravity then
+        self.gravity_ = gravity
+        self:update_layout()
+    end
 end
 
-function waffle:show(view, push, screen)
-   view = view or self.root_view_
-   screen = screen or awful.screen.focused()
-   if self.wibox_ == nil then
-      self.wibox_ = wibox({
-            screen = screen,
-            x = screen.geometry.x,
-            y = screen.geometry.y,
-            width = screen.geometry.width,
-            height = screen.geometry.height,
-            bg = beautiful.waffle_background or (beautiful.bg_normal:sub(1,7) .. "80"),
-            opacity = 1,
-            ontop = true,
-            type = "dock",
-      })
-   end
+function waffle:show(view, args)
+    args = args or {}
+    view = view or self.root_view_
+    local screen = args.screen or awful.screen.focused()
+    if self.wibox_ == nil then
+        self.wibox_ = wibox({
+                screen = screen,
+                x = screen.geometry.x,
+                y = screen.geometry.y,
+                width = screen.geometry.width,
+                height = screen.geometry.height,
+                bg = beautiful.waffle_background or (beautiful.bg_normal:sub(1,7) .. "80"),
+                opacity = 1,
+                ontop = true,
+                type = "dock",
+                visible = false,
+        })
+    end
 
-   self:update_layout(screen)
+    self:update_layout(screen)
 
-   if push then
-      self.stack_ = self.stack_ or {}
-      table.insert(self.stack_, self.view_)
-   end
-   self.view_ = view
-   self.widget_container.widget = view.widget
+    if args.push then
+        self.stack_ = self.stack_ or {}
+        table.insert(self.stack_, self.view_)
+    end
+    self.view_ = view
+    self.widget_container.widget = view.widget
 
-   if not self.wibox_.visible then
-      self.keygrabber_ = awful.keygrabber.run(
-         function (mod, key, event)
-            if #key == 1 then
-               key = key:lower()
+    if not self.wibox_.visible then
+        if type(args.anchor) == "table" then
+            self.wibox_.anchor = args.anchor
+        elseif args.anchor == false or capi.mouse.screen ~= screen then
+            local screen_geo = screen.geometry
+            self.wibox_.anchor = { x = screen_geo.x + screen_geo.width / 2,
+                                   y = screen_geo.y + screen_geo.height / 2 }
+        else
+            local coords = capi.mouse.coords()
+            self.wibox_.anchor = coords
+        end
+        self.keygrabber_ = awful.keygrabber.run(
+            function (mod, key, event)
+                if #key == 1 then
+                    key = key:lower()
+                end
+                if self.view_.key_handler and self.view_.key_handler(mod, key, event) then
+                    -- pass
+                elseif key == "Escape" or key == "F12" then
+                    if event == "press" then
+                        self:hide()
+                    end
+                elseif key == "BackSpace" then
+                    if event == "press" then
+                        self:go_back()
+                    end
+                end
             end
-            if self.view_.key_handler and self.view_.key_handler(mod, key, event) then
-               -- pass
-            elseif key == "Escape" or key == "F12" then
-               if event == "press" then
-                  self:hide()
-               end
-            elseif key == "BackSpace" then
-               if event == "press" then
-                  self:go_back()
-               end
-            end
-         end
-      )
-      self.wibox_.visible = true
-   end
+        )
+        self.wibox_.visible = true
+    end
 end
 
 function waffle:go_back()
-   local headpos = self.stack_ and #self.stack_ or 0
-   if headpos >= 1 then
-      local last = self.stack_[headpos]
-      table.remove(self.stack_, headpos)
-      self:show(last, nil, false)
-   else
-      self:hide()
-   end
+    local headpos = self.stack_ and #self.stack_ or 0
+    if headpos >= 1 then
+        local last = self.stack_[headpos]
+        table.remove(self.stack_, headpos)
+        self:show(last, nil, false)
+    else
+        self:hide()
+    end
 end
 
 function waffle:hide()
-   if self.keygrabber_ ~= nil then
-      awful.keygrabber.stop(self.keygrabber_)
-      self.keygrabber_ = nil
-   end
-   if self.wibox_ ~= nil then
-      self.wibox_.visible = false
-      self.wibox_ = nil
-   end
-   self.view_ = nil
-   self.stack_ = nil
+    if self.keygrabber_ ~= nil then
+        awful.keygrabber.stop(self.keygrabber_)
+        self.keygrabber_ = nil
+    end
+    if self.wibox_ ~= nil then
+        self.wibox_.visible = false
+        self.wibox_ = nil
+    end
+    self.view_ = nil
+    self.stack_ = nil
 end
 
 function waffle:set_root_view(v)
-   self.root_view_ = v
+    self.root_view_ = v
 end
 
 return waffle
