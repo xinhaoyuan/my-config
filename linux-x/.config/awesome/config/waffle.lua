@@ -1077,9 +1077,6 @@ local waffle_root_view = create_view(
       }),
       spacing = dpi(10),
       layout = wibox.layout.fixed.vertical,
-   },
-   {
-       default_key_handler = hide_after_release,
    }
 )
 
