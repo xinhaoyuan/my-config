@@ -173,27 +173,6 @@ local my_tag_list_buttons = awful.util.table.join(
    awful.button({ }, 5, function(t) awful.tag.viewprev(awful.tag.getscreen(t)) end)
 )
 
-local client_menu_selected = nil
-local client_menu
-client_menu = awful.menu({
-      { "Close", function () client_menu_selected:kill() end },
-      { "(Un)maximize", function () client_menu_selected.maximized = not client_menu_selected.maximized end },
-})
-
--- client_menu = awful.popup {
---     widget = wibox.widget {
---         {
---             text = "hello",
---             widget = wibox.widget.textbox
---         },
---         bg = beautiful.bg_normal,
---         widget = wibox.container.background
---     },
---     placement = awful.placement.next_to,
---     ontop = true,
---     visible = false,
--- }
-
 local default_icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal)
 
 local property_to_text = {
@@ -529,8 +508,7 @@ local my_tasklist_buttons = awful.util.table.join(
     ),
     awful.button({ }, 3,
         function (c)
-            client_menu_selected = c
-            client_menu:show()
+            shared.waffle.show_client_waffle(c)
         end
     ),
     awful.button({ }, 4,

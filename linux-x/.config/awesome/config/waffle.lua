@@ -1,4 +1,6 @@
 local shared = require((...):match("(.-)[^%.]+$") .. "shared")
+shared.waffle = {}
+
 local capi = {
    client = client,
    screen = screen,
@@ -37,48 +39,51 @@ local function em(t)
     return t
 end
 
-local function create_view(root)
-   local checked = {[root] = true}
-   local traverse_pool = {root}
-   local view = {}
-   view.keys = {}
+local function create_view(root, args)
+    args = args or {}
+    local checked = {[root] = true}
+    local traverse_pool = {root}
+    local view = {}
+    view.keys = {}
 
-   -- traverse the hierachy in depth-first order
-   while #traverse_pool > 0 do
-      local widget = traverse_pool[#traverse_pool]
-      table.remove(traverse_pool, #traverse_pool)
+    -- traverse the hierachy in depth-first order
+    while #traverse_pool > 0 do
+        local widget = traverse_pool[#traverse_pool]
+        table.remove(traverse_pool, #traverse_pool)
 
-      for _, c in ipairs(widget:get_children()) do
-         if not checked[c] then
-            checked[c] = true
-            table.insert(traverse_pool, c)
-         end
-      end
-
-      if widget.keys then
-         for k, f in pairs(widget.keys) do
-            if not view.keys[k] then
-               view.keys[k] = f
+        for _, c in ipairs(widget:get_children()) do
+            if not checked[c] then
+                checked[c] = true
+                table.insert(traverse_pool, c)
             end
-         end
-      end
-   end
+        end
 
-   view.widget = root
-   view.key_handler = function (mod, key, event)
-      if event == "press" and view.keys[key] then
-         view.keys[key](mod, key, event)
-         return true
-      else
-         return false
-      end
-   end
+        if widget.keys then
+            for k, f in pairs(widget.keys) do
+                if not view.keys[k] then
+                    view.keys[k] = f
+                end
+            end
+        end
+    end
 
-   view.options = {
-      -- Options here.
-   }
+    view.widget = root
+    view.key_handler = function (mod, key, event)
+        if event == "press" and view.keys[key] then
+            view.keys[key](mod, key, event)
+            return true
+        elseif args.default_key_handler then
+            return args.default_key_handler(mod, key, event)
+        else
+            return false
+        end
+    end
 
-   return view
+    view.options = {
+        -- Options here.
+    }
+
+    return view
 end
 
 local function context_focused(context)
@@ -87,7 +92,10 @@ end
 
 local function simple_button(args)
    local action = args.action
-   local width = waffle_width - button_padding * 2
+   local width
+   if not args.no_force_width then
+       width = args.width or (waffle_width - button_padding * 2)
+   end
 
    local label = args.label_widget or
       wibox.widget {
@@ -108,8 +116,8 @@ local function simple_button(args)
                      wibox.widget {
                          image = args.icon,
                          resize = true,
-                         forced_width = button_height,
-                         forced_height = button_height,
+                         forced_width = args.icon_width or button_height,
+                         forced_height = args.icon_height or button_height,
                          widget = masked_imagebox,
                      }
                                  ),
@@ -118,7 +126,7 @@ local function simple_button(args)
                 {
                     text = args.indicator,
                     font = font_big,
-                    forced_height = button_height,
+                    forced_height = args.height or button_height,
                     align = "center",
                     valign = "center",
                     widget = wibox.widget.textbox,
@@ -219,6 +227,21 @@ waffle_poweroff_button = simple_button({
 
 function waffle_poweroff_button:update_text()
    self.label.markup = "Power off <span size='x-small'>(" .. tostring(2 - waffle_poweroff_count) .. " more times)</span>"
+end
+
+local hide_key_pressed = false
+local function hide_after_release(mod, key, event)
+    if event == "press" and not hide_after_pressed then
+        hide_after_pressed = true
+    elseif event == "release" and hide_after_pressed then
+        gtimer.start_new(
+            0.03, -- Fixing xscape emulating the key case the waffle to show again.
+            function ()
+                hide_after_pressed = false
+                waffle:hide()
+            end
+        )
+    end
 end
 
 local waffle_poweroff_view = create_view(decorate(waffle_poweroff_button))
@@ -1054,9 +1077,54 @@ local waffle_root_view = create_view(
       }),
       spacing = dpi(10),
       layout = wibox.layout.fixed.vertical,
+   },
+   {
+       default_key_handler = hide_after_release,
    }
 )
 
 waffle:set_root_view(waffle_root_view)
+
+local client_waffle_selected
+local client_waffle = create_view(
+    wibox.widget {
+        decorate(
+            wibox.widget {
+                simple_button({
+                        markup = "Close",
+                        no_force_width = true,
+                        action = function (alt)
+                            waffle:hide()
+                            if not client_waffle_selected.valid then
+                                return
+                            end
+                            client_waffle_selected:kill()
+                        end
+                }),
+                simple_button({
+                        markup = "(Un)maximize",
+                        no_force_width = true,
+                        action = function (alt)
+                            waffle:hide()
+                            if not client_waffle_selected.valid then
+                                return
+                            end
+                            client_waffle_selected.maximized = not client_waffle_selected.maximized
+                        end
+                }),
+                layout = wibox.layout.fixed.horizontal,
+        }),
+        spacing = dpi(10),
+        layout = wibox.layout.fixed.vertical,
+    },
+    {
+        default_key_handler = hide_after_release,
+    }
+)
+
+function shared.waffle.show_client_waffle(c)
+    client_waffle_selected = c
+    waffle:show(client_waffle)
+end
 
 return nil
