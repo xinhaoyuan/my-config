@@ -52,8 +52,8 @@ theme.border_width  = dpi(2)
 theme.border_outer_space = dpi(1)
 theme.border_inner_space = dpi(1)
 theme.border_space = theme.bg_normal
--- theme.border_normal = acolor.from_string(theme.bg_normal):blend_with(acolor.from_string(theme.bg_focus), 0.3):to_string()
-theme.border_normal = theme.bg_normal
+theme.border_normal = acolor.from_string(theme.bg_normal):blend_with(acolor.from_string(theme.bg_focus), 0.3):to_string()
+-- theme.border_normal = theme.bg_normal
 theme.border_focus  = theme.bg_focus
 theme.border_marked = theme.bg_urgent
 
