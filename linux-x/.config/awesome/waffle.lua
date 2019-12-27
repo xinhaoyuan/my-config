@@ -135,24 +135,41 @@ function waffle:set_gravity(gravity)
     end
 end
 
-function waffle:show(view, args)
-    args = args or {}
-    view = view or self.root_view_
-    local screen = args.screen or awful.screen.focused()
-    if self.wibox_ == nil then
-        self.wibox_ = wibox({
+local function get_waffle_wibox(screen)
+    if screen.waffle_wibox == nil then
+        screen.waffle_wibox = wibox({
                 screen = screen,
                 x = screen.geometry.x,
                 y = screen.geometry.y,
                 width = screen.geometry.width,
                 height = screen.geometry.height,
-                bg = beautiful.waffle_background or (beautiful.bg_normal:sub(1,7) .. "80"),
+                bg = "#00000000",
                 opacity = 1,
                 ontop = true,
                 type = "dock",
-                visible = false,
+                visible = true,
+                input_passthrough = true,
         })
     end
+    return screen.waffle_wibox
+end
+
+capi.screen.connect_signal(
+    "removed",
+    function (s)
+        print("Screen "..tostring(s).." is removed. Removing its waffle wibox.")
+        if screen.waffle_wibox ~= nil then
+            screen.waffle_wibox:remove()
+            screen.waffle_wibox = nil
+        end
+    end
+)
+
+function waffle:show(view, args)
+    args = args or {}
+    view = view or self.root_view_
+    local screen = args.screen or awful.screen.focused()
+    self.wibox_ = get_waffle_wibox(screen)
 
     self:update_layout(screen)
 
@@ -163,7 +180,7 @@ function waffle:show(view, args)
     self.view_ = view
     self.widget_container.widget = view.widget
 
-    if not self.wibox_.visible then
+    if self.wibox_.input_passthrough then
         if type(args.anchor) == "table" then
             self.wibox_.anchor = args.anchor
         elseif args.anchor == false or capi.mouse.screen ~= screen then
@@ -192,7 +209,7 @@ function waffle:show(view, args)
                 end
             end
         )
-        self.wibox_.visible = true
+        self.wibox_.input_passthrough = false
     end
 end
 
@@ -213,7 +230,8 @@ function waffle:hide()
         self.keygrabber_ = nil
     end
     if self.wibox_ ~= nil then
-        self.wibox_.visible = false
+        self.wibox_.input_passthrough = true
+        self.wibox_.widget = nil
         self.wibox_ = nil
     end
     self.view_ = nil
