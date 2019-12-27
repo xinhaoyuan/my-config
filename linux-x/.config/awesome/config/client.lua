@@ -15,6 +15,7 @@ local gtimer = require("gears.timer")
 local gshape = require("gears.shape")
 local gcolor = require("gears.color")
 local machi = require("layout-machi")
+local border = require("border-helper")
 
 function shared.client.titlebar_toggle(c)
    if not c.has_titlebar_enabled then
@@ -45,7 +46,7 @@ function shared.client.titlebar_show(c)
             capi.client.emit_signal("list")
         end
     end
-    c:geometry(geo)
+    -- c:geometry(geo)
 end
 
 function shared.client.titlebar_hide(c)
@@ -59,7 +60,7 @@ function shared.client.titlebar_hide(c)
             capi.client.emit_signal("list")
         end
     end
-    c:geometry(geo)
+    -- c:geometry(geo)
 end
 
 local table_join = awful.util.table.join
@@ -246,64 +247,33 @@ local opposite_dir = {
 --     c.titlebar_container = titlebar_container
 -- end
 
+local border_top = border["top"] + border["left"] + border["right"]
 local function draw_tb_border_bgimage_top(context, cr, width, height)
     local c = context["client"]
-    local space_color = gcolor(beautiful.border_space)
-    cr:set_source(space_color)
-    cr:paint()
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    local padding = beautiful.border_outer_space + beautiful.border_width / 2
-    cr:move_to(padding, height)
-    cr:line_to(padding, padding)
-    cr:line_to(width - padding, padding)
-    cr:line_to(width - padding, height)
-    cr:set_source(border_color)
-    cr:set_line_width(beautiful.border_width)
-    cr:stroke()
+    border.draw(cr, width, height, border_color, border_top)
 end
 
+
+local border_bottom = border["bottom"] + border["left"] + border["right"]
 local function draw_tb_border_bgimage_bottom(context, cr, width, height)
     local c = context["client"]
-    local space_color = gcolor(beautiful.border_space)
-    cr:set_source(space_color)
-    cr:paint()
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    local padding = beautiful.border_outer_space + beautiful.border_width / 2
-    cr:move_to(padding, 0)
-    cr:line_to(padding, height - padding)
-    cr:line_to(width - padding, height - padding)
-    cr:line_to(width - padding, 0)
-    cr:set_source(border_color)
-    cr:set_line_width(beautiful.border_width)
-    cr:stroke()
+    border.draw(cr, width, height, border_color, border_bottom)
 end
 
+local border_left = border["left"]
 local function draw_tb_border_bgimage_left(context, cr, width, height)
     local c = context["client"]
-    local space_color = gcolor(beautiful.border_space)
-    cr:set_source(space_color)
-    cr:paint()
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    local padding = beautiful.border_outer_space + beautiful.border_width / 2
-    cr:move_to(padding, 0)
-    cr:line_to(padding, height)
-    cr:set_source(border_color)
-    cr:set_line_width(beautiful.border_width)
-    cr:stroke()
+    border.draw(cr, width, height, border_color, border_left)
 end
 
+local border_right = border["right"]
 local function draw_tb_border_bgimage_right(context, cr, width, height)
     local c = context["client"]
-    local space_color = gcolor(beautiful.border_space)
-    cr:set_source(space_color)
-    cr:paint()
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    local padding = beautiful.border_outer_space + beautiful.border_width / 2
-    cr:move_to(width - padding, 0)
-    cr:line_to(width - padding, height)
-    cr:set_source(border_color)
-    cr:set_line_width(beautiful.border_width)
-    cr:stroke()
+    border.draw(cr, width, height, border_color, border_right)
 end
 
 local function create_titlebars(c)

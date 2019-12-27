@@ -28,6 +28,7 @@ local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
 local fixed_align = require("fixed_align")
 local masked_imagebox = require("masked_imagebox")
+local border = require("border-helper")
 local debug_container = require("debug_container")
 local cbg = require("contextual_background")
 local aux = require("aux")
@@ -64,6 +65,13 @@ local size_index = {
     ["right"] = "width",
 }
 
+local dual_size_index = {
+    ["top"] = "width",
+    ["bottom"] = "width",
+    ["left"] = "height",
+    ["right"] = "height",
+}
+
 local top_index = {
     ["bottom"] = "top",
     ["top"] = "bottom",
@@ -90,6 +98,13 @@ local direction_index = {
     ["bottom"] = "horizontal",
     ["left"] = "vertical",
     ["right"] = "vertical",
+}
+
+local dual_direction_index = {
+    ["top"] = "vertical",
+    ["bottom"] = "vertical",
+    ["left"] = "horizontal",
+    ["right"] = "horizontal",
 }
 
 local gravity_index = {
@@ -568,6 +583,51 @@ local function alt_color(color)
    return alt_color_cache[color]
 end
 
+space_filler_with_left_right_borders = {
+    {
+        bgimage = function (context, cr, width, height)
+            border.draw(cr, width, height, beautiful.border_focus,
+                        border[right_index[shared.var.bar_position]] +
+                            border[top_index[shared.var.bar_position]])
+        end,
+        ["forced_"..dual_size_index[shared.var.bar_position]] =
+            beautiful.border_inner_space + beautiful.border_width + beautiful.border_outer_space,
+        widget = wibox.container.background
+    },
+    {
+        buttons = root_buttons,
+        ["content_fill_"..direction_index[shared.var.bar_position]] = true,
+        widget = wibox.container.place,
+    },
+    {
+        bgimage = function (context, cr, width, height)
+            border.draw(cr, width, height, beautiful.border_focus,
+                        border[left_index[shared.var.bar_position]] +
+                            border[top_index[shared.var.bar_position]])
+        end,
+        ["forced_"..dual_size_index[shared.var.bar_position]] =
+            beautiful.border_inner_space + beautiful.border_width + beautiful.border_outer_space,
+        widget = wibox.container.background
+    },
+    layout = wibox.layout.align[direction_index[shared.var.bar_position]]
+}
+
+local function with_top_border(widget)
+    return wibox.widget {
+        {
+            bgimage = function (context, cr, width, height)
+                border.draw(cr, width, height, beautiful.border_focus,
+                            border[top_index[shared.var.bar_position]])
+            end,
+            ["forced_"..size_index[shared.var.bar_position]] =
+                beautiful.border_inner_space + beautiful.border_width + beautiful.border_outer_space,
+            widget = wibox.container.background
+        },
+        widget,
+        layout = wibox.layout.align[dual_direction_index[shared.var.bar_position]]
+    }
+end
+
 local function setup_screen(scr)
    local s = scr.index
 
@@ -687,7 +747,10 @@ local function setup_screen(scr)
          fg = beautiful.fg_normal,
          bg = "#00000000",
          [size_index[shared.var.bar_position]] =
-             beautiful.bar_height + beautiful.border_width,
+             beautiful.bar_height +
+             beautiful.border_outer_space +
+             beautiful.border_width +
+             beautiful.border_inner_space,
          position = shared.var.bar_position,
          border_width = 0,
          cursor = "cross",
@@ -749,69 +812,31 @@ local function setup_screen(scr)
    local layout
 
    if beautiful.bar_style == "minimal" then
-       layout = wibox.widget {
+       layout = with_top_border {
+           left_layout,
            {
-               {
-                   left_layout,
-                   {
-                       tasklist_with_fallback,
-                       ["content_fill_"..direction_index[shared.var.bar_position]] = true,
-                       widget = wibox.container.place,
-                   },
-                   {
-                       right_layout,
-                       [direction_index[shared.var.bar_position] == "horizontal" and "left" or "top"] = dpi(5),
-                       widget = wibox.container.margin,
-                   },
-                   layout = wibox.layout.align[direction_index[shared.var.bar_position]],
-               },
-               [top_index[shared.var.bar_position]] = beautiful.border_width,
-               color = beautiful.border_focus,
+               tasklist_with_fallback,
+               ["content_fill_"..direction_index[shared.var.bar_position]] = true,
+               widget = wibox.container.place,
+           },
+           {
+               right_layout,
+               [direction_index[shared.var.bar_position] == "horizontal" and "left" or "top"] = dpi(5),
                widget = wibox.container.margin,
            },
+           layout = wibox.layout.align[direction_index[shared.var.bar_position]],
+       }
+   else
+       local middle = with_top_border {
+           tasklist_with_fallback,
            bg = beautiful.bg_normal,
            widget = wibox.container.background,
        }
-   else
-       local middle = fixed_margin(
-           wibox.widget {
-               {
-                   tasklist_with_fallback,
-                   bg = beautiful.bg_normal,
-                   widget = wibox.container.background,
-               },
-               draw_empty = false,
-               [top_index[shared.var.bar_position]] = beautiful.border_width,
-               color = beautiful.border_focus,
-               widget = wibox.container.margin,
-       })
        middle = {
            {
-               {
-                   wibox.widget {
-                       buttons = root_buttons,
-                       ["content_fill_"..direction_index[shared.var.bar_position]] = true,
-                       widget = wibox.container.place,
-                   },
-                   draw_empty = false,
-                   [left_index[shared.var.bar_position]] = beautiful.border_width,
-                   [right_index[shared.var.bar_position]] = beautiful.border_width,
-                   color = beautiful.border_focus,
-                   widget = wibox.container.margin,
-               },
+               space_filler_with_left_right_borders,
                middle,
-               {
-                   {
-                       buttons = root_buttons,
-                       ["content_fill_"..direction_index[shared.var.bar_position]] = true,
-                       widget = wibox.container.place,
-                   },
-                   draw_empty = false,
-                   [left_index[shared.var.bar_position]] = beautiful.border_width,
-                   [right_index[shared.var.bar_position]] = beautiful.border_width,
-                   color = beautiful.border_focus,
-                   widget = wibox.container.margin,
-               },
+               space_filler_with_left_right_borders,
                expand = "outside",
                layout = fixed_align[direction_index[shared.var.bar_position]],
            },
@@ -819,49 +844,26 @@ local function setup_screen(scr)
            widget = wibox.container.place,
        }
        layout = wibox.widget {
-           {
-               {
-                   left_layout,
-                   bg = beautiful.bg_normal,
-                   widget = wibox.container.background,
-               },
-               draw_empty = true,
-               [top_index[shared.var.bar_position]] = beautiful.border_width,
-               color = beautiful.border_focus,
-               widget = wibox.container.margin,
+           with_top_border {
+               left_layout,
+               bg = beautiful.bg_normal,
+               widget = wibox.container.background,
            },
            {
                middle,
-               {
-                   {
-                       buttons = root_buttons,
-                       ["fill_"..direction_index[shared.var.bar_position]] = true,
-                       widget = wibox.container.place,
-                   },
-                   draw_empty = true,
-                   [left_index[shared.var.bar_position]] = beautiful.border_width,
-                   [right_index[shared.var.bar_position]] = beautiful.border_width,
-                   color = beautiful.border_focus,
-                   widget = wibox.container.margin,
-               },
+               space_filler_with_left_right_borders,
                draw_last = true,
                widget = fallback,
            },
-           {
+           with_top_border {
                {
-                   {
-                       right_layout,
-                       draw_empty = false,
-                       [direction_index[shared.var.bar_position] == "horizontal" and "left" or "top"] = dpi(5),
-                       widget = wibox.container.margin,
-                   },
-                   bg = beautiful.bg_normal,
-                   widget = wibox.container.background,
+                   right_layout,
+                   draw_empty = false,
+                   [direction_index[shared.var.bar_position] == "horizontal" and "left" or "top"] = dpi(5),
+                   widget = wibox.container.margin,
                },
-               draw_empty = true,
-               [top_index[shared.var.bar_position]] = beautiful.border_width,
-               color = beautiful.border_focus,
-               widget = wibox.container.margin,
+               bg = beautiful.bg_normal,
+               widget = wibox.container.background,
            },
            expand = "inside",
            layout = wibox.layout.align[direction_index[shared.var.bar_position]],

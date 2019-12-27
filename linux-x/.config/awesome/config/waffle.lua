@@ -845,15 +845,13 @@ do
             layout = wibox.layout.stack
         },
         label_widget = wibox.widget {
-            fixed_margin(
-                wibox.widget {
-                    mpd_text_widget,
-                    draw_empty = false,
-                    left = dpi(5),
-                    right = dpi(5),
-                    widget = wibox.container.margin,
-                }
-            ),
+            {
+                mpd_text_widget,
+                draw_empty = false,
+                left = dpi(5),
+                right = dpi(5),
+                widget = fixed_margin,
+            },
             {
                 text = "Music",
                 align = "center",
