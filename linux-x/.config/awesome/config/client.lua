@@ -60,7 +60,7 @@ function shared.client.titlebar_hide(c)
             capi.client.emit_signal("list")
         end
     end
-    -- c:geometry(geo)
+    c:geometry(geo)
 end
 
 local table_join = awful.util.table.join
