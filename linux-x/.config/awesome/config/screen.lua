@@ -686,7 +686,8 @@ local function setup_screen(scr)
          screen = s,
          fg = beautiful.fg_normal,
          bg = "#00000000",
-         [size_index[shared.var.bar_position]] = beautiful.bar_height + beautiful.border_width,
+         [size_index[shared.var.bar_position]] =
+             beautiful.bar_height + beautiful.border_width,
          position = shared.var.bar_position,
          border_width = 0,
          cursor = "cross",
