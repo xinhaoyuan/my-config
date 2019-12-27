@@ -166,7 +166,12 @@ fortune_widget.watch:connect_signal(
 )
 
 function shared.screen.toggle_fortune()
-   fortune_widget:set_visible(not fortune_widget:get_visible())
+    -- TODO: Investigate why using set_visible would not let it show up.
+    if fortune_widget:get_forced_width() == 0 then
+        fortune_widget:set_forced_width(nil)
+    else
+        fortune_widget:set_forced_width(0)
+    end
 end
 
 function shared.screen.get_fortune()
@@ -585,46 +590,47 @@ end
 
 space_filler_with_left_right_borders = {
     {
-        bgimage = function (context, cr, width, height)
-            border.draw(cr, width, height, beautiful.border_focus,
-                        border[right_index[shared.var.bar_position]] +
-                            border[top_index[shared.var.bar_position]])
-        end,
-        ["forced_"..dual_size_index[shared.var.bar_position]] =
-            beautiful.border_inner_space + beautiful.border_width + beautiful.border_outer_space,
-        widget = wibox.container.background
-    },
-    {
         buttons = root_buttons,
         ["content_fill_"..direction_index[shared.var.bar_position]] = true,
         widget = wibox.container.place,
     },
-    {
-        bgimage = function (context, cr, width, height)
-            border.draw(cr, width, height, beautiful.border_focus,
-                        border[left_index[shared.var.bar_position]] +
-                            border[top_index[shared.var.bar_position]])
-        end,
-        ["forced_"..dual_size_index[shared.var.bar_position]] =
-            beautiful.border_inner_space + beautiful.border_width + beautiful.border_outer_space,
-        widget = wibox.container.background
-    },
-    layout = wibox.layout.align[direction_index[shared.var.bar_position]]
+    bgimage = function (context, cr, width, height)
+        -- TODO: Support rotation.
+        local total_width = beautiful.border_inner_space + beautiful.border_width +
+            beautiful.border_outer_space
+        cr:save()
+        cr:rectangle(0, 0, total_width, height)
+        cr:clip()
+        border.draw(cr, total_width, height, beautiful.border_focus,
+                    border[right_index[shared.var.bar_position]] +
+                        border[top_index[shared.var.bar_position]])
+        cr:restore()
+        cr:save()
+        cr:translate(width - total_width, 0)
+        cr:rectangle(0, 0, total_width, height)
+        cr:clip()
+        border.draw(cr, total_width, height, beautiful.border_focus,
+                    border[left_index[shared.var.bar_position]] +
+                        border[top_index[shared.var.bar_position]])
+        cr:restore()
+    end,
+    widget = wibox.container.background
 }
 
 local function with_top_border(widget)
     return wibox.widget {
         {
-            bgimage = function (context, cr, width, height)
-                border.draw(cr, width, height, beautiful.border_focus,
-                            border[top_index[shared.var.bar_position]])
-            end,
-            ["forced_"..size_index[shared.var.bar_position]] =
+            widget,
+            [top_index[shared.var.bar_position]] =
                 beautiful.border_inner_space + beautiful.border_width + beautiful.border_outer_space,
-            widget = wibox.container.background
+            draw_empty = false,
+            widget = fixed_margin,
         },
-        widget,
-        layout = wibox.layout.align[dual_direction_index[shared.var.bar_position]]
+        bgimage = function (context, cr, width, height)
+            border.draw(cr, width, height, beautiful.border_focus,
+                        border[top_index[shared.var.bar_position]])
+        end,
+        widget = wibox.container.background
     }
 end
 
@@ -817,7 +823,7 @@ local function setup_screen(scr)
            {
                tasklist_with_fallback,
                ["content_fill_"..direction_index[shared.var.bar_position]] = true,
-               widget = wibox.container.place,
+               widget = wibox.place,
            },
            {
                right_layout,

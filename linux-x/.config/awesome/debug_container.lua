@@ -1,3 +1,4 @@
+local wibox = require("wibox")
 local base = require("wibox.widget.base")
 local gtable = require("gears.table")
 
@@ -57,6 +58,16 @@ end
 
 function debug_container.mt:__call(...)
    return self:new(...)
+end
+
+function debug_container.with_name(name)
+    return function (widget)
+        return wibox.widget {
+            widget,
+            debug_name = name,
+            widget = debug_container
+        }
+    end
 end
 
 setmetatable(debug_container, debug_container.mt)
