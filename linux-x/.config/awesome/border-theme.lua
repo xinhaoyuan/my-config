@@ -31,9 +31,11 @@ local default_theme = {}
 
 function default_theme:before_draw(context, cr)
     if self.inited == nil then
-        self.line_width = beautiful.border_width
-        self.padding = beautiful.border_outer_space + beautiful.border_width / 2
-        self.size = beautiful.border_outer_space + beautiful.border_width + beautiful.border_inner_space
+        local inner_space = beautiful.border_inner_space or 0
+        local outer_space = beautiful.border_outer_space or 0
+        self.line_width = beautiful.border_width - inner_space - outer_space
+        self.padding = outer_space + self.line_width / 2
+        self.size = beautiful.border_width
         self.inited = true
     end
     cr:save()
@@ -99,8 +101,8 @@ end
 
 mod.theme = default_theme
 
-function mod.draw(context, cr, width, height, directions)
-    local theme = mod.theme
+function mod:draw(context, cr, width, height, directions)
+    local theme = self.theme
     theme:before_draw(context, cr)
     if directions == 15 then
         -- full box

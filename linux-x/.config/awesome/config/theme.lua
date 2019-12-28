@@ -48,7 +48,7 @@ theme.fg_minimize   = theme.bg_normal
 
 theme.useless_gap   = dpi(3)
 
-theme.border_width  = dpi(2)
+theme.border_width  = dpi(4)
 theme.border_outer_space = dpi(1)
 theme.border_inner_space = dpi(1)
 theme.border_space = theme.bg_normal

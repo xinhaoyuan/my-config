@@ -199,11 +199,11 @@ local function decorate(widget)
                 fg = beautiful.fg_normal,
                 widget = wibox.container.background,
             },
-            margins = beautiful.border_inner_space + beautiful.border_width + beautiful.border_outer_space,
+            margins = beautiful.border_width,
             widget = wibox.container.margin,
         },
         bgimage = function (context, cr, width, height)
-            border.draw({ color = beautiful.border_focus }, cr, width, height, decorate_border)
+            border:draw({ color = beautiful.border_focus }, cr, width, height, decorate_border)
         end,
         widget = wibox.container.background
     }

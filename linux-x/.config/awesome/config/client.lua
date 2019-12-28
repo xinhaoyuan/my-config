@@ -251,7 +251,7 @@ local border_top = border.directions{ "top", "left", "right" }
 local function draw_tb_border_bgimage_top(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    border.draw({ color = border_color }, cr, width, height, border_top)
+    border:draw({ color = border_color }, cr, width, height, border_top)
 end
 
 
@@ -259,50 +259,49 @@ local border_bottom = border.directions{ "bottom", "left", "right" }
 local function draw_tb_border_bgimage_bottom(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    border.draw({ color = border_color }, cr, width, height, border_bottom)
+    border:draw({ color = border_color }, cr, width, height, border_bottom)
 end
 
 local border_left = border.directions{ "left" }
 local function draw_tb_border_bgimage_left(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    border.draw({ color = border_color }, cr, width, height, border_left)
+    border:draw({ color = border_color }, cr, width, height, border_left)
 end
 
 local border_right = border.directions{ "right" }
 local function draw_tb_border_bgimage_right(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    border.draw({ color = border_color }, cr, width, height, border_right)
+    border:draw({ color = border_color }, cr, width, height, border_right)
 end
 
 local function create_titlebars(c)
-    local total_size = beautiful.border_outer_space + beautiful.border_width + beautiful.border_inner_space
     awful.titlebar(c,
                    {
                        position = "top",
-                       size = total_size,
+                       size = beautiful.border_width,
                        bgimage = draw_tb_border_bgimage_top,
                    }
     ) : setup({ widget = wibox.container.background })
     awful.titlebar(c,
                    {
                        position = "bottom",
-                       size = total_size,
+                       size = beautiful.border_width,
                        bgimage = draw_tb_border_bgimage_bottom,
                    }
     ) : setup({ widget = wibox.container.background })
     awful.titlebar(c,
                    {
                        position = "left",
-                       size = total_size,
+                       size = beautiful.border_width,
                        bgimage = draw_tb_border_bgimage_left,
                    }
     ) : setup({ widget = wibox.container.background })
     awful.titlebar(c,
                    {
                        position = "right",
-                       size = total_size,
+                       size = beautiful.border_width,
                        bgimage = draw_tb_border_bgimage_right,
                    }
     ) : setup({ widget = wibox.container.background })

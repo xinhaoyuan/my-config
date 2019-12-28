@@ -596,19 +596,18 @@ space_filler_with_left_right_borders = {
     },
     bgimage = function (context, cr, width, height)
         -- TODO: Support rotation.
-        local total_width = beautiful.border_inner_space + beautiful.border_width +
-            beautiful.border_outer_space
+        local total_width = beautiful.border_width
         cr:save()
         cr:rectangle(0, 0, total_width, height)
         cr:clip()
-        border.draw({ color = beautiful.border_focus }, cr, total_width, height,
+        border:draw({ color = beautiful.border_focus }, cr, total_width, height,
             border.directions{ right_index[shared.var.bar_position], top_index[shared.var.bar_position] })
         cr:restore()
         cr:save()
         cr:translate(width - total_width, 0)
         cr:rectangle(0, 0, total_width, height)
         cr:clip()
-        border.draw({ color = beautiful.border_focus }, cr, total_width, height,
+        border:draw({ color = beautiful.border_focus }, cr, total_width, height,
             border.directions{ left_index[shared.var.bar_position], top_index[shared.var.bar_position] })
         cr:restore()
     end,
@@ -619,13 +618,12 @@ local function with_top_border(widget)
     return wibox.widget {
         {
             widget,
-            [top_index[shared.var.bar_position]] =
-                beautiful.border_inner_space + beautiful.border_width + beautiful.border_outer_space,
+            [top_index[shared.var.bar_position]] = beautiful.border_width,
             draw_empty = false,
             widget = fixed_margin,
         },
         bgimage = function (context, cr, width, height)
-            border.draw({ color = beautiful.border_focus }, cr, width, height,
+            border:draw({ color = beautiful.border_focus }, cr, width, height,
                 border.directions{ top_index[shared.var.bar_position] })
         end,
         widget = wibox.container.background
@@ -753,9 +751,7 @@ local function setup_screen(scr)
          bg = "#00000000",
          [size_index[shared.var.bar_position]] =
              beautiful.bar_height +
-             beautiful.border_outer_space +
-             beautiful.border_width +
-             beautiful.border_inner_space,
+             beautiful.border_width,
          position = shared.var.bar_position,
          border_width = 0,
          cursor = "cross",
