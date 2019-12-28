@@ -36,8 +36,8 @@
 
 window {
     background-color: @background;
-    border:           0.15em;
-    padding:          0.15em;
+    border:           0;
+    padding:          0;
     width:            30em;
 }
 mainbox {
