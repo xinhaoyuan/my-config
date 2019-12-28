@@ -1,4 +1,4 @@
--- Draw functions for enhanced
+-- Draw functions for enhanced borders
 
 local gcache = require("gears.cache")
 local gcolor = require("gears.color")
