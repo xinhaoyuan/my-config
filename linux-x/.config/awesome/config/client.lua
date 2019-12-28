@@ -15,7 +15,7 @@ local gtimer = require("gears.timer")
 local gshape = require("gears.shape")
 local gcolor = require("gears.color")
 local machi = require("layout-machi")
-local border = require("border-helper")
+local border = require("border-theme")
 
 function shared.client.titlebar_toggle(c)
    if not c.has_titlebar_enabled then
@@ -247,33 +247,33 @@ local opposite_dir = {
 --     c.titlebar_container = titlebar_container
 -- end
 
-local border_top = border["top"] + border["left"] + border["right"]
+local border_top = border.directions{ "top", "left", "right" }
 local function draw_tb_border_bgimage_top(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    border.draw(cr, width, height, border_color, border_top)
+    border.draw({ color = border_color }, cr, width, height, border_top)
 end
 
 
-local border_bottom = border["bottom"] + border["left"] + border["right"]
+local border_bottom = border.directions{ "bottom", "left", "right" }
 local function draw_tb_border_bgimage_bottom(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    border.draw(cr, width, height, border_color, border_bottom)
+    border.draw({ color = border_color }, cr, width, height, border_bottom)
 end
 
-local border_left = border["left"]
+local border_left = border.directions{ "left" }
 local function draw_tb_border_bgimage_left(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    border.draw(cr, width, height, border_color, border_left)
+    border.draw({ color = border_color }, cr, width, height, border_left)
 end
 
-local border_right = border["right"]
+local border_right = border.directions{ "right" }
 local function draw_tb_border_bgimage_right(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    border.draw(cr, width, height, border_color, border_right)
+    border.draw({ color = border_color }, cr, width, height, border_right)
 end
 
 local function create_titlebars(c)

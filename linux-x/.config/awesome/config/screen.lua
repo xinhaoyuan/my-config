@@ -28,7 +28,7 @@ local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
 local fixed_align = require("fixed_align")
 local masked_imagebox = require("masked_imagebox")
-local border = require("border-helper")
+local border = require("border-theme")
 local debug_container = require("debug_container")
 local cbg = require("contextual_background")
 local aux = require("aux")
@@ -601,17 +601,15 @@ space_filler_with_left_right_borders = {
         cr:save()
         cr:rectangle(0, 0, total_width, height)
         cr:clip()
-        border.draw(cr, total_width, height, beautiful.border_focus,
-                    border[right_index[shared.var.bar_position]] +
-                        border[top_index[shared.var.bar_position]])
+        border.draw({ color = beautiful.border_focus }, cr, total_width, height,
+            border.directions{ right_index[shared.var.bar_position], top_index[shared.var.bar_position] })
         cr:restore()
         cr:save()
         cr:translate(width - total_width, 0)
         cr:rectangle(0, 0, total_width, height)
         cr:clip()
-        border.draw(cr, total_width, height, beautiful.border_focus,
-                    border[left_index[shared.var.bar_position]] +
-                        border[top_index[shared.var.bar_position]])
+        border.draw({ color = beautiful.border_focus }, cr, total_width, height,
+            border.directions{ left_index[shared.var.bar_position], top_index[shared.var.bar_position] })
         cr:restore()
     end,
     widget = wibox.container.background
@@ -627,8 +625,8 @@ local function with_top_border(widget)
             widget = fixed_margin,
         },
         bgimage = function (context, cr, width, height)
-            border.draw(cr, width, height, beautiful.border_focus,
-                        border[top_index[shared.var.bar_position]])
+            border.draw({ color = beautiful.border_focus }, cr, width, height,
+                border.directions{ top_index[shared.var.bar_position] })
         end,
         widget = wibox.container.background
     }

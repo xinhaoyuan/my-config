@@ -20,7 +20,7 @@ local fixed_margin = require("fixed_margin")
 local outlined_textbox = require("outlined_textbox")
 local cbg = require("contextual_background")
 local masked_imagebox = require("masked_imagebox")
-local border = require("border-helper")
+local border = require("border-theme")
 local aux = require("aux")
 local mpc = require("mpc")
 local dpi = require("beautiful.xresources").apply_dpi
@@ -189,7 +189,7 @@ local function button(args)
    return ret
 end
 
-local decorate_border = border["top"] + border["bottom"] + border["left"] + border["right"]
+local decorate_border = border.directions { "top", "bottom", "left", "right" }
 local function decorate(widget)
     return wibox.widget {
         {
@@ -203,7 +203,7 @@ local function decorate(widget)
             widget = wibox.container.margin,
         },
         bgimage = function (context, cr, width, height)
-            border.draw(cr, width, height, beautiful.border_focus, decorate_border)
+            border.draw({ color = beautiful.border_focus }, cr, width, height, decorate_border)
         end,
         widget = wibox.container.background
     }
