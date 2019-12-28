@@ -91,7 +91,7 @@ local function context_focused(context)
     context.focus = true
 end
 
-local function simple_button(args)
+local function button(args)
    local action = args.action
    local width
    if not args.no_force_width then
@@ -211,7 +211,7 @@ end
 
 local waffle_poweroff_count = 0
 local waffle_poweroff_button = nil
-waffle_poweroff_button = simple_button({
+waffle_poweroff_button = button({
       markup = "",
       indicator = em("p"),
       key = "p",
@@ -249,7 +249,7 @@ local waffle_poweroff_view = create_view(decorate(waffle_poweroff_button))
 local waffle_settings_view = create_view(
    decorate(
       wibox.widget {
-         -- simple_button({
+         -- button({
          --       markup = "Toggle titlebars",
          --       indicator = em("t"),
          --       key = "t",
@@ -274,7 +274,7 @@ local waffle_settings_view = create_view(
          --          waffle:hide()
          --       end
          -- }),
-         simple_button({
+         button({
                markup = "Toggle fortune",
                indicator = em("f"),
                key = "f",
@@ -283,7 +283,7 @@ local waffle_settings_view = create_view(
                   waffle:hide()
                end
          }),
-         simple_button({
+         button({
                markup = "Cycle bar styles",
                indicator = em("b"),
                key = "b",
@@ -300,7 +300,7 @@ local waffle_settings_view = create_view(
                   capi.screen.emit_signal("list")
                end
          }),
-         simple_button({
+         button({
                markup = "Wallpaper",
                indicator = em("w"),
                key = "w",
@@ -309,7 +309,7 @@ local waffle_settings_view = create_view(
                   waffle:hide()
                end
          }),
-         simple_button({
+         button({
                markup = "Screen layout",
                indicator = em("s"),
                key = "s",
@@ -326,7 +326,7 @@ local waffle_settings_view = create_view(
                   waffle:hide()
                end
          }),
-         simple_button({
+         button({
                markup = "Pulse audio",
                indicator = em("a"),
                key = "a",
@@ -831,7 +831,7 @@ do
     )
     mpc_ping_timer:start()
 
-    mpd_widget = simple_button {
+    mpd_widget = button {
         icon_widget = wibox.widget {
             mpd_icon_widget,
             {
@@ -940,7 +940,7 @@ local waffle_root_view = create_view(
       -- ),
       decorate(
          wibox.widget {
-            simple_button({
+            button({
                   icon = gcolor.recolor_image(icons.launcher, beautiful.fg_normal),
                   markup = "Launcher",
                   indicator = em("\\"),
@@ -954,7 +954,7 @@ local waffle_root_view = create_view(
                      waffle:hide()
                   end
             }),
-            simple_button({
+            button({
                   icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal),
                   markup = "Terminal",
                   indicator = em("↵"),
@@ -968,7 +968,7 @@ local waffle_root_view = create_view(
                      waffle:hide()
                   end
             }),
-            simple_button({
+            button({
                   icon = gcolor.recolor_image(icons.browser, beautiful.fg_normal),
                   markup = "Web browser",
                   indicator = em("w"),
@@ -978,7 +978,7 @@ local waffle_root_view = create_view(
                      waffle:hide()
                   end
             }),
-            simple_button({
+            button({
                   icon = gcolor.recolor_image(icons.file_manager, beautiful.fg_normal),
                   markup = "File manager",
                   indicator = em("e"),
@@ -988,7 +988,7 @@ local waffle_root_view = create_view(
                      waffle:hide()
                   end
             }),
-            simple_button({
+            button({
                   icon = gcolor.recolor_image(icons.fortune, beautiful.fg_normal),
                   markup = "Fortune",
                   indicator = em("f"),
@@ -1001,7 +1001,7 @@ local waffle_root_view = create_view(
                      waffle:hide()
                   end
             }),
-            simple_button({
+            button({
                   icon = gcolor.recolor_image(icons.setup, beautiful.fg_normal),
                   markup = "Settings",
                   indicator = em("s"),
@@ -1041,7 +1041,7 @@ local waffle_root_view = create_view(
       }),
       decorate(
          wibox.widget {
-            simple_button({
+            button({
                   icon = gcolor.recolor_image(icons.lock, beautiful.fg_normal),
                   markup = "Lock screen",
                   indicator = em("l"),
@@ -1051,7 +1051,7 @@ local waffle_root_view = create_view(
                      waffle:hide()
                   end
             }),
-            simple_button({
+            button({
                   icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
                   markup = "Suspend",
                   indicator = em("u"),
@@ -1061,7 +1061,7 @@ local waffle_root_view = create_view(
                      waffle:hide()
                   end
             }),
-            simple_button({
+            button({
                   icon = gcolor.recolor_image(icons.poweroff, beautiful.fg_normal),
                   markup = "Power off",
                   indicator = em("p"),
@@ -1086,9 +1086,8 @@ local client_waffle = create_view(
     wibox.widget {
         decorate(
             wibox.widget {
-                simple_button({
+                button({
                         markup = "Close",
-                        no_force_width = true,
                         action = function (alt)
                             waffle:hide()
                             if not client_waffle_selected.valid then
@@ -1097,9 +1096,8 @@ local client_waffle = create_view(
                             client_waffle_selected:kill()
                         end
                 }),
-                simple_button({
-                        markup = "(Un)maximize",
-                        no_force_width = true,
+                button({
+                        markup = "Toggle max",
                         action = function (alt)
                             waffle:hide()
                             if not client_waffle_selected.valid then
@@ -1108,7 +1106,7 @@ local client_waffle = create_view(
                             client_waffle_selected.maximized = not client_waffle_selected.maximized
                         end
                 }),
-                layout = wibox.layout.fixed.horizontal,
+                layout = wibox.layout.fixed.vertical,
         }),
         spacing = dpi(10),
         layout = wibox.layout.fixed.vertical,
