@@ -249,31 +249,31 @@ local waffle_poweroff_view = create_view(decorate(waffle_poweroff_button))
 local waffle_settings_view = create_view(
    decorate(
       wibox.widget {
-         simple_button({
-               markup = "Toggle titlebars",
-               indicator = em("t"),
-               key = "t",
-               action = function (alt)
-                  if not alt then
-                     if shared.var.enable_titlebar then
-                        for _, c in ipairs(capi.client.get()) do
-                           shared.client.titlebar_disable(c)
-                        end
-                        shared.var.enable_titlebar = false
-                     else
-                        for _, c in ipairs(capi.client.get()) do
-                           shared.client.titlebar_enable(c)
-                        end
-                        shared.var.enable_titlebar = true
-                     end
-                  else
-                      shared.var.hide_clients_with_titlebars =
-                          not shared.var.hide_clients_with_titlebars
-                      capi.client.emit_signal("list")
-                  end
-                  waffle:hide()
-               end
-         }),
+         -- simple_button({
+         --       markup = "Toggle titlebars",
+         --       indicator = em("t"),
+         --       key = "t",
+         --       action = function (alt)
+         --          if not alt then
+         --             if shared.var.enable_titlebar then
+         --                for _, c in ipairs(capi.client.get()) do
+         --                   shared.client.titlebar_disable(c)
+         --                end
+         --                shared.var.enable_titlebar = false
+         --             else
+         --                for _, c in ipairs(capi.client.get()) do
+         --                   shared.client.titlebar_enable(c)
+         --                end
+         --                shared.var.enable_titlebar = true
+         --             end
+         --          else
+         --              shared.var.hide_clients_with_titlebars =
+         --                  not shared.var.hide_clients_with_titlebars
+         --              capi.client.emit_signal("list")
+         --          end
+         --          waffle:hide()
+         --       end
+         -- }),
          simple_button({
                markup = "Toggle fortune",
                indicator = em("f"),

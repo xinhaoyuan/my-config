@@ -169,6 +169,11 @@ function waffle:show(view, args)
     args = args or {}
     view = view or self.root_view_
     local screen = args.screen or awful.screen.focused()
+    if self.wibox_ ~= nil and self.wibox_.screen ~= screen then
+        self.wibox_.input_passthrough = true
+        self.wibox_.widget = nil
+        self.wibox_ = nil
+    end
     self.wibox_ = get_waffle_wibox(screen)
 
     self:update_layout(screen)
