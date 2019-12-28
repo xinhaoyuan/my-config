@@ -27,9 +27,9 @@ end
 
 -- Default theme as a template
 
-local default_border_theme = {}
+local default_theme = {}
 
-function default_border_theme:before_draw(context, cr)
+function default_theme:before_draw(context, cr)
     if self.inited == nil then
         self.line_width = beautiful.border_width
         self.padding = beautiful.border_outer_space + beautiful.border_width / 2
@@ -43,35 +43,35 @@ function default_border_theme:before_draw(context, cr)
     cr:set_source(gcolor(context.color))
 end
 
-function default_border_theme:top_left(context, cr)
+function default_theme:top_left(context, cr)
     cr:move_to(self.padding, self.size)
     cr:line_to(self.padding, self.padding)
     cr:line_to(self.size, self.padding)
     cr:stroke()
 end
 
-function default_border_theme:top_right(context, cr)
+function default_theme:top_right(context, cr)
     cr:move_to(self.size - self.padding, self.size)
     cr:line_to(self.size - self.padding, self.padding)
     cr:line_to(0, self.padding)
     cr:stroke()
 end
 
-function default_border_theme:bottom_left(context, cr)
+function default_theme:bottom_left(context, cr)
     cr:move_to(self.padding, 0)
     cr:line_to(self.padding, self.size - self.padding)
     cr:line_to(self.size, self.size - self.padding)
     cr:stroke()
 end
 
-function default_border_theme:bottom_right(context, cr)
+function default_theme:bottom_right(context, cr)
     cr:move_to(self.size - self.padding, 0)
     cr:line_to(self.size - self.padding, self.size - self.padding)
     cr:line_to(0, self.size - self.padding)
     cr:stroke()
 end
 
-function default_border_theme:top(context, cr, length)
+function default_theme:top(context, cr, length)
     if length <= 0 then
         return
     end
@@ -80,9 +80,9 @@ function default_border_theme:top(context, cr, length)
     cr:stroke()
 end
 
-default_border_theme.bottom = default_border_theme.top
+default_theme.bottom = default_theme.top
 
-function default_border_theme:left(context, cr, length)
+function default_theme:left(context, cr, length)
     if length <= 0 then
         return
     end
@@ -91,14 +91,16 @@ function default_border_theme:left(context, cr, length)
     cr:stroke()
 end
 
-default_border_theme.right = default_border_theme.left
+default_theme.right = default_theme.left
 
-function default_border_theme:after_draw(context, cr)
+function default_theme:after_draw(context, cr)
     cr:restore()
 end
 
+mod.theme = default_theme
+
 function mod.draw(context, cr, width, height, directions)
-    local theme = default_border_theme
+    local theme = mod.theme
     theme:before_draw(context, cr)
     if directions == 15 then
         -- full box
