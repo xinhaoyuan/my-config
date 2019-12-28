@@ -28,7 +28,7 @@
     selected-active-foreground:  @x-color11;
     selected-active-background:  @x-color8;
 
-    border-color:                @x-color12;
+    border-color:                @x-color14;
     separatorcolor:              @foreground;
     background-color:            @background;
     foreground-color:            @foreground;

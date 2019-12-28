@@ -358,6 +358,16 @@ require("awful.rules").rules = {
       },
    },
    {
+       rule = { class = "Rofi" },
+       properties = {
+           placement = awful.placement.centered,
+           skip_taskbar = true,
+           callback = function (c)
+               c:connect_signal("unfocus", function() c:kill() end)
+           end,
+       },
+   },
+   {
       rule = { class = "Plank", type = "dock" },
       properties = {
          floating = true,

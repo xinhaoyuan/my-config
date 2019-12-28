@@ -60,7 +60,7 @@ shared.action = {
                      "-show", "combi",
                      "-modi", "combi",
                      "-font", beautiful.font}
-        awful.spawn(cmd)
+        awful.spawn(cmd, false)
     end,
     app_finder = function ()
         awful.spawn("xfce4-appfinder")
