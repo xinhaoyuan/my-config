@@ -117,7 +117,7 @@ theme.font = theme.fontname_normal .. " 11"
 theme.font_mono = theme.fontname_mono .. " 11"
 theme.useless_gap = dpi(8)
 -- custom property number
-theme.bar_height = dpi(20)
+theme.bar_height = dpi(24)
 theme.menu_width = dpi(150)
 -- custom property color
 theme.special_normal = xrdb.color1

@@ -764,6 +764,15 @@ do
         widget = wibox.widget.textbox
     }
 
+    local mpd_progress_widget = wibox.widget {
+        max_value     = 1,
+        value         = 0,
+        forced_height = button_height,
+        color = beautiful.bg_focus.."80",
+        background_color = "#00000000",
+        widget        = wibox.widget.progressbar,
+    }
+
     local lighter_fg_normal = aux.color.from_string(beautiful.fg_normal):blend_with(beautiful.bg_normal, 0.75):to_string()
     local lighter_fg_focus = aux.color.from_string(beautiful.fg_focus):blend_with(beautiful.bg_focus, 0.75):to_string()
 
@@ -788,10 +797,34 @@ do
 
     local mpd_need_update = false
     local mpc_conn
+
+    local function update_mpd_status(result)
+        if result.state == "play" then
+            mpd_status_widget:set_text("▶")
+        elseif result.state == "pause" then
+            mpd_status_widget:set_text("⏸")
+        elseif result.state == "stop" then
+            mpd_status_widget:set_text("⏹")
+        else
+            mpd_status_widget:set_text(result.state)
+        end
+
+        local time = result["time"]
+        if time ~= nil then
+            local colon_pos = time:find(":")
+            if colon_pos ~= nil then
+                local played = tonumber(time:sub(1, colon_pos - 1))
+                local total = tonumber(time:sub(colon_pos + 1, #time))
+                mpd_progress_widget:set_value(played / total)
+            end
+        end
+    end
+
     local mpc_ping_timer = gtimer {
         timeout = 3,
         callback = function ()
-            mpc_conn:send("ping")
+            mpc_conn:send("status", function (_, result) update_mpd_status(result) end)
+            return true
         end
     }
     local function mpc_error_handler(err)
@@ -802,17 +835,7 @@ do
     mpc_conn = mpc.new(
         nil, nil, nil, mpc_error_handler,
         "status",
-        function(_, result)
-            if result.state == "play" then
-                mpd_status_widget:set_text("▶")
-            elseif result.state == "pause" then
-                mpd_status_widget:set_text("⏸")
-            elseif result.state == "stop" then
-                mpd_status_widget:set_text("⏹")
-            else
-                mpd_status_widget:set_text(result.state)
-            end
-        end,
+        function(_, result) update_mpd_status(result) end,
         "currentsong",
         function(_, result)
             local title, artist, file = result.title, result.artist, result.file
@@ -842,7 +865,11 @@ do
         },
         label_widget = wibox.widget {
             {
-                mpd_text_widget,
+                {
+                    mpd_progress_widget,
+                    mpd_text_widget,
+                    layout = wibox.layout.stack,
+                },
                 draw_empty = false,
                 left = dpi(5),
                 right = dpi(5),

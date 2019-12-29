@@ -181,7 +181,8 @@ end
 -- Screen bar
 
 local my_widgets = {}
-local my_tray = wibox.widget.systray()
+local my_tray
+my_tray = wibox.widget.systray()
 my_tray.horizontal = direction_index[shared.var.bar_position] == "horizontal"
 my_tray.base_size = beautiful.bar_height
 local my_tag_list_buttons = awful.util.table.join(
@@ -781,8 +782,8 @@ local function setup_screen(scr)
       layout         = wibox.layout.fixed[direction_index[shared.var.bar_position]]
    }
 
-   if scr == primary_screen then
-      right_layout:add(my_tray)
+   if scr == primary_screen and my_tray ~= nil then
+       right_layout:add(my_tray)
    end
 
    local clock
