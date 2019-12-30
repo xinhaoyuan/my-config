@@ -28,8 +28,8 @@ local dpi = require("beautiful.xresources").apply_dpi
 local waffle_width = beautiful.waffle_width or dpi(240)
 local button_height = dpi(20)
 local button_padding = dpi(4)
-local font_big = beautiful.fontname_normal .. " 10"
-local font_small = beautiful.fontname_mono .. " 7"
+local font_normal = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_normal)
+local font_info = beautiful.fontname_mono.." "..tostring(beautiful.fontsize_small)
 local graph_background = "#00000000"
 local graph_normal_color = aux.color.from_string(beautiful.border_focus):blend_with(beautiful.bg_normal, 0.25):to_string()
 local graph_color = graph_normal_color -- "linear:0,0:0,22:0,#FF0000:0.5," .. graph_normal_color
@@ -102,7 +102,7 @@ local function button(args)
       wibox.widget {
          markup = args.markup or nil,
          text = args.text or nil,
-         font = font_big,
+         font = font_normal,
          forced_height = button_height,
          align = "center",
          valign = "center",
@@ -126,7 +126,7 @@ local function button(args)
             args.indicator and {
                 {
                     text = args.indicator,
-                    font = font_big,
+                    font = font_normal,
                     forced_height = args.height or button_height,
                     align = "center",
                     valign = "center",
@@ -326,16 +326,6 @@ local waffle_settings_view = create_view(
                   waffle:hide()
                end
          }),
-         button({
-               markup = "Pulse audio",
-               indicator = em("a"),
-               key = "a",
-               action = function (alt)
-                  local cmd = {"pavucontrol"}
-                  awful.spawn(cmd)
-                  waffle:hide()
-               end
-         }),
          layout = wibox.layout.fixed.vertical,
    })
 )
@@ -400,7 +390,7 @@ do
          local diff_total = total - total_prev
          local diff_usage = (1000 * (diff_total - diff_idle) / diff_total + 5) / 10
 
-         local markup = "<span font_desc='" .. font_small .. "'>" .. tostring(math.floor(diff_usage)) .. "%</span>"
+         local markup = "<span font_desc='" .. font_info .. "'>" .. tostring(math.floor(diff_usage)) .. "%</span>"
          cpu_text_widget:set_markup(markup)
 
          cpugraph_widget:add_value(diff_usage)
@@ -480,7 +470,7 @@ do
          local total, available = stdout:match('MemTotal:%s+([0-9]+) .*MemAvailable:%s+([0-9]+)')
          local usage = math.floor((total - available) / total * 100 + 0.5)
 
-         local markup = "<span font_desc='" .. font_small .. "'>" .. format_size((total - available) * 1000) .. "B</span>"
+         local markup = "<span font_desc='" .. font_info .. "'>" .. format_size((total - available) * 1000) .. "B</span>"
          ram_text_widget:set_markup(markup)
 
          ramgraph_widget:add_value(usage)
@@ -625,7 +615,7 @@ do
 
             if prev_recv ~= nil then
                 local rx = (recv - prev_recv) / update_interval_s
-                local markup = "<span font_desc='" .. font_small .. "'>RX " .. format_size(rx) .. "B/s</span>"
+                local markup = "<span font_desc='" .. font_info .. "'>RX " .. format_size(rx) .. "B/s</span>"
                 rx_text_widget:set_markup(markup)
                 netgraph_rx_widget.max_value = 256 * 1024
                 netgraph_rx_widget:add_value(rx)
@@ -633,7 +623,7 @@ do
             prev_recv = recv
             if prev_send ~= nil then
                 local tx = (send - prev_send) / update_interval_s
-                local markup = "<span font_desc='" .. font_small .. "'>TX " .. format_size(tx) .. "B/s</span>"
+                local markup = "<span font_desc='" .. font_info .. "'>TX " .. format_size(tx) .. "B/s</span>"
                 tx_text_widget:set_markup(markup)
                 netgraph_tx_widget.max_value = 256 * 1024
                 netgraph_tx_widget:add_value(tx)
@@ -755,7 +745,7 @@ do
         widget = wibox.widget.textbox
     }
 
-    local mpd_text_widget = wibox.widget {
+    local mpd_title_widget = wibox.widget {
         text = "",
         align = "center",
         valign = "center",
@@ -764,10 +754,20 @@ do
         widget = wibox.widget.textbox
     }
 
+    local mpd_meta_widget = wibox.widget {
+        text = "",
+        align = "center",
+        valign = "center",
+        ellipsize = "end",
+        font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
+        forced_height = button_height,
+        widget = wibox.widget.textbox
+    }
+
     local mpd_progress_widget = wibox.widget {
         max_value     = 1,
         value         = 0,
-        forced_height = button_height,
+        forced_height = button_height * 2,
         color = beautiful.bg_focus.."80",
         background_color = "#00000000",
         widget        = wibox.widget.progressbar,
@@ -829,7 +829,7 @@ do
     }
     local function mpc_error_handler(err)
         mpd_status_widget:set_text("✖")
-        mpd_text_widget:set_text(tostring(err))
+        mpd_title_widget:set_text(tostring(err))
     end
 
     mpc_conn = mpc.new(
@@ -838,25 +838,29 @@ do
         function(_, result) update_mpd_status(result) end,
         "currentsong",
         function(_, result)
-            local title, artist, file = result.title, result.artist, result.file
+            local title, artist, album, file = result.title, result.artist, result.album, result.file
             -- for k, v in pairs(result) do
             --     print(tostring(k)..":"..tostring(v))
             -- end
-            local text = ""
-            if title then
-                text = title
-            end
+            mpd_title_widget:set_text(title or "")
+            local meta = {}
             if artist then
-                text = text.." - "..artist
+                meta[#meta + 1] = artist
             end
-            mpd_text_widget:set_text(text)
+            if album then
+                meta[#meta + 1] = album
+            end
+            mpd_meta_widget:set_text(table.concat(meta, " - "))
         end
     )
     mpc_ping_timer:start()
 
     mpd_widget = button {
         icon_widget = wibox.widget {
-            mpd_icon_widget,
+            {
+                mpd_icon_widget,
+                widget = wibox.container.place
+            },
             {
                 mpd_status_widget,
                 widget = wibox.container.place
@@ -867,7 +871,11 @@ do
             {
                 {
                     mpd_progress_widget,
-                    mpd_text_widget,
+                    {
+                        mpd_title_widget,
+                        mpd_meta_widget,
+                        layout = wibox.layout.fixed.vertical,
+                    },
                     layout = wibox.layout.stack,
                 },
                 draw_empty = false,
@@ -1035,7 +1043,7 @@ local waffle_root_view = create_view(
                   key = "s",
                   action = function (alt)
                       waffle:show(waffle_settings_view, { push = true })
-                  end
+                  end,
             }),
             layout = wibox.layout.fixed.vertical,
       }),
@@ -1049,20 +1057,16 @@ local waffle_root_view = create_view(
                },
                widget = fallback,
             },
-            {
-               {
-                  {
-                     image = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
-                     forced_height = button_height,
-                     forced_width = button_height,
-                     widget = wibox.widget.imagebox,
-                  },
-                  volumebar_widget,
-                  forced_width = waffle_width - button_padding * 2,
-                  layout = wibox.layout.fixed.horizontal,
-               },
-               margins = button_padding,
-               widget = wibox.container.margin,
+            button {
+                icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
+                label_widget = volumebar_widget,
+                indicator = em("a"),
+                key = "a",
+                action = function (alt)
+                    local cmd = {"pavucontrol"}
+                    awful.spawn(cmd)
+                    waffle:hide()
+                end,
             },
             layout = wibox.layout.fixed.vertical,
       }),

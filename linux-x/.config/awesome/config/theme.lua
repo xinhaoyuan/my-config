@@ -112,9 +112,12 @@ theme.notification_icon_size = dpi(48)
 theme.fontname_normal = "Iosevka SS08"
 -- custom property string
 theme.fontname_mono = "Iosevka SS08"
-theme.font = theme.fontname_normal .. " 11"
+-- custom property number
+theme.fontsize_normal = 11
+theme.fontsize_small = 9
+theme.font = theme.fontname_normal.." "..tostring(theme.fontsize_normal)
 -- custom property string font descriptor
-theme.font_mono = theme.fontname_mono .. " 11"
+theme.font_mono = theme.fontname_mono.." "..tostring(theme.fontsize_normal)
 theme.useless_gap = dpi(8)
 -- custom property number
 theme.bar_height = dpi(24)
