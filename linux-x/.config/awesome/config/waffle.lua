@@ -830,6 +830,7 @@ do
     local function mpc_error_handler(err)
         mpd_status_widget:set_text("✖")
         mpd_title_widget:set_text(tostring(err))
+        mpd_meta_widget:set_text("(╯°Д°)╯ ┻━┻")
     end
 
     mpc_conn = mpc.new(
