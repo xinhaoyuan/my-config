@@ -1154,13 +1154,42 @@ local client_waffle = create_view(
                             client_waffle_selected.maximized = not client_waffle_selected.maximized
                         end
                 }),
+                button({
+                        markup = "Toggle float",
+                        action = function (alt)
+                            waffle:hide()
+                            if not client_waffle_selected.valid then
+                                return
+                            end
+                            client_waffle_selected.floating = not client_waffle_selected.floating
+                        end
+                }),
+                button({
+                        markup = "Move",
+                        action = function (alt)
+                            waffle:hide()
+                            if not client_waffle_selected.valid then
+                                return
+                            end
+                            local geo = client_waffle_selected:geometry()
+                            mouse.coords({ x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 })
+                            awful.mouse.client.move(client_waffle_selected)
+                        end
+                }),
+                button({
+                        markup = "Resize",
+                        action = function (alt)
+                            waffle:hide()
+                            if not client_waffle_selected.valid then
+                                return
+                            end
+                            awful.mouse.client.resize(client_waffle_selected, "northeast")
+                        end
+                }),
                 layout = wibox.layout.fixed.vertical,
         }),
         spacing = dpi(10),
         layout = wibox.layout.fixed.vertical,
-    },
-    {
-        default_key_handler = hide_after_release,
     }
 )
 
