@@ -88,54 +88,57 @@ function shared.client.shrink(c)
 end
 
 local client_keys = table_join(
-   awful.key({ "Mod4" }, ".", function (c)
-         c.maximized = false
-         c.maximized_vertical = false
-         c.maximized_horizontal = false
-         c.fullscreen = false
-         c.floating = false
-         c:raise()
-         delayed(
-            function ()
-               machi.switcher.start(c)
+    awful.key({ "Mod4", "Shift" }, "F12", function (c)
+            shared.waffle.show_client_waffle(c, { anchor = false })
+    end),
+    awful.key({ "Mod4" }, ".", function (c)
+            c.maximized = false
+            c.maximized_vertical = false
+            c.maximized_horizontal = false
+            c.fullscreen = false
+            c.floating = false
+            c:raise()
+            delayed(
+                function ()
+                    machi.switcher.start(c)
+                end
+            )
+    end),
+
+    awful.key({ "Mod4" }, "Tab", function (c)
+            c.maximized = false
+            c.maximized_vertical = false
+            c.maximized_horizontal = false
+            c.fullscreen = false
+            c.floating = false
+            c:raise()
+            delayed(
+                function ()
+                    machi.switcher.start(c, {["Super_L"] = true})
+                end
+            )
+    end),
+
+    awful.key({ "Mod4" }, "Prior", shared.client.enlarge),
+    awful.key({ "Mod4" }, "Next", shared.client.shrink),
+    awful.key({ "Mod4" }, "=", function (c) c.ontop = not c.ontop end),
+    awful.key({ "Mod4" }, "-", function (c) c.sticky = not c.sticky end),
+
+    awful.key({ "Mod4" }, "t", function (c) shared.client.titlebar_toggle(c) end),
+
+    awful.key({ "Mod4" }, "f", function (c)
+            if c.fullscreen then
+            else
+                if c.floating then
+                    c.maximized = false;
+                    c.maximized_vertical = false;
+                    c.maximized_horizontal = false;
+                end
+                awful.client.floating.toggle(c);
             end
-         )
-   end),
+    end),
 
-   awful.key({ "Mod4" }, "Tab", function (c)
-         c.maximized = false
-         c.maximized_vertical = false
-         c.maximized_horizontal = false
-         c.fullscreen = false
-         c.floating = false
-         c:raise()
-         delayed(
-            function ()
-               machi.switcher.start(c, {["Super_L"] = true})
-            end
-         )
-   end),
-
-   awful.key({ "Mod4" }, "Prior", shared.client.enlarge),
-   awful.key({ "Mod4" }, "Next", shared.client.shrink),
-   awful.key({ "Mod4" }, "=", function (c) c.ontop = not c.ontop end),
-   awful.key({ "Mod4" }, "-", function (c) c.sticky = not c.sticky end),
-
-   awful.key({ "Mod4" }, "t", function (c) shared.client.titlebar_toggle(c) end),
-
-   awful.key({ "Mod4" }, "f", function (c)
-         if c.fullscreen then
-         else
-            if c.floating then
-               c.maximized = false;
-               c.maximized_vertical = false;
-               c.maximized_horizontal = false;
-            end
-            awful.client.floating.toggle(c);
-         end
-   end),
-
-   awful.key({ "Mod4" }, "c", function (c) c:kill() end)
+    awful.key({ "Mod4" }, "c", function (c) c:kill() end)
 )
 
 local client_buttons = table_join(

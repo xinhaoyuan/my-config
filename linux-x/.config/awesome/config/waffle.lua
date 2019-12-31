@@ -246,89 +246,7 @@ local function hide_after_release(mod, key, event)
 end
 
 local waffle_poweroff_view = create_view(decorate(waffle_poweroff_button))
-local waffle_settings_view = create_view(
-   decorate(
-      wibox.widget {
-         -- button({
-         --       markup = "Toggle titlebars",
-         --       indicator = em("t"),
-         --       key = "t",
-         --       action = function (alt)
-         --          if not alt then
-         --             if shared.var.enable_titlebar then
-         --                for _, c in ipairs(capi.client.get()) do
-         --                   shared.client.titlebar_disable(c)
-         --                end
-         --                shared.var.enable_titlebar = false
-         --             else
-         --                for _, c in ipairs(capi.client.get()) do
-         --                   shared.client.titlebar_enable(c)
-         --                end
-         --                shared.var.enable_titlebar = true
-         --             end
-         --          else
-         --              shared.var.hide_clients_with_titlebars =
-         --                  not shared.var.hide_clients_with_titlebars
-         --              capi.client.emit_signal("list")
-         --          end
-         --          waffle:hide()
-         --       end
-         -- }),
-         button({
-               markup = "Toggle fortune",
-               indicator = em("f"),
-               key = "f",
-               action = function (alt)
-                  shared.screen.toggle_fortune()
-                  waffle:hide()
-               end
-         }),
-         button({
-               markup = "Cycle bar styles",
-               indicator = em("b"),
-               key = "b",
-               action = function (alt)
-                  waffle:hide()
-                  for i, v in ipairs(beautiful.bar_styles) do
-                     if v == beautiful.bar_style then
-                        beautiful.bar_style = beautiful.bar_styles[i % #beautiful.bar_styles + 1]
-                        capi.screen.emit_signal("list")
-                        return
-                     end
-                  end
-                  beautiful.bar_style = "auto"
-                  capi.screen.emit_signal("list")
-               end
-         }),
-         button({
-               markup = "Wallpaper",
-               indicator = em("w"),
-               key = "w",
-               action = function (alt)
-                  shared.action.wallpaper_setup()
-                  waffle:hide()
-               end
-         }),
-         button({
-               markup = "Screen layout",
-               indicator = em("s"),
-               key = "s",
-               action = function (alt)
-                  if alt then
-                     local cmd = {"arandr"}
-                     awful.spawn(cmd)
-                  else
-                     local cmd = {"rofi-screen-layout",
-                                  "-font", beautiful.font
-                     }
-                     awful.spawn(cmd)
-                  end
-                  waffle:hide()
-               end
-         }),
-         layout = wibox.layout.fixed.vertical,
-   })
-)
+local waffle_settings_view
 
 local cpu_widget_width = (waffle_width - button_padding) / 2 - button_height - button_padding * 2
 local cpu_widget
@@ -773,7 +691,7 @@ do
         max_value     = 1,
         value         = 0,
         forced_height = button_height * 2,
-        color = beautiful.bg_focus.."80",
+        color = graph_normal_color,
         background_color = "#00000000",
         widget        = wibox.widget.progressbar,
     }
@@ -804,6 +722,9 @@ do
     local mpc_conn
 
     local function update_mpd_status(result)
+        if not mpd_widget:get_visible() then
+            mpd_widget:set_visible(true)
+        end
         if result.state == "play" then
             mpd_status_widget:set_text("▶")
         elseif result.state == "pause" then
@@ -833,33 +754,11 @@ do
         end
     }
     local function mpc_error_handler(err)
-        mpd_status_widget:set_text("✖")
-        mpd_title_widget:set_text(tostring(err))
-        mpd_meta_widget:set_text("(╯°Д°)╯ ┻━┻")
+        -- mpd_status_widget:set_text("✖")
+        -- mpd_title_widget:set_text(tostring(err))
+        -- mpd_meta_widget:set_text("(╯°Д°)╯ ┻━┻")
+        mpd_widget:set_visible(false)
     end
-
-    mpc_conn = mpc.new(
-        nil, nil, nil, mpc_error_handler,
-        "status",
-        function(_, result) update_mpd_status(result) end,
-        "currentsong",
-        function(_, result)
-            local title, artist, album, file = result.title, result.artist, result.album, result.file
-            -- for k, v in pairs(result) do
-            --     print(tostring(k)..":"..tostring(v))
-            -- end
-            mpd_title_widget:set_text(title or "")
-            local meta = {}
-            if artist then
-                meta[#meta + 1] = artist
-            end
-            if album then
-                meta[#meta + 1] = album
-            end
-            mpd_meta_widget:set_text(table.concat(meta, " - "))
-        end
-    )
-    mpc_ping_timer:start()
 
     mpd_widget = button {
         icon_widget = wibox.widget {
@@ -945,6 +844,30 @@ do
             mpc_conn:toggle_play()
         end
     end
+
+    mpc_conn = mpc.new(
+        nil, nil, nil, mpc_error_handler,
+        "status",
+        function(_, result) update_mpd_status(result) end,
+        "currentsong",
+        function(_, result)
+            local title, artist, album, file = result.title, result.artist, result.album, result.file
+            -- for k, v in pairs(result) do
+            --     print(tostring(k)..":"..tostring(v))
+            -- end
+            mpd_title_widget:set_text(title or "")
+            local meta = {}
+            if artist then
+                meta[#meta + 1] = artist
+            end
+            if album then
+                meta[#meta + 1] = album
+            end
+            mpd_meta_widget:set_text(table.concat(meta, " - "))
+        end
+    )
+    mpc_ping_timer:start()
+
 end
 
 local waffle_root_view = create_view(
@@ -1064,28 +987,21 @@ local waffle_root_view = create_view(
             layout = wibox.layout.fixed.vertical,
       }),
       decorate(
-         wibox.widget {
-            {
-               mpd_widget,
-               {
-                  text = "Music",
-                  widget = wibox.widget.textbox,
-               },
-               widget = fallback,
-            },
-            button {
-                icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
-                label_widget = volumebar_widget,
-                buttons = volumebar_buttons,
-                indicator = em("a"),
-                key = "a",
-                action = function (alt)
-                    local cmd = {"pavucontrol"}
-                    awful.spawn(cmd)
-                    waffle:hide()
-                end,
-            },
-            layout = wibox.layout.fixed.vertical,
+          wibox.widget {
+              mpd_widget,
+              button {
+                  icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
+                  label_widget = volumebar_widget,
+                  buttons = volumebar_buttons,
+                  indicator = em("a"),
+                  key = "a",
+                  action = function (alt)
+                      local cmd = {"pavucontrol"}
+                      awful.spawn(cmd)
+                      waffle:hide()
+                  end,
+              },
+              layout = wibox.layout.fixed.vertical,
       }),
       decorate(
          wibox.widget {
@@ -1129,6 +1045,98 @@ local waffle_root_view = create_view(
 
 waffle:set_root_view(waffle_root_view)
 
+waffle_settings_view = create_view(
+   decorate(
+      wibox.widget {
+         -- button({
+         --       markup = "Toggle titlebars",
+         --       indicator = em("t"),
+         --       key = "t",
+         --       action = function (alt)
+         --          if not alt then
+         --             if shared.var.enable_titlebar then
+         --                for _, c in ipairs(capi.client.get()) do
+         --                   shared.client.titlebar_disable(c)
+         --                end
+         --                shared.var.enable_titlebar = false
+         --             else
+         --                for _, c in ipairs(capi.client.get()) do
+         --                   shared.client.titlebar_enable(c)
+         --                end
+         --                shared.var.enable_titlebar = true
+         --             end
+         --          else
+         --              shared.var.hide_clients_with_titlebars =
+         --                  not shared.var.hide_clients_with_titlebars
+         --              capi.client.emit_signal("list")
+         --          end
+         --          waffle:hide()
+         --       end
+         -- }),
+         -- button({
+         --       markup = "Toggle music",
+         --       indicator = em("m"),
+         --       key = "m",
+         --       action = function (alt)
+         --           mpd_widget:set_visible(not mpd_widget:get_visible())
+         --           waffle:go_back()
+         --       end
+         -- }),
+         button({
+               markup = "Toggle fortune",
+               indicator = em("f"),
+               key = "f",
+               action = function (alt)
+                  shared.screen.toggle_fortune()
+               end
+         }),
+         button({
+               markup = "Cycle bar styles",
+               indicator = em("b"),
+               key = "b",
+               action = function (alt)
+                  for i, v in ipairs(beautiful.bar_styles) do
+                     if v == beautiful.bar_style then
+                        beautiful.bar_style = beautiful.bar_styles[i % #beautiful.bar_styles + 1]
+                        capi.screen.emit_signal("list")
+                        return
+                     end
+                  end
+                  beautiful.bar_style = "auto"
+                  capi.screen.emit_signal("list")
+               end
+         }),
+         button({
+               markup = "Wallpaper",
+               indicator = em("w"),
+               key = "w",
+               action = function (alt)
+                  shared.action.wallpaper_setup()
+                  waffle:hide()
+               end
+         }),
+         button({
+               markup = "Screen layout",
+               indicator = em("s"),
+               key = "s",
+               action = function (alt)
+                  if alt then
+                     local cmd = {"arandr"}
+                     awful.spawn(cmd)
+                  else
+                     local cmd = {"rofi-screen-layout",
+                                  "-font", beautiful.font
+                     }
+                     awful.spawn(cmd)
+                  end
+                  waffle:hide()
+               end
+         }),
+         layout = wibox.layout.fixed.vertical,
+   })
+)
+
+
 local client_waffle_selected
 local client_waffle = create_view(
     wibox.widget {
@@ -1136,6 +1144,8 @@ local client_waffle = create_view(
             wibox.widget {
                 button({
                         markup = "Close",
+                        indicator = em("c"),
+                        key = "c",
                         action = function (alt)
                             waffle:hide()
                             if not client_waffle_selected.valid then
@@ -1146,6 +1156,8 @@ local client_waffle = create_view(
                 }),
                 button({
                         markup = "Toggle max",
+                        indicator = em("m"),
+                        key = "m",
                         action = function (alt)
                             waffle:hide()
                             if not client_waffle_selected.valid then
@@ -1156,6 +1168,8 @@ local client_waffle = create_view(
                 }),
                 button({
                         markup = "Toggle float",
+                        indicator = em("f"),
+                        key = "f",
                         action = function (alt)
                             waffle:hide()
                             if not client_waffle_selected.valid then
@@ -1165,7 +1179,7 @@ local client_waffle = create_view(
                         end
                 }),
                 button({
-                        markup = "Move",
+                        markup = "Move by mouse",
                         action = function (alt)
                             waffle:hide()
                             if not client_waffle_selected.valid then
@@ -1177,7 +1191,7 @@ local client_waffle = create_view(
                         end
                 }),
                 button({
-                        markup = "Resize",
+                        markup = "Resize by mouse",
                         action = function (alt)
                             waffle:hide()
                             if not client_waffle_selected.valid then
@@ -1193,9 +1207,14 @@ local client_waffle = create_view(
     }
 )
 
-function shared.waffle.show_client_waffle(c)
+function shared.waffle.show_client_waffle(c, args)
+    args = args or {}
+    if args.anchor == false then
+        local geo = c:geometry()
+        args.anchor = { x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 }
+    end
     client_waffle_selected = c
-    waffle:show(client_waffle)
+    waffle:show(client_waffle, args)
 end
 
 return nil
