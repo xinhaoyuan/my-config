@@ -636,6 +636,7 @@ end
 
 local volumebar_widget_width = waffle_width - button_height
 local volumebar_widget
+local volumebar_buttons
 do
    local GET_VOLUME_CMD = 'amixer -D pulse sget Master'
    local INC_VOLUME_CMD = 'amixer -D pulse sset Master 5%+'
@@ -676,25 +677,29 @@ do
 
    end
 
-   volumebar_widget:connect_signal(
-      "button::press",
-      function(_, _, _, button)
-         local cmd
-         if (button == 1)     then
-             awful.spawn({"pavucontrol"})
-             waffle:hide()
-         elseif (button == 3) then cmd = TOG_VOLUME_CMD
-         elseif (button == 4) then cmd = INC_VOLUME_CMD
-         elseif (button == 5) then cmd = DEC_VOLUME_CMD
-         end
-
-         awful.spawn.easy_async_with_shell(
-            cmd .. ">/dev/null&&" .. GET_VOLUME_CMD,
-            function (stdout, stderr, exitreason, exitcode)
+   local function spawn_and_update_volumebar(cmd)
+       awful.spawn.easy_async_with_shell(
+           cmd .. ">/dev/null&&" .. GET_VOLUME_CMD,
+           function (stdout, stderr, exitreason, exitcode)
                update_graphic(volumebar_widget, stdout, stderr, exitreason, exitcode)
-            end
-         )
-      end
+           end
+       )
+   end
+
+   volumebar_buttons = awful.util.table.join(
+       awful.button({ }, 1, function ()
+               awful.spawn({"pavucontrol"})
+               waffle:hide()
+       end),
+       awful.button({ }, 3, function ()
+               spawn_and_update_volumebar(TOG_VOLUME_CMD)
+       end),
+       awful.button({ }, 4, function ()
+               spawn_and_update_volumebar(INC_VOLUME_CMD)
+       end),
+       awful.button({ }, 5, function ()
+               spawn_and_update_volumebar(DEC_VOLUME_CMD)
+       end)
    )
 
    watch(GET_VOLUME_CMD, 1, update_graphic, volumebar_widget)
@@ -1071,6 +1076,7 @@ local waffle_root_view = create_view(
             button {
                 icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
                 label_widget = volumebar_widget,
+                buttons = volumebar_buttons,
                 indicator = em("a"),
                 key = "a",
                 action = function (alt)
