@@ -773,8 +773,8 @@ do
         widget        = wibox.widget.progressbar,
     }
 
-    local lighter_fg_normal = aux.color.from_string(beautiful.fg_normal):blend_with(beautiful.bg_normal, 0.75):to_string()
-    local lighter_fg_focus = aux.color.from_string(beautiful.fg_focus):blend_with(beautiful.bg_focus, 0.75):to_string()
+    -- local lighter_fg_normal = aux.color.from_string(beautiful.fg_normal):blend_with(beautiful.bg_normal, 0.75):to_string()
+    -- local lighter_fg_focus = aux.color.from_string(beautiful.fg_focus):blend_with(beautiful.bg_focus, 0.75):to_string()
 
     local mpd_icon_widget =
         wibox.widget {
@@ -787,9 +787,9 @@ do
             },
             fg_function = function (context)
                 if context.focus then
-                    return lighter_fg_focus
+                    return beautiful.fg_focus
                 else
-                    return lighter_fg_normal
+                    return beautiful.fg_normal
                 end
             end,
             widget = cbg
@@ -859,14 +859,14 @@ do
     mpd_widget = button {
         icon_widget = wibox.widget {
             {
-                mpd_icon_widget,
-                widget = wibox.container.place
-            },
-            {
                 mpd_status_widget,
                 widget = wibox.container.place
             },
-            layout = wibox.layout.stack
+            {
+                mpd_icon_widget,
+                widget = wibox.container.place
+            },
+            layout = wibox.layout.fixed.vertical,
         },
         label_widget = wibox.widget {
             {

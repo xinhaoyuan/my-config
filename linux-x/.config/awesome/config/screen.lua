@@ -748,7 +748,7 @@ local function setup_screen(scr)
    my_widgets[s].wibar = awful.wibar({
          screen = s,
          fg = beautiful.fg_normal,
-         ontop = true,
+         ontop = false,
          bg = "#00000000",
          [size_index[shared.var.bar_position]] =
              beautiful.bar_height +
