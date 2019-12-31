@@ -874,7 +874,17 @@ do
                     mpd_progress_widget,
                     {
                         mpd_title_widget,
-                        mpd_meta_widget,
+                        {
+                            mpd_meta_widget,
+                            {
+                                text = "_(:3」∠)_",
+                                align = "center",
+                                force_height = button_height,
+                                font = font_info,
+                                widget = wibox.widget.textbox
+                            },
+                            widget = fallback
+                        },
                         layout = wibox.layout.fixed.vertical,
                     },
                     layout = wibox.layout.stack,
