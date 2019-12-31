@@ -95,6 +95,7 @@ local DATE_FORMAT="+%y%m%d%H%M%S"
 local DATE_FORMAT_WITH_STYLE="+$fg_bold[green]%y$fg_no_bold[green]%m$fg_bold[green]%d$fg_no_bold[cyan]%H$fg_bold[cyan]%M$fg_no_bold[cyan]%S"
 local DATE_PLACEHOLDER="000000000000"
 local DATE_FORMAT_LEN=12
+local DATE_HFORMAT="+%y-%m-%d %H:%M:%S"
 
 preexec_date() {
     emulate -L zsh
@@ -104,8 +105,9 @@ preexec_date() {
     local CMD=${1[(wr)^(*=*|sudo|ssh|mosh|rake|-*)]:gs/%/%%}
     local LINE="${2:gs/%/%%}"
     local DATE=$(date "${DATE_FORMAT}")
+    local HDATE=$(date "${DATE_HFORMAT}")
     local STYLED_DATE=$(date "${DATE_FORMAT_WITH_STYLE}")
-    my_title '$CMD' '[$DATE] %100>...>$LINE%<<'
+    my_title '$CMD' '[$HDATE] %100>...>$LINE%<<'
 
     if [[ "$1" == *$'\n'* ]]; then
         # print simple time for multiline command
