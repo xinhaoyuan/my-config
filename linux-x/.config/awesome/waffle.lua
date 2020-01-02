@@ -135,6 +135,11 @@ function waffle:set_gravity(gravity)
     end
 end
 
+function waffle:set_view(view)
+    self.view_ = view
+    self.widget_container.widget = view.widget
+end
+
 local function get_waffle_wibox(screen)
     if screen.waffle_wibox == nil then
         screen.waffle_wibox = wibox({
@@ -165,6 +170,10 @@ capi.screen.connect_signal(
     end
 )
 
+local function on_client_button_press()
+    waffle:hide()
+end
+
 function waffle:show(view, args)
     args = args or {}
     view = view or self.root_view_
@@ -175,17 +184,16 @@ function waffle:show(view, args)
         self.wibox_ = nil
     end
     self.wibox_ = get_waffle_wibox(screen)
-
-    self:update_layout(screen)
+    self.wibox_.widget = self.widget_container
 
     if args.push then
         self.stack_ = self.stack_ or {}
         table.insert(self.stack_, self.view_)
     end
-    self.view_ = view
-    self.widget_container.widget = view.widget
+    waffle:set_view(view)
 
     if self.wibox_.input_passthrough then
+        capi.client.connect_signal("button::press", on_client_button_press)
         if type(args.anchor) == "table" then
             self.wibox_.anchor = args.anchor
         elseif args.anchor == false or capi.mouse.screen ~= screen then
@@ -241,6 +249,7 @@ function waffle:hide()
     end
     self.view_ = nil
     self.stack_ = nil
+    capi.client.disconnect_signal("button::press", on_client_button_press)
 end
 
 function waffle:set_root_view(v)
