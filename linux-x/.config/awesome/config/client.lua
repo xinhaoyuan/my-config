@@ -87,36 +87,38 @@ function shared.client.shrink(c)
    end
 end
 
+function shared.client.start_switcher(c, quick_mode)
+    c.maximized = false
+    c.maximized_vertical = false
+    c.maximized_horizontal = false
+    c.fullscreen = false
+    c.floating = false
+    c:raise()
+    if quick_mode then
+        delayed(
+            function ()
+                machi.switcher.start(c, {["Super_L"] = true})
+            end
+        )
+    else
+        delayed(
+            function ()
+                machi.switcher.start(c)
+            end
+        )
+    end
+end
+
 local client_keys = table_join(
     awful.key({ "Mod4", "Shift" }, "F12", function (c)
             shared.waffle.show_client_waffle(c, { anchor = false })
     end),
     awful.key({ "Mod4" }, ".", function (c)
-            c.maximized = false
-            c.maximized_vertical = false
-            c.maximized_horizontal = false
-            c.fullscreen = false
-            c.floating = false
-            c:raise()
-            delayed(
-                function ()
-                    machi.switcher.start(c)
-                end
-            )
+            shared.client.start_switcher(c, false)
     end),
 
     awful.key({ "Mod4" }, "Tab", function (c)
-            c.maximized = false
-            c.maximized_vertical = false
-            c.maximized_horizontal = false
-            c.fullscreen = false
-            c.floating = false
-            c:raise()
-            delayed(
-                function ()
-                    machi.switcher.start(c, {["Super_L"] = true})
-                end
-            )
+            shared.client.start_switcher(c, true)
     end),
 
     awful.key({ "Mod4" }, "Prior", shared.client.enlarge),

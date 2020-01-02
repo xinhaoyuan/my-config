@@ -92,7 +92,6 @@ local function context_focused(context)
 end
 
 local function button(args)
-   local action = args.action
    local width
    if not args.no_force_width then
        width = args.width or (waffle_width - button_padding * 2)
@@ -108,6 +107,9 @@ local function button(args)
          valign = "center",
          widget = wibox.widget.textbox,
       }
+
+   local button_action = args.button_action or args.action
+   local key_action = args.key_action or args.action
 
    local ret = wibox.widget {
       {
@@ -139,10 +141,10 @@ local function button(args)
             layout = wibox.layout.align.horizontal,
          },
          buttons = args.buttons or
-            (action and
+            (button_action and
                 awful.util.table.join(
-                   awful.button({ }, 1, function () action(false) end),
-                   awful.button({ }, 3, function () action(true) end))),
+                   awful.button({ }, 1, function () button_action(false) end),
+                   awful.button({ }, 3, function () button_action(true) end))),
          margins = button_padding,
          widget = wibox.container.margin,
       },
@@ -165,13 +167,13 @@ local function button(args)
       end
    )
 
-   if args.key ~= nil and action then
+   if args.key ~= nil and key_action then
       local function cb(mod, _, event)
          for _, m in ipairs(mod) do
             mod[m] = true
          end
          if event == "press" then
-            action(mod["Shift"])
+            key_action(mod["Shift"])
          end
       end
       ret.keys = {}
@@ -1179,25 +1181,28 @@ local client_waffle = create_view(
                         end
                 }),
                 button({
-                        markup = "Move by mouse",
-                        action = function (alt)
+                        markup = "Move/resize",
+                        indicator = em("s"),
+                        key = "s",
+                        key_action = function (alt)
                             waffle:hide()
                             if not client_waffle_selected.valid then
                                 return
                             end
-                            local geo = client_waffle_selected:geometry()
-                            mouse.coords({ x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 })
-                            awful.mouse.client.move(client_waffle_selected)
-                        end
-                }),
-                button({
-                        markup = "Resize by mouse",
-                        action = function (alt)
+                            shared.client.start_switcher(client_waffle_selected, false)
+                        end,
+                        button_action = function (alt)
                             waffle:hide()
                             if not client_waffle_selected.valid then
                                 return
                             end
-                            awful.mouse.client.resize(client_waffle_selected, "northeast")
+                            if alt then
+                                awful.mouse.client.resize(client_waffle_selected, "northeast")
+                            else
+                                local geo = client_waffle_selected:geometry()
+                                mouse.coords({ x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 })
+                                awful.mouse.client.move(client_waffle_selected)
+                            end
                         end
                 }),
                 layout = wibox.layout.fixed.vertical,
