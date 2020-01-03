@@ -179,9 +179,7 @@ function waffle:show(view, args)
     view = view or self.root_view_
     local screen = args.screen or awful.screen.focused()
     if self.wibox_ ~= nil and self.wibox_.screen ~= screen then
-        self.wibox_.input_passthrough = true
-        self.wibox_.widget = nil
-        self.wibox_ = nil
+        self:hide()
     end
     self.wibox_ = get_waffle_wibox(screen)
     self.wibox_.widget = self.widget_container
