@@ -12,13 +12,14 @@ import argparse
 import re
 
 parser = argparse.ArgumentParser()
+parser.add_argument("-m", dest = "mime_type")
 parser.add_argument("-t", dest = "target")
 parser.add_argument("-s", dest = "search")
 parser.add_argument("-r", dest = "replace")
 args = parser.parse_args()
 
-if args.target is None and args.search is None:
-    sys.stderr.write("Need -t or -s\n")
+if args.mime_type is None and args.target is None and args.search is None:
+    sys.stderr.write("Need -m, -t or -s\n")
     sys.exit(1)
 
 logging.basicConfig(level = logging.DEBUG)
@@ -27,6 +28,8 @@ logger = logging.getLogger(__file__)
 def find_in_paths(filename, paths):
     ret = []
     for path in paths:
+        if not os.path.isdir(path):
+            continue
         for fn in os.listdir(path):
             if fn == filename:
                 ret.append(os.path.join(path, fn))
@@ -38,9 +41,10 @@ results = find_in_paths("mimeinfo.cache", dirs)
 if len(results) == 0:
     sys.stderr.write("Cannot find mimeinfo.cache in {}\n".format(dirs))
     sys.exit(1)
+    pass
 
 data = RawConfigParser(strict = False)
-with open(results[1], "r") as f:
+with open(results[0], "r") as f:
     data.read_file(f)
 
 has_sideeffect = False
@@ -48,7 +52,9 @@ has_sideeffect = False
 for mime, apps_str in data.items("MIME Cache"):
     apps = list(filter(len, apps_str.split(";")))
     found = False
-    if args.target:
+    if args.mime_type:
+        found = args.mime_type in mime
+    elif args.target:
         found = args.target in apps
     else:
         for item in apps:
