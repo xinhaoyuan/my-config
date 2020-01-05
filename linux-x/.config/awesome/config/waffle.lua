@@ -191,6 +191,10 @@ local function button(args)
    return ret
 end
 
+local border_theme = setmetatable({}, {__index = border.rounded_theme})
+border_theme:init()
+border_theme.size = beautiful.border_width * 3
+border_theme.padding = dpi(1)
 local decorate_border = border.directions { "top", "bottom", "left", "right" }
 local function decorate(widget)
     return wibox.widget {
@@ -199,13 +203,19 @@ local function decorate(widget)
                 widget,
                 bg = beautiful.bg_normal,
                 fg = beautiful.fg_normal,
+                shape = function (cr, width, height)
+                    gshape.rounded_rect(cr, width, height, beautiful.border_width * 2)
+                end,
                 widget = wibox.container.background,
             },
             margins = beautiful.border_width,
             widget = wibox.container.margin,
         },
         bgimage = function (context, cr, width, height)
-            border:draw({ color = beautiful.border_focus }, cr, width, height, decorate_border)
+            border:draw({ theme = border_theme, color = beautiful.border_focus }, cr, width, height, decorate_border)
+        end,
+        shape = function (cr, width, height)
+            gshape.rounded_rect(cr, width, height, beautiful.border_width * 3)
         end,
         widget = wibox.container.background
     }
