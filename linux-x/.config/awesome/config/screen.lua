@@ -198,6 +198,7 @@ local default_icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal)
 
 local property_to_text = {
    {"sticky", "S"},
+   {"above", "A"},
    {"ontop", "T"},
    {"maximized", "M"},
    {"floating", "F"},

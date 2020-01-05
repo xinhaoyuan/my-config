@@ -1180,6 +1180,18 @@ local client_waffle = create_view(
                         end
                 }),
                 button({
+                        markup = "Toggle above",
+                        indicator = em("a"),
+                        key = "a",
+                        action = function (alt)
+                            waffle:hide()
+                            if not client_waffle_selected.valid then
+                                return
+                            end
+                            client_waffle_selected.above = not client_waffle_selected.above
+                        end
+                }),
+                button({
                         markup = "Toggle float",
                         indicator = em("f"),
                         key = "f",
