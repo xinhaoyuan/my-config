@@ -1137,6 +1137,7 @@ waffle_settings_view = create_view(
                      awful.spawn(cmd)
                   else
                      local cmd = {"rofi-screen-layout",
+                                  "-normal-window",
                                   "-font", beautiful.font
                      }
                      awful.spawn(cmd)
