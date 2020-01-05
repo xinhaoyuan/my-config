@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ ! -e $HOME/.xsession-init-guard ]; then
-    xcape -e 'Super_L=Super_L|F12;Shift_L=Super_L|Shift_L|F12'
+    xcape -e 'Super_L=Super_L|F12'
     nitrogen --restore
     update-rofi-config
     fcitx
