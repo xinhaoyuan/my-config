@@ -16,6 +16,7 @@ local gshape = require("gears.shape")
 local gcolor = require("gears.color")
 local machi = require("layout-machi")
 local border = require("border-theme")
+local cairo = require("lgi").cairo
 
 function shared.client.titlebar_toggle(c)
    if not c.has_titlebar_enabled then
@@ -252,11 +253,16 @@ local opposite_dir = {
 --     c.titlebar_container = titlebar_container
 -- end
 
+local border_theme = setmetatable({}, {__index = border.rounded_theme})
+border_theme:init()
+border_theme.size = beautiful.border_width * 3
+border_theme.padding = dpi(1)
+
 local border_top = border.directions{ "top", "left", "right" }
 local function draw_tb_border_bgimage_top(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    border:draw({ color = border_color }, cr, width, height, border_top)
+    border:draw({ theme = border_theme, color = border_color }, cr, width, height, border_top)
 end
 
 
@@ -264,52 +270,118 @@ local border_bottom = border.directions{ "bottom", "left", "right" }
 local function draw_tb_border_bgimage_bottom(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    border:draw({ color = border_color }, cr, width, height, border_bottom)
+    border:draw({ theme = border_theme, color = border_color }, cr, width, height, border_bottom)
 end
 
 local border_left = border.directions{ "left" }
 local function draw_tb_border_bgimage_left(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    border:draw({ color = border_color }, cr, width, height, border_left)
+    border:draw({ theme = border_theme, color = border_color }, cr, width, height, border_left)
 end
 
 local border_right = border.directions{ "right" }
 local function draw_tb_border_bgimage_right(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    border:draw({ color = border_color }, cr, width, height, border_right)
+    border:draw({ theme = border_theme, color = border_color }, cr, width, height, border_right)
+end
+
+local function apply_container_shape(client, shape, ...)
+  local geo = client:geometry()
+
+  local img = cairo.ImageSurface(cairo.Format.A1, geo.width, geo.height)
+  local cr = cairo.Context(img)
+
+  cr:set_operator(cairo.Operator.CLEAR)
+  cr:set_source_rgba(0,0,0,1)
+  cr:paint()
+  cr:set_operator(cairo.Operator.SOURCE)
+  cr:set_source_rgba(1,1,1,1)
+
+  shape(cr, geo.width, geo.height, ...)
+
+  cr:fill()
+
+  client.client_container_shape = img._native
+  img:finish()
+end
+
+local function my_client_shape(cr, width, height)
+    gshape.rounded_rect(cr, width, height, beautiful.border_width * 3)
+end
+
+local function update_shape(c)
+    local bw = beautiful.border_width
+    if c.maximized or c.fullscreen then
+        c.client_container_shape = nil
+        if c._shape ~= nil then
+            c.shape = nil
+        end
+    else
+        if c._shape ~= my_client_shape then
+            c.shape = my_client_shape
+        end
+        apply_container_shape(
+            c,
+            function (cr, width, height)
+                cr:translate(bw, bw)
+                gshape.rounded_rect(cr, width - bw * 2, height - bw * 2, bw * 2)
+            end
+        )
+    end
+end
+
+local update_shape_scheduled = false
+local function delayed_update_shape(c)
+    if update_shape_scheduled == false then
+        update_shape_scheduled = true
+        gtimer.delayed_call(function ()
+                update_shape(c)
+                update_shape_scheduled = false
+        end)
+    end
 end
 
 local function create_titlebars(c)
+    local bw = beautiful.border_width
     awful.titlebar(c,
                    {
                        position = "top",
-                       size = beautiful.border_width,
+                       size = bw * 3,
                        bgimage = draw_tb_border_bgimage_top,
                    }
     ) : setup({ widget = wibox.container.background })
     awful.titlebar(c,
                    {
                        position = "bottom",
-                       size = beautiful.border_width,
+                       size = bw * 3,
                        bgimage = draw_tb_border_bgimage_bottom,
                    }
     ) : setup({ widget = wibox.container.background })
     awful.titlebar(c,
                    {
                        position = "left",
-                       size = beautiful.border_width,
+                       size = bw * 3,
                        bgimage = draw_tb_border_bgimage_left,
                    }
     ) : setup({ widget = wibox.container.background })
     awful.titlebar(c,
                    {
                        position = "right",
-                       size = beautiful.border_width,
+                       size = bw * 3,
                        bgimage = draw_tb_border_bgimage_right,
                    }
     ) : setup({ widget = wibox.container.background })
+
+
+    c:titlebar_left(bw * 3, bw * 2)
+    c:titlebar_right(bw * 3, bw * 2)
+    c:titlebar_top(bw * 3, bw * 2)
+    c:titlebar_bottom(bw * 3, bw * 2)
+
+    c:connect_signal("property::size", delayed_update_shape)
+    delayed_update_shape(c)
 end
 
 capi.client.connect_signal("request::titlebars", create_titlebars)
@@ -333,7 +405,17 @@ end
 local function manage_cb(c)
     c.has_titlebar = false
     c.has_titlebar_enabled = shared.var.enable_titlebar
-   reset_decoration(c)
+    reset_decoration(c)
+
+    local bw = beautiful.border_width
+
+    -- c:titlebar_left(bw * 2, bw)
+    -- c:titlebar_right(bw * 2, bw)
+    -- c:titlebar_top(bw * 2, bw)
+    -- c:titlebar_bottom(bw * 2, bw)
+
+    -- c:connect_signal("property::size", delayed_update_shape)
+    -- delayed_update_shape(c)
 end
 
 capi.client.connect_signal("manage", manage_cb)

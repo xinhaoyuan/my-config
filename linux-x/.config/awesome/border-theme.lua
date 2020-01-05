@@ -29,7 +29,7 @@ end
 
 local default_theme = {}
 
-function default_theme:before_draw(context, cr)
+function default_theme:init()
     if self.inited == nil then
         local inner_space = beautiful.border_inner_space or 0
         local outer_space = beautiful.border_outer_space or 0
@@ -38,6 +38,10 @@ function default_theme:before_draw(context, cr)
         self.size = beautiful.border_width
         self.inited = true
     end
+end
+
+function default_theme:before_draw(context, cr)
+    self:init()
     cr:save()
     cr:set_source(gcolor(beautiful.border_space))
     cr:paint()
@@ -82,7 +86,14 @@ function default_theme:top(context, cr, length)
     cr:stroke()
 end
 
-default_theme.bottom = default_theme.top
+function default_theme:bottom(context, cr, length)
+    if length <= 0 then
+        return
+    end
+    cr:move_to(0, self.size - self.padding)
+    cr:line_to(length, self.size - self.padding)
+    cr:stroke()
+end
 
 function default_theme:left(context, cr, length)
     if length <= 0 then
@@ -93,16 +104,114 @@ function default_theme:left(context, cr, length)
     cr:stroke()
 end
 
-default_theme.right = default_theme.left
+
+function default_theme:right(context, cr, length)
+    if length <= 0 then
+        return
+    end
+    cr:move_to(self.size - self.padding, 0)
+    cr:line_to(self.size - self.padding, length)
+    cr:stroke()
+end
 
 function default_theme:after_draw(context, cr)
     cr:restore()
 end
 
-mod.theme = default_theme
+mod.default_theme = default_theme
+
+------
+
+local rounded_theme = {}
+
+function rounded_theme:init()
+    if self.inited == nil then
+        self.size = beautiful.border_width
+        self.padding = beautiful.border_outer_space
+        self.inited = true
+    end
+end
+
+function rounded_theme:before_draw(context, cr)
+    self:init()
+    cr:save()
+    cr:set_source(gcolor(beautiful.border_space))
+    cr:paint()
+    cr:set_line_width(self.line_width)
+    cr:set_source(gcolor(context.color))
+end
+
+function rounded_theme:top_left(context, cr)
+    cr:arc(self.size, self.size, self.size - self.padding, math.pi, math.pi * 1.5)
+    cr:line_to(self.size, self.size)
+    cr:close_path()
+    cr:fill()
+end
+
+function rounded_theme:top_right(context, cr)
+    cr:arc(0, self.size, self.size - self.padding, math.pi * -0.5, 0)
+    cr:line_to(0, self.size)
+    cr:close_path()
+    cr:fill()
+end
+
+function rounded_theme:bottom_left(context, cr)
+    cr:arc(self.size, 0, self.size - self.padding, math.pi * 0.5, math.pi)
+    cr:line_to(self.size, 0)
+    cr:close_path()
+    cr:fill()
+end
+
+function rounded_theme:bottom_right(context, cr)
+    cr:arc(0, 0, self.size - self.padding, 0, math.pi * 0.5)
+    cr:line_to(0, 0)
+    cr:close_path()
+    cr:fill()
+end
+
+function rounded_theme:top(context, cr, length)
+    if length <= 0 then
+        return
+    end
+    cr:rectangle(0, self.padding, length, self.size - self.padding)
+    cr:fill()
+end
+
+function rounded_theme:bottom(context, cr, length)
+    if length <= 0 then
+        return
+    end
+    cr:rectangle(0, 0, length, self.size - self.padding)
+    cr:fill()
+end
+
+function rounded_theme:left(context, cr, length)
+    if length <= 0 then
+        return
+    end
+    cr:rectangle(self.padding, 0, self.size - self.padding, length)
+    cr:fill()
+end
+
+
+function rounded_theme:right(context, cr, length)
+    if length <= 0 then
+        return
+    end
+    cr:rectangle(0, 0, self.size - self.padding, length)
+    cr:fill()
+end
+
+function rounded_theme:after_draw(context, cr)
+    cr:restore()
+end
+
+mod.rounded_theme = rounded_theme
+
+------
 
 function mod:draw(context, cr, width, height, directions)
-    local theme = self.theme
+    local theme = context.theme or self.default_theme
     theme:before_draw(context, cr)
     if directions == 15 then
         -- full box
