@@ -191,11 +191,17 @@ local function button(args)
    return ret
 end
 
-local border_theme = setmetatable({}, {__index = border.rounded_theme})
-border_theme:init()
-border_theme.size = beautiful.border_width * 3
-border_theme.outer_space = dpi(1)
-border_theme.inner_space = beautiful.border_width * 2 + dpi(1)
+local border_theme
+if beautiful.border_radius == nil then
+    border_theme = border.default_theme
+else
+    border_theme = setmetatable({}, {__index = border.rounded_theme})
+    border_theme:init()
+    border_theme.size = beautiful.border_radius
+    border_theme.outer_space = beautiful.border_outer_space
+    border_theme.inner_space = beautiful.border_radius - beautiful.border_width + beautiful.border_inner_space
+end
+
 local decorate_border = border.directions { "top", "bottom", "left", "right" }
 local function decorate(widget)
     return wibox.widget {
@@ -204,9 +210,12 @@ local function decorate(widget)
                 widget,
                 bg = beautiful.bg_normal,
                 fg = beautiful.fg_normal,
-                shape = function (cr, width, height)
-                    gshape.rounded_rect(cr, width, height, beautiful.border_width * 2)
-                end,
+                shape = beautiful.border_radius ~= nil and
+                    function (cr, width, height)
+                        gshape.rounded_rect(cr, width, height,
+                                            beautiful.border_radius -
+                                                beautiful.border_width)
+                    end,
                 widget = wibox.container.background,
             },
             margins = beautiful.border_width,
@@ -215,8 +224,8 @@ local function decorate(widget)
         bgimage = function (context, cr, width, height)
             border:draw({ theme = border_theme, color = beautiful.border_focus }, cr, width, height, decorate_border)
         end,
-        shape = function (cr, width, height)
-            gshape.rounded_rect(cr, width, height, beautiful.border_width * 3)
+        shape = beautiful.border_radius ~= nil and function (cr, width, height)
+            gshape.rounded_rect(cr, width, height, beautiful.border_radius)
         end,
         widget = wibox.container.background
     }

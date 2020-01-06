@@ -253,11 +253,16 @@ local opposite_dir = {
 --     c.titlebar_container = titlebar_container
 -- end
 
-local border_theme = setmetatable({}, {__index = border.rounded_theme})
-border_theme:init()
-border_theme.size = beautiful.border_width * 3
-border_theme.outer_space = dpi(1)
-border_theme.inner_space = beautiful.border_width * 2 + dpi(1)
+local border_theme
+if beautiful.border_radius == nil then
+    border_theme = border.default_theme
+else
+    border_theme = setmetatable({}, {__index = border.rounded_theme})
+    border_theme:init()
+    border_theme.size = beautiful.border_radius
+    border_theme.outer_space = beautiful.border_outer_space
+    border_theme.inner_space = beautiful.border_radius - beautiful.border_width + beautiful.border_inner_space
+end
 
 local border_top = border.directions{ "top", "left", "right" }
 local function draw_tb_border_bgimage_top(context, cr, width, height)
@@ -309,25 +314,31 @@ local function apply_container_shape(client, shape, ...)
 end
 
 local function my_client_shape(cr, width, height)
-    gshape.rounded_rect(cr, width, height, beautiful.border_width * 3)
+    gshape.rounded_rect(cr, width, height, beautiful.border_radius)
 end
 
 local function update_shape(c)
-    local bw = beautiful.border_width
+    if beautiful.border_radius == nil then
+        return
+    end
+
     if c.maximized or c.fullscreen then
         c.client_container_shape = nil
         if c._shape ~= nil then
             c.shape = nil
         end
-    else
+    else 
         if c._shape ~= my_client_shape then
             c.shape = my_client_shape
         end
         apply_container_shape(
             c,
             function (cr, width, height)
-                cr:translate(bw, bw)
-                gshape.rounded_rect(cr, width - bw * 2, height - bw * 2, bw * 2)
+                cr:translate(beautiful.border_width, beautiful.border_width)
+                gshape.rounded_rect(cr,
+                                    width - beautiful.border_width * 2,
+                                    height - beautiful.border_width * 2,
+                                    beautiful.border_radius - beautiful.border_width)
             end
         )
     end
@@ -344,41 +355,51 @@ local function delayed_update_shape(c)
 end
 
 local function create_titlebars(c)
-    local bw = beautiful.border_width
+    local tw
+    local to
+    if beautiful.border_radius == nil then
+        tw = beautiful.border_width
+        to = 0
+    else
+        tw = beautiful.border_radius
+        to = beautiful.border_radius - beautiful.border_width
+    end
     awful.titlebar(c,
                    {
                        position = "top",
-                       size = bw * 3,
+                       size = tw,
                        bgimage = draw_tb_border_bgimage_top,
                    }
     ) : setup({ widget = wibox.container.background })
     awful.titlebar(c,
                    {
                        position = "bottom",
-                       size = bw * 3,
+                       size = tw,
                        bgimage = draw_tb_border_bgimage_bottom,
                    }
     ) : setup({ widget = wibox.container.background })
     awful.titlebar(c,
                    {
                        position = "left",
-                       size = bw * 3,
+                       size = tw,
                        bgimage = draw_tb_border_bgimage_left,
                    }
     ) : setup({ widget = wibox.container.background })
     awful.titlebar(c,
                    {
                        position = "right",
-                       size = bw * 3,
+                       size = tw,
                        bgimage = draw_tb_border_bgimage_right,
                    }
     ) : setup({ widget = wibox.container.background })
 
 
-    c:titlebar_left(bw * 3, bw * 2)
-    c:titlebar_right(bw * 3, bw * 2)
-    c:titlebar_top(bw * 3, bw * 2)
-    c:titlebar_bottom(bw * 3, bw * 2)
+    if to > 0 then
+        c:titlebar_left(tw, to)
+        c:titlebar_right(tw, to)
+        c:titlebar_top(tw, to)
+        c:titlebar_bottom(tw, to)
+    end
 
     c:connect_signal("property::size", delayed_update_shape)
     delayed_update_shape(c)
