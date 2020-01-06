@@ -327,7 +327,7 @@ local function update_shape(c)
         if c._shape ~= nil then
             c.shape = nil
         end
-    else 
+    else
         if c._shape ~= my_client_shape then
             c.shape = my_client_shape
         end
