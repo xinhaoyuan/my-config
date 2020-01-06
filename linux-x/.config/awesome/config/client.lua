@@ -333,13 +333,12 @@ local function update_shape(c)
     end
 end
 
-local update_shape_scheduled = false
 local function delayed_update_shape(c)
-    if update_shape_scheduled == false then
-        update_shape_scheduled = true
+    if c.container_shape_update_scheduled == nil then
+        c.container_shape_update_scheduled = true
         gtimer.delayed_call(function ()
                 update_shape(c)
-                update_shape_scheduled = false
+                c.container_shape_update_scheduled = nil
         end)
     end
 end
