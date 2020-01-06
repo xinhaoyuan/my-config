@@ -256,7 +256,8 @@ local opposite_dir = {
 local border_theme = setmetatable({}, {__index = border.rounded_theme})
 border_theme:init()
 border_theme.size = beautiful.border_width * 3
-border_theme.padding = dpi(1)
+border_theme.outer_space = dpi(1)
+border_theme.inner_space = beautiful.border_width * 2 + dpi(1)
 
 local border_top = border.directions{ "top", "left", "right" }
 local function draw_tb_border_bgimage_top(context, cr, width, height)

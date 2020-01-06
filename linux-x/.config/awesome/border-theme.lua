@@ -127,7 +127,8 @@ local rounded_theme = {}
 function rounded_theme:init()
     if self.inited == nil then
         self.size = beautiful.border_width
-        self.padding = beautiful.border_outer_space
+        self.outer_space = beautiful.border_outer_space
+        self.inner_space = beautiful.border_inner_space
         self.inited = true
     end
 end
@@ -142,29 +143,33 @@ function rounded_theme:before_draw(context, cr)
 end
 
 function rounded_theme:top_left(context, cr)
-    cr:arc(self.size, self.size, self.size - self.padding, math.pi, math.pi * 1.5)
-    cr:line_to(self.size, self.size)
+    cr:arc(self.size, self.size, self.size - self.outer_space, math.pi, math.pi * 1.5)
+    cr:line_to(self.size, self.size - self.inner_space)
+    cr:arc_negative(self.size, self.size, self.inner_space, math.pi * 1.5, math.pi)
     cr:close_path()
     cr:fill()
 end
 
 function rounded_theme:top_right(context, cr)
-    cr:arc(0, self.size, self.size - self.padding, math.pi * -0.5, 0)
+    cr:arc(0, self.size, self.size - self.outer_space, math.pi * -0.5, 0)
     cr:line_to(0, self.size)
+    cr:arc_negative(0, self.size, self.inner_space, 0, math.pi * -0.5)
     cr:close_path()
     cr:fill()
 end
 
 function rounded_theme:bottom_left(context, cr)
-    cr:arc(self.size, 0, self.size - self.padding, math.pi * 0.5, math.pi)
+    cr:arc(self.size, 0, self.size - self.outer_space, math.pi * 0.5, math.pi)
     cr:line_to(self.size, 0)
+    cr:arc_negative(self.size, 0, self.inner_space, math.pi, math.pi * 0.5)
     cr:close_path()
     cr:fill()
 end
 
 function rounded_theme:bottom_right(context, cr)
-    cr:arc(0, 0, self.size - self.padding, 0, math.pi * 0.5)
+    cr:arc(0, 0, self.size - self.outer_space, 0, math.pi * 0.5)
     cr:line_to(0, 0)
+    cr:arc_negative(0, 0, self.inner_space, math.pi * 0.5, 0)
     cr:close_path()
     cr:fill()
 end
@@ -173,7 +178,7 @@ function rounded_theme:top(context, cr, length)
     if length <= 0 then
         return
     end
-    cr:rectangle(0, self.padding, length, self.size - self.padding)
+    cr:rectangle(0, self.outer_space, length, self.size - self.outer_space - self.inner_space)
     cr:fill()
 end
 
@@ -181,7 +186,7 @@ function rounded_theme:bottom(context, cr, length)
     if length <= 0 then
         return
     end
-    cr:rectangle(0, 0, length, self.size - self.padding)
+    cr:rectangle(0, self.inner_space, length, self.size - self.outer_space - self.inner_space)
     cr:fill()
 end
 
@@ -189,7 +194,7 @@ function rounded_theme:left(context, cr, length)
     if length <= 0 then
         return
     end
-    cr:rectangle(self.padding, 0, self.size - self.padding, length)
+    cr:rectangle(self.outer_space, 0, self.size - self.outer_space - self.inner_space, length)
     cr:fill()
 end
 
@@ -198,7 +203,7 @@ function rounded_theme:right(context, cr, length)
     if length <= 0 then
         return
     end
-    cr:rectangle(0, 0, self.size - self.padding, length)
+    cr:rectangle(self.inner_space, 0, self.size - self.outer_space - self.inner_space, length)
     cr:fill()
 end
 

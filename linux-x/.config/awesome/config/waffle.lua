@@ -194,7 +194,8 @@ end
 local border_theme = setmetatable({}, {__index = border.rounded_theme})
 border_theme:init()
 border_theme.size = beautiful.border_width * 3
-border_theme.padding = dpi(1)
+border_theme.outer_space = dpi(1)
+border_theme.inner_space = beautiful.border_width * 2 + dpi(1) 
 local decorate_border = border.directions { "top", "bottom", "left", "right" }
 local function decorate(widget)
     return wibox.widget {
