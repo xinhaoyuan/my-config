@@ -707,8 +707,6 @@ do
 
     local mpd_title_widget = wibox.widget {
         text = "",
-        align = "center",
-        valign = "center",
         ellipsize = "end",
         forced_height = button_height,
         widget = wibox.widget.textbox
@@ -716,8 +714,6 @@ do
 
     local mpd_meta_widget = wibox.widget {
         text = "",
-        align = "center",
-        valign = "center",
         ellipsize = "end",
         font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
         forced_height = button_height,
@@ -814,9 +810,27 @@ do
                 {
                     mpd_progress_widget,
                     {
-                        mpd_title_widget,
                         {
-                            mpd_meta_widget,
+                            {
+                                mpd_title_widget,
+                                speed = 100,
+                                step_function = wibox.container.scroll.step_functions
+                                    .waiting_nonlinear_back_and_forth,
+                                layout = wibox.container.scroll.horizontal,
+                            },
+                            widget = wibox.container.place
+                        },
+                        {
+                            {
+                                {
+                                    mpd_meta_widget,
+                                    speed = 100,
+                                    step_function = wibox.container.scroll.step_functions
+                                        .waiting_nonlinear_back_and_forth,
+                                    layout = wibox.container.scroll.horizontal,
+                                },
+                                widget = wibox.container.place
+                            },
                             {
                                 text = "_(:3」∠)_",
                                 align = "center",
