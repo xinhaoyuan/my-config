@@ -616,10 +616,10 @@ do
       border_width = 0,
       color = bar_color,
       background_color = background_color,
-      margins = {
-          top = dpi(2),
-          bottom = dpi(2),
-      },
+      -- margins = {
+      --     top = dpi(2),
+      --     bottom = dpi(2),
+      -- },
       shape = gshape.bar,
       clip = true,
       widget = wibox.widget.progressbar
@@ -636,8 +636,8 @@ do
    local function parse_battery_output(stdout)
        local results = {}
        for line in stdout:gmatch("[^\r\n]+") do
-           key, value = line:match("([^:]*):(.*)")
-           if key == "Precentage" then
+           key, value = line:match("%s*([^:]-)%s*:%s*(.-)%s*$")
+           if key == "Percentage" then
                results.value = tonumber(value:match("(%d*)%%")) / 100
            elseif key == "Remaining" then
                results.remaining = value
@@ -646,7 +646,7 @@ do
                results.charging = (value:match("Charging") ~= nil)
            end
        end
-       return (results.value ~= nil) and results
+       return results
    end
 
    local update_graphic = function (widget, stdout, _, _, _)

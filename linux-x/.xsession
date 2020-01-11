@@ -1,4 +1,5 @@
 . $HOME/.path_profile
 
-# wal -R
+python3 -m pywal -R
+
 exec awesome
