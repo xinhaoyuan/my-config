@@ -626,9 +626,20 @@ do
    }
 
    battery_widget = wibox.widget {
-       battery_percentage_widget,
-       battery_status_widget,
-       layout = wibox.layout.stack
+       {
+           image = gcolor.recolor_image(icons.battery_full, beautiful.fg_normal),
+           forced_height = button_height,
+           forced_width = button_height,
+           widget = wibox.widget.imagebox
+       },
+       {
+           battery_percentage_widget,
+           battery_status_widget,
+           layout = wibox.layout.stack
+       },
+       spacing = button_padding,
+       visible = false,
+       layout = wibox.layout.fixed.horizontal
    }
 
    -- Surface-linux
@@ -651,14 +662,10 @@ do
 
    local update_graphic = function (widget, stdout, _, _, _)
        local status = parse_battery_output(stdout)
-       if status == nil then
-           battery_percentage_widget.value = 0
-           battery_status_widget:set_text("No battery info")
-       else
-           battery_percentage_widget.value = status.value
-           battery_percentage_widget.color = status.charging and charging_color or bar_color
-           battery_status_widget:set_text(status.state..": "..status.remaining)
-       end
+       battery_widget.visible = true
+       battery_percentage_widget.value = status.value
+       battery_percentage_widget.color = status.charging and charging_color or bar_color
+       battery_status_widget:set_text(status.state..": "..status.remaining)
    end
 
    local function spawn_and_update_battery(cmd)
@@ -1016,38 +1023,36 @@ local waffle_root_view = create_view(
       decorate(
          wibox.widget {
             {
-               {
-                  {
-                     image = gcolor.recolor_image(icons.cpu, beautiful.fg_normal),
-                     forced_height = button_height,
-                     forced_width = button_height,
-                     widget = wibox.widget.imagebox,
-                  },
-                  cpu_widget,
-                  {
-                     image = gcolor.recolor_image(icons.ram, beautiful.fg_normal),
-                     forced_height = button_height,
-                     forced_width = button_height,
-                     widget = wibox.widget.imagebox,
-                  },
-                  ram_widget,
-                  spacing = button_padding,
-                  layout = wibox.layout.fixed.horizontal,
-               },
-               net_widget,
-               {
-                   {
-                       image = gcolor.recolor_image(icons.battery_full, beautiful.fg_normal),
-                       forced_height = button_height,
-                       forced_width = button_height,
-                       widget = wibox.widget.imagebox
-                   },
-                   battery_widget,
-                   spacing = button_padding,
-                   layout = wibox.layout.fixed.horizontal
-               },
-               spacing = button_padding,
-               layout = wibox.layout.fixed.vertical,
+                {
+                    {
+                        image = gcolor.recolor_image(icons.cpu, beautiful.fg_normal),
+                        forced_height = button_height,
+                        forced_width = button_height,
+                        widget = wibox.widget.imagebox,
+                    },
+                    cpu_widget,
+                    {
+                        image = gcolor.recolor_image(icons.ram, beautiful.fg_normal),
+                        forced_height = button_height,
+                        forced_width = button_height,
+                        widget = wibox.widget.imagebox,
+                    },
+                    ram_widget,
+                    spacing = button_padding,
+                    layout = wibox.layout.fixed.horizontal,
+                },
+                {
+                    net_widget,
+                    top = button_padding,
+                    widget = fixed_margin,
+                },
+                {
+                    battery_widget,
+                    top = button_padding,
+                    draw_empty = false,
+                    widget = fixed_margin,
+                },
+                layout = wibox.layout.fixed.vertical,
             },
             margins = button_padding,
             widget = wibox.container.margin,
