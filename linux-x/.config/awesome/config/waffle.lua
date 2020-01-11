@@ -231,27 +231,6 @@ local function decorate(widget)
     }
 end
 
-local waffle_poweroff_count = 0
-local waffle_poweroff_button = nil
-waffle_poweroff_button = button({
-      markup = "",
-      indicator = em("p"),
-      key = "p",
-      action = function (alt)
-         waffle_poweroff_count = waffle_poweroff_count + 1
-         if waffle_poweroff_count >= 2 then
-            awful.spawn({"systemctl", "poweroff"})
-            waffle:hide()
-         else
-            waffle_poweroff_button:update_text()
-         end
-      end
-})
-
-function waffle_poweroff_button:update_text()
-   self.label.markup = "Power off <span size='x-small'>(" .. tostring(2 - waffle_poweroff_count) .. " more times)</span>"
-end
-
 local hide_key_pressed = false
 local function hide_after_release(mod, key, event)
     if event == "press" and not hide_after_pressed then
@@ -267,7 +246,43 @@ local function hide_after_release(mod, key, event)
     end
 end
 
-local waffle_poweroff_view = create_view(decorate(waffle_poweroff_button))
+local waffle_shutdown_view = create_view(
+    decorate(
+        wibox.widget {
+            button({
+                    -- icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
+                    markup = "Suspend",
+                    indicator = em("s"),
+                    key = "s",
+                    action = function (alt)
+                        waffle:hide()
+                        awful.spawn({"systemctl", "suspend"})
+                    end
+            }),
+            button({
+                    -- icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
+                    markup = "Hibernate",
+                    indicator = em("h"),
+                    key = "h",
+                    action = function (alt)
+                        waffle:hide()
+                        awful.spawn({"systemctl", "hibernate"})
+                    end
+            }),
+            button({
+                    -- icon = gcolor.recolor_image(icons.poweroff, beautiful.fg_normal),
+                    markup = "Power off",
+                    indicator = em("p"),
+                    key = "p",
+                    action = function (alt)
+                        waffle:hide()
+                        awful.spawn({"systemctl", "poweroff"})
+                    end
+            }),
+            layout = wibox.layout.fixed.vertical
+        }
+))
+
 local waffle_settings_view
 
 local cpu_widget_width = (waffle_width - button_padding) / 2 - button_height - button_padding * 2
@@ -1038,24 +1053,12 @@ local waffle_root_view = create_view(
                   end
             }),
             button({
-                  icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
-                  markup = "Suspend",
+                  icon = gcolor.recolor_image(icons.poweroff, beautiful.fg_normal),
+                  markup = "Shut down",
                   indicator = em("u"),
                   key = "u",
                   action = function (alt)
-                     awful.spawn({"systemctl", "suspend"})
-                     waffle:hide()
-                  end
-            }),
-            button({
-                  icon = gcolor.recolor_image(icons.poweroff, beautiful.fg_normal),
-                  markup = "Power off",
-                  indicator = em("p"),
-                  key = "p",
-                  action = function (alt)
-                     waffle_poweroff_count = 0
-                     waffle_poweroff_button:update_text()
-                     waffle:show(waffle_poweroff_view, { push = true })
+                      waffle:show(waffle_shutdown_view, { push = true })
                   end
             }),
             layout = wibox.layout.fixed.vertical,
