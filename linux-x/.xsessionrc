@@ -24,4 +24,5 @@ else
     xrdb -merge $HOME/.Xresources.d/hidpi
 fi
 
+xmodmap $HOME/.Xmodmap
 python3 -m pywal -R
