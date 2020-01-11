@@ -12,6 +12,7 @@ icons.fortune = local_path .. "fortune.svg"
 icons.terminal = local_path .. "terminal.svg"
 icons.file_manager = local_path .. "file_manager.svg"
 icons.setup = local_path .. "setup.svg"
+icons.battery_full = local_path .. "battery-full.svg"
 
 icons.lock = local_path .. "lock.svg"
 icons.sleep = local_path .. "sleep.svg"

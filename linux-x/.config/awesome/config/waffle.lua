@@ -589,6 +589,91 @@ do
     )
 end
 
+local battery_widget_width = waffle_width - button_height - button_padding
+local battery_widget
+do
+   local bar_color = graph_normal_color
+   local charging_color = aux.color.from_string(beautiful.special_normal):blend_with(beautiful.bg_normal, 0.25):to_string()
+   local background_color = beautiful.border_normal
+
+   local battery_status_widget = wibox.widget {
+        text = "",
+        ellipsize = "end",
+        align = "center",
+        forced_width = battery_widget_width,
+        forced_height = button_height,
+        font = font_info,
+        outline_color = beautiful.bg_normal,
+        outline_size = dpi(2),
+        widget = outlined_textbox,
+    }
+
+   local battery_percentage_widget = wibox.widget {
+      max_value = 1,
+      forced_width = battery_widget_width,
+      forced_height = button_height,
+      paddings = 0,
+      border_width = 0,
+      color = bar_color,
+      background_color = background_color,
+      margins = {
+          top = dpi(2),
+          bottom = dpi(2),
+      },
+      shape = gshape.bar,
+      clip = true,
+      widget = wibox.widget.progressbar
+   }
+
+   battery_widget = wibox.widget {
+       battery_percentage_widget,
+       battery_status_widget,
+       layout = wibox.layout.stack
+   }
+
+   -- Surface-linux
+   local battery_status_command = {"mshw0084-rqst.py", "-q", "-d", "/dev/ttyS0", "bat1.pretty"}
+   local function parse_battery_output(stdout)
+       local results = {}
+       for line in stdout:gmatch("[^\r\n]+") do
+           key, value = line:match("([^:]*):(.*)")
+           if key == "Precentage" then
+               results.value = tonumber(value:match("(%d*)%%")) / 100
+           elseif key == "Remaining" then
+               results.remaining = value
+           elseif key == "State" then
+               results.state = value
+               results.charging = (value:match("Charging") ~= nil)
+           end
+       end
+       return (results.value ~= nil) and results
+   end
+
+   local update_graphic = function (widget, stdout, _, _, _)
+       local status = parse_battery_output(stdout)
+       if status == nil then
+           battery_percentage_widget.value = 0
+           battery_status_widget:set_text("No battery info")
+       else
+           battery_percentage_widget.value = status.value
+           battery_percentage_widget.color = status.charging and charging_color or bar_color
+           battery_status_widget:set_text(status.state..": "..status.remaining)
+       end
+   end
+
+   local function spawn_and_update_battery(cmd)
+       awful.spawn.easy_async_with_shell(
+           battery_status_command,
+           function (stdout, stderr, exitreason, exitcode)
+               update_graphic(battery_widget, stdout, stderr, exitreason, exitcode)
+           end
+       )
+   end
+
+   watch(battery_status_command, 60, update_graphic, battery_widget)
+end
+
+
 local volumebar_widget_width = waffle_width - button_height
 local volumebar_widget
 local volumebar_buttons
@@ -950,6 +1035,17 @@ local waffle_root_view = create_view(
                   layout = wibox.layout.fixed.horizontal,
                },
                net_widget,
+               {
+                   {
+                       image = gcolor.recolor_image(icons.battery_full, beautiful.fg_normal),
+                       forced_height = button_height,
+                       forced_width = button_height,
+                       widget = wibox.widget.imagebox
+                   },
+                   battery_widget,
+                   spacing = button_padding,
+                   layout = wibox.layout.fixed.horizontal
+               },
                spacing = button_padding,
                layout = wibox.layout.fixed.vertical,
             },
@@ -1199,7 +1295,9 @@ local client_waffle = create_view(
                         indicator = em("m"),
                         key = "m",
                         action = function (alt)
-                            waffle:hide()
+                            if not alt then
+                                waffle:hide()
+                            end
                             if not client_waffle_selected.valid then
                                 return
                             end
@@ -1211,7 +1309,9 @@ local client_waffle = create_view(
                         indicator = em("a"),
                         key = "a",
                         action = function (alt)
-                            waffle:hide()
+                            if not alt then
+                                waffle:hide()
+                            end
                             if not client_waffle_selected.valid then
                                 return
                             end
@@ -1223,7 +1323,9 @@ local client_waffle = create_view(
                         indicator = em("f"),
                         key = "f",
                         action = function (alt)
-                            waffle:hide()
+                            if not alt then
+                                waffle:hide()
+                            end
                             if not client_waffle_selected.valid then
                                 return
                             end
