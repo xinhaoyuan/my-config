@@ -589,7 +589,7 @@ do
     )
 end
 
-local battery_widget_width = waffle_width - button_height - button_padding
+local battery_widget_width = waffle_width - button_height - button_padding * 3
 local battery_widget
 do
    local bar_color = graph_normal_color
@@ -601,25 +601,19 @@ do
         ellipsize = "end",
         align = "center",
         forced_width = battery_widget_width,
-        forced_height = button_height,
+        forced_height = button_height - dpi(2),
         font = font_info,
-        outline_color = beautiful.bg_normal,
-        outline_size = dpi(2),
-        widget = outlined_textbox,
+        widget = wibox.widget.textbox
     }
 
    local battery_percentage_widget = wibox.widget {
       max_value = 1,
       forced_width = battery_widget_width,
-      forced_height = button_height,
+      forced_height = dpi(2),
       paddings = 0,
       border_width = 0,
       color = bar_color,
       background_color = background_color,
-      -- margins = {
-      --     top = dpi(2),
-      --     bottom = dpi(2),
-      -- },
       shape = gshape.bar,
       clip = true,
       widget = wibox.widget.progressbar
@@ -633,9 +627,9 @@ do
            widget = wibox.widget.imagebox
        },
        {
-           battery_percentage_widget,
            battery_status_widget,
-           layout = wibox.layout.stack
+           battery_percentage_widget,
+           layout = wibox.layout.fixed.vertical
        },
        spacing = button_padding,
        visible = false,
@@ -643,7 +637,8 @@ do
    }
 
    -- Surface-linux
-   local battery_status_command = {"mshw0084-rqst.py", "-q", "-d", "/dev/ttyS0", "bat1.pretty"}
+   local battery_status_command =
+       {"mshw0084-rqst.py", "-q", "-d", "/dev/ttyS0", "bat1.pretty"}
    local function parse_battery_output(stdout)
        local results = {}
        for line in stdout:gmatch("[^\r\n]+") do
@@ -696,8 +691,8 @@ do
 
    volumebar_widget = wibox.widget {
       max_value = 1,
-      forced_width = volumebar_widget_width,
-      forced_height = button_height,
+      forced_width = button_width,
+      forced_height = dpi(2),
       paddings = 0,
       border_width = 0,
       color = bar_color,
@@ -705,10 +700,8 @@ do
       shape = gshape.bar,
       clip = true,
       margins = {
-         left = dpi(4) + button_padding,
-         right = dpi(4),
-         top = button_height / 2 - dpi(1),
-         bottom = button_height / 2 - dpi(1),
+         left = button_padding,
+         right = button_padding,
       },
       widget = wibox.widget.progressbar
    }
@@ -815,9 +808,9 @@ do
     local mpd_progress_widget = wibox.widget {
         max_value     = 1,
         value         = 0,
-        forced_height = button_height * 2,
+        forced_height = dpi(2),
         color = graph_normal_color,
-        background_color = "#00000000",
+        background_color = beautiful.border_normal,
         widget        = wibox.widget.progressbar,
     }
 
@@ -900,11 +893,21 @@ do
         label_widget = wibox.widget {
             {
                 {
+                    {
+                        {
+                            mpd_title_widget,
+                            speed = 100,
+                            step_function = wibox.container.scroll.step_functions
+                                .waiting_nonlinear_back_and_forth,
+                            layout = wibox.container.scroll.horizontal,
+                        },
+                        widget = wibox.container.place
+                    },
                     mpd_progress_widget,
                     {
                         {
                             {
-                                mpd_title_widget,
+                                mpd_meta_widget,
                                 speed = 100,
                                 step_function = wibox.container.scroll.step_functions
                                     .waiting_nonlinear_back_and_forth,
@@ -913,32 +916,19 @@ do
                             widget = wibox.container.place
                         },
                         {
-                            {
-                                {
-                                    mpd_meta_widget,
-                                    speed = 100,
-                                    step_function = wibox.container.scroll.step_functions
-                                        .waiting_nonlinear_back_and_forth,
-                                    layout = wibox.container.scroll.horizontal,
-                                },
-                                widget = wibox.container.place
-                            },
-                            {
-                                text = "_(:3」∠)_",
-                                align = "center",
-                                force_height = button_height,
-                                font = font_info,
-                                widget = wibox.widget.textbox
-                            },
-                            widget = fallback
+                            text = "_(:3」∠)_",
+                            align = "center",
+                            force_height = button_height - dpi(2),
+                            font = font_info,
+                            widget = wibox.widget.textbox
                         },
-                        layout = wibox.layout.fixed.vertical,
+                        widget = fallback
                     },
-                    layout = wibox.layout.stack,
+                    layout = wibox.layout.fixed.vertical,
                 },
                 draw_empty = false,
-                left = dpi(5),
-                right = dpi(5),
+                left = button_padding,
+                right = button_padding,
                 widget = fixed_margin,
             },
             {
@@ -1143,7 +1133,10 @@ local waffle_root_view = create_view(
               mpd_widget,
               button {
                   icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
-                  label_widget = volumebar_widget,
+                  label_widget = wibox.widget {
+                      volumebar_widget,
+                      widget = wibox.container.place
+                  },
                   buttons = volumebar_buttons,
                   indicator = em("a"),
                   key = "a",
