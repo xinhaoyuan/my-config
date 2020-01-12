@@ -621,7 +621,7 @@ do
 
    battery_widget = wibox.widget {
        {
-           image = gcolor.recolor_image(icons.battery_full, beautiful.fg_normal),
+           image = gcolor.recolor_image(icons.battery_half, beautiful.fg_normal),
            forced_height = button_height,
            forced_width = button_height,
            widget = wibox.widget.imagebox
