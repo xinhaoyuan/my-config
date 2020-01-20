@@ -1,6 +1,7 @@
 local icons = {}
 local local_path = debug.getinfo(1, "S").source:match("^@(.-)[^/]+$")
 
+icons.clock = local_path .. "clock.svg"
 icons.cpu = local_path .. "cpu.svg" 
 icons.ram = local_path .. "ram.svg"
 icons.ethernet = local_path .. "ethernet.svg"

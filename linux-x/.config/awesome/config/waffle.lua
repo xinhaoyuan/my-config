@@ -40,8 +40,10 @@ local function em(t)
     return t
 end
 
-local function create_view(root, args)
+local function view(args)
     args = args or {}
+    local root = args.root
+    assert(root ~= nil)
     local checked = {[root] = true}
     local traverse_pool = {root}
     local view = {}
@@ -246,42 +248,41 @@ local function hide_after_release(mod, key, event)
     end
 end
 
-local waffle_shutdown_view = create_view(
-    decorate(
-        wibox.widget {
-            button({
-                    -- icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
-                    markup = "Suspend",
-                    indicator = em("s"),
-                    key = "s",
-                    action = function (alt)
-                        waffle:hide()
-                        awful.spawn({"systemctl", "suspend"})
-                    end
-            }),
-            button({
-                    -- icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
-                    markup = "Hibernate",
-                    indicator = em("h"),
-                    key = "h",
-                    action = function (alt)
-                        waffle:hide()
-                        awful.spawn({"systemctl", "hibernate"})
-                    end
-            }),
-            button({
-                    -- icon = gcolor.recolor_image(icons.poweroff, beautiful.fg_normal),
-                    markup = "Power off",
-                    indicator = em("p"),
-                    key = "p",
-                    action = function (alt)
-                        waffle:hide()
-                        awful.spawn({"systemctl", "poweroff"})
-                    end
-            }),
-            layout = wibox.layout.fixed.vertical
-        }
-))
+local waffle_shutdown_view = view {
+    root = decorate {
+        button({
+                -- icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
+                markup = "Suspend",
+                indicator = em("s"),
+                key = "s",
+                action = function (alt)
+                    waffle:hide()
+                    awful.spawn({"systemctl", "suspend"})
+                end
+        }),
+        button({
+                -- icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
+                markup = "Hibernate",
+                indicator = em("h"),
+                key = "h",
+                action = function (alt)
+                    waffle:hide()
+                    awful.spawn({"systemctl", "hibernate"})
+                end
+        }),
+        button({
+                -- icon = gcolor.recolor_image(icons.poweroff, beautiful.fg_normal),
+                markup = "Power off",
+                indicator = em("p"),
+                key = "p",
+                action = function (alt)
+                    waffle:hide()
+                    awful.spawn({"systemctl", "poweroff"})
+                end
+        }),
+        layout = wibox.layout.fixed.vertical
+    }
+}
 
 local waffle_settings_view
 
@@ -1003,15 +1004,9 @@ do
 
 end
 
-local waffle_root_view = create_view(
-   wibox.widget {
-      --    wibox.widget {
-      --       align = "center",
-      --       format = "<span size='x-large'>%y-%m-%d %a %H:%M</span>",
-      --       widget = wibox.widget.textclock,
-      --    },
-      decorate(
-         wibox.widget {
+local waffle_root_view = view {
+    root = wibox.widget {
+        decorate {
             {
                 {
                     {
@@ -1046,234 +1041,245 @@ local waffle_root_view = create_view(
             },
             margins = button_padding,
             widget = wibox.container.margin,
-      }),
-      -- decorate(
-      --    wibox.widget {
-      --       wibox.widget.calendar.month(os.date('*t'), beautiful.font_mono),
-      --       top = dpi(10), right = dpi(10),
-      --       widget = wibox.container.margin,
-      --    }
-      -- ),
-      decorate(
-         wibox.widget {
+        },
+        decorate {
+            button {
+                icon = gcolor.recolor_image(icons.clock, beautiful.fg_normal),
+                label_widget = wibox.widget {
+                    align = "center",
+                    format = "%m/%d %a %H:%M",
+                    widget = wibox.widget.textclock,
+                },
+                indicator = em("c"),
+                key = "c",
+                action = function (alt)
+                    if alt then
+                        shared.action.web_browser("https://calendar.google.com")
+                    else
+                        shared.action.terminal_session {
+                            name = "org-mode",
+                            command = {"emacs", "-nw"}
+                        }
+                    end
+                    waffle:hide()
+                end,
+            },
+            button {
+                    icon = gcolor.recolor_image(icons.launcher, beautiful.fg_normal),
+                    markup = "Launcher",
+                    indicator = em("\\"),
+                    key = {"\\","|"},
+                    action = function (alt)
+                        if alt then
+                            shared.action.app_finder()
+                        else
+                            shared.action.launcher()
+                        end
+                        waffle:hide()
+                    end
+            },
             button({
-                  icon = gcolor.recolor_image(icons.launcher, beautiful.fg_normal),
-                  markup = "Launcher",
-                  indicator = em("\\"),
-                  key = {"\\","|"},
-                  action = function (alt)
-                     if alt then
-                        shared.action.app_finder()
-                     else
-                        shared.action.launcher()
-                     end
-                     waffle:hide()
-                  end
+                    icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal),
+                    markup = "Terminal",
+                    indicator = em("↵"),
+                    key = "Return",
+                    action = function (alt)
+                        if alt then
+                            awful.spawn("xterm")
+                        else
+                            shared.action.terminal()
+                        end
+                        waffle:hide()
+                    end
             }),
             button({
-                  icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal),
-                  markup = "Terminal",
-                  indicator = em("↵"),
-                  key = "Return",
-                  action = function (alt)
-                     if alt then
-                        awful.spawn("xterm")
-                     else
-                        shared.action.terminal()
-                     end
-                     waffle:hide()
-                  end
+                    icon = gcolor.recolor_image(icons.browser, beautiful.fg_normal),
+                    markup = "Web browser",
+                    indicator = em("w"),
+                    key = "w",
+                    action = function (alt)
+                        shared.action.web_browser()
+                        waffle:hide()
+                    end
             }),
             button({
-                  icon = gcolor.recolor_image(icons.browser, beautiful.fg_normal),
-                  markup = "Web browser",
-                  indicator = em("w"),
-                  key = "w",
-                  action = function (alt)
-                     shared.action.web_browser()
-                     waffle:hide()
-                  end
+                    icon = gcolor.recolor_image(icons.file_manager, beautiful.fg_normal),
+                    markup = "File manager",
+                    indicator = em("e"),
+                    key = "e",
+                    action = function (alt)
+                        shared.action.file_manager()
+                        waffle:hide()
+                    end
             }),
             button({
-                  icon = gcolor.recolor_image(icons.file_manager, beautiful.fg_normal),
-                  markup = "File manager",
-                  indicator = em("e"),
-                  key = "e",
-                  action = function (alt)
-                     shared.action.file_manager()
-                     waffle:hide()
-                  end
+                    icon = gcolor.recolor_image(icons.fortune, beautiful.fg_normal),
+                    markup = "Fortune",
+                    indicator = em("f"),
+                    key = "f",
+                    action = function (alt)
+                        local fortune = shared.screen.get_fortune()
+                        if fortune then
+                            shared.action.web_browser("? " .. fortune)
+                        end
+                        waffle:hide()
+                    end
             }),
             button({
-                  icon = gcolor.recolor_image(icons.fortune, beautiful.fg_normal),
-                  markup = "Fortune",
-                  indicator = em("f"),
-                  key = "f",
-                  action = function (alt)
-                     local fortune = shared.screen.get_fortune()
-                     if fortune then
-                        shared.action.web_browser("? " .. fortune)
-                     end
-                     waffle:hide()
-                  end
-            }),
-            button({
-                  icon = gcolor.recolor_image(icons.setup, beautiful.fg_normal),
-                  markup = "Settings",
-                  indicator = em("s"),
-                  key = "s",
-                  action = function (alt)
-                      waffle:show(waffle_settings_view, { push = true })
-                  end,
-            }),
-            layout = wibox.layout.fixed.vertical,
-      }),
-      decorate(
-          wibox.widget {
-              mpd_widget,
-              button {
-                  icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
-                  label_widget = wibox.widget {
-                      volumebar_widget,
-                      widget = wibox.container.place
-                  },
-                  buttons = volumebar_buttons,
-                  indicator = em("a"),
-                  key = "a",
-                  action = function (alt)
-                      local cmd = {"pavucontrol"}
-                      awful.spawn(cmd)
-                      waffle:hide()
-                  end,
-              },
-              layout = wibox.layout.fixed.vertical,
-      }),
-      decorate(
-         wibox.widget {
-            button({
-                  icon = gcolor.recolor_image(icons.lock, beautiful.fg_normal),
-                  markup = "Lock screen",
-                  indicator = em("l"),
-                  key = "l",
-                  action = function (alt)
-                     shared.action.screen_locker()
-                     waffle:hide()
-                  end
-            }),
-            button({
-                  icon = gcolor.recolor_image(icons.poweroff, beautiful.fg_normal),
-                  markup = "Shut down",
-                  indicator = em("u"),
-                  key = "u",
-                  action = function (alt)
-                      waffle:show(waffle_shutdown_view, { push = true })
-                  end
+                    icon = gcolor.recolor_image(icons.setup, beautiful.fg_normal),
+                    markup = "Settings",
+                    indicator = em("s"),
+                    key = "s",
+                    action = function (alt)
+                        waffle:show(waffle_settings_view, { push = true })
+                    end,
             }),
             layout = wibox.layout.fixed.vertical,
-      }),
-      spacing = dpi(10),
-      layout = wibox.layout.fixed.vertical,
-   }
-)
+        },
+        decorate {
+            mpd_widget,
+            button {
+                icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
+                label_widget = wibox.widget {
+                    volumebar_widget,
+                    widget = wibox.container.place
+                },
+                buttons = volumebar_buttons,
+                indicator = em("a"),
+                key = "a",
+                action = function (alt)
+                    local cmd = {"pavucontrol"}
+                    awful.spawn(cmd)
+                    waffle:hide()
+                end,
+            },
+            layout = wibox.layout.fixed.vertical,
+        },
+        decorate {
+            button({
+                    icon = gcolor.recolor_image(icons.lock, beautiful.fg_normal),
+                    markup = "Lock screen",
+                    indicator = em("l"),
+                    key = "l",
+                    action = function (alt)
+                        shared.action.screen_locker()
+                        waffle:hide()
+                    end
+            }),
+            button({
+                    icon = gcolor.recolor_image(icons.poweroff, beautiful.fg_normal),
+                    markup = "Shut down",
+                    indicator = em("u"),
+                    key = "u",
+                    action = function (alt)
+                        waffle:show(waffle_shutdown_view, { push = true })
+                    end
+            }),
+            layout = wibox.layout.fixed.vertical,
+        },
+        spacing = dpi(10),
+        layout = wibox.layout.fixed.vertical,
+    },
+}
 
 waffle:set_root_view(waffle_root_view)
 
-waffle_settings_view = create_view(
-   decorate(
-      wibox.widget {
-         -- button({
-         --       markup = "Toggle titlebars",
-         --       indicator = em("t"),
-         --       key = "t",
-         --       action = function (alt)
-         --          if not alt then
-         --             if shared.var.enable_titlebar then
-         --                for _, c in ipairs(capi.client.get()) do
-         --                   shared.client.titlebar_disable(c)
-         --                end
-         --                shared.var.enable_titlebar = false
-         --             else
-         --                for _, c in ipairs(capi.client.get()) do
-         --                   shared.client.titlebar_enable(c)
-         --                end
-         --                shared.var.enable_titlebar = true
-         --             end
-         --          else
-         --              shared.var.hide_clients_with_titlebars =
-         --                  not shared.var.hide_clients_with_titlebars
-         --              capi.client.emit_signal("list")
-         --          end
-         --          waffle:hide()
-         --       end
-         -- }),
-         -- button({
-         --       markup = "Toggle music",
-         --       indicator = em("m"),
-         --       key = "m",
-         --       action = function (alt)
-         --           mpd_widget:set_visible(not mpd_widget:get_visible())
-         --           waffle:go_back()
-         --       end
-         -- }),
-         button({
-               markup = "Toggle fortune",
-               indicator = em("f"),
-               key = "f",
-               action = function (alt)
-                  shared.screen.toggle_fortune()
-               end
-         }),
-         button({
-               markup = "Cycle bar styles",
-               indicator = em("b"),
-               key = "b",
-               action = function (alt)
-                  for i, v in ipairs(beautiful.bar_styles) do
-                     if v == beautiful.bar_style then
-                        beautiful.bar_style = beautiful.bar_styles[i % #beautiful.bar_styles + 1]
+waffle_settings_view = view {
+    root = decorate(
+        wibox.widget {
+            -- button({
+            --       markup = "Toggle titlebars",
+            --       indicator = em("t"),
+            --       key = "t",
+            --       action = function (alt)
+            --          if not alt then
+            --             if shared.var.enable_titlebar then
+            --                for _, c in ipairs(capi.client.get()) do
+            --                   shared.client.titlebar_disable(c)
+            --                end
+            --                shared.var.enable_titlebar = false
+            --             else
+            --                for _, c in ipairs(capi.client.get()) do
+            --                   shared.client.titlebar_enable(c)
+            --                end
+            --                shared.var.enable_titlebar = true
+            --             end
+            --          else
+            --              shared.var.hide_clients_with_titlebars =
+            --                  not shared.var.hide_clients_with_titlebars
+            --              capi.client.emit_signal("list")
+            --          end
+            --          waffle:hide()
+            --       end
+            -- }),
+            -- button({
+            --       markup = "Toggle music",
+            --       indicator = em("m"),
+            --       key = "m",
+            --       action = function (alt)
+            --           mpd_widget:set_visible(not mpd_widget:get_visible())
+            --           waffle:go_back()
+            --       end
+            -- }),
+            button({
+                    markup = "Toggle fortune",
+                    indicator = em("f"),
+                    key = "f",
+                    action = function (alt)
+                        shared.screen.toggle_fortune()
+                    end
+            }),
+            button({
+                    markup = "Cycle bar styles",
+                    indicator = em("b"),
+                    key = "b",
+                    action = function (alt)
+                        for i, v in ipairs(beautiful.bar_styles) do
+                            if v == beautiful.bar_style then
+                                beautiful.bar_style = beautiful.bar_styles[i % #beautiful.bar_styles + 1]
+                                capi.screen.emit_signal("list")
+                                return
+                            end
+                        end
+                        beautiful.bar_style = "auto"
                         capi.screen.emit_signal("list")
-                        return
-                     end
-                  end
-                  beautiful.bar_style = "auto"
-                  capi.screen.emit_signal("list")
-               end
-         }),
-         button({
-               markup = "Wallpaper",
-               indicator = em("w"),
-               key = "w",
-               action = function (alt)
-                  shared.action.wallpaper_setup()
-                  waffle:hide()
-               end
-         }),
-         button({
-               markup = "Screen layout",
-               indicator = em("s"),
-               key = "s",
-               action = function (alt)
-                  if alt then
-                     local cmd = {"arandr"}
-                     awful.spawn(cmd)
-                  else
-                     local cmd = {"rofi-screen-layout",
-                                  "-normal-window",
-                                  "-font", beautiful.font
-                     }
-                     awful.spawn(cmd)
-                  end
-                  waffle:hide()
-               end
-         }),
-         layout = wibox.layout.fixed.vertical,
-   })
-)
+                    end
+            }),
+            button({
+                    markup = "Wallpaper",
+                    indicator = em("w"),
+                    key = "w",
+                    action = function (alt)
+                        shared.action.wallpaper_setup()
+                        waffle:hide()
+                    end
+            }),
+            button({
+                    markup = "Screen layout",
+                    indicator = em("s"),
+                    key = "s",
+                    action = function (alt)
+                        if alt then
+                            local cmd = {"arandr"}
+                            awful.spawn(cmd)
+                        else
+                            local cmd = {"rofi-screen-layout",
+                                         "-normal-window",
+                                         "-font", beautiful.font
+                            }
+                            awful.spawn(cmd)
+                        end
+                        waffle:hide()
+                    end
+            }),
+            layout = wibox.layout.fixed.vertical,
+    })
+}
 
 
 local client_waffle_selected
-local client_waffle = create_view(
-    wibox.widget {
+local client_waffle = view {
+    root = wibox.widget {
         decorate(
             wibox.widget {
                 button({
@@ -1360,7 +1366,7 @@ local client_waffle = create_view(
         spacing = dpi(10),
         layout = wibox.layout.fixed.vertical,
     }
-)
+}
 
 function shared.waffle.show_client_waffle(c, args)
     args = args or {}

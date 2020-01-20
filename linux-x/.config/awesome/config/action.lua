@@ -42,6 +42,16 @@ shared.action = {
         end
         awful.spawn(cmd)
     end,
+    terminal_session = function (args)
+        args = args or {}
+        local name = args.name or "default"
+        local cmd = args.command or {}
+        local real_cmd = {"tmux", "new", "-As", name}
+        for _, c in ipairs(cmd) do
+            real_cmd[#real_cmd + 1] = c
+        end
+        shared.action.terminal(real_cmd)
+    end,
     web_browser = function (url)
         local cmd = {"x-www-browser"}
         if url then table.insert(cmd, url) end
