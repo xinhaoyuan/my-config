@@ -141,7 +141,12 @@ function waffle:set_view(view)
 end
 
 local function get_waffle_wibox(screen)
-    if screen.waffle_wibox == nil then
+    if screen.waffle_wibox == nil or
+        screen.waffle_wibox.x ~= screen.geometry.x or
+        screen.waffle_wibox.y ~= screen.geometry.y or
+        screen.waffle_wibox.width ~= screen.geometry.width or
+        screen.waffle_wibox.height ~= screen.geometry.height
+    then
         screen.waffle_wibox = wibox({
                 screen = screen,
                 x = screen.geometry.x,
