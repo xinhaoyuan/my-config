@@ -31,7 +31,7 @@ local button_padding = dpi(4)
 local font_normal = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_normal)
 local font_info = beautiful.fontname_mono.." "..tostring(beautiful.fontsize_small)
 local graph_background = "#00000000"
-local graph_normal_color = aux.color.from_string(beautiful.border_focus):blend_with(beautiful.bg_normal, 0.25):to_string()
+local graph_normal_color = aux.color.from_string(beautiful.bg_focus):blend_with(beautiful.bg_normal, 0.25):to_string()
 local graph_color = graph_normal_color -- "linear:0,0:0,22:0,#FF0000:0.5," .. graph_normal_color
 local update_interval_s = 1
 
