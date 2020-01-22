@@ -413,12 +413,14 @@ local function reset_decoration(c)
     else
         c.border_width = 0
     end
-    if c.maximized -- and not shared.var.enable_titlebar
-    then
-        shared.client.titlebar_hide(c)
-    else
-        if c.has_titlebar_enabled then
-            shared.client.titlebar_show(c)
+    if c.type ~= "dock" then
+        if c.maximized -- and not shared.var.enable_titlebar
+        then
+            shared.client.titlebar_hide(c)
+        else
+            if c.has_titlebar_enabled then
+                shared.client.titlebar_show(c)
+            end
         end
     end
 end
@@ -476,7 +478,7 @@ require("awful.rules").rules = {
        },
    },
    {
-      rule = { class = "Plank", type = "dock" },
+      rule = { type = "dock" },
       properties = {
          floating = true,
          sticky = true,
