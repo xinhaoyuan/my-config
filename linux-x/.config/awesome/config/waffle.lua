@@ -1050,8 +1050,8 @@ local waffle_root_view = view {
                     format = "%m/%d %a %H:%M",
                     widget = wibox.widget.textclock,
                 },
-                indicator = em("c"),
-                key = "c",
+                indicator = em("t"),
+                key = "t",
                 action = function (alt)
                     if alt then
                         shared.action.web_browser("https://calendar.google.com")

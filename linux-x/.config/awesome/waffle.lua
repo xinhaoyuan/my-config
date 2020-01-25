@@ -200,9 +200,9 @@ function waffle:show(view, args)
         if type(args.anchor) == "table" then
             self.wibox_.anchor = args.anchor
         elseif args.anchor == false or capi.mouse.screen ~= screen then
-            local screen_geo = screen.geometry
-            self.wibox_.anchor = { x = screen_geo.x + screen_geo.width / 2,
-                                   y = screen_geo.y + screen_geo.height / 2 }
+            local avail_area = screen.workarea
+            self.wibox_.anchor = { x = avail_area.x + avail_area.width / 2,
+                                   y = avail_area.y + avail_area.height / 2 }
         else
             local coords = capi.mouse.coords()
             self.wibox_.anchor = coords

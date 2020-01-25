@@ -27,6 +27,10 @@ function class:blend_with(c, w)
    return self
 end
 
+function class:lightness()
+    return (math.max(self[1], self[2], self[3]) + math.min(self[1], self[2], self[3])) / 2
+end
+
 function mod.from_string(s)
     local ret = table.pack(gcolor.parse_color(s))
     setmetatable(ret, class.mt)
