@@ -554,6 +554,9 @@
           (lambda ()
             (c-set-style "awk")
             ))
+(add-hook 'c++-mode-hook
+          (lambda ()
+            (c-set-offset 'innamespace 0)))
 (add-hook 'c-initialization-hook
           (lambda ()
             ;; indent format
