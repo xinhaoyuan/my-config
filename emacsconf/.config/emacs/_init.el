@@ -67,6 +67,7 @@
 (if (and (daemonp) (eq (length (frame-list)) 1))
     (setq server-frame (selected-frame)))
 
+(setq system-time-locale "C")
 (setq eshell-save-history-on-exit nil)
 (setq completion-ignore-case t)
 (setq read-file-name-completion-ignore-case t)
@@ -444,7 +445,6 @@
 (define-key my-prefix (kbd "t") 'tabify-buffer)
 (define-key my-prefix (kbd "T") 'untabify-buffer)
 (define-key my-prefix (kbd "r") (lambda () (interactive) (revert-buffer nil t t)))
-(define-key my-prefix (kbd "p") 'org-publish-current-project)
 (define-key my-prefix (kbd "C-z") 'delete-surrounding-blank)
 (define-key my-prefix (kbd "DEL") 'delete-surrounding-blank)
 (define-key my-prefix (kbd "!") (lambda () (interactive) (term (or (getenv "SHELL") "/bin/sh"))))
@@ -476,6 +476,7 @@
 (define-key my-prefix (kbd "o o") (lambda () (interactive) (find-file my-org-dir)))
 (define-key my-prefix (kbd "o c") 'org-agenda)
 (define-key my-prefix (kbd "o @") 'org-store-link)
+(define-key my-prefix (kbd "o p") 'org-publish-current-project)
 
 (global-unset-key (kbd "C-x C-c"))
 (global-set-key (kbd "C-x C-c") 'my-exit)
@@ -483,7 +484,6 @@
 (global-set-key (kbd "M-<down>") 'scroll-up)
 (global-unset-key (kbd "C-SPC"))
 (global-set-key (kbd "C-x c") 'kill-this-buffer)
-
 
 (defun vsplit-last-buffer ()
   (interactive)
@@ -661,6 +661,8 @@
     (progn
       (setq org-directory "~/org")
       (setq org-agenda-files '("~/org/agenda-work.org"))
+      (setq-default org-display-custom-times t)
+      (setq org-time-stamp-custom-formats '("<%Y-%m-%d %a>" . "<%Y-%m-%d %a %H:%M>"))
       ))
 ;; }}}
 
