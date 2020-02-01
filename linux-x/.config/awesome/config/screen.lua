@@ -1030,18 +1030,26 @@ local global_keys = table_join(
 
 shared.screen.tags = { "1", "2", "3", "4" }
 
+local function switch_to_or_go_last(screen, tag)
+    if #screen.selected_tags == 1 and screen.selected_tags[1] == tag then
+        awful.tag.history.restore(screen)
+    else
+        tag:view_only()
+    end
+end
+
 for i = 1, #shared.screen.tags do
-   local key = tostring(i)
-   global_keys =
-      table_join(
-         awful.key({ "Mod4" }, key, function () awful.screen.focused().tags[i]:view_only() end),
-         awful.key({ "Mod4", "Control" }, key, function () awful.tag.viewtoggle(awful.screen.focused().tags[i]) end),
-         awful.key({ "Mod4", "Shift" }, key, function ()
-               local c = capi.client.focus
-               if c == nil then return end
-               c:toggle_tag(c.screen.tags[i])
-         end),
-         global_keys)
+    local key = tostring(i)
+    global_keys =
+        table_join(
+            awful.key({ "Mod4" }, key, function () local screen = awful.screen.focused(); switch_to_or_go_last(screen, screen.tags[i]) end),
+            awful.key({ "Mod4", "Control" }, key, function () awful.tag.viewtoggle(awful.screen.focused().tags[i]) end),
+            awful.key({ "Mod4", "Shift" }, key, function ()
+                    local c = capi.client.focus
+                    if c == nil then return end
+                    c:toggle_tag(c.screen.tags[i])
+            end),
+            global_keys)
 end
 
 capi.root.keys(table_join(capi.root.keys(), global_keys))
