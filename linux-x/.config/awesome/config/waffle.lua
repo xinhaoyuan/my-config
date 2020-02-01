@@ -1056,10 +1056,7 @@ local waffle_root_view = view {
                     if alt then
                         shared.action.web_browser("https://calendar.google.com")
                     else
-                        shared.action.terminal_session {
-                            name = "org-mode",
-                            command = {"emacs", "-nw"}
-                        }
+                        shared.action.calendar()
                     end
                     waffle:hide()
                 end,

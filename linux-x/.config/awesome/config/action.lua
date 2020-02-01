@@ -72,6 +72,12 @@ shared.action = {
                      "-font", beautiful.font}
         awful.spawn(cmd, false)
     end,
+    calendar = function ()
+         shared.action.terminal_session {
+             name = "org-mode",
+             command = {"emacs", "-nw", "-e", "org-agenda-list"}
+         }
+    end,
     app_finder = function ()
         awful.spawn("xfce4-appfinder")
     end,
