@@ -472,9 +472,10 @@
 (define-key my-prefix (kbd "TAB") 'simple-indent-mode)
 (define-key my-prefix (kbd "l") 'lsp)
 (define-key my-prefix (kbd "v") 'set-variable)
-
-(define-key my-prefix (kbd "o c") (lambda () (interactive) (find-file my-configure-dir)))
+(define-key my-prefix (kbd "c") (lambda () (interactive) (find-file my-configure-dir)))
 (define-key my-prefix (kbd "o o") (lambda () (interactive) (find-file my-org-dir)))
+(define-key my-prefix (kbd "o c") 'org-agenda)
+(define-key my-prefix (kbd "o @") 'org-store-link)
 
 (global-unset-key (kbd "C-x C-c"))
 (global-set-key (kbd "C-x C-c") 'my-exit)
@@ -653,6 +654,14 @@
           (lambda ()
             (setq imaxima-scale-factor 1.5)
             (setq imaxima-equation-color "black")))
+;; }}}
+
+;; org-mode {{{
+(if (require 'org nil 'noerror)
+    (progn
+      (setq org-directory "~/org")
+      (setq org-agenda-files '("~/org/agenda-work.org"))
+      ))
 ;; }}}
 
 
