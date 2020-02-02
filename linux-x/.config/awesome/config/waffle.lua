@@ -138,7 +138,7 @@ local function button(args)
                         valign = "center",
                         widget = wibox.widget.textbox,
                     },
-                    halign = "right", 
+                    halign = "right",
                     widget = wibox.container.place
                 },
                 fg_function = {"special_"},
