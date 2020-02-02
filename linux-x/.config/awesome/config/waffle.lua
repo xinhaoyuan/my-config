@@ -145,7 +145,7 @@ local function button(args)
                 widget = cbg
             },
             forced_width = width,
-            expand = "outside_with_minimum",
+            expand = "inside",
             layout = fixed_align.horizontal,
          },
          buttons = args.buttons or
