@@ -17,6 +17,7 @@ local gtimer = require("gears.timer")
 local icons = require("icons")
 local fallback = require("fallback")
 local fixed_margin = require("fixed_margin")
+local fixed_align = require("fixed_align")
 local outlined_textbox = require("outlined_textbox")
 local cbg = require("contextual_background")
 local masked_imagebox = require("masked_imagebox")
@@ -129,18 +130,23 @@ local function button(args)
             label,
             args.indicator and {
                 {
-                    text = args.indicator,
-                    font = font_normal,
-                    forced_height = args.height or button_height,
-                    align = "center",
-                    valign = "center",
-                    widget = wibox.widget.textbox,
+                    {
+                        text = args.indicator,
+                        font = font_normal,
+                        forced_height = args.height or button_height,
+                        align = "center",
+                        valign = "center",
+                        widget = wibox.widget.textbox,
+                    },
+                    halign = "right", 
+                    widget = wibox.container.place
                 },
                 fg_function = {"special_"},
                 widget = cbg
             },
             forced_width = width,
-            layout = wibox.layout.align.horizontal,
+            expand = "outside_with_minimum",
+            layout = fixed_align.horizontal,
          },
          buttons = args.buttons or
             (button_action and
