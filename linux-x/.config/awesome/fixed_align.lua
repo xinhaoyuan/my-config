@@ -69,7 +69,7 @@ function align:layout(context, width, height)
             end
         end
         if size_first + size_third > size then
-            size_first = size_first - (size_first + size_thrid - size) / 2
+            size_first = size_first - math.floor((size_first + size_thrid - size) / 2)
             size_third = size - size_first
         end
         size_remains = size - size_first - size_second - size_third
@@ -78,11 +78,13 @@ function align:layout(context, width, height)
         else
             local size_diff = size_first - size_third
             if size_diff < 0 then
-                size_first = size_first + math.min(size_remains, -size_diff) + math.max(0, size_remains + size_diff) / 2
-                size_third = size_third + math.max(0, size_remains + size_diff) / 2
+                local add_to_first = math.ceil(math.min(size_remains, -size_diff) + math.max(0, size_remains + size_diff) / 2)
+                size_first = size_first + add_to_first
+                size_third = size_third + size_remains - add_to_first
             else
-                size_first = size_first + math.max(0, size_remains - size_diff) / 2
-                size_third = size_third + math.min(size_remains, size_diff) + math.max(0, size_remains - size_diff) / 2
+                local add_to_first = math.ceil(math.max(0, size_remains - size_diff) / 2)
+                size_first = size_first + add_to_first
+                size_third = size_third + size_remains - add_to_first
             end
         end
         size_remains = 0

@@ -746,9 +746,9 @@ local function setup_screen(scr)
                    align = "center",
                    widget = wibox.widget.textbox,
                },
-               width = dpi(16),
-               strategy = "min",
-               widget = wibox.container.constraint
+               left = dpi(3),
+               right = dpi(3),
+               widget = wibox.container.margin,
            },
            id = "background_role",
            widget = wibox.container.background,
