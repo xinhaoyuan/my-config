@@ -844,22 +844,17 @@ local function setup_screen(scr)
            bg = beautiful.bg_normal,
            widget = wibox.container.background,
        }
-       middle = {
-           {
-               space_filler_with_left_right_borders,
-               middle,
-               space_filler_with_left_right_borders,
-               expand = "outside",
-               layout = fixed_align[direction_index[shared.var.bar_position]],
-           },
-           ["content_fill_"..direction_index[shared.var.bar_position]] = true,
-           widget = wibox.container.place,
-       }
        layout = wibox.widget {
-           with_top_border {
-               left_layout,
-               bg = beautiful.bg_normal,
-               widget = wibox.container.background,
+           {
+               with_top_border {
+                   left_layout,
+                   bg = beautiful.bg_normal,
+                   widget = wibox.container.background,
+               },
+               space_filler_with_left_right_borders,
+               nil,
+               expand = "inside",
+               layout = fixed_align[direction_index[shared.var.bar_position]]
            },
            {
                middle,
@@ -867,18 +862,24 @@ local function setup_screen(scr)
                draw_last = true,
                widget = fallback,
            },
-           with_top_border {
-               {
-                   right_layout,
-                   draw_empty = false,
-                   [direction_index[shared.var.bar_position] == "horizontal" and "left" or "top"] = dpi(5),
-                   widget = wibox.container.margin,
+           {
+               nil,
+               space_filler_with_left_right_borders,
+               with_top_border {
+                   {
+                       right_layout,
+                       draw_empty = false,
+                       [direction_index[shared.var.bar_position] == "horizontal" and "left" or "top"] = dpi(5),
+                       widget = wibox.container.margin,
+                   },
+                   bg = beautiful.bg_normal,
+                   widget = wibox.container.background,
                },
-               bg = beautiful.bg_normal,
-               widget = wibox.container.background,
+               expand = "inside",
+               layout = fixed_align[direction_index[shared.var.bar_position]]
            },
-           expand = "inside",
-           layout = wibox.layout.align[direction_index[shared.var.bar_position]],
+           expand = "outside_with_minimum",
+           layout = fixed_align[direction_index[shared.var.bar_position]],
        }
    end
    my_widgets[s].wibar:set_widget(layout)

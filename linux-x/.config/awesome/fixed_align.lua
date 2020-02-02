@@ -23,6 +23,8 @@ local align = {}
 function align:layout(context, width, height)
     local result = {}
 
+    local is_dir_y = self._private.dir == "y"
+
     -- Draw will have to deal with all three align modes and should work in a
     -- way that makes sense if one or two of the widgets are missing (if they
     -- are all missing, it won't draw anything.) It should also handle the case
@@ -31,8 +33,10 @@ function align:layout(context, width, height)
     -- when the expand mode is "none" wants to take up more space than is
     -- allowed.
     local size_first = 0
+    local size_third = 0
+    local size = is_dir_y and height or width
     -- start with all the space given by the parent, subtract as we go along
-    local size_remains = self._private.dir == "y" and height or width
+    local size_remains = size
     -- This is only set & used if expand ~= "inside" and we have second width.
     -- It contains the size allocated to the second widget.
     local size_second
@@ -43,23 +47,59 @@ function align:layout(context, width, height)
     --  instead
     if self._private.expand ~= "inside" and self._private.second then
         local w, h = base.fit_widget(self, context, self._private.second, width, height)
-        size_second = self._private.dir == "y" and h or w
-        -- if all the space is taken, skip the rest, and draw just the middle
-        -- widget
-        if size_second >= size_remains then
-            return { base.place_widget_at(self._private.second, 0, 0, width, height) }
-        else
-            -- the middle widget is sized first, the outside widgets are given
-            --  the remaining space if available we will draw later
-            size_remains = size_remains - size_second
-        end
+        size_second = is_dir_y and h or w
+        size_remains = math.max(0, size_remains - size_second)
     end
+
+    if self._private.expand == "outside_with_minimum" then
+        if self._private.first then
+            local w, h = base.fit_widget(self, context, self._private.first, width, height)
+            if is_dir_y then
+                size_first = h
+            else
+                size_first = w
+            end
+        end
+        if self._private.third then
+            local w, h = base.fit_widget(self, context, self._private.third, width, height)
+            if is_dir_y then
+                size_third = h
+            else
+                size_third = w
+            end
+        end
+        if size_first + size_third > size then
+            size_first = size_first - (size_first + size_thrid - size) / 2
+            size_third = size - size_first
+        end
+        size_remains = size - size_first - size_second - size_third
+        if size_remains < 0 then
+            size_second = size_second + size_remains
+        else
+            local size_diff = size_first - size_third
+            if size_diff < 0 then
+                size_first = size_first + math.min(size_remains, -size_diff) + math.max(0, size_remains + size_diff) / 2
+                size_third = size_third + math.max(0, size_remains + size_diff) / 2
+            else
+                size_first = size_first + math.max(0, size_remains - size_diff) / 2
+                size_third = size_third + math.min(size_remains, size_diff) + math.max(0, size_remains - size_diff) / 2
+            end
+        end
+        size_remains = 0
+    end
+
     if self._private.first then
         local w, h, _ = width, height, nil
         -- we use the fit function for the "inside" and "none" modes, but
         --  ignore it for the "outside" mode, which will force it to expand
         --  into the remaining space
-        if self._private.expand ~= "outside" then
+        if self._private.expand == "outside_with_minimum" then
+            if is_dir_y then
+                h = size_first
+            else
+                w = size_first
+            end
+        elseif self._private.expand ~= "outside" then
             if self._private.dir == "y" then
                 _, h = base.fit_widget(self, context, self._private.first, width, size_remains)
                 size_first = h
@@ -88,9 +128,15 @@ function align:layout(context, width, height)
         table.insert(result, base.place_widget_at(self._private.first, 0, 0, w, h))
     end
     -- size_remains will be <= 0 if first used all the space
-    if self._private.third and size_remains > 0 then
+    if self._private.third then
         local w, h, _ = width, height, nil
-        if self._private.expand ~= "outside" then
+        if self._private.expand == "outside_with_minimum" then
+            if is_dir_y then
+                h = size_third
+            else
+                w = size_third
+            end
+        elseif self._private.expand ~= "outside" then
             if self._private.dir == "y" then
                 _, h = base.fit_widget(self, context, self._private.third, width, size_remains)
                 -- give the middle widget the rest of the space for "inside" mode
@@ -115,9 +161,15 @@ function align:layout(context, width, height)
     end
     -- here we either draw the second widget in the space set aside for it
     -- in the beginning, or in the remaining space, if it is "inside"
-    if self._private.second and size_remains > 0 then
+    if self._private.second then
         local x, y, w, h = 0, 0, width, height
-        if self._private.expand == "inside" then
+        if self._private.expand == "outside_with_minimum" then
+            if is_dir_y then
+                x, y, h = 0, size_first, size_second
+            else
+                x, y, w = size_first, 0, size_second
+            end
+        elseif self._private.expand == "inside" then
             if self._private.dir == "y" then
                 h = size_remains
                 x, y = 0, size_first
@@ -244,7 +296,7 @@ end
 -- @property expand
 
 function align:set_expand(mode)
-    if mode == "none" or mode == "outside" then
+    if mode == "none" or mode == "outside" or mode == "outside_with_minimum" then
         self._private.expand = mode
     else
         self._private.expand = "inside"
