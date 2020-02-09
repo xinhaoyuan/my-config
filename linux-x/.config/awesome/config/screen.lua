@@ -216,8 +216,12 @@ local property_to_text = {
 local function tasklist_update_function(widget, c, index, objects)
     local sb = widget:get_children_by_id("status_role")[1]
     local bgb = widget:get_children_by_id("my_background_role")[1]
+    local title_text_role = widget:get_children_by_id("title_text_role")[1]
     local status_text = ""
     local prop = {}
+    if title_text_role ~= nil then
+        title_text_role.text = c.name or "<Untitled>"
+    end
     for _, pp in ipairs(property_to_text) do
         local key = pp[1]
         if c.saved and c.saved[key] ~= nil then
@@ -364,7 +368,7 @@ local tasklist_template = {
                 {
                     {
                         {
-                            id = "text_role",
+                            id = "title_text_role",
                             widget = wibox.widget.textbox,
                         },
                         direction = direction_index[shared.var.bar_position] == "horizontal" and "north" or "west",
