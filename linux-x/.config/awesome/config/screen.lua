@@ -367,40 +367,48 @@ local tasklist_template = {
                 },
                 {
                     {
-                        {
-                            id = "title_text_role",
-                            widget = wibox.widget.textbox,
-                        },
-                        direction = direction_index[shared.var.bar_position] == "horizontal" and "north" or "west",
-                        widget = wibox.container.rotate
-                    },
-                    [direction_index[shared.var.bar_position] == "horizontal" and "halign" or "valign"] =
-                        direction_index[shared.var.bar_position] == "horizontal" and "left" or "top",
-                    widget = wibox.container.place,
-                },
-                {
-                    {
+                        nil,
                         {
                             {
-                                id = "status_role",
-                                valign = "center",
-                                align = "center",
-                                widget = wibox.widget.textbox,
+                                {
+                                    id = "title_text_role",
+                                    widget = wibox.widget.textbox,
+                                },
+                                direction = direction_index[shared.var.bar_position] == "horizontal" and "north" or "west",
+                                widget = wibox.container.rotate
                             },
-                            direction = direction_index[shared.var.bar_position] == "horizontal" and "north" or "west",
-                            widget = wibox.container.rotate
+                            [direction_index[shared.var.bar_position] == "horizontal" and "halign" or "valign"] =
+                                direction_index[shared.var.bar_position] == "horizontal" and "left" or "top",
+                            widget = wibox.container.place,
                         },
-                        fg_function = function (context)
-                            if context.focus or context.minimized then
-                                return beautiful.special_focus
-                            else
-                                return beautiful.special_normal
-                            end
-                        end,
-                        widget = cbg
+                        {
+                            {
+                                {
+                                    {
+                                        id = "status_role",
+                                        valign = "center",
+                                        align = "center",
+                                        widget = wibox.widget.textbox,
+                                    },
+                                    direction = direction_index[shared.var.bar_position] == "horizontal" and "north" or "west",
+                                    widget = wibox.container.rotate
+                                },
+                                fg_function = function (context)
+                                    if context.focus or context.minimized then
+                                        return beautiful.special_focus
+                                    else
+                                        return beautiful.special_normal
+                                    end
+                                end,
+                                widget = cbg
+                            },
+                            [left_index[shared.var.bar_position]] = dpi(3),
+                            widget = wibox.container.margin,
+                        },
+                        layout = wibox.layout.align[direction_index[shared.var.bar_position]],
                     },
-                    [left_index[shared.var.bar_position]] = dpi(3),
-                    widget = wibox.container.margin,
+                    halign = "left",
+                    widget = wibox.container.place
                 },
                 layout = wibox.layout.align[direction_index[shared.var.bar_position]],
             },
@@ -508,9 +516,9 @@ local tasklist_template = {
         else
             ret = beautiful.bg_normal
         end
-        if context.is_odd and not context.focus then
-            ret = alt_color(ret)
-        end
+        -- if context.is_odd and not context.focus then
+        --     ret = alt_color(ret)
+        -- end
         return ret
     end,
     widget = cbg,
