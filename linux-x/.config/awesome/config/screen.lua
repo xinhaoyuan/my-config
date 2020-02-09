@@ -606,11 +606,12 @@ local function alt_color(color)
    return alt_color_cache[color]
 end
 
-space_filler_with_left_right_borders = {
+local space_filler_with_left_right_borders = {
     {
         buttons = root_buttons,
-        ["content_fill_"..direction_index[shared.var.bar_position]] = true,
-        widget = wibox.container.place,
+        ["content_fill_horizontal"] = true,
+        ["content_fill_vertical"] = true,
+        widget = fixed_place,
     },
     bgimage = function (context, cr, width, height)
         -- TODO: Support rotation.
@@ -836,7 +837,7 @@ local function setup_screen(scr)
            {
                tasklist_with_fallback,
                ["content_fill_"..direction_index[shared.var.bar_position]] = true,
-               widget = wibox.place,
+               widget = wibox.container.place,
            },
            {
                right_layout,
@@ -865,7 +866,14 @@ local function setup_screen(scr)
            },
            {
                middle,
-               space_filler_with_left_right_borders,
+               {
+                   space_filler_with_left_right_borders,
+                   ["content_fill_horizontal"] = true,
+                   ["content_fill_vertical"] = true,
+                   ["fill_horizontal"] = true,
+                   ["fill_vertical"] = true,
+                   widget = fixed_place
+               },
                draw_last = true,
                widget = fallback,
            },

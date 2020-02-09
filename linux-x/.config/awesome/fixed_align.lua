@@ -69,7 +69,7 @@ function align:layout(context, width, height)
             end
         end
         if size_first + size_third > size then
-            size_first = size_first - math.floor((size_first + size_thrid - size) / 2)
+            size_first = size_first - math.floor((size_first + size_third - size) / 2)
             size_third = size - size_first
         end
         size_remains = size - size_first - size_second - size_third
