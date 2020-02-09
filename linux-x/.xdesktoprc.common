@@ -8,6 +8,7 @@ if [ ! -e $HOME/.xsession-init-guard ]; then
     compton --config $HOME/.config/compton/compton.conf &
     cbatticon -n &
     pasystray --notify=all &
+    blueman-applet &
     # wicd-gtk -t &
     nm-applet &
     # synapse -s &

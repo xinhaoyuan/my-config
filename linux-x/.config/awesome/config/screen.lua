@@ -362,58 +362,53 @@ local tasklist_template = {
                         },
                         widget = fallback,
                     },
-                    [right_index[shared.var.bar_position]] = dpi(3),
+                    [right_index[shared.var.bar_position]] = dpi(4),
                     widget = wibox.container.margin,
                 },
                 {
                     {
-                        nil,
                         {
+                            nil,
                             {
-                                {
-                                    id = "title_text_role",
-                                    widget = wibox.widget.textbox,
-                                },
-                                direction = direction_index[shared.var.bar_position] == "horizontal" and "north" or "west",
-                                widget = wibox.container.rotate
+                                id = "title_text_role",
+                                widget = wibox.widget.textbox,
                             },
-                            [direction_index[shared.var.bar_position] == "horizontal" and "halign" or "valign"] =
-                                direction_index[shared.var.bar_position] == "horizontal" and "left" or "top",
-                            widget = wibox.container.place,
-                        },
-                        {
                             {
                                 {
                                     {
-                                        id = "status_role",
-                                        valign = "center",
-                                        align = "center",
-                                        widget = wibox.widget.textbox,
+                                        {
+                                            id = "status_role",
+                                            valign = "center",
+                                            align = "center",
+                                            widget = wibox.widget.textbox,
+                                        },
+                                        direction = direction_index[shared.var.bar_position] == "horizontal" and "north" or "west",
+                                        widget = wibox.container.rotate
                                     },
-                                    direction = direction_index[shared.var.bar_position] == "horizontal" and "north" or "west",
-                                    widget = wibox.container.rotate
+                                    fg_function = function (context)
+                                        if context.focus or context.minimized then
+                                            return beautiful.special_focus
+                                        else
+                                            return beautiful.special_normal
+                                        end
+                                    end,
+                                    widget = cbg
                                 },
-                                fg_function = function (context)
-                                    if context.focus or context.minimized then
-                                        return beautiful.special_focus
-                                    else
-                                        return beautiful.special_normal
-                                    end
-                                end,
-                                widget = cbg
+                                left = dpi(4),
+                                widget = wibox.container.margin,
                             },
-                            [left_index[shared.var.bar_position]] = dpi(3),
-                            widget = wibox.container.margin,
+                            layout = wibox.layout.align[direction_index[shared.var.bar_position]],
                         },
-                        layout = wibox.layout.align[direction_index[shared.var.bar_position]],
+                        halign = "left",
+                        widget = wibox.container.place
                     },
-                    halign = "left",
-                    widget = wibox.container.place
+                    direction = direction_index[shared.var.bar_position] == "horizontal" and "north" or "west",
+                    widget = wibox.container.rotate
                 },
                 layout = wibox.layout.align[direction_index[shared.var.bar_position]],
             },
-            [left_index[shared.var.bar_position]]  = dpi(5),
-            [right_index[shared.var.bar_position]] = dpi(5),
+            [left_index[shared.var.bar_position]]  = dpi(4),
+            [right_index[shared.var.bar_position]] = dpi(4),
             widget = wibox.container.margin
         },
         -- {
