@@ -685,7 +685,7 @@ local function setup_screen(scr)
           if beautiful.bar_style == "auto" then
               local should_expand = false
               for _, c in ipairs(clients) do
-                  if c:isvisible() and c.maximized then
+                  if c.maximized then
                       should_expand = true
                       break
                   end
