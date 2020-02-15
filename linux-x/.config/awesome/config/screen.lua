@@ -747,12 +747,12 @@ local function setup_screen(scr)
            {
                {
                    id = "text_role",
-                   align = "center",
                    widget = wibox.widget.textbox,
                },
-               left = dpi(3),
-               right = dpi(3),
-               widget = wibox.container.margin,
+               halign = "center",
+               valign = "center",
+               forced_width = beautiful.bar_height,
+               widget = wibox.container.place
            },
            id = "background_role",
            widget = wibox.container.background,
@@ -1050,15 +1050,15 @@ local global_keys = table_join(
 
 -- tags and layouts
 
-shared.screen.tags = { "1", "2", "3", "4" }
+shared.screen.tags = { "春", "夏", "秋", "冬" }
 
 for i = 1, #shared.screen.tags do
     local key = tostring(i)
     global_keys =
         table_join(
-            awful.key({ "Mod4" }, key, function () switch_to_or_go_last(awful.screen.focused().tags[i]) end),
-            awful.key({ "Mod4", "Control" }, key, function () awful.tag.viewtoggle(awful.screen.focused().tags[i]) end),
-            awful.key({ "Mod4", "Shift" }, key, function ()
+            awful.key({ "Mod4" }, tostring(i), function () switch_to_or_go_last(awful.screen.focused().tags[i]) end),
+            awful.key({ "Mod4", "Control" }, tostring(i), function () awful.tag.viewtoggle(awful.screen.focused().tags[i]) end),
+            awful.key({ "Mod4", "Shift" }, tostring(i), function ()
                     local c = capi.client.focus
                     if c == nil then return end
                     c:toggle_tag(c.screen.tags[i])
