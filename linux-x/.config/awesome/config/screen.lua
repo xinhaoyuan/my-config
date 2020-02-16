@@ -802,7 +802,7 @@ local function setup_screen(scr)
 
    local clock
    if direction_index[shared.var.bar_position] == "horizontal" then
-       clock = wibox.widget.textclock("<span color='" .. beautiful.border_focus .. "'>%m<b>%d</b></span>%H<b>%M</b> ")
+       clock = wibox.widget.textclock("<span color='" .. beautiful.border_focus .. "'>%m<b>%d</b></span> %H<b>%M</b> ")
    else
        clock = wibox.widget.textclock("<span color='" .. beautiful.border_focus .. "'>%m\n<b>%d</b></span>\n%H\n<b>%M</b>")
    end
