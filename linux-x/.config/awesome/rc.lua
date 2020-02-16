@@ -33,8 +33,6 @@ local config = require("config")
 require("my-autofocus")
 require("my-menu")
 
-config.start()
-
 require("gears.timer").delayed_call(
     function ()
 	if capi.client.focus then
