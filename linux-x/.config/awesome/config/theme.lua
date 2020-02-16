@@ -124,9 +124,9 @@ theme.useless_gap = dpi(8)
 theme.bar_height = dpi(24)
 theme.menu_width = dpi(150)
 -- custom property color
-theme.special_normal = acolor.from_string(theme.bg_normal):lightness() > 0.5 and c_red[1] or c_purple[1]
+theme.special_normal = acolor.from_string(theme.bg_normal):lightness() > 0.5 and c_red[1] or c_yellow[2]
 -- custom property color
-theme.special_focus = acolor.from_string(theme.bg_normal):lightness() > 0.5 and c_purple[1] or c_red[1]
+theme.special_focus = acolor.from_string(theme.bg_focus):lightness() > 0.5 and c_red[1] or c_yellow[2]
 -- custom property boolean
 theme.waffle_use_entire_screen = true
 -- custom property color
