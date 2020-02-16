@@ -37,4 +37,6 @@ function mod.from_string(s)
     return ret
 end
 
+setmetatable(mod, { __call = function (_, s) return mod.from_string(s) end })
+
 return mod

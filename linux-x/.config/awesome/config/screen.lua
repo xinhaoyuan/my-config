@@ -1050,7 +1050,7 @@ local global_keys = table_join(
 
 -- tags and layouts
 
-shared.screen.tags = { "春", "夏", "秋", "冬" }
+shared.screen.tags = { "壹", "贰", "叁", "肆" }
 
 for i = 1, #shared.screen.tags do
     local key = tostring(i)
