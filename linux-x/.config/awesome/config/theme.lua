@@ -34,6 +34,10 @@ local c_white  = { xrdb.color7, xrdb.color15 }
 
 local theme = dofile(themes_path.."default/theme.lua")
 
+local function is_light_color(color)
+    return acolor(color):lightness() > 0.6
+end
+
 theme.bg_normal     = c_normal[2]
 theme.bg_focus      = c_blue[2]
 theme.bg_urgent     = c_red[2]
@@ -42,9 +46,9 @@ theme.bg_minimize   = c_black[2]
 theme.bg_systray    = theme.bg_normal
 
 theme.fg_normal     = xrdb.foreground
-theme.fg_focus      = acolor.from_string(theme.bg_focus):lightness() > 0.5 and c_black[1] or c_white[2]
-theme.fg_urgent     = acolor.from_string(theme.bg_urgent):lightness() > 0.5 and c_black[1] or c_white[2]
-theme.fg_minimize   = acolor.from_string(theme.bg_minimize):lightness() > 0.5 and c_black[1] or c_white[2]
+theme.fg_focus      = is_light_color(theme.bg_focus) and c_black[1] or c_white[2]
+theme.fg_urgent     = is_light_color(theme.bg_urgent) and c_black[1] or c_white[2]
+theme.fg_minimize   = is_light_color(theme.bg_minimize) and c_black[1] or c_white[2]
 
 theme.useless_gap   = dpi(3)
 
@@ -105,7 +109,6 @@ theme.taglist_squares_unsel = theme_assets.taglist_squares_unsel(
     taglist_square_size, theme.fg_normal
 )
 
-
 theme.notification_icon_size = dpi(48)
 
 -- custom property string
@@ -124,9 +127,9 @@ theme.useless_gap = dpi(8)
 theme.bar_height = dpi(24)
 theme.menu_width = dpi(150)
 -- custom property color
-theme.special_normal = acolor.from_string(theme.bg_normal):lightness() > 0.5 and c_red[1] or c_yellow[2]
+theme.special_normal = is_light_color(theme.bg_normal) and c_red[1] or c_yellow[2]
 -- custom property color
-theme.special_focus = acolor.from_string(theme.bg_focus):lightness() > 0.5 and c_red[1] or c_yellow[2]
+theme.special_focus = is_light_color(theme.bg_focus) and c_red[1] or c_yellow[2]
 -- custom property boolean
 theme.waffle_use_entire_screen = true
 -- custom property color
