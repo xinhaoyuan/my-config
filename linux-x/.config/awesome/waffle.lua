@@ -258,7 +258,7 @@ function waffle:hide()
         self.wibox_.widget = nil
         self.wibox_ = nil
     end
-    if self._view_ and self.view_.on_close then
+    if self.view_ and self.view_.on_close then
         self.view_:on_close()
     end
     if self.stack_ then

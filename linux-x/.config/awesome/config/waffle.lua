@@ -87,6 +87,8 @@ local function view(args)
         -- Options here.
     }
 
+    view.on_close = args.on_close
+
     return view
 end
 
