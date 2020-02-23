@@ -10,6 +10,7 @@ local gears = require("gears")
 local gtable = require("gears.table")
 local lgi = require("lgi")
 local dpi = require("beautiful.xresources").apply_dpi
+local af = require("my-autofocus")
 
 -- A waffle view is a table with the following elements
 --   .widget -- the entry widget
@@ -186,7 +187,11 @@ function waffle:show(view, args)
     if self.wibox_ ~= nil and self.wibox_.screen ~= screen then
         self:hide()
     end
-    self.wibox_ = get_waffle_wibox(screen)
+    if self.wibox_ == nil then
+        af.manage_focus(screen)
+        capi.client.focus = nil
+        self.wibox_ = get_waffle_wibox(screen)
+    end
     self.wibox_.widget = self.widget_container
 
     if args.push then
@@ -246,6 +251,7 @@ function waffle:hide()
         self.keygrabber_ = nil
     end
     if self.wibox_ ~= nil then
+        af.unmanage_focus(self.wibox_.screen)
         self.wibox_.input_passthrough = true
         self.wibox_.widget = nil
         self.wibox_ = nil
