@@ -501,6 +501,19 @@ require("awful.rules").rules = {
          focusable = false,
       }
    },
+   {
+       rule = { class = "tabbed" },
+       properties = {
+           callback = function(c)
+               c:geometry({
+                       x = c.screen.geometry.width / 4,
+                       y = c.screen.geometry.height / 4,
+                       width = c.screen.geometry.width / 2,
+                       height = c.screen.geometry.height / 2
+               })
+           end
+       }
+   }
 }
 
 return nil
