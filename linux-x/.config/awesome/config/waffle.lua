@@ -1367,7 +1367,10 @@ local client_waffle = view {
         }),
         spacing = dpi(10),
         layout = wibox.layout.fixed.vertical,
-    }
+    },
+    on_close = function()
+        shared.waffle_selected_client = nil
+    end
 }
 
 function shared.waffle.show_client_waffle(c, args)

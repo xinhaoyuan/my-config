@@ -197,6 +197,8 @@ function waffle:show(view, args)
     if args.push then
         self.stack_ = self.stack_ or {}
         table.insert(self.stack_, self.view_)
+    elseif self.view_ and self.view_.on_close then
+        self.view_:on_close()
     end
     waffle:set_view(view)
 
@@ -255,6 +257,16 @@ function waffle:hide()
         self.wibox_.input_passthrough = true
         self.wibox_.widget = nil
         self.wibox_ = nil
+    end
+    if self._view_ and self.view_.on_close then
+        self.view_:on_close()
+    end
+    if self.stack_ then
+        for _, v in ipairs(self.stack_) do
+            if v.on_close then
+                v:on_close()
+            end
+        end
     end
     self.view_ = nil
     self.stack_ = nil
