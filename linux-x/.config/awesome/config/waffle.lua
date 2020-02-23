@@ -1280,7 +1280,6 @@ waffle_settings_view = view {
 }
 
 
-local client_waffle_selected
 local client_waffle = view {
     root = wibox.widget {
         decorate(
@@ -1291,10 +1290,10 @@ local client_waffle = view {
                         key = "c",
                         action = function (alt)
                             waffle:hide()
-                            if not client_waffle_selected.valid then
+                            if not shared.waffle_selected_client.valid then
                                 return
                             end
-                            client_waffle_selected:kill()
+                            shared.waffle_selected_client:kill()
                         end
                 }),
                 button({
@@ -1305,10 +1304,10 @@ local client_waffle = view {
                             if not alt then
                                 waffle:hide()
                             end
-                            if not client_waffle_selected.valid then
+                            if not shared.waffle_selected_client.valid then
                                 return
                             end
-                            client_waffle_selected.maximized = not client_waffle_selected.maximized
+                            shared.waffle_selected_client.maximized = not shared.waffle_selected_client.maximized
                         end
                 }),
                 button({
@@ -1319,10 +1318,10 @@ local client_waffle = view {
                             if not alt then
                                 waffle:hide()
                             end
-                            if not client_waffle_selected.valid then
+                            if not shared.waffle_selected_client.valid then
                                 return
                             end
-                            client_waffle_selected.above = not client_waffle_selected.above
+                            shared.waffle_selected_client.above = not shared.waffle_selected_client.above
                         end
                 }),
                 button({
@@ -1333,10 +1332,10 @@ local client_waffle = view {
                             if not alt then
                                 waffle:hide()
                             end
-                            if not client_waffle_selected.valid then
+                            if not shared.waffle_selected_client.valid then
                                 return
                             end
-                            client_waffle_selected.floating = not client_waffle_selected.floating
+                            shared.waffle_selected_client.floating = not shared.waffle_selected_client.floating
                         end
                 }),
                 button({
@@ -1345,22 +1344,22 @@ local client_waffle = view {
                         key = "s",
                         key_action = function (alt)
                             waffle:hide()
-                            if not client_waffle_selected.valid then
+                            if not shared.waffle_selected_client.valid then
                                 return
                             end
-                            shared.client.start_switcher(client_waffle_selected, false)
+                            shared.client.start_switcher(shared.waffle_selected_client, false)
                         end,
                         button_action = function (alt)
                             waffle:hide()
-                            if not client_waffle_selected.valid then
+                            if not shared.waffle_selected_client.valid then
                                 return
                             end
                             if alt then
-                                awful.mouse.client.resize(client_waffle_selected, "northeast")
+                                awful.mouse.client.resize(shared.waffle_selected_client, "northeast")
                             else
-                                local geo = client_waffle_selected:geometry()
+                                local geo = shared.waffle_selected_client:geometry()
                                 mouse.coords({ x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 })
-                                awful.mouse.client.move(client_waffle_selected)
+                                awful.mouse.client.move(shared.waffle_selected_client)
                             end
                         end
                 }),
@@ -1377,7 +1376,7 @@ function shared.waffle.show_client_waffle(c, args)
         local geo = c:geometry()
         args.anchor = { x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 }
     end
-    client_waffle_selected = c
+    shared.waffle_selected_client = c
     waffle:show(client_waffle, args)
 end
 
