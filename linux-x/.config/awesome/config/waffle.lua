@@ -877,6 +877,7 @@ do
             end
 
             mpd_meta_widget:set_text(table.concat(meta, " - "))
+            mpd_progress_widget:set_value(status.progress or 0)
 
             mpd_widget:set_visible(true)
         end
