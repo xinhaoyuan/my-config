@@ -1,7 +1,7 @@
 -- Methods exposed externally and also shared across sub-modules.
 -- The default config variables are defined here.
 
-local gtimer = require("gears.timer")
+local hotpot = require("hotpot")
 
 local shared = {
    var = {
@@ -15,7 +15,7 @@ local shared = {
    on_start_functions = {},
 }
 
-gtimer.delayed_call(function ()
+hotpot.config.on_ready(function ()
         for _, f in ipairs(shared.on_start_functions) do
             f()
         end

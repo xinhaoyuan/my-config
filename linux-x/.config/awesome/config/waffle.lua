@@ -23,7 +23,7 @@ local cbg = require("contextual_background")
 local masked_imagebox = require("masked_imagebox")
 local border = require("border-theme")
 local aux = require("aux")
-local mpc = require("mpc")
+local mpc_gobject = require("mpc-gobject")
 local dpi = require("beautiful.xresources").apply_dpi
 
 local waffle_width = beautiful.waffle_width or dpi(240)
@@ -845,47 +845,42 @@ do
             widget = cbg
         }
 
-    local mpd_need_update = false
-    local mpc_conn
+    mpc_gobject:connect_signal(
+        "status_update",
+        function (_, status)
+            if status.err then
+                -- mpd_status_widget:set_text("✖")
+                -- mpd_title_widget:set_text(tostring(err))
+                -- mpd_meta_widget:set_text("(╯°Д°)╯ ┻━┻")
+                mpd_widget:set_visible(false)
+                return
+            end
 
-    local function update_mpd_status(result)
-        if not mpd_widget:get_visible() then
+            if status.state == "play" then
+                mpd_status_widget:set_text("▶")
+            elseif status.state == "pause" then
+                mpd_status_widget:set_text("⏸")
+            elseif status.state == "stop" then
+                mpd_status_widget:set_text("⏹")
+            else
+                mpd_status_widget:set_text(status.state)
+            end
+
+            mpd_title_widget:set_text(status.title or "")
+
+            local meta = {}
+            if status.artist then
+                meta[#meta + 1] = status.artist
+            end
+            if status.album then
+                meta[#meta + 1] = status.album
+            end
+
+            mpd_meta_widget:set_text(table.concat(meta, " - "))
+
             mpd_widget:set_visible(true)
         end
-        if result.state == "play" then
-            mpd_status_widget:set_text("▶")
-        elseif result.state == "pause" then
-            mpd_status_widget:set_text("⏸")
-        elseif result.state == "stop" then
-            mpd_status_widget:set_text("⏹")
-        else
-            mpd_status_widget:set_text(result.state)
-        end
-
-        local time = result["time"]
-        if time ~= nil then
-            local colon_pos = time:find(":")
-            if colon_pos ~= nil then
-                local played = tonumber(time:sub(1, colon_pos - 1))
-                local total = tonumber(time:sub(colon_pos + 1, #time))
-                mpd_progress_widget:set_value(played / total)
-            end
-        end
-    end
-
-    local mpc_ping_timer = gtimer {
-        timeout = 3,
-        callback = function ()
-            mpc_conn:send("status", function (_, result) update_mpd_status(result) end)
-            return true
-        end
-    }
-    local function mpc_error_handler(err)
-        -- mpd_status_widget:set_text("✖")
-        -- mpd_title_widget:set_text(tostring(err))
-        -- mpd_meta_widget:set_text("(╯°Д°)╯ ┻━┻")
-        mpd_widget:set_visible(false)
-    end
+    )
 
     mpd_widget = button {
         icon_widget = wibox.widget {
@@ -957,13 +952,12 @@ do
         end,
         buttons = awful.util.table.join(
             awful.button({ }, 1, function () waffle:hide(); shared.action.music_app() end),
-            awful.button({ }, 3, function () mpc_conn:toggle_play() end),
-            -- Avoid accidental multi prev/next actions
+            awful.button({ }, 3, function () mpc_gobject:toggle_play() end),
             awful.button({ }, 4, function ()
-                    mpc_conn:send("next")
+                    mpc_gobject:go_next()
             end),
             awful.button({ }, 5, function ()
-                    mpc_conn:send("previous")
+                    mpc_gobject:go_previous()
             end)
         ),
     }
@@ -971,45 +965,21 @@ do
     mpd_widget.keys["Left"] = function (mod)
         for _, m in ipairs(mod) do mod[m] = true end
         if mod["Shift"] then
-            mpc_conn:send("previous")
+            mpc_gobject:go_previous()
         end
     end
     mpd_widget.keys["Right"] = function (mod)
         for _, m in ipairs(mod) do mod[m] = true end
         if mod["Shift"] then
-            mpc_conn:send("next")
+            mpc_gobject:go_next()
         end
     end
     mpd_widget.keys["Up"] = function (mod)
         for _, m in ipairs(mod) do mod[m] = true end
         if mod["Shift"] then
-            mpc_conn:toggle_play()
+            mpc_gobject:toggle_play()
         end
     end
-
-    mpc_conn = mpc.new(
-        nil, nil, nil, mpc_error_handler,
-        "status",
-        function(_, result) update_mpd_status(result) end,
-        "currentsong",
-        function(_, result)
-            local title, artist, album, file = result.title, result.artist, result.album, result.file
-            -- for k, v in pairs(result) do
-            --     print(tostring(k)..":"..tostring(v))
-            -- end
-            mpd_title_widget:set_text(title or "")
-            local meta = {}
-            if artist then
-                meta[#meta + 1] = artist
-            end
-            if album then
-                meta[#meta + 1] = album
-            end
-            mpd_meta_widget:set_text(table.concat(meta, " - "))
-        end
-    )
-    mpc_ping_timer:start()
-
 end
 
 local waffle_root_view = view {
