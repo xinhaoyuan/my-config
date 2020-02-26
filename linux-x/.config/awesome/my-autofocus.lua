@@ -44,12 +44,10 @@ local find_alternative_focus = function (prev, s)
    return clients[1]
 end
 
-local managed_counter = {}
-setmetatable(managed_counter, { __mode = "k" })
+local managed_counter = 0
 
 local autofocus = {
     find_alternative_focus = find_alternative_focus,
-    managed_counter = managed_counter,
 }
 
 --- Give focus when clients appear/disappear.
@@ -58,7 +56,7 @@ local autofocus = {
 -- @param s the screen of prev, in case prev.screen is not accessible now
 local function check_focus(prev, s)
     if not s or not s.valid then return end
-    if managed_counter[s] > 0 then return end
+    if managed_counter > 0 then return end
    -- When no visible client has the focus...
    if not capi.client.focus or not capi.client.focus:isvisible() or not awful_client.focus.filter(capi.client.focus) then
       local c = autofocus.find_alternative_focus(prev, s)
@@ -84,7 +82,7 @@ end
 local function check_focus_tag(t)
    local s = t.screen
    if (not s) or (not s.valid) then return end
-   if managed_counter[s] > 0 then return end
+   if managed_counter > 0 then return end
    s = capi.screen[s]
    check_focus(nil, s)
    if not capi.client.focus or not awful_client.focus.filter(capi.client.focus) or capi.screen[capi.client.focus.screen] ~= s then
@@ -101,23 +99,17 @@ local function check_focus_tag(t)
 end
 
 function autofocus.manage_focus(s)
-    managed_counter[s] = managed_counter[s] + 1
+    managed_counter = managed_counter + 1
 end
 
 function autofocus.unmanage_focus(s)
-    if managed_counter[s] > 0 then
-        managed_counter[s] = managed_counter[s] - 1
-        if managed_counter[s] == 0 then
+    if managed_counter > 0 then
+        managed_counter = managed_counter - 1
+        if managed_counter == 0 then
             gtimer.delayed_call(check_focus, nil, s)
         end
     end
 end
-
-awful.screen.connect_for_each_screen(
-    function (s)
-        managed_counter[s] = 0
-    end
-)
 
 capi.tag.connect_signal(
    "property::selected", function (t)
