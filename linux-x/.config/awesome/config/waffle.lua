@@ -846,7 +846,7 @@ do
         }
 
     mpc_gobject:connect_signal(
-        "status_update",
+        "update::status",
         function (_, status)
             if status.err then
                 -- mpd_status_widget:set_text("✖")
@@ -866,20 +866,25 @@ do
                 mpd_status_widget:set_text(status.state)
             end
 
-            mpd_title_widget:set_text(status.title or "")
+            mpd_progress_widget:set_value(status.progress or 0)
+            mpd_widget:set_visible(true)
+        end
+    )
+
+    mpc_gobject:connect_signal(
+        "update::song",
+        function (_, song)
+            mpd_title_widget:set_text(song.title or "")
 
             local meta = {}
-            if status.artist then
-                meta[#meta + 1] = status.artist
+            if song.artist then
+                meta[#meta + 1] = song.artist
             end
-            if status.album then
-                meta[#meta + 1] = status.album
+            if song.album then
+                meta[#meta + 1] = song.album
             end
 
             mpd_meta_widget:set_text(table.concat(meta, " - "))
-            mpd_progress_widget:set_value(status.progress or 0)
-
-            mpd_widget:set_visible(true)
         end
     )
 

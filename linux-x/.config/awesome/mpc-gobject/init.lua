@@ -8,12 +8,11 @@ local klass = {}
 function klass:init()
     local this = self
     self._private = {}
-    self.status = {}
     self._private.mpc_conn = mpc.new(
         nil, nil, nil,
         function (err)
             this.state = { err = err }
-            this:schedule_status_update_signal()
+            this:schedule_update()
         end,
         "status",
         function (_, result) this:update_status(result) end,
@@ -28,12 +27,13 @@ function klass:init()
             return true
         end
     }
-    
+
 end
 
 function klass:update_status(status)
-    self.status.err = nil
-    self.status.state = status.state
+    self.status = {
+        state = status.state
+    }
     local time = status.time
     if time ~= nil then
         local colon_pos = time:find(":")
@@ -45,28 +45,41 @@ function klass:update_status(status)
             self.status.progress = played / length
         end
     end
-    self:schedule_status_update_signal()
+    self:schedule_update()
 end
 
 function klass:update_song(song)
-    self.status.err = nil
-    self.status.title = song.title
-    self.status.artist = song.artist
-    self.status.album = song.album
-    self.status.file = song.file
-    self:schedule_status_update_signal()
+    self.song = {
+        title = song.title,
+        artist = song.artist,
+        album = song.album,
+        file = song.file,
+    }
+    self:schedule_update()
 end
 
-function klass:schedule_status_update_signal()
-    if self._private.scheduled_signal then
+function klass:schedule_update()
+    if self._private.scheduled_update then
         return
     end
-    self._private.scheduled_signal = true
+    self._private.scheduled_update = true
     local this = self
     gtimer.delayed_call(function ()
-            this._private.scheduled_signal = false
-            this:emit_signal("status_update", this.status)
+            this._private.scheduled_update = false
+            this:update()
     end)
+end
+
+function klass:update()
+    if self.status then
+        self:emit_signal("update::status", self.status)
+        self.status = nil
+    end
+
+    if self.song then
+        self:emit_signal("update::song", self.song)
+        self.song = nil
+    end
 end
 
 function klass:go_previous()
@@ -103,4 +116,3 @@ hotpot.config.on_ready(
 )
 
 return mod
-
