@@ -505,11 +505,12 @@ require("awful.rules").rules = {
        rule = { class = "tabbed" },
        properties = {
            callback = function(c)
+               local screen_geo = c.screen.geometry
                c:geometry({
-                       x = c.screen.geometry.width / 4,
-                       y = c.screen.geometry.height / 4,
-                       width = c.screen.geometry.width / 2,
-                       height = c.screen.geometry.height / 2
+                       x = screen_geo.x + screen_geo.width / 4,
+                       y = screen_geo.y + screen_geo.height / 4,
+                       width = screen_geo.width / 2,
+                       height = screen_geo.height / 2
                })
            end
        }
