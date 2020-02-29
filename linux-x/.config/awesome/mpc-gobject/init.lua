@@ -11,7 +11,7 @@ function klass:init()
     self._private.mpc_conn = mpc.new(
         nil, nil, nil,
         function (err)
-            this.state = { err = err }
+            this.status = { err = err }
             this:schedule_update()
         end,
         "status",
