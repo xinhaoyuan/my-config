@@ -26,14 +26,14 @@ local function try_compact_focus_timestamp()
 end
 
 function mod.update(c)
-   if c == nil then return end
-   if c.focus_timestamp ~= nil and c.focus_timestamp > global_focus_timestamp
-   then
-      global_focus_timestamp = c.focus_timestamp
-   end
-   global_focus_timestamp = global_focus_timestamp + 1
-   try_compact_focus_timestamp()
-   c.focus_timestamp = global_focus_timestamp
+    if c == nil then return end
+    if c.focus_timestamp ~= nil and c.focus_timestamp > global_focus_timestamp
+    then
+        global_focus_timestamp = c.focus_timestamp
+    end
+    global_focus_timestamp = global_focus_timestamp + 1
+    try_compact_focus_timestamp()
+    c.focus_timestamp = global_focus_timestamp
 end
 
 function mod.get(c)
@@ -41,12 +41,12 @@ function mod.get(c)
 end
 
 capi.client.connect_signal(
-   "focus",
-   function (c)
-      if awful.client.focus.history.is_enabled() then
-         mod.update(c)
-      end
-   end
+    "focus",
+    function (c)
+        if awful.client.focus.history.is_enabled() then
+            mod.update(c)
+        end
+    end
 )
 
 capi.client.connect_signal(
