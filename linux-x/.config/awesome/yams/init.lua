@@ -7,7 +7,7 @@ local api = {
     beautiful = require("beautiful"),
     wibox     = require("wibox"),
     awful     = require("awful"),
-    fts       = require("focus-timestamp"),
+    fts       = require("hotpot").focus_timestamp,
     lgi       = require("lgi"),
     dpi       = require("beautiful.xresources").apply_dpi,
 }

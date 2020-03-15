@@ -1022,7 +1022,7 @@ local global_keys = table_join(
             table.sort(
                clients,
                function (a, b)
-                  return a.focus_timestamp > b.focus_timestamp
+                   return focus_timestamp.get(a) > focus_timestamp.get(b)
                end
             )
 

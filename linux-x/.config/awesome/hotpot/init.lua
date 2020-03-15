@@ -1,5 +1,6 @@
 local hotpot = {}
 
 return {
-    config = require("hotpot.config")
+    config = require("hotpot.config"),
+    focus_timestamp = require("hotpot.focus_timestamp"),
 }

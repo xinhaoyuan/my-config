@@ -20,7 +20,7 @@ local capi = {
 local awful = require("awful")
 local awful_client = require("awful.client")
 local gtimer = require("gears.timer")
-local fts = require("focus-timestamp")
+local fts = require("hotpot").focus_timestamp
 
 local find_alternative_focus = function (prev, s)
    local clients = {}
