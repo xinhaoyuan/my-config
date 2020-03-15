@@ -779,7 +779,7 @@ local function setup_screen(scr)
    })
 
    local left_layout = wibox.layout.fixed[direction_index[shared.var.bar_position]]()
-   local layoutbox = awful.widget.layoutbox(s)
+   local layoutbox = awful.widget.layoutbox{screen = s}
    masked_imagebox.convert(layoutbox.imagebox)
    my_widgets[s].indicator = wibox.widget {
        layoutbox,
