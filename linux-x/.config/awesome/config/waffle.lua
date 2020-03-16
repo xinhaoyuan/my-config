@@ -1016,7 +1016,7 @@ do
             local lines = {}
             for k, v in pairs(organda_lines) do
                 for _, l in ipairs(v) do
-                    table.insert(lines, "- "..l)
+                    table.insert(lines, "- "..l.." -")
                 end
             end
             organda_text.markup = table.concat(lines, "\n")
