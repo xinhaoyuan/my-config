@@ -995,14 +995,14 @@ do
     local organda_text = wibox.widget {
         font = font_info,
         ellipsize = "end",
+        align = "center",
         wrap = "word_char",
         widget = wibox.widget.textbox
     }
     organda_widget = wibox.widget {
         organda_text,
-        forced_width = waffle_width,
-        halign = "center",
-        widget = wibox.container.place
+        width = waffle_width,
+        widget = wibox.container.constraint
     }
 
     local function render_organda_items(items)
