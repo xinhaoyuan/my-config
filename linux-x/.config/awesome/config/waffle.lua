@@ -24,6 +24,7 @@ local masked_imagebox = require("masked_imagebox")
 local border = require("border-theme")
 local aux = require("aux")
 local mpc_gobject = require("mpc-gobject")
+local organda = require("organda")
 local dpi = require("beautiful.xresources").apply_dpi
 
 local waffle_width = beautiful.waffle_width or dpi(240)
@@ -700,7 +701,7 @@ do
 
    volumebar_widget = wibox.widget {
       max_value = 1,
-      forced_width = button_width,
+      forced_width = waffle_width,
       forced_height = dpi(2),
       paddings = 0,
       border_width = 0,
@@ -988,6 +989,41 @@ do
     end
 end
 
+local organda_widget
+do
+    local organda_lines = {}
+    local organda_text = wibox.widget {
+        font = font_info,
+        ellipsize = "end",
+        wrap = "word_char",
+        widget = wibox.widget.textbox
+    }
+    organda_widget = wibox.widget {
+        organda_text,
+        forced_width = waffle_width,
+        halign = "center",
+        widget = wibox.container.place
+    }
+
+    local function render_organda_items(items)
+        return items
+    end
+
+    organda.topic:connect_signal(
+        "update",
+        function (_, path, items)
+            organda_lines[path] = render_organda_items(items)
+            local lines = {}
+            for k, v in pairs(organda_lines) do
+                for _, l in ipairs(v) do
+                    table.insert(lines, "- "..l)
+                end
+            end
+            organda_text.markup = table.concat(lines, "\n")
+        end
+    )
+end
+
 local waffle_root_view = view {
     root = wibox.widget {
         decorate {
@@ -1045,6 +1081,10 @@ local waffle_root_view = view {
                     waffle:hide()
                 end,
             },
+            organda_widget,
+            layout = wibox.layout.fixed.vertical
+        },
+        decorate {
             button {
                     icon = gcolor.recolor_image(icons.launcher, beautiful.fg_normal),
                     markup = "Launcher",
