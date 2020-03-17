@@ -37,7 +37,7 @@ end
 hotpot.config.on_ready(
     function ()
         if #mod.config.files == 0 then
-            hotpot.logging.warning("organda: no files to watch - will do nothing.")
+            hotpot.logging.warning("orgenda: no files to watch - will do nothing.")
             return
         end
         local cmd = {"fswatch", "-x", "--event=Updated"}
