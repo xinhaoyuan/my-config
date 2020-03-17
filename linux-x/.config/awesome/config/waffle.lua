@@ -1207,12 +1207,18 @@ local waffle_root_view = view {
         {
             {
                 {
-                    waffle_root_admin_widget,
+                    waffle_root_action_widget,
                     valign = "bottom",
                     widget = wibox.container.place
                 },
                 {
-                    waffle_root_audio_widget,
+                    {
+                        waffle_root_admin_widget,
+                        waffle_root_agenda_widget,
+                        waffle_root_audio_widget,
+                        spacing = button_padding,
+                        layout = wibox.layout.fixed.vertical
+                    },
                     valign = "bottom",
                     widget = wibox.container.place
                 },
@@ -1224,24 +1230,6 @@ local waffle_root_view = view {
         },
         {
             waffle_root_status_widget,
-            halign = "center",
-            widget = wibox.container.place
-        },
-        {
-            {
-                {
-                    waffle_root_action_widget,
-                    valign = "top",
-                    widget = wibox.container.place
-                },
-                {
-                    waffle_root_agenda_widget,
-                    valign = "top",
-                    widget = wibox.container.place
-                },
-                spacing = button_padding,
-                layout = wibox.layout.fixed.horizontal
-            },
             halign = "center",
             widget = wibox.container.place
         },
