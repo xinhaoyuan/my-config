@@ -74,8 +74,8 @@ shared.action = {
     end,
     calendar = function ()
          shared.action.terminal_session {
-             name = "org-mode",
-             command = {"emacs", "-nw", "-e", "org-agenda-list"}
+             name = "calendar",
+             command = {"emacs", "-nw", os.getenv("HOME").."/org/TODO.org"}
          }
     end,
     app_finder = function ()
