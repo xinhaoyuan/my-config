@@ -9,6 +9,10 @@ local mod = {
     topic = gobject{class = {}},
 }
 
+local function parse_timestamp(timestamp)
+    return timestamp:match("[-0-9]+")
+end
+
 local function parse_file(path)
     local fd = io.open(path, "r")
     if not fd then
@@ -17,12 +21,48 @@ local function parse_file(path)
     end
 
     local results = {}
+    local todo_item = nil
     for line in fd:lines() do
-        local text = line:match(".-TODO%s+(.*)")
-        if text ~= nil then
-            table.insert(results, text)
+        local todo_match = line:match(".+TODO%s+(.*)")
+        if todo_match ~= nil then
+            if todo_item ~= nil then
+                table.insert(results, todo_item)
+            end
+            local tag_begin = todo_match:find("%s+[A-Z]*:.*")
+            if tag_begin == nil then
+                todo_item = { text = todo_match }
+            else
+                todo_item = { text = todo_match:sub(tag_begin - 1) }
+            end
+        end
+
+        if todo_item ~= nil then
+            local match_begin = 1
+            while true do
+                local tag_begin, tag_end, name, timestamp = line:find("([A-Z]+):%s*<([^>]+)>", match_begin)
+                if tag_begin == nil then break end
+                match_begin = tag_end + 1
+
+                if name == "SCHEDULED" or name == "DEADLINE" then
+                    todo_item.date = parse_timestamp(timestamp)
+                end
+            end
         end
     end
+    if todo_item ~= nil then
+        table.insert(results, todo_item)
+    end
+    table.sort(results,
+               function (a, b)
+                   if a.date == nil then
+                       return nil
+                   elseif b.date == nil then
+                       return true
+                   else
+                       return a.date < b.date
+                   end
+               end
+    )
     return results
 end
 

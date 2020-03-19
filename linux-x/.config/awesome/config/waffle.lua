@@ -14,6 +14,7 @@ local watch = require("awful.widget.watch")
 local gshape = require("gears.shape")
 local gcolor = require("gears.color")
 local gtimer = require("gears.timer")
+local gstring = require("gears.string")
 local icons = require("icons")
 local fallback = require("fallback")
 local fixed_margin = require("fixed_margin")
@@ -997,18 +998,30 @@ do
     local orgenda_text = wibox.widget {
         font = font_info,
         ellipsize = "end",
-        align = "center",
+        align = "left",
         wrap = "word_char",
         widget = wibox.widget.textbox
     }
     orgenda_widget = wibox.widget {
-        orgenda_text,
+        {
+            orgenda_text,
+            margins = button_padding,
+            widget = wibox.container.margin
+        },
         width = waffle_width,
         widget = wibox.container.constraint
     }
 
     local function render_orgenda_items(items)
-        return items
+        local lines = {}
+        for _, item in ipairs(items) do
+            if item.date ~= nil then
+                table.insert(lines, "<b>["..tostring(item.date).."]</b> "..gstring.xml_escape(item.text))
+            else
+                table.insert(lines, " - "..gstring.xml_escape(item.text))
+            end
+        end
+        return lines
     end
 
     orgenda.topic:connect_signal(
@@ -1018,7 +1031,7 @@ do
             local lines = {}
             for k, v in pairs(orgenda_lines) do
                 for _, l in ipairs(v) do
-                    table.insert(lines, "- "..l.." -")
+                    table.insert(lines, l)
                 end
             end
             orgenda_text.markup = table.concat(lines, "\n")
