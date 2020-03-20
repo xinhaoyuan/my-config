@@ -117,8 +117,8 @@ theme.fontname_normal = "Iosevka SS08"
 -- custom property string
 theme.fontname_mono = "Iosevka SS08"
 -- custom property number
-theme.fontsize_normal = 11
-theme.fontsize_small = 9
+theme.fontsize_normal = 12
+theme.fontsize_small = 10
 theme.font = theme.fontname_normal.." "..tostring(theme.fontsize_normal)
 -- custom property string font descriptor
 theme.font_mono = theme.fontname_mono.." "..tostring(theme.fontsize_normal)

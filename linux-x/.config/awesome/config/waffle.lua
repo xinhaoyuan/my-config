@@ -260,7 +260,7 @@ end
 
 local waffle_shutdown_view = view {
     root = decorate {
-        button({
+        button {
                 -- icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
                 markup = "Suspend",
                 indicator = em("s"),
@@ -269,8 +269,8 @@ local waffle_shutdown_view = view {
                     waffle:hide()
                     awful.spawn({"systemctl", "suspend"})
                 end
-        }),
-        button({
+        },
+        button {
                 -- icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
                 markup = "Hibernate",
                 indicator = em("h"),
@@ -279,8 +279,17 @@ local waffle_shutdown_view = view {
                     waffle:hide()
                     awful.spawn({"systemctl", "hibernate"})
                 end
-        }),
-        button({
+        },
+        button {
+                markup = "Reboot",
+                indicator = em("r"),
+                key = "r",
+                action = function (alt)
+                    waffle:hide()
+                    awful.spawn({"systemctl", "reboot"})
+                end
+        },
+        button {
                 -- icon = gcolor.recolor_image(icons.poweroff, beautiful.fg_normal),
                 markup = "Power off",
                 indicator = em("p"),
@@ -289,7 +298,7 @@ local waffle_shutdown_view = view {
                     waffle:hide()
                     awful.spawn({"systemctl", "poweroff"})
                 end
-        }),
+        },
         layout = wibox.layout.fixed.vertical
     }
 }
