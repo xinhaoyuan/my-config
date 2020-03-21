@@ -117,14 +117,14 @@ theme.fontname_normal = "Iosevka SS08"
 -- custom property string
 theme.fontname_mono = "Iosevka SS08"
 -- custom property number
-theme.fontsize_normal = 12
-theme.fontsize_small = 10
+theme.fontsize_normal = 11
+theme.fontsize_small = 9
 theme.font = theme.fontname_normal.." "..tostring(theme.fontsize_normal)
 -- custom property string font descriptor
 theme.font_mono = theme.fontname_mono.." "..tostring(theme.fontsize_normal)
 theme.useless_gap = dpi(8)
 -- custom property number
-theme.bar_height = dpi(24)
+theme.bar_height = dpi(20)
 theme.menu_width = dpi(150)
 -- custom property color
 theme.special_normal = is_light_color(theme.bg_normal) and c_red[1] or c_yellow[2]

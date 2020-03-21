@@ -29,7 +29,7 @@ local orgenda = require("orgenda")
 local dpi = require("beautiful.xresources").apply_dpi
 
 local waffle_width = beautiful.waffle_width or dpi(240)
-local button_height = dpi(20)
+local button_height = beautiful.bar_height
 local button_padding = dpi(4)
 local font_normal = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_normal)
 local font_info = beautiful.fontname_mono.." "..tostring(beautiful.fontsize_small)
