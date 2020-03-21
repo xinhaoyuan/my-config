@@ -124,7 +124,7 @@ theme.font = theme.fontname_normal.." "..tostring(theme.fontsize_normal)
 theme.font_mono = theme.fontname_mono.." "..tostring(theme.fontsize_normal)
 theme.useless_gap = dpi(8)
 -- custom property number
-theme.bar_height = dpi(20)
+theme.bar_height = dpi(22)
 theme.menu_width = dpi(150)
 -- custom property color
 theme.special_normal = is_light_color(theme.bg_normal) and c_red[1] or c_yellow[2]
