@@ -35,7 +35,7 @@ local c_white  = { xrdb.color7, xrdb.color15 }
 local theme = dofile(themes_path.."default/theme.lua")
 
 local function is_light_color(color)
-    return acolor(color):lightness() > 0.6
+    return acolor(color):lightness() > 0.7
 end
 
 theme.bg_normal     = c_normal[2]
