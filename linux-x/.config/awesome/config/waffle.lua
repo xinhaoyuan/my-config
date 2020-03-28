@@ -251,7 +251,7 @@ local function decorate_waffle(widget)
             margins = button_padding,
             widget = wibox.container.margin,
         },
-        bg = acolor.from_string(beautiful.fg_normal.."a0"):blend_with(beautiful.bg_normal.."a0", 0.5):to_string(),
+        bg = acolor.from_string(beautiful.fg_normal.."a0"):blend_with(beautiful.bg_normal.."a0", 0.75):to_string(),
         widget = wibox.container.background,
     }
 end
