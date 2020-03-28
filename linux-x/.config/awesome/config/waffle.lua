@@ -29,9 +29,11 @@ local mpc_gobject = require("mpc-gobject")
 local orgenda = require("orgenda")
 local dpi = require("beautiful.xresources").apply_dpi
 
+local panel_border = true
 local waffle_width = beautiful.waffle_panel_width or dpi(240)
 local button_height = beautiful.waffle_item_height or dpi(20)
-local button_padding = dpi(8)
+local button_padding = dpi(4)
+local panel_padding = dpi(8)
 local font_normal = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_normal)
 local font_info = beautiful.fontname_mono.." "..tostring(beautiful.fontsize_small)
 local graph_background = "#00000000"
@@ -217,38 +219,44 @@ end
 
 local decorate_border = border.directions { "top", "bottom", "left", "right" }
 local function decorate_panel(widget)
-    return wibox.widget {
-        -- {
-        --     {
-                widget,
-                bg = beautiful.bg_normal,
-                fg = beautiful.fg_normal,
-                shape = beautiful.border_radius ~= nil and
-                    function (cr, width, height)
-                        gshape.rounded_rect(cr, width, height,
-                                            beautiful.border_radius -
-                                                beautiful.border_width)
-                    end,
-                widget = wibox.container.background,
-        --     },
-        --     margins = beautiful.border_width,
-        --     widget = wibox.container.margin,
-        -- },
-        -- bgimage = function (context, cr, width, height)
-        --     border:draw({ theme = border_theme, color = beautiful.border_focus }, cr, width, height, decorate_border)
-        -- end,
-        -- shape = beautiful.border_radius ~= nil and function (cr, width, height)
-        --     gshape.rounded_rect(cr, width, height, beautiful.border_radius)
-        -- end,
-        -- widget = wibox.container.background
+    local panel = wibox.widget {
+        widget,
+        bg = beautiful.bg_normal,
+        fg = beautiful.fg_normal,
+        shape = beautiful.border_radius ~= nil and
+            function (cr, width, height)
+                gshape.rounded_rect(cr, width, height,
+                                    beautiful.border_radius -
+                                        beautiful.border_width)
+            end,
+        widget = wibox.container.background
     }
+
+    if panel_border then
+        panel = wibox.widget {
+            {
+                panel,
+                margins = beautiful.border_width,
+                widget = wibox.container.margin,
+            },
+            bgimage = function (context, cr, width, height)
+                border:draw({ theme = border_theme, color = beautiful.border_focus }, cr, width, height, decorate_border)
+            end,
+            shape = beautiful.border_radius ~= nil and function (cr, width, height)
+                gshape.rounded_rect(cr, width, height, beautiful.border_radius)
+                                                       end,
+            widget = wibox.container.background
+        }
+    end
+
+    return panel
 end
 
 local function decorate_waffle(widget)
     return wibox.widget {
         {
             widget,
-            margins = button_padding,
+            margins = panel_padding,
             widget = wibox.container.margin,
         },
         bg = acolor.from_string(beautiful.fg_normal.."a0"):blend_with(beautiful.bg_normal.."a0", 0.75):to_string(),
@@ -1093,8 +1101,8 @@ local waffle_root_status_widget = decorate_panel {
     },
     top = button_padding,
     bottom = button_padding,
-    left = button_padding * 2, -- + beautiful.border_width,
-    right = button_padding * 2, -- + beautiful.border_width,
+    left = button_padding * 1.5 + panel_padding * 0.5 + (panel_border and beautiful.border_width or 0),
+    right = button_padding * 1.5 + panel_padding * 0.5 + (panel_border and beautiful.border_width or 0),
     widget = wibox.container.margin,
 }
 
@@ -1251,11 +1259,11 @@ local waffle_root_view = view {
                     {
                         waffle_root_admin_widget,
                         waffle_root_agenda_widget,
-                        spacing = button_padding,
+                        spacing = panel_padding,
                         layout = wibox.layout.fixed.vertical
                     },
                     {
-                        height = button_padding,
+                        height = panel_padding,
                         strategy = "min",
                         widget = wibox.container.constraint,
                     },
@@ -1263,7 +1271,7 @@ local waffle_root_view = view {
                     expand = "inside",
                     layout = wibox.layout.align.vertical
                 },
-                spacing = button_padding,
+                spacing = panel_padding,
                 layout = wibox.layout.fixed.horizontal
             },
             halign = "center",
@@ -1274,7 +1282,7 @@ local waffle_root_view = view {
             halign = "center",
             widget = wibox.container.place
         },
-        spacing = button_padding,
+        spacing = panel_padding,
         layout = wibox.layout.fixed.vertical,
     },
 }
