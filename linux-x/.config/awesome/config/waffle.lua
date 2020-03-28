@@ -273,7 +273,7 @@ local function hide_after_release(mod, key, event)
 end
 
 local waffle_shutdown_view = view {
-    root = decorate_waffle {
+    root = decorate_waffle(decorate_panel {
         button {
                 -- icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
                 markup = "Suspend",
@@ -314,7 +314,7 @@ local waffle_shutdown_view = view {
                 end
         },
         layout = wibox.layout.fixed.vertical
-    }
+    })
 }
 
 local waffle_settings_view
@@ -1093,8 +1093,8 @@ local waffle_root_status_widget = decorate_panel {
     },
     top = button_padding,
     bottom = button_padding,
-    left = button_padding * 2, -- + beautiful.border_width * 2,
-    right = button_padding * 2, -- + beautiful.border_width * 2,
+    left = button_padding * 2, -- + beautiful.border_width,
+    right = button_padding * 2, -- + beautiful.border_width,
     widget = wibox.container.margin,
 }
 
@@ -1282,7 +1282,7 @@ local waffle_root_view = view {
 waffle:set_root_view(waffle_root_view)
 
 waffle_settings_view = view {
-    root = decorate_waffle {
+    root = decorate_waffle(decorate_panel {
         -- button({
         --       markup = "Toggle titlebars",
         --       indicator = em("t"),
@@ -1369,7 +1369,7 @@ waffle_settings_view = view {
                 end
         }),
         layout = wibox.layout.fixed.vertical,
-    },
+    }),
 }
 
 

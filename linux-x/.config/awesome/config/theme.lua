@@ -135,7 +135,7 @@ theme.waffle_use_entire_screen = true
 -- custom property color
 theme.waffle_background = "#00000000"
 -- custom property number
-theme.waffle_panel_width = dpi(180)
+theme.waffle_panel_width = dpi(200)
 -- custom_property number
 theme.waffle_item_height = dpi(20)
 
