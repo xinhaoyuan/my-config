@@ -21,20 +21,21 @@ local fixed_margin = require("fixed_margin")
 local fixed_align = require("fixed_align")
 local outlined_textbox = require("outlined_textbox")
 local cbg = require("contextual_background")
+local debug_container = require("debug_container")
 local masked_imagebox = require("masked_imagebox")
 local border = require("border-theme")
-local aux = require("aux")
+local acolor = require("aux").color
 local mpc_gobject = require("mpc-gobject")
 local orgenda = require("orgenda")
 local dpi = require("beautiful.xresources").apply_dpi
 
-local waffle_width = beautiful.waffle_width or dpi(240)
-local button_height = beautiful.bar_height
-local button_padding = dpi(4)
+local waffle_width = beautiful.waffle_panel_width or dpi(240)
+local button_height = beautiful.waffle_item_height or dpi(20)
+local button_padding = dpi(8)
 local font_normal = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_normal)
 local font_info = beautiful.fontname_mono.." "..tostring(beautiful.fontsize_small)
 local graph_background = "#00000000"
-local graph_normal_color = aux.color.from_string(beautiful.bg_focus):blend_with(beautiful.bg_normal, 0.25):to_string()
+local graph_normal_color = acolor.from_string(beautiful.bg_focus):blend_with(beautiful.bg_normal, 0.25):to_string()
 local graph_color = graph_normal_color -- "linear:0,0:0,22:0,#FF0000:0.5," .. graph_normal_color
 local update_interval_s = 1
 
@@ -215,10 +216,10 @@ else
 end
 
 local decorate_border = border.directions { "top", "bottom", "left", "right" }
-local function decorate(widget)
+local function decorate_panel(widget)
     return wibox.widget {
-        {
-            {
+        -- {
+        --     {
                 widget,
                 bg = beautiful.bg_normal,
                 fg = beautiful.fg_normal,
@@ -229,19 +230,32 @@ local function decorate(widget)
                                                 beautiful.border_width)
                     end,
                 widget = wibox.container.background,
-            },
-            margins = beautiful.border_width,
-            widget = wibox.container.margin,
-        },
-        bgimage = function (context, cr, width, height)
-            border:draw({ theme = border_theme, color = beautiful.border_focus }, cr, width, height, decorate_border)
-        end,
-        shape = beautiful.border_radius ~= nil and function (cr, width, height)
-            gshape.rounded_rect(cr, width, height, beautiful.border_radius)
-        end,
-        widget = wibox.container.background
+        --     },
+        --     margins = beautiful.border_width,
+        --     widget = wibox.container.margin,
+        -- },
+        -- bgimage = function (context, cr, width, height)
+        --     border:draw({ theme = border_theme, color = beautiful.border_focus }, cr, width, height, decorate_border)
+        -- end,
+        -- shape = beautiful.border_radius ~= nil and function (cr, width, height)
+        --     gshape.rounded_rect(cr, width, height, beautiful.border_radius)
+        -- end,
+        -- widget = wibox.container.background
     }
 end
+
+local function decorate_waffle(widget)
+    return wibox.widget {
+        {
+            widget,
+            margins = button_padding,
+            widget = wibox.container.margin,
+        },
+        bg = acolor.from_string(beautiful.fg_normal.."a0"):blend_with(beautiful.bg_normal.."a0", 0.5):to_string(),
+        widget = wibox.container.background,
+    }
+end
+
 
 local hide_key_pressed = false
 local function hide_after_release(mod, key, event)
@@ -259,7 +273,7 @@ local function hide_after_release(mod, key, event)
 end
 
 local waffle_shutdown_view = view {
-    root = decorate {
+    root = decorate_waffle {
         button {
                 -- icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
                 markup = "Suspend",
@@ -613,7 +627,7 @@ local battery_widget_width = waffle_width - button_height - button_padding * 3
 local battery_widget
 do
    local bar_color = graph_normal_color
-   local charging_color = aux.color.from_string(beautiful.special_normal):blend_with(beautiful.bg_normal, 0.25):to_string()
+   local charging_color = acolor.from_string(beautiful.special_normal):blend_with(beautiful.bg_normal, 0.25):to_string()
    local background_color = beautiful.border_normal
 
    local battery_status_widget = wibox.widget {
@@ -836,8 +850,8 @@ do
         widget        = wibox.widget.progressbar,
     }
 
-    -- local lighter_fg_normal = aux.color.from_string(beautiful.fg_normal):blend_with(beautiful.bg_normal, 0.75):to_string()
-    -- local lighter_fg_focus = aux.color.from_string(beautiful.fg_focus):blend_with(beautiful.bg_focus, 0.75):to_string()
+    -- local lighter_fg_normal = acolor.from_string(beautiful.fg_normal):blend_with(beautiful.bg_normal, 0.75):to_string()
+    -- local lighter_fg_focus = acolor.from_string(beautiful.fg_focus):blend_with(beautiful.bg_focus, 0.75):to_string()
 
     local mpd_icon_widget =
         wibox.widget {
@@ -1048,7 +1062,7 @@ do
     )
 end
 
-local waffle_root_status_widget = decorate {
+local waffle_root_status_widget = decorate_panel {
     {
         {
             {
@@ -1079,12 +1093,12 @@ local waffle_root_status_widget = decorate {
     },
     top = button_padding,
     bottom = button_padding,
-    left = button_padding + beautiful.border_width * 2,
-    right = button_padding + beautiful.border_width * 2,
+    left = button_padding * 2, -- + beautiful.border_width * 2,
+    right = button_padding * 2, -- + beautiful.border_width * 2,
     widget = wibox.container.margin,
 }
 
-local waffle_root_agenda_widget = decorate {
+local waffle_root_agenda_widget = decorate_panel {
     button {
         icon = gcolor.recolor_image(icons.clock, beautiful.fg_normal),
         label_widget = wibox.widget {
@@ -1107,7 +1121,7 @@ local waffle_root_agenda_widget = decorate {
     layout = wibox.layout.fixed.vertical
 }
 
-local waffle_root_action_widget = decorate {
+local waffle_root_action_widget = decorate_panel {
     button {
         icon = gcolor.recolor_image(icons.launcher, beautiful.fg_normal),
         markup = "Launcher",
@@ -1181,7 +1195,7 @@ local waffle_root_action_widget = decorate {
     layout = wibox.layout.fixed.vertical,
 }
 
-local waffle_root_audio_widget = decorate {
+local waffle_root_audio_widget = decorate_panel {
     mpd_widget,
     button {
         icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
@@ -1201,7 +1215,7 @@ local waffle_root_audio_widget = decorate {
     layout = wibox.layout.fixed.vertical,
 }
 
-local waffle_root_admin_widget = decorate {
+local waffle_root_admin_widget = decorate_panel {
     button {
             icon = gcolor.recolor_image(icons.lock, beautiful.fg_normal),
             markup = "Lock screen",
@@ -1225,24 +1239,29 @@ local waffle_root_admin_widget = decorate {
 }
 
 local waffle_root_view = view {
-    root = wibox.widget {
+    root = decorate_waffle {
         {
             {
                 {
                     waffle_root_action_widget,
-                    valign = "bottom",
+                    valign = "top",
                     widget = wibox.container.place
                 },
                 {
                     {
                         waffle_root_admin_widget,
                         waffle_root_agenda_widget,
-                        waffle_root_audio_widget,
                         spacing = button_padding,
                         layout = wibox.layout.fixed.vertical
                     },
-                    valign = "bottom",
-                    widget = wibox.container.place
+                    {
+                        height = button_padding,
+                        strategy = "min",
+                        widget = wibox.container.constraint,
+                    },
+                    waffle_root_audio_widget,
+                    expand = "inside",
+                    layout = wibox.layout.align.vertical
                 },
                 spacing = button_padding,
                 layout = wibox.layout.fixed.horizontal
@@ -1263,102 +1282,100 @@ local waffle_root_view = view {
 waffle:set_root_view(waffle_root_view)
 
 waffle_settings_view = view {
-    root = decorate(
-        wibox.widget {
-            -- button({
-            --       markup = "Toggle titlebars",
-            --       indicator = em("t"),
-            --       key = "t",
-            --       action = function (alt)
-            --          if not alt then
-            --             if shared.var.enable_titlebar then
-            --                for _, c in ipairs(capi.client.get()) do
-            --                   shared.client.titlebar_disable(c)
-            --                end
-            --                shared.var.enable_titlebar = false
-            --             else
-            --                for _, c in ipairs(capi.client.get()) do
-            --                   shared.client.titlebar_enable(c)
-            --                end
-            --                shared.var.enable_titlebar = true
-            --             end
-            --          else
-            --              shared.var.hide_clients_with_titlebars =
-            --                  not shared.var.hide_clients_with_titlebars
-            --              capi.client.emit_signal("list")
-            --          end
-            --          waffle:hide()
-            --       end
-            -- }),
-            -- button({
-            --       markup = "Toggle music",
-            --       indicator = em("m"),
-            --       key = "m",
-            --       action = function (alt)
-            --           mpd_widget:set_visible(not mpd_widget:get_visible())
-            --           waffle:go_back()
-            --       end
-            -- }),
-            button({
-                    markup = "Toggle fortune",
-                    indicator = em("f"),
-                    key = "f",
-                    action = function (alt)
-                        shared.screen.toggle_fortune()
-                    end
-            }),
-            button({
-                    markup = "Cycle bar styles",
-                    indicator = em("b"),
-                    key = "b",
-                    action = function (alt)
-                        for i, v in ipairs(beautiful.bar_styles) do
-                            if v == beautiful.bar_style then
-                                beautiful.bar_style = beautiful.bar_styles[i % #beautiful.bar_styles + 1]
-                                capi.screen.emit_signal("list")
-                                return
-                            end
+    root = decorate_waffle {
+        -- button({
+        --       markup = "Toggle titlebars",
+        --       indicator = em("t"),
+        --       key = "t",
+        --       action = function (alt)
+        --          if not alt then
+        --             if shared.var.enable_titlebar then
+        --                for _, c in ipairs(capi.client.get()) do
+        --                   shared.client.titlebar_disable(c)
+        --                end
+        --                shared.var.enable_titlebar = false
+        --             else
+        --                for _, c in ipairs(capi.client.get()) do
+        --                   shared.client.titlebar_enable(c)
+        --                end
+        --                shared.var.enable_titlebar = true
+        --             end
+        --          else
+        --              shared.var.hide_clients_with_titlebars =
+        --                  not shared.var.hide_clients_with_titlebars
+        --              capi.client.emit_signal("list")
+        --          end
+        --          waffle:hide()
+        --       end
+        -- }),
+        -- button({
+        --       markup = "Toggle music",
+        --       indicator = em("m"),
+        --       key = "m",
+        --       action = function (alt)
+        --           mpd_widget:set_visible(not mpd_widget:get_visible())
+        --           waffle:go_back()
+        --       end
+        -- }),
+        button({
+                markup = "Toggle fortune",
+                indicator = em("f"),
+                key = "f",
+                action = function (alt)
+                    shared.screen.toggle_fortune()
+                end
+        }),
+        button({
+                markup = "Cycle bar styles",
+                indicator = em("b"),
+                key = "b",
+                action = function (alt)
+                    for i, v in ipairs(beautiful.bar_styles) do
+                        if v == beautiful.bar_style then
+                            beautiful.bar_style = beautiful.bar_styles[i % #beautiful.bar_styles + 1]
+                            capi.screen.emit_signal("list")
+                            return
                         end
-                        beautiful.bar_style = "auto"
-                        capi.screen.emit_signal("list")
                     end
-            }),
-            button({
-                    markup = "Wallpaper",
-                    indicator = em("w"),
-                    key = "w",
-                    action = function (alt)
-                        shared.action.wallpaper_setup()
-                        waffle:hide()
+                    beautiful.bar_style = "auto"
+                    capi.screen.emit_signal("list")
+                end
+        }),
+        button({
+                markup = "Wallpaper",
+                indicator = em("w"),
+                key = "w",
+                action = function (alt)
+                    shared.action.wallpaper_setup()
+                    waffle:hide()
+                end
+        }),
+        button({
+                markup = "Screen layout",
+                indicator = em("s"),
+                key = "s",
+                action = function (alt)
+                    if alt then
+                        local cmd = {"arandr"}
+                        awful.spawn(cmd)
+                    else
+                        local cmd = {"rofi-screen-layout",
+                                     "-normal-window",
+                                     "-font", beautiful.font
+                        }
+                        awful.spawn(cmd)
                     end
-            }),
-            button({
-                    markup = "Screen layout",
-                    indicator = em("s"),
-                    key = "s",
-                    action = function (alt)
-                        if alt then
-                            local cmd = {"arandr"}
-                            awful.spawn(cmd)
-                        else
-                            local cmd = {"rofi-screen-layout",
-                                         "-normal-window",
-                                         "-font", beautiful.font
-                            }
-                            awful.spawn(cmd)
-                        end
-                        waffle:hide()
-                    end
-            }),
-            layout = wibox.layout.fixed.vertical,
-    })
+                    waffle:hide()
+                end
+        }),
+        layout = wibox.layout.fixed.vertical,
+    },
 }
 
 
 local client_waffle = view {
-    root = wibox.widget {
-        decorate(
-            wibox.widget {
+    root = decorate_waffle {
+        decorate_panel {
                 button({
                         markup = "Close",
                         indicator = em("c"),
@@ -1445,7 +1462,7 @@ local client_waffle = view {
                         end
                 }),
                 layout = wibox.layout.fixed.vertical,
-        }),
+        },
         spacing = dpi(10),
         layout = wibox.layout.fixed.vertical,
     },

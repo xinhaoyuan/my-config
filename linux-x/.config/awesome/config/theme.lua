@@ -124,7 +124,7 @@ theme.font = theme.fontname_normal.." "..tostring(theme.fontsize_normal)
 theme.font_mono = theme.fontname_mono.." "..tostring(theme.fontsize_normal)
 theme.useless_gap = dpi(8)
 -- custom property number
-theme.bar_height = dpi(22)
+theme.bar_height = dpi(24)
 theme.menu_width = dpi(150)
 -- custom property color
 theme.special_normal = is_light_color(theme.bg_normal) and c_red[1] or c_yellow[2]
@@ -134,8 +134,10 @@ theme.special_focus = is_light_color(theme.bg_focus) and c_red[1] or c_yellow[2]
 theme.waffle_use_entire_screen = true
 -- custom property color
 theme.waffle_background = "#00000000"
--- custom property
-theme.waffle_width = dpi(200)
+-- custom property number
+theme.waffle_panel_width = dpi(180)
+-- custom_property number
+theme.waffle_item_height = dpi(20)
 
 theme.titlebar_bg_focus = theme.bg_normal
 theme.titlebar_fg_focus = theme.fg_normal
