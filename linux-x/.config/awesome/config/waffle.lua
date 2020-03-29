@@ -1204,7 +1204,6 @@ local waffle_root_action_widget = decorate_panel {
 }
 
 local waffle_root_audio_widget = decorate_panel {
-    mpd_widget,
     button {
         icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
         label_widget = wibox.widget {
@@ -1220,6 +1219,7 @@ local waffle_root_audio_widget = decorate_panel {
             waffle:hide()
         end,
     },
+    mpd_widget,
     layout = wibox.layout.fixed.vertical,
 }
 

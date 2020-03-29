@@ -85,10 +85,10 @@
                  (progn
                    ;; for xterm-query
                    (load "term/xterm")
-                   (message "Querying the background color")
+                   ;; (message "Querying the background color")
                    (flet ((my-xterm-maybe-set-dark-background-mode
                            (redc greenc bluec)
-                           (message "!!! %d %d %d" redc greenc bluec)
+                           ;; (message "background rgb %d %d %d" redc greenc bluec)
                            ;; Use the heuristic in `frame-set-background-mode' to decide if a
                            ;; frame is dark.
                            (if (< (+ redc greenc bluec) (* .6 (+ 65535 65535 65535)))
