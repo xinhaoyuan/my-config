@@ -1049,7 +1049,7 @@ do
             if item.date ~= nil then
                 table.insert(lines, "<b>["..tostring(item.date).."]</b> "..gstring.xml_escape(item.text))
             else
-                table.insert(lines, " - "..gstring.xml_escape(item.text))
+                table.insert(lines, "<b>[-]</b> "..gstring.xml_escape(item.text))
             end
         end
         return lines
