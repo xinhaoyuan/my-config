@@ -66,7 +66,6 @@ shared.action = {
         local cmd = {"rofi", "show",
                      "-normal-window",
                      "-combi-modi", "window,drun",
-                     "-show-icons",
                      "-show", "combi",
                      "-modi", "combi",
                      "-font", beautiful.font}

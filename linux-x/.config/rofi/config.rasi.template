@@ -3,6 +3,10 @@
  * Rofi version: 1.5.1
  **/
 
+configuration {
+    show-icons: true;
+}
+
 * {
     foreground:                  @x-foreground;
     background:                  @x-background;
