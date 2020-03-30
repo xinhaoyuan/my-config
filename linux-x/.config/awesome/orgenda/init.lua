@@ -65,16 +65,18 @@ local function parse_file(path)
     local results = {}
     local todo_item = nil
     for line in fd:lines() do
-        local todo_match = line:match(".+TODO%s+(.*)")
-        if todo_match ~= nil then
-            if todo_item ~= nil then
-                table.insert(results, todo_item)
+        if line:find("^%s*#") == nil then
+            local todo_match = line:match("TODO%s+(.+)")
+            if todo_match ~= nil then
+                if todo_item ~= nil then
+                    table.insert(results, todo_item)
+                end
+                todo_item = parse_todo_match(todo_match)
             end
-            todo_item = parse_todo_match(todo_match)
-        end
 
-        if todo_item ~= nil then
-            parse_attributes(line, todo_item)
+            if todo_item ~= nil then
+                parse_attributes(line, todo_item)
+            end
         end
     end
     if todo_item ~= nil then
