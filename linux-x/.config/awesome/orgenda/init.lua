@@ -15,7 +15,7 @@ end
 
 local function parse_todo_match(todo_match)
     local _, priority_end, priority  = todo_match:find("^%[#([A-C])%]%s+")
-    priority = priority == nil and 1 or 3 +  string.byte("A") - string.byte(priority)
+    priority = priority == nil and 2 or 3 + string.byte("A") - string.byte(priority)
     local text_begin = priority_end == nil and 1 or priority_end + 1
     local tag_begin, tag_end = todo_match:find("%s+[A-Z]*:.*")
     local tag_length = tag_begin == nil and 0 or tag_end - tag_begin + 1

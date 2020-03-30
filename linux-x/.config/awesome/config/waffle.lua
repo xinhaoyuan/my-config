@@ -1043,13 +1043,17 @@ do
         widget = wibox.container.constraint
     }
 
+    local function render_priority(pri)
+        return ({ "☺", "☆", "★" })[pri]
+    end
+
     local function render_orgenda_items(items)
         local lines = {}
         for _, item in ipairs(items) do
             if item.date ~= nil then
-                table.insert(lines, "<b>["..tostring(item.date).."]</b> "..gstring.xml_escape(item.text))
+                table.insert(lines, "<b>["..tostring(item.date).."]</b>"..render_priority(item.priority).." "..gstring.xml_escape(item.text))
             else
-                table.insert(lines, "<b>[-]</b> "..gstring.xml_escape(item.text))
+                table.insert(lines, render_priority(item.priority).." "..gstring.xml_escape(item.text))
             end
         end
         return lines
