@@ -31,6 +31,7 @@ local masked_imagebox = require("masked_imagebox")
 local border = require("border-theme")
 local debug_container = require("debug_container")
 local cbg = require("contextual_background")
+local fts = require("hotpot").focus_timestamp
 local aux = require("aux")
 local icons = require("icons")
 require("manage_ticket")
@@ -1022,7 +1023,7 @@ local global_keys = table_join(
             table.sort(
                clients,
                function (a, b)
-                   return focus_timestamp.get(a) > focus_timestamp.get(b)
+                   return fts.get(a) > fts.get(b)
                end
             )
 
