@@ -1,17 +1,18 @@
 -- Yet Another Minimal Switcher
 --   Author: Xinhao Yuan <xinhaoyuan@gmail.com>
 
-local api = {
-    client    = client,
-    gears     = require("gears"),
-    beautiful = require("beautiful"),
-    wibox     = require("wibox"),
-    awful     = require("awful"),
-    fts       = require("hotpot").focus_timestamp,
-    lgi       = require("lgi"),
-    dpi       = require("beautiful.xresources").apply_dpi,
-    border    = require("border-theme")
+local capi = {
+    client = client,
 }
+
+local gears = require("gears")
+local beautiful = require("beautiful")
+local wibox = require("wibox")
+local awful = require("awful")
+local fts = require("hotpot").focus_timestamp
+local lgi = require("lgi")
+local dpi = require("beautiful.xresources").apply_dpi
+local border = require("border-theme")
 
 local function min(a, b)
     if a < b then return a else return b end
@@ -24,7 +25,7 @@ end
 local function with_alpha(col, alpha)
     local r, g, b
     _, r, g, b, _ = col:get_rgba()
-    return api.lgi.cairo.SolidPattern.create_rgba(r, g, b, alpha)
+    return lgi.cairo.SolidPattern.create_rgba(r, g, b, alpha)
 end
 
 local function activate(c)
@@ -34,7 +35,7 @@ end
 local function create(config)
     -- the default filter will get all focusable client with any selected tags
     local function default_filter(c)
-        if not api.awful.client.focus.filter(c) then return false end
+        if not awful.client.focus.filter(c) then return false end
         for _, t in ipairs(c:tags()) do
             if t.selected then
                 return true
@@ -67,19 +68,19 @@ local function create(config)
     end
 
     local function start(screen)
-        local tablist_font_desc = api.beautiful.get_merged_font(
-            api.beautiful.font, api.dpi(10))
-        local font_color = with_alpha(api.gears.color(api.beautiful.fg_normal), 1)
-        local font_color_hl = with_alpha(api.gears.color(api.beautiful.fg_focus), 1)
-        local label_size = api.dpi(30)
-        local fill_color = with_alpha(api.gears.color(api.beautiful.bg_normal), 0.85)
-        local fill_color_hl = with_alpha(api.gears.color(api.beautiful.bg_focus), 1)
+        local tablist_font_desc = beautiful.get_merged_font(
+            beautiful.font, dpi(10))
+        local font_color = with_alpha(gears.color(beautiful.fg_normal), 1)
+        local font_color_hl = with_alpha(gears.color(beautiful.fg_focus), 1)
+        local label_size = dpi(30)
+        local fill_color = with_alpha(gears.color(beautiful.bg_normal), 0.85)
+        local fill_color_hl = with_alpha(gears.color(beautiful.bg_focus), 1)
 
         if screen == nil then
-            if api.client.focus then
-                screen = api.client.focus.screen
+            if capi.client.focus then
+                screen = capi.client.focus.screen
             else
-                screen = api.awful.screen.focused()
+                screen = awful.screen.focused()
             end
         end
 
@@ -89,7 +90,7 @@ local function create(config)
         local panel = nil
 
         if config.panel then
-            panel = api.wibox({
+            panel = wibox({
                     screen = screen,
                     x = screen.workarea.x,
                     y = screen.workarea.y,
@@ -123,7 +124,7 @@ local function create(config)
 
         local function initialize()
             tablist = {}
-            for c in api.awful.client.iterate(config.filter, nil, config.same_screen and screen or nil) do
+            for c in awful.client.iterate(config.filter, nil, config.same_screen and screen or nil) do
                 tablist[#tablist + 1] = c
             end
             table.sort(
@@ -133,7 +134,7 @@ local function create(config)
                     if a.minimized ~= b.minimized then
                         return b.minimized
                     end
-                    return api.fts.get(a) > api.fts.get(b)
+                    return fts.get(a) > fts.get(b)
                 end
             )
 
@@ -180,10 +181,10 @@ local function create(config)
             cr:paint()
 
             local msg, ext
-            local pl = api.lgi.Pango.Layout.create(cr)
+            local pl = lgi.Pango.Layout.create(cr)
             pl:set_font_description(tablist_font_desc)
 
-            local padding = api.beautiful.border_width
+            local padding = beautiful.border_width
             local inner_padding = padding
             local panel_height = 0
             local panel_width = 0
@@ -196,8 +197,8 @@ local function create(config)
                     pl:set_text(label)
                     local w, h
                     w, h = pl:get_size()
-                    w = w / api.lgi.Pango.SCALE
-                    h = h / api.lgi.Pango.SCALE
+                    w = w / lgi.Pango.SCALE
+                    h = h / lgi.Pango.SCALE
                     local ext = { width = w, height = h, x_bearing = 0, y_bearing = 0 }
                     table.insert(exts, ext)
                     table.insert(labels, label)
@@ -215,7 +216,7 @@ local function create(config)
             cr:clip()
             cr:set_source(fill_color)
             cr:paint()
-            api.border:draw({ color = api.beautiful.border_focus }, cr, panel_width + padding * 2, panel_height + padding * 2, api.border.directions { "top", "bottom", "left", "right" })
+            border:draw({ color = beautiful.border_focus }, cr, panel_width + padding * 2, panel_height + padding * 2, border.directions { "top", "bottom", "left", "right" })
             cr:restore()
 
             local label_x = panel_x + padding
@@ -263,7 +264,7 @@ local function create(config)
             return
         end
 
-        api.awful.client.focus.history.disable_tracking()
+        awful.client.focus.history.disable_tracking()
 
         switch(true)
 
@@ -275,15 +276,15 @@ local function create(config)
             -- So we just manually update the history info instead.
             maintain_tablist()
             if #tablist > 0 then
-                api.fts.update(tablist[tablist_index])
-                api.awful.client.focus.history.add(tablist[tablist_index])
+                fts.update(tablist[tablist_index])
+                awful.client.focus.history.add(tablist[tablist_index])
             end
-            api.awful.client.focus.history.enable_tracking()
+            awful.client.focus.history.enable_tracking()
             if panel then
                 panel.visible = false
             end
             if kg ~= nil then
-                api.awful.keygrabber.stop(kg)
+                awful.keygrabber.stop(kg)
                 kg = nil
             end
             finalize()
@@ -294,7 +295,7 @@ local function create(config)
             panel.visible = true
         end
 
-        kg = api.awful.keygrabber.run(
+        kg = awful.keygrabber.run(
             function (mod, key, event)
                 local action = config.keys[key]
                 if event == "release" then
