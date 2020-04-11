@@ -10,6 +10,7 @@ local api = {
     fts       = require("hotpot").focus_timestamp,
     lgi       = require("lgi"),
     dpi       = require("beautiful.xresources").apply_dpi,
+    border    = require("border-theme")
 }
 
 local function min(a, b)
@@ -176,16 +177,16 @@ local function create(config)
 
         local function draw_info(context, cr, width, height)
             cr:set_source_rgba(0, 0, 0, 0)
-            cr:rectangle(0, 0, width, height)
-            cr:fill()
+            cr:paint()
 
             local msg, ext
             local pl = api.lgi.Pango.Layout.create(cr)
             pl:set_font_description(tablist_font_desc)
 
-            local vpadding = api.dpi(10)
-            local info_height = vpadding
-            local info_width = 2 * vpadding
+            local padding = api.beautiful.border_width
+            local inner_padding = padding
+            local panel_height = 0
+            local panel_width = 0
             local exts = {}
             local labels = {}
 
@@ -200,36 +201,43 @@ local function create(config)
                     local ext = { width = w, height = h, x_bearing = 0, y_bearing = 0 }
                     table.insert(exts, ext)
                     table.insert(labels, label)
-                    info_height = info_height + ext.height + vpadding
-                    info_width = max(info_width, w + 2 * vpadding)
+                    panel_height = panel_height + ext.height + 2 * inner_padding
+                    panel_width = max(panel_width, w + 2 * inner_padding)
                 end
             end
 
-            local x_offset = width / 2
-            local y_offset = height / 2 - info_height / 2 + vpadding
+            local panel_x = width / 2 - panel_width / 2 - padding
+            local panel_y = height / 2 - panel_height / 2 - padding
 
-            cr:rectangle((width - info_width) / 2, y_offset - vpadding, info_width, info_height)
+            cr:save()
+            cr:translate(panel_x, panel_y)
+            cr:rectangle(0, 0, panel_width + padding * 2, panel_height + padding * 2)
+            cr:clip()
             cr:set_source(fill_color)
-            cr:fill()
+            cr:paint()
+            api.border:draw({ color = api.beautiful.border_focus }, cr, panel_width + padding * 2, panel_height + padding * 2, api.border.directions { "top", "bottom", "left", "right" })
+            cr:restore()
 
+            local label_x = panel_x + padding
+            local label_y = panel_y + padding
             for index, label in ipairs(labels) do
                 local ext = exts[index]
                 if index == tablist_index then
-                    cr:rectangle(x_offset - ext.width / 2 - vpadding / 2, y_offset - vpadding / 2, ext.width + vpadding, ext.height + vpadding)
+                    cr:rectangle(label_x, label_y, panel_width, ext.height + inner_padding * 2)
                     cr:set_source(fill_color_hl)
                     cr:fill()
                     pl:set_text(label)
-                    cr:move_to(x_offset - ext.width / 2 - ext.x_bearing, y_offset - ext.y_bearing)
+                    cr:move_to(label_x + (panel_width - ext.width) / 2 - ext.x_bearing, label_y + inner_padding - ext.y_bearing)
                     cr:set_source(font_color_hl)
                     cr:show_layout(pl)
                 else
                     pl:set_text(label)
-                    cr:move_to(x_offset - ext.width / 2 - ext.x_bearing, y_offset - ext.y_bearing)
+                    cr:move_to(label_x + (panel_width - ext.width) / 2 - ext.x_bearing, label_y + inner_padding - ext.y_bearing)
                     cr:set_source(font_color)
                     cr:show_layout(pl)
                 end
 
-                y_offset = y_offset + ext.height + vpadding
+                label_y = label_y + ext.height + inner_padding * 2
             end
         end
 
