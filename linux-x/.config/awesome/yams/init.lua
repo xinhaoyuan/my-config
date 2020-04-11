@@ -14,21 +14,13 @@ local lgi = require("lgi")
 local dpi = require("beautiful.xresources").apply_dpi
 local border = require("border-theme")
 
-local function min(a, b)
-    if a < b then return a else return b end
-end
-
-local function max(a, b)
-    if a < b then return b else return a end
-end
-
 local function with_alpha(col, alpha)
     local r, g, b
     _, r, g, b, _ = col:get_rgba()
     return lgi.cairo.SolidPattern.create_rgba(r, g, b, alpha)
 end
 
-local function activate(c)
+local function activate_client(c)
     c:emit_signal("request::activate", "mouse.move", {raise=false})
 end
 
@@ -171,7 +163,7 @@ local function create(config)
                 if c.minimized then
                     c.minimized = false
                 end
-                activate(c)
+                activate_client(c)
                 c:raise()
             end
         end
@@ -203,7 +195,7 @@ local function create(config)
                     table.insert(exts, ext)
                     table.insert(labels, label)
                     panel_height = panel_height + ext.height + 2 * inner_padding
-                    panel_width = max(panel_width, w + 2 * inner_padding)
+                    panel_width = math.max(panel_width, w + 2 * inner_padding)
                 end
             end
 
@@ -254,7 +246,7 @@ local function create(config)
                 cc.opacity = config.opacity_selected
                 cc.minimized = false
                 cc.above = true
-                activate(tablist[tablist_index])
+                activate_client(tablist[tablist_index])
             end
         end
 
