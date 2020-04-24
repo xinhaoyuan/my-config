@@ -408,7 +408,10 @@ end
 capi.client.connect_signal("request::titlebars", create_titlebars)
 
 local function reset_decoration(c)
-    if not c.borderless and not c.maximized then
+    if c.borderless then
+        c.border_width = 0
+        return
+    elseif c.maximized then
         c.border_width = 0
     else
         c.border_width = 0
@@ -500,6 +503,14 @@ require("awful.rules").rules = {
          borderless = true,
          focusable = false,
       }
+   },
+   {
+       rule = { class = "Xfdesktop" },
+       properties = {
+           borderless = true,
+           sticky = true,
+           fullscreen = true,
+       },
    },
    {
        rule = { class = "tabbed" },
