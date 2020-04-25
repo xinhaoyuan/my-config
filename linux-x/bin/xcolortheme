@@ -26,6 +26,7 @@ hue delta: adjust the hue of the selected names.
 set dst_name src_name: set the color of dst_name to the src_name.
 swap name_1 name_2: swap the colors of name_1 and name_2.
 preview: preview the current theme through escape sequence.
+ansify: rearrange the 16 color according to the ANSI convention.
 apply: apply the current theme to the terminal through escape sequence.
 print: print the color table.
 
@@ -133,6 +134,41 @@ def adjust_hue(data, selector, amount):
         colors[k] = colors[k].hex_l
     return colors
 
+def ansify(data):
+
+    def color_pair(pair):
+        if pair[0].luminance > pair[1].luminance:
+            return (pair[1], pair[0])
+        return pair
+
+    colors = []
+    for k in range(1, 7):
+        colors.append(color_pair((colour.Color(data['color{}'.format(k)]), colour.Color(data['color{}'.format(k + 8)]))))
+        pass
+    colors.sort(key = lambda item : item[0].hue)
+    data['color1'] = colors[0][0].hex_l
+    data['color9'] = colors[0][1].hex_l
+    data['color3'] = colors[1][0].hex_l
+    data['color11'] = colors[1][1].hex_l
+    data['color2'] = colors[2][0].hex_l
+    data['color10'] = colors[2][1].hex_l
+    data['color6'] = colors[3][0].hex_l
+    data['color14'] = colors[3][1].hex_l
+    data['color4'] = colors[4][0].hex_l
+    data['color12'] = colors[4][1].hex_l
+    data['color5'] = colors[5][0].hex_l
+    data['color13'] = colors[5][1].hex_l
+    black = color_pair((colour.Color(data['color0']), colour.Color(data['color8'])))
+    white = color_pair((colour.Color(data['color7']), colour.Color(data['color15'])))
+    if black[0].luminance > white[0].luminance:
+        tmp = black; black = white; white = tmp
+        pass
+    data['color0'] = black[0].hex_l
+    data['color8'] = black[1].hex_l
+    data['color7'] = white[0].hex_l
+    data['color15'] = white[1].hex_l
+    pass
+
 def save_xres(data, path):
     f = sys.stdout if path is None else open(path, "w")
     for kw in SPECIAL_COLORS:
@@ -146,7 +182,7 @@ def save_xres(data, path):
         f.close()
         pass
     pass
-        
+
 def save_json(data, path):
     f = sys.stdout if path is None else open(path, "w")
     out = { "special" : {}, "colors" : {} }
@@ -259,6 +295,8 @@ while i < len(cmds):
         if cmds[i] in data and cmds[i + 1] in data:
             data[cmds[i]] = data[cmds[i + 1]]
             i += 2
+    elif cmd == "ansify":
+        ansify(data)
     elif cmd == "apply":
         apply_color(data)
     elif cmd == "preview":
