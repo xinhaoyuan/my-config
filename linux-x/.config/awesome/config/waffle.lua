@@ -1091,9 +1091,13 @@ local waffle_root_status_widget = decorate_panel {
                 widget = wibox.widget.imagebox,
             },
             ram_widget,
-            net_widget,
             spacing = button_padding,
             layout = wibox.layout.fixed.horizontal,
+        },
+        {
+            top = button_padding,
+            net_widget,
+            widget = fixed_margin
         },
         {
             battery_widget,
@@ -1101,12 +1105,9 @@ local waffle_root_status_widget = decorate_panel {
             draw_empty = false,
             widget = fixed_margin,
         },
-        layout = wibox.layout.fixed.horizontal,
+        layout = wibox.layout.fixed.vertical,
     },
-    top = button_padding,
-    bottom = button_padding,
-    left = button_padding * 1.5 + panel_padding * 0.5 + (panel_border and beautiful.border_width or 0),
-    right = button_padding * 1.5 + panel_padding * 0.5 + (panel_border and beautiful.border_width or 0),
+    margins = button_padding,
     widget = wibox.container.margin,
 }
 
@@ -1252,43 +1253,14 @@ local waffle_root_admin_widget = decorate_panel {
 
 local waffle_root_view = view {
     root = decorate_waffle {
-        {
-            waffle_root_status_widget,
-            halign = "center",
-            widget = wibox.container.place
-        },
-        {
-            {
-                {
-                    waffle_root_action_widget,
-                    valign = "bottom",
-                    widget = wibox.container.place
-                },
-                {
-                    waffle_root_audio_widget,
-                    {
-                        height = panel_padding,
-                        strategy = "min",
-                        widget = wibox.container.constraint,
-                    },
-                    {
-                        waffle_root_agenda_widget,
-                        waffle_root_admin_widget,
-                        spacing = panel_padding,
-                        layout = wibox.layout.fixed.vertical
-                    },
-                    expand = "inside",
-                    layout = wibox.layout.align.vertical
-                },
-                spacing = panel_padding,
-                layout = wibox.layout.fixed.horizontal
-            },
-            halign = "center",
-            widget = wibox.container.place
-        },
+        waffle_root_status_widget,
+        waffle_root_audio_widget,
+        waffle_root_agenda_widget,
+        waffle_root_action_widget,
+        waffle_root_admin_widget,
         spacing = panel_padding,
         layout = wibox.layout.fixed.vertical,
-    },
+    }
 }
 
 waffle:set_root_view(waffle_root_view)
