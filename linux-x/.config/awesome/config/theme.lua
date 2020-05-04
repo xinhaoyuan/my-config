@@ -41,7 +41,7 @@ end
 theme.bg_normal     = c_normal[2]
 theme.bg_focus      = c_blue[2]
 theme.bg_urgent     = c_red[2]
-theme.bg_minimize   = c_black[2]
+theme.bg_minimize   = acolor(c_black[2]):blend_with(acolor(theme.bg_normal), 0.5):to_string()
 
 theme.bg_systray    = theme.bg_normal
 
