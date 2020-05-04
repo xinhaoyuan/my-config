@@ -134,7 +134,8 @@ def adjust_hue(data, selector, amount):
         colors[k] = colors[k].hex_l
     return colors
 
-def ansify(data):
+def ansify(data, adjust_str):
+    adjust = float(adjust_str)
 
     def color_pair(pair):
         if pair[0].luminance > pair[1].luminance:
@@ -146,6 +147,16 @@ def ansify(data):
         colors.append(color_pair((colour.Color(data['color{}'.format(k)]), colour.Color(data['color{}'.format(k + 8)]))))
         pass
     colors.sort(key = lambda item : item[0].hue)
+    min_index = None
+    min_abs_hue = None
+    for i in range(6):
+        abs_hue = min((colors[i][0].hue + adjust) % 1, 1 - (colors[i][0].hue + adjust) % 1)
+        if min_abs_hue is None or min_abs_hue > abs_hue:
+            min_abs_hue = abs_hue
+            min_index = i
+            pass
+        pass
+    colors = colors[min_index:] + colors[0:min_index]
     data['color1'] = colors[0][0].hex_l
     data['color9'] = colors[0][1].hex_l
     data['color3'] = colors[1][0].hex_l
@@ -295,8 +306,9 @@ while i < len(cmds):
         if cmds[i] in data and cmds[i + 1] in data:
             data[cmds[i]] = data[cmds[i + 1]]
             i += 2
-    elif cmd == "ansify":
-        ansify(data)
+    elif cmd == "ansify" and i + 1 < len(cmds):
+        ansify(data, cmds[i])
+        i += 1
     elif cmd == "apply":
         apply_color(data)
     elif cmd == "preview":
