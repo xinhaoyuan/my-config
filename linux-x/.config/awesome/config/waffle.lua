@@ -10,7 +10,6 @@ local awful = require("awful")
 local beautiful = require("beautiful")
 local wibox = require("wibox")
 local waffle = require("waffle")
-local watch = require("awful.widget.watch")
 local gshape = require("gears.shape")
 local gcolor = require("gears.color")
 local gtimer = require("gears.timer")
@@ -330,7 +329,7 @@ local waffle_settings_view
 local cpu_widget_width = (waffle_width - button_padding) / 2 - button_height - button_padding * 2
 local cpu_widget
 do
-   local cpugraph_widget = wibox.widget {
+   local cpu_graph_widget = wibox.widget {
       max_value = 100,
       background_color = graph_background,
       forced_width = cpu_widget_width,
@@ -354,9 +353,12 @@ do
    cpu_widget = wibox.widget {
       {
           {
-              cpugraph_widget,
               {
-                  cpugraph_widget,
+                  id = "graph",
+                  widget = cpu_graph_widget
+              },
+              {
+                  cpu_graph_widget,
                   reflection = {
                       horizontal = false,
                       vertical = true,
@@ -365,7 +367,10 @@ do
               },
               layout = wibox.layout.fixed.vertical,
           },
-         cpu_text_widget,
+          {
+              id = "text",
+              widget = cpu_text_widget
+          },
          layout = wibox.layout.manual
       },
       width = cpu_widget_width,
@@ -375,28 +380,34 @@ do
 
    local total_prev = 0
    local idle_prev = 0
+   local function on_output (stdout)
+       local user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice =
+           stdout:match('(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s')
 
-   watch({"grep", "-e", "^cpu ", "/proc/stat"}, update_interval_s,
-      function(widget, stdout)
-         local user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice =
-            stdout:match('(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s')
+       local total = user + nice + system + idle + iowait + irq + softirq + steal
 
-         local total = user + nice + system + idle + iowait + irq + softirq + steal
+       local diff_idle = idle - idle_prev
+       local diff_total = total - total_prev
+       local diff_usage = (1000 * (diff_total - diff_idle) / diff_total + 5) / 10
 
-         local diff_idle = idle - idle_prev
-         local diff_total = total - total_prev
-         local diff_usage = (1000 * (diff_total - diff_idle) / diff_total + 5) / 10
+       local markup = "<span font_desc='" .. font_info .. "'>" .. tostring(math.floor(diff_usage)) .. "%</span>"
+       -- widget:get_children_by_id("text")[1]:set_markup(markup)
+       -- widget:get_children_by_id("graph")[1]:add_value(diff_usage)
+       cpu_text_widget:set_markup(markup)
+       cpu_graph_widget:add_value(diff_usage)
 
-         local markup = "<span font_desc='" .. font_info .. "'>" .. tostring(math.floor(diff_usage)) .. "%</span>"
-         cpu_text_widget:set_markup(markup)
+       total_prev = total
+       idle_prev = idle
+   end
 
-         cpugraph_widget:add_value(diff_usage)
-
-         total_prev = total
-         idle_prev = idle
-      end,
-      cpu_widget
-   )
+   gtimer {
+       timeout = update_interval_s,
+       call_now = true,
+       autostart = true,
+       callback = function ()
+           awful.spawn.easy_async({"grep", "-e", "^cpu ", "/proc/stat"}, on_output)
+       end,
+   }
 end
 
 local function format_size(s)
@@ -419,7 +430,7 @@ end
 local ram_widget_width = (waffle_width - button_padding) / 2 - button_height - button_padding * 2
 local ram_widget
 do
-   local ramgraph_widget = wibox.widget {
+   local ram_graph_widget = wibox.widget {
       max_value = 100,
       background_color = graph_background,
       forced_width = ram_widget_width,
@@ -443,9 +454,12 @@ do
    ram_widget = wibox.widget {
        {
            {
-               ramgraph_widget,
                {
-                   ramgraph_widget,
+                   id = "graph",
+                   widget = ram_graph_widget
+               },
+               {
+                   ram_graph_widget,
                    reflection = {
                        horizontal = false,
                        vertical = true,
@@ -454,7 +468,10 @@ do
                },
                layout = wibox.layout.fixed.vertical,
            },
-           ram_text_widget,
+           {
+               id = "text",
+               widget = ram_text_widget
+           },
            layout = wibox.layout.manual
        },
        width = ram_widget_width,
@@ -462,18 +479,25 @@ do
        widget = wibox.container.constraint,
    }
 
-   watch({"egrep", "-e", "MemTotal:|MemAvailable:", "/proc/meminfo"}, update_interval_s,
-      function(widget, stdout, stderr, exitreason, exitcode)
-         local total, available = stdout:match('MemTotal:%s+([0-9]+) .*MemAvailable:%s+([0-9]+)')
-         local usage = math.floor((total - available) / total * 100 + 0.5)
+   local function on_output(stdout)
+       local total, available = stdout:match('MemTotal:%s+([0-9]+) .*MemAvailable:%s+([0-9]+)')
+       local usage = math.floor((total - available) / total * 100 + 0.5)
 
-         local markup = "<span font_desc='" .. font_info .. "'>" .. format_size((total - available) * 1000) .. "B</span>"
-         ram_text_widget:set_markup(markup)
+       local markup = "<span font_desc='" .. font_info .. "'>" .. format_size((total - available) * 1000) .. "B</span>"
+       -- widget:get_children_by_id("text")[1]:set_markup(markup)
+       -- widget:get_children_by_id("graph")[1]:add_value(usage)
+       ram_text_widget:set_markup(markup)
+       ram_graph_widget:add_value(usage)
+   end
 
-         ramgraph_widget:add_value(usage)
-      end,
-      ram_widget
-   )
+   gtimer {
+       timeout = update_interval_s,
+       call_now = true,
+       autostart = true,
+       callback = function ()
+           awful.spawn.easy_async({"egrep", "-e", "MemTotal:|MemAvailable:", "/proc/meminfo"}, on_output)
+       end,
+   }
 end
 
 local net_widget_width = (waffle_width - button_height - button_padding * 4) / 2
@@ -591,44 +615,49 @@ do
 
     local prev_recv = nil
     local prev_send = nil
-
-    watch({"egrep", "-e", "[[:alnum:]]+:", "/proc/net/dev"}, update_interval_s,
-        function(widget, stdout, stderr, exitreason, exitcode)
-            local recv = 0
-            local send = 0
-            for line in stdout:gmatch("[^\r\n]+") do
-                local items = {}
-                for item in line:gmatch("[^ \t:]+") do
-                    if #item > 0 then
-                        table.insert(items, item)
-                    end
-                end
-                if items[1] ~= "lo" and items[1]:match("^tun[0-9]*$") == nil then
-                    -- Skips VPN for avoiding double-couting
-                    recv = recv + tonumber(items[2])
-                    send = send + tonumber(items[10])
+    local function on_output(stdout)
+        local recv = 0
+        local send = 0
+        for line in stdout:gmatch("[^\r\n]+") do
+            local items = {}
+            for item in line:gmatch("[^ \t:]+") do
+                if #item > 0 then
+                    table.insert(items, item)
                 end
             end
+            if items[1] ~= "lo" and items[1]:match("^tun[0-9]*$") == nil then
+                -- Skips VPN for avoiding double-couting
+                recv = recv + tonumber(items[2])
+                send = send + tonumber(items[10])
+            end
+        end
 
-            if prev_recv ~= nil then
-                local rx = (recv - prev_recv) / update_interval_s
-                local markup = "<span font_desc='" .. font_info .. "'>RX " .. format_size(rx) .. "B/s</span>"
-                rx_text_widget:set_markup(markup)
-                netgraph_rx_widget.max_value = 256 * 1024
-                netgraph_rx_widget:add_value(rx)
-            end
-            prev_recv = recv
-            if prev_send ~= nil then
-                local tx = (send - prev_send) / update_interval_s
-                local markup = "<span font_desc='" .. font_info .. "'>TX " .. format_size(tx) .. "B/s</span>"
-                tx_text_widget:set_markup(markup)
-                netgraph_tx_widget.max_value = 256 * 1024
-                netgraph_tx_widget:add_value(tx)
-            end
-            prev_send = send
+        if prev_recv ~= nil then
+            local rx = (recv - prev_recv) / update_interval_s
+            local markup = "<span font_desc='" .. font_info .. "'>RX " .. format_size(rx) .. "B/s</span>"
+            rx_text_widget:set_markup(markup)
+            netgraph_rx_widget.max_value = 256 * 1024
+            netgraph_rx_widget:add_value(rx)
+        end
+        prev_recv = recv
+        if prev_send ~= nil then
+            local tx = (send - prev_send) / update_interval_s
+            local markup = "<span font_desc='" .. font_info .. "'>TX " .. format_size(tx) .. "B/s</span>"
+            tx_text_widget:set_markup(markup)
+            netgraph_tx_widget.max_value = 256 * 1024
+            netgraph_tx_widget:add_value(tx)
+        end
+        prev_send = send
+    end
+
+    gtimer {
+        timeout = update_interval_s,
+        call_now = true,
+        autostart = true,
+        callback = function ()
+            awful.spawn.easy_async({"egrep", "-e", "[[:alnum:]]+:", "/proc/net/dev"}, on_output)
         end,
-        netgraph_widget
-    )
+    }
 end
 
 local battery_widget_width = waffle_width - button_height - button_padding * 3
@@ -680,7 +709,7 @@ do
 
    -- Surface-linux
    local battery_status_command = {"mshw0084-rqst.py", "-q", "-d", "/dev/ttyS0", "bat1.pretty"}
-   -- For debugging
+   -- -- For debugging
    -- local battery_status_command = {"echo", "Percentage: 70%\nState:Charging\nRemaining: 10 hours"}
 
    local function parse_battery_output(stdout)
@@ -699,7 +728,7 @@ do
        return results
    end
 
-   local update_graphic = function (widget, stdout, _, _, _)
+   local update_graphic = function (widget, stdout)
        local status = parse_battery_output(stdout)
        battery_widget.visible = true
        battery_percentage_widget.value = status.value
@@ -716,7 +745,18 @@ do
        )
    end
 
-   watch(battery_status_command, 60, update_graphic, battery_widget)
+   gtimer {
+       timeout = 60,
+       call_now = true,
+       autostart = true,
+       callback = function ()
+           awful.spawn.easy_async(battery_status_command,
+                                  function (stdout)
+                                      update_graphic(battery_widget, stdout)
+                                  end
+           )
+       end,
+   }
 end
 
 
@@ -750,7 +790,7 @@ do
       widget = wibox.widget.progressbar
    }
 
-   local update_graphic = function (widget, stdout, _, _, _)
+   local update_graphic = function (widget, stdout)
       local mute = string.match(stdout, "%[(o%D%D?)%]")
       local volume = string.match(stdout, "(%d?%d?%d)%%")
       volume = tonumber(string.format("% 3d", volume))
@@ -786,7 +826,18 @@ do
        end)
    )
 
-   watch(GET_VOLUME_CMD, 1, update_graphic, volumebar_widget)
+   gtimer {
+       timeout = update_interval_s,
+       call_now = true,
+       autostart = true,
+       callback = function ()
+           awful.spawn.easy_async(GET_VOLUME_CMD,
+                                  function (stdout)
+                                      update_graphic(volumebar_widget, stdout)
+                                  end
+           )
+       end,
+   }
 
    volumebar_widget.keys = {
       ["-"] = function (mod, _, event)
@@ -1101,7 +1152,7 @@ local waffle_root_status_widget = decorate_panel {
         },
         {
             battery_widget,
-            left = button_padding,
+            top = button_padding,
             draw_empty = false,
             widget = fixed_margin,
         },
