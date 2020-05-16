@@ -32,7 +32,8 @@ function traverse.new(output_filename, age_threshold)
     return self
 end
 
-function traverse:before_scan()
+function traverse:before_scan(options)
+    collectgarbage("collect")
     self.counts = {
         boolean = 0,
         number = 0,
@@ -49,6 +50,7 @@ function traverse:before_scan()
         client = 0,
         old = 0,
     }
+    self.options = options
     self.string_length = 0
     self.table_entries = 0
     self.scan_timestamp = os.time()
@@ -62,13 +64,21 @@ end
 
 function traverse:on_reached_object(object, path)
     local timestamp = self.discover_timestamp[object]
-    if timestamp == nil then
+    local is_old = false
+    if self.options.mark_ignore then
+        self.discover_timestamp[object] = -1
+        timestamp = -1
+    elseif timestamp == nil then
         self.discover_timestamp[object] = self.scan_timestamp
+        timestamp = self.scan_timestamp
     else
-        if self.scan_timestamp - timestamp >= self.age_threshold then
+        is_old = timestamp >= 0 and self.scan_timestamp - timestamp >= self.age_threshold
+        if is_old then
             self.counts.old = self.counts.old + 1
-            self:print("Age "..(self.scan_timestamp - timestamp).."s, "..tostring(object)..": "..path_tostring(path)) 
         end
+    end
+    if timestamp >= 0 and (self.options.dump or (is_old and self.options.dump_old)) then
+        self:print("Age "..(self.scan_timestamp - timestamp).."s, "..tostring(object)..": "..path_tostring(path))
     end
 end
 
@@ -101,8 +111,8 @@ function traverse:print_stat()
     self:print()
 end
 
-function traverse:scan()
-    self:before_scan()
+function traverse:scan(options)
+    self:before_scan(options)
     self:traverse(_G, path_append("_G"))
     self:traverse(debug.getregistry(), path_append("registry"))
     self:print_stat()
@@ -240,18 +250,19 @@ end
 
 local tracker
 return function (output_filename, interval, age_threshold)
-    if tracker ~= nil then return end
+    if tracker ~= nil then return tracker end
     interval = interval or 60
     age_threshold = age_threshold or 600
     tracker = traverse.new(output_filename, age_threshold)
     gtimer {
         timeout = interval,
-        call_now = true,
+        call_now = false,
         autostart = true,
         callback = function ()
             tracker:scan()
         end
     }
+    return tracker
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
