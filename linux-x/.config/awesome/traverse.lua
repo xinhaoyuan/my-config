@@ -50,13 +50,14 @@ function traverse:before_scan(options)
         client = 0,
         old = 0,
     }
-    self.options = options
+    self.options = options or {}
     self.string_length = 0
     self.table_entries = 0
     self.scan_timestamp = os.time()
     self.reached = setmetatable({}, { __mode = "k"})
     self.reached[traverse] = true
     self.reached[self] = true
+    self.reached[self.options] = true
     self.reached[self.reached] = true
     self.reached[self.discover_timestamp] = true
     self.reached[self.output] = true
