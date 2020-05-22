@@ -12,18 +12,18 @@ local autolocker = require("autolocker")
 local term_cmd
 do
     local term_prog = "urxvt"
-    -- if os.execute("command -v xst") then
-    --     term_prog = "xst"
-    -- elseif os.execute("command -v urxvt") then
-    --     term_prog = "urxvt"
-    -- else
-    --     term_prog = "x-termninal-emulator"
-    --     print("Warning: no suitable terminal program found. Fallback to x-terminal-emulator.")
-    -- end
+    if os.execute("command -v st") then
+        term_prog = "st"
+    elseif os.execute("command -v urxvt") then
+        term_prog = "urxvt"
+    else
+        term_prog = "x-termninal-emulator"
+        print("Warning: no suitable terminal program found. Fallback to x-terminal-emulator.")
+    end
     local has_tabbed = os.execute("command -v tabbed")
 
-    if has_tabbed and term_prog == "xst" then
-        term_cmd = {"tabbed", "-c", "-F", beautiful.fontname_normal .. ":size=10", "-M", beautiful.fg_normal, "-m", beautiful.bg_normal, "-T", beautiful.fg_focus, "-t", beautiful.bg_focus, "-r", "2", "--", "xst", "-w", "--"}
+    if has_tabbed and term_prog == "st" then
+        term_cmd = {"tabbed", "-c", "-F", beautiful.fontname_normal .. ":size=10", "-M", beautiful.fg_normal, "-m", beautiful.bg_normal, "-T", beautiful.fg_focus, "-t", beautiful.bg_focus, "-r", "2", "--", "st", "-w", "--"}
     elseif has_tabbed and term_prog == "urxvt" then
         term_cmd = {"tabbed", "-c", "-F", beautiful.fontname_normal .. ":size=10", "-M", beautiful.fg_normal, "-m", beautiful.bg_normal, "-T", beautiful.fg_focus, "-t", beautiful.bg_focus, "-r", "2", "--", "urxvt", "-embed", "--"}
     else

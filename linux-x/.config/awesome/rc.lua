@@ -42,67 +42,54 @@ require("gears.timer").delayed_call(
     end
                                    )
 
--- __userdata_info = {}
--- __userdata_info_counter = 0
--- setmetatable(__userdata_info, { __mode = "k" })
+__userdata_info = {}
+__userdata_info_counter = 0
+setmetatable(__userdata_info, { __mode = "k" })
 
--- on_pushlightuserdata = function (userdata)
---     local level = 2
---     local info = {}
---     while true do
---         local level_info = debug.getinfo(level, "Sl")
---         if not level_info then break end
---         if level_info.what == "C" then
---             -- Ignore C functions
---         else   -- a Lua function
---             if not level_info.short_src:find("/lgi/") then
---                 table.insert(info, {level - 1, level_info.short_src, level_info.currentline})
---             end
---         end
---         level = level + 1
---     end
---     __userdata_info[userdata] = {__userdata_info_counter, true, os.date("%Y%m%d%H%M%S"), info}
---     __userdata_info_counter = __userdata_info_counter + 1
--- end
+on_pushlightuserdata = function (userdata)
+    local level = 2
+    local stacktrace = {}
+    while true do
+        local level_info = debug.getinfo(level, "Sl")
+        if not level_info then break end
+        if level_info.what == "C" then
+            -- Ignore C functions
+        else   -- a Lua function
+            if not level_info.short_src:find("/lgi/") then
+                table.insert(stacktrace, { level - 1, level_info.short_src, level_info.currentline})
+            end
+        end
+        level = level + 1
+    end
+    __userdata_info[userdata] = {
+        id = __userdata_info_counter,
+        light = true,
+        timestamp = os.date("%Y%m%d%H%M%S"),
+        stacktrace = stacktrace
+    }
+    __userdata_info_counter = __userdata_info_counter + 1
+end
 
--- on_newuserdata = function (userdata)
---     local level = 2
---     local info = {}
---     while true do
---         local level_info = debug.getinfo(level, "Sl")
---         if not level_info then break end
---         if level_info.what == "C" then
---             -- Ignore C functions
---         else   -- a Lua function
---             if not level_info.short_src:find("/lgi/") then
---                 table.insert(info, {level - 1, level_info.short_src, level_info.currentline})
---             end
---         end
---         level = level + 1
---     end
---     __userdata_info[userdata] = {__userdata_info_counter, false, os.date("%Y%m%d%H%M%S"), info}
---     __userdata_info_counter = __userdata_info_counter + 1
--- end
-
--- dump_userdata_info = function ()
---     collectgarbage("collect")
---     collectgarbage("collect")
---     collectgarbage("collect")
---     output = io.open(os.getenv("HOME").."/awesome_userdata_info", "w")
---     local count = 0
---     local ud_list = {}
---     for ud, ts_and_info in pairs(__userdata_info) do
---         table.insert(ud_list, {ud, ts_and_info[1], ts_and_info[2], ts_and_info[3], ts_and_info[4]})
---     end
-
---     table.sort(ud_list, function (a, b) return a[4] < b[4] end)
---     for _, tp in ipairs(ud_list) do
---         local ud, id, is_light, ts, info = table.unpack(tp)
---         output:write("#"..tostring(id)..(is_light and " l " or " h ")..tostring(ts).." "..tostring(ud).."\n")
---         for i, l in ipairs(info) do
---             output:write("--> "..tostring(l[1]).." "..tostring(l[2]).." "..tostring(l[3]).."\n")
---         end
---     end
---     output:write(tostring(#ud_list).." userdata dumped")
---     output:close()
--- end
+on_newuserdata = function (userdata)
+    local level = 2
+    local stacktrace = {}
+    while true do
+        local level_info = debug.getinfo(level, "Sl")
+        if not level_info then break end
+        if level_info.what == "C" then
+            -- Ignore C functions
+        else   -- a Lua function
+            if not level_info.short_src:find("/lgi/") then
+                table.insert(stacktrace, { level - 1, level_info.short_src, level_info.currentline})
+            end
+        end
+        level = level + 1
+    end
+    __userdata_info[userdata] = {
+        id = __userdata_info_counter,
+        light = false,
+        timestamp = os.date("%Y%m%d%H%M%S"),
+        stacktrace = stacktrace
+    }
+    __userdata_info_counter = __userdata_info_counter + 1
+end

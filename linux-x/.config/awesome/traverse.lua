@@ -61,6 +61,7 @@ function traverse:before_scan(options)
     self.reached[self.reached] = true
     self.reached[self.discover_timestamp] = true
     self.reached[self.output] = true
+    self.reached[__userdata_info] = true
 end
 
 function traverse:on_reached_object(object, path)
@@ -78,8 +79,17 @@ function traverse:on_reached_object(object, path)
             self.counts.old = self.counts.old + 1
         end
     end
-    if timestamp >= 0 and (self.options.dump or (is_old and self.options.dump_old)) then
-        self:print("Age "..(self.scan_timestamp - timestamp).."s, "..tostring(object)..": "..path_tostring(path))
+    if timestamp >= 0 then
+        if self.options.dump or (is_old and self.options.dump_old) or (self.options.dump_userdata and __userdata_info[object] ~= nil) then
+            local userdata_info = __userdata_info[object] 
+            self:print("Age "..(self.scan_timestamp - timestamp).."s "..type(object).." "..tostring(object)..": "..path_tostring(path))
+            if userdata_info ~= nil then
+                self:print("id ", userdata_info.id, " light ", userdata_info.light)
+                for _, level in ipairs(userdata_info.stacktrace) do
+                    self:print(level[1], " ", level[2], ":", level[3])
+                end
+            end
+        end
     end
 end
 
