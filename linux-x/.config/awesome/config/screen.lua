@@ -609,13 +609,23 @@ local function alt_color(color)
    return alt_color_cache[color]
 end
 
-local space_filler_with_left_right_borders = {
-    {
-        buttons = root_buttons,
-        ["content_fill_horizontal"] = true,
-        ["content_fill_vertical"] = true,
-        widget = fixed_place,
-    },
+local function with_top_border(widget)
+    return wibox.widget {
+        {
+            widget,
+            [top_index[shared.var.bar_position]] = beautiful.border_width,
+            draw_empty = false,
+            widget = fixed_margin,
+        },
+        bgimage = function (context, cr, width, height)
+            border:draw({ color = beautiful.border_focus }, cr, width, height,
+                border.directions{ top_index[shared.var.bar_position] })
+        end,
+        widget = wibox.container.background
+    }
+end
+
+local space_filler_with_left_right_borders = wibox.widget {
     bgimage = function (context, cr, width, height)
         -- TODO: Support rotation.
         local total_width = beautiful.border_width
@@ -636,21 +646,21 @@ local space_filler_with_left_right_borders = {
     widget = wibox.container.background
 }
 
-local function with_top_border(widget)
-    return wibox.widget {
-        {
-            widget,
-            [top_index[shared.var.bar_position]] = beautiful.border_width,
-            draw_empty = false,
-            widget = fixed_margin,
-        },
-        bgimage = function (context, cr, width, height)
-            border:draw({ color = beautiful.border_focus }, cr, width, height,
-                border.directions{ top_index[shared.var.bar_position] })
-        end,
+local space_filler_with_top_border = with_top_border {
+    {
+        background = beautiful.bg_normal,
         widget = wibox.container.background
-    }
-end
+    },
+    widget = fixed_place,
+}
+
+local space_filler = wibox.widget {
+    space_filler_with_left_right_borders,
+    buttons = root_buttons,
+    ["content_fill_horizontal"] = true,
+    ["content_fill_vertical"] = true,
+    widget = fixed_place
+}
 
 local function setup_screen(scr)
    local s = scr.index
@@ -693,7 +703,13 @@ local function setup_screen(scr)
                       break
                   end
               end
-              tasklist.expand_space = should_expand
+
+              -- tasklist.expand_space = should_expand
+              if should_expand then
+                  space_filler:set_children({space_filler_with_top_border})
+              else
+                  space_filler:set_children({space_filler_with_left_right_borders})
+              end
           end
           awful.widget.common.list_update(w, b, l, d, clients, args)
 
@@ -862,7 +878,7 @@ local function setup_screen(scr)
                    bg = beautiful.bg_normal,
                    widget = wibox.container.background,
                },
-               space_filler_with_left_right_borders,
+               space_filler,
                nil,
                expand = "inside",
                layout = fixed_align[direction_index[shared.var.bar_position]]
@@ -882,7 +898,7 @@ local function setup_screen(scr)
            },
            {
                nil,
-               space_filler_with_left_right_borders,
+               space_filler,
                with_top_border {
                    {
                        right_layout,
