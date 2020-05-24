@@ -120,7 +120,7 @@ local gravity_index = {
 local machi = require("layout-machi")
 
 beautiful.layout_machi = machi.get_icon()
-machi.default_editor.set_gap(beautiful.useless_gap * 2, beautiful.useless_gap * 2)
+machi.default_editor.set_gap(beautiful.useless_gap, beautiful.useless_gap)
 
 local alayout = require("awful.layout")
 alayout.layouts = {
@@ -499,8 +499,10 @@ local tasklist_template = {
     },
     id     = "my_background_role",
     fg_function = function (context)
-        if context.focus or context.minimized then
+        if context.focus then
             return beautiful.fg_focus
+        elseif context.minimized then
+            return beautiful.fg_minimize
         else
             return beautiful.fg_normal
         end
@@ -626,6 +628,10 @@ local function with_top_border(widget)
 end
 
 local space_filler_with_left_right_borders = wibox.widget {
+    {
+        forced_width = beautiful.useless_gap + beautiful.border_width * 2,
+        widget = wibox.container.constraint,
+    },
     bgimage = function (context, cr, width, height)
         -- TODO: Support rotation.
         local total_width = beautiful.border_width
@@ -646,15 +652,51 @@ local space_filler_with_left_right_borders = wibox.widget {
     widget = wibox.container.background
 }
 
-local space_filler_with_top_border = with_top_border {
+local space_filler_left_with_top_border = with_top_border {
     {
+        {
+            {
+                markup = "<span color='"..beautiful.sep_normal.."'>|</span>",
+                font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
+                widget = wibox.widget.textbox
+            },
+            forced_width = dpi(10),
+            widget = wibox.container.place
+        },
         background = beautiful.bg_normal,
         widget = wibox.container.background
     },
+    halign = "right",
     widget = fixed_place,
 }
 
-local space_filler = wibox.widget {
+local space_filler_right_with_top_border = with_top_border {
+    {
+        {
+            {
+                markup = "<span color='"..beautiful.sep_normal.."'>|</span>",
+                font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
+                widget = wibox.widget.textbox
+            },
+            forced_width = dpi(10),
+            widget = wibox.container.place
+        },
+        background = beautiful.bg_normal,
+        widget = wibox.container.background
+    },
+    halign = "left",
+    widget = fixed_place,
+}
+
+local space_filler_left = wibox.widget {
+    space_filler_with_left_right_borders,
+    buttons = root_buttons,
+    ["content_fill_horizontal"] = true,
+    ["content_fill_vertical"] = true,
+    widget = fixed_place
+}
+
+local space_filler_right = wibox.widget {
     space_filler_with_left_right_borders,
     buttons = root_buttons,
     ["content_fill_horizontal"] = true,
@@ -706,9 +748,11 @@ local function setup_screen(scr)
 
               -- tasklist.expand_space = should_expand
               if should_expand then
-                  space_filler:set_children({space_filler_with_top_border})
+                  space_filler_left:set_children({space_filler_left_with_top_border})
+                  space_filler_right:set_children({space_filler_right_with_top_border})
               else
-                  space_filler:set_children({space_filler_with_left_right_borders})
+                  space_filler_left:set_children({space_filler_with_left_right_borders})
+                  space_filler_right:set_children({space_filler_with_left_right_borders})
               end
           end
           awful.widget.common.list_update(w, b, l, d, clients, args)
@@ -878,7 +922,7 @@ local function setup_screen(scr)
                    bg = beautiful.bg_normal,
                    widget = wibox.container.background,
                },
-               space_filler,
+               space_filler_left,
                nil,
                expand = "inside",
                layout = fixed_align[direction_index[shared.var.bar_position]]
@@ -898,7 +942,7 @@ local function setup_screen(scr)
            },
            {
                nil,
-               space_filler,
+               space_filler_right,
                with_top_border {
                    {
                        right_layout,

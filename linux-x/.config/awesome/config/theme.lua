@@ -41,16 +41,19 @@ end
 theme.bg_normal     = c_normal[2]
 theme.bg_focus      = c_blue[2]
 theme.bg_urgent     = c_red[2]
-theme.bg_minimize   = acolor(c_black[2]):blend_with(acolor(theme.bg_normal), 0.5):to_string()
+theme.bg_minimize   = theme.bg_normal
 
 theme.bg_systray    = theme.bg_normal
 
 theme.fg_normal     = xrdb.foreground
 theme.fg_focus      = is_light_color(theme.bg_focus) and c_black[1] or c_white[2]
 theme.fg_urgent     = is_light_color(theme.bg_urgent) and c_black[1] or c_white[2]
-theme.fg_minimize   = is_light_color(theme.bg_minimize) and c_black[1] or c_white[2]
+theme.fg_minimize   = acolor(is_light_color(theme.bg_minimize) and c_black[1] or c_white[2]):blend_with(acolor(theme.bg_minimize), 0.6):to_string()
 
-theme.useless_gap   = dpi(3)
+-- custom property
+theme.sep_normal = acolor(theme.bg_normal):blend_with(acolor(theme.fg_normal), 0.5):to_string()
+
+theme.useless_gap   = dpi(6)
 
 theme.border_width  = dpi(4)
 theme.border_outer_space = dpi(1)
@@ -293,6 +296,17 @@ theme.tasklist_layout = {
         },
         auto = {
             forced_height = theme.bar_height,
+            spacing = dpi(10),
+            spacing_widget = {
+                {
+                    markup = "<span color='"..theme.sep_normal.."'>|</span>",
+                    font = theme.fontname_normal.." "..tostring(theme.fontsize_small),
+                    widget = wibox.widget.textbox
+                },
+                halign = "center",
+                valign = "center",
+                widget = wibox.container.place
+            },
             size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
             fill_space = true,
             layout = flexer.horizontal
