@@ -1,2 +1,2 @@
-URxvt*font:     xft:Iosevka SS08:size=10,xft:Latin Modern Math,xft:Microsoft YaHei
+URxvt*font:     xft:Iosevka Fixed SS03:size=10,xft:Latin Modern Math,xft:Microsoft YaHei
 URxvt*letterSpace: 0

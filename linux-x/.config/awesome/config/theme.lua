@@ -112,10 +112,10 @@ theme.taglist_squares_unsel = theme_assets.taglist_squares_unsel(
 theme.notification_icon_size = dpi(48)
 
 -- custom property string
--- Interesting fonts: Hack, Iosevka SS08, Lato, Quicksand, Lobster Two, Purisa, Dosis
-theme.fontname_normal = "Iosevka SS08"
+-- Interesting fonts: Hack, Iosevka SS08 (or SS03), Lato, Quicksand, Lobster Two, Purisa, Dosis
+theme.fontname_normal = "Iosevka SS03"
 -- custom property string
-theme.fontname_mono = "Iosevka SS08"
+theme.fontname_mono = "Iosevka SS03"
 -- custom property number
 theme.fontsize_normal = 11
 theme.fontsize_small = 9
