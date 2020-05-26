@@ -80,6 +80,13 @@ local top_index = {
     ["right"] = "left",
 }
 
+local bottom_index = {
+    ["bottom"] = "bottom",
+    ["top"] = "top",
+    ["left"] = "left",
+    ["right"] = "right",
+}
+
 local left_index = {
     ["bottom"] = "left",
     ["top"] = "right",
@@ -371,6 +378,8 @@ local tasklist_template = {
                                 },
                                 widget = fallback,
                             },
+                            [top_index[shared.var.bar_position]] = dpi(2),
+                            [bottom_index[shared.var.bar_position]] = dpi(2),
                             [right_index[shared.var.bar_position]] = dpi(4),
                             widget = wibox.container.margin,
                         },
@@ -705,14 +714,12 @@ local space_filler_right = wibox.widget {
 }
 
 local function setup_screen(scr)
-   local s = scr.index
-
    scr.mypromptbox = awful.widget.prompt()
 
-   my_widgets[s] = {}
+   my_widgets[scr] = {}
    local tasklist -- leave it there for reference inside its definition.
    tasklist = awful.widget.tasklist {
-      screen = s,
+      screen = scr,
       filter = function (c, s)
          if not awful.widget.tasklist.filter.currenttags(c, s) then
             return false
@@ -737,6 +744,7 @@ local function setup_screen(scr)
          return cls
       end,
       update_function = function (w, b, l, d, clients, args)
+
           if beautiful.bar_style == "auto" then
               local should_expand = false
               for _, c in ipairs(clients) do
@@ -747,6 +755,8 @@ local function setup_screen(scr)
               end
 
               -- tasklist.expand_space = should_expand
+              local space_filler_left = my_widgets[scr].wibar.widget:get_children_by_id("space_filler_left")[1]
+              local space_filler_right = my_widgets[scr].wibar.widget:get_children_by_id("space_filler_right")[1]
               if should_expand then
                   space_filler_left:set_children({space_filler_left_with_top_border})
                   space_filler_right:set_children({space_filler_right_with_top_border})
@@ -803,10 +813,9 @@ local function setup_screen(scr)
        },
        widget = fallback,
    }
-   my_widgets[s].tasklist = tasklist_with_fallback
 
-   my_widgets[s].tag_list = awful.widget.taglist {
-       screen = s,
+   my_widgets[scr].tag_list = awful.widget.taglist {
+       screen = scr,
        filter = function (t) return true end,
        buttons = my_tag_list_buttons,
        layout = wibox.layout.fixed[direction_index[shared.var.bar_position]],
@@ -826,8 +835,8 @@ local function setup_screen(scr)
        }
    }
 
-   my_widgets[s].wibar = awful.wibar({
-         screen = s,
+   my_widgets[scr].wibar = awful.wibar({
+         screen = scr,
          fg = beautiful.fg_normal,
          ontop = false,
          bg = "#00000000",
@@ -842,20 +851,20 @@ local function setup_screen(scr)
    local left_layout = wibox.layout.fixed[direction_index[shared.var.bar_position]]()
    local layoutbox = awful.widget.layoutbox{screen = s}
    masked_imagebox.convert(layoutbox.imagebox)
-   my_widgets[s].indicator = wibox.widget {
+   my_widgets[scr].indicator = wibox.widget {
        layoutbox,
        fg_function = {"fg_"},
        bg_function = {"bg_"},
        widget = cbg
    }
-   my_widgets[s].indicator:buttons(
+   my_widgets[scr].indicator:buttons(
       awful.util.table.join(
           awful.button({ }, 1, function () revelation{curr_tag_only = true} end),
           awful.button({ }, 3, function () waffle:show() end),
           awful.button({ }, 4, function () awful.layout.inc( 1) end),
           awful.button({ }, 5, function () awful.layout.inc(-1) end)))
-   left_layout:add(my_widgets[s].indicator)
-   left_layout:add(my_widgets[s].tag_list)
+   left_layout:add(my_widgets[scr].indicator)
+   left_layout:add(my_widgets[scr].tag_list)
    left_layout:add(scr.mypromptbox)
    local right_layout = wibox.widget {
       spacing        = dpi(5),
@@ -922,7 +931,13 @@ local function setup_screen(scr)
                    bg = beautiful.bg_normal,
                    widget = wibox.container.background,
                },
-               space_filler_left,
+               {
+                   id = "space_filler_left",
+                   buttons = root_buttons,
+                   ["content_fill_horizontal"] = true,
+                   ["content_fill_vertical"] = true,
+                   widget = fixed_place
+               },
                nil,
                expand = "inside",
                layout = fixed_align[direction_index[shared.var.bar_position]]
@@ -942,7 +957,13 @@ local function setup_screen(scr)
            },
            {
                nil,
-               space_filler_right,
+               {
+                   id = "space_filler_right",
+                   buttons = root_buttons,
+                   ["content_fill_horizontal"] = true,
+                   ["content_fill_vertical"] = true,
+                   widget = fixed_place
+               },
                with_top_border {
                    {
                        right_layout,
@@ -960,7 +981,7 @@ local function setup_screen(scr)
            layout = fixed_align[direction_index[shared.var.bar_position]],
        }
    end
-   my_widgets[s].wibar:set_widget(layout)
+   my_widgets[scr].wibar:set_widget(layout)
 end
 
 -- Avoid nested call of reset_widgets
@@ -1014,7 +1035,7 @@ gtimer {
     timeout = 0.5,
     autostart = true,
     callback = function()
-        local nscreen = capi.mouse.screen.index
+        local nscreen = capi.mouse.screen
         if nscreen ~= current_screen then
             if current_screen ~= nil then
                 my_widgets[current_screen].indicator:set_context_transform_function(nil)
