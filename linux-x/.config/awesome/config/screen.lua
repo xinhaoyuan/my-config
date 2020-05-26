@@ -849,7 +849,7 @@ local function setup_screen(scr)
    })
 
    local left_layout = wibox.layout.fixed[direction_index[shared.var.bar_position]]()
-   local layoutbox = awful.widget.layoutbox{screen = s}
+   local layoutbox = awful.widget.layoutbox{screen = scr}
    masked_imagebox.convert(layoutbox.imagebox)
    my_widgets[scr].indicator = wibox.widget {
        layoutbox,
@@ -988,7 +988,7 @@ end
 local reset_widgets_flag = false
 
 local function reset_widgets()
-    for _, w in ipairs(my_widgets) do
+    for _, w in pairs(my_widgets) do
         w.wibar:remove()
     end
     my_widgets = {}
