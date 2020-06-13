@@ -83,6 +83,7 @@
            (let ((term (getenv-internal "TERM" initial-environment)))
              (if (or (string-prefix-p "rxvt" term) (string-suffix-p "-256color" term))
                  (progn
+                   (setq frame-background-mode 'light)
                    ;; for xterm-query
                    (load "term/xterm")
                    ;; (message "Querying the background color")

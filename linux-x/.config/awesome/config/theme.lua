@@ -274,6 +274,7 @@ theme.bar_style = "auto"
 theme.bar_styles = {"simple", "split", "auto"}
 theme.tasklist_plain_task_name = true
 
+local function size_transform_function(size) return dpi(300) end
 local flexer = require("flexer")
 -- custom property
 theme.tasklist_layout = {
@@ -284,14 +285,14 @@ theme.tasklist_layout = {
         },
         simple = {
             forced_height = theme.bar_height,
-            size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
+            size_transform = size_transform_function,
             fill_space = true,
             expand_space = true,
             layout = flexer.horizontal
         },
         split = {
             forced_height = theme.bar_height,
-            size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
+            size_transform = size_transform_function,
             layout = flexer.horizontal
         },
         auto = {
@@ -307,7 +308,7 @@ theme.tasklist_layout = {
                 valign = "center",
                 widget = wibox.container.place
             },
-            size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
+            size_transform = size_transform_function,
             fill_space = true,
             layout = flexer.horizontal
         },
@@ -319,19 +320,19 @@ theme.tasklist_layout = {
         },
         simple = {
             forced_width = theme.bar_height,
-            size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
+            size_transform = size_transform_function,
             fill_space = true,
             expand_space = true,
             layout = flexer.vertical
         },
         split = {
             forced_width = theme.bar_height,
-            size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
+            size_transform = size_transform_function,
             layout = flexer.vertical
         },
         auto = {
             forced_width = theme.bar_height,
-            size_transform = function (size) return math.min(math.max(dpi(200), size), dpi(600)) end,
+            size_transform = size_transform_function,
             fill_space = true,
             layout = flexer.vertical
         },
