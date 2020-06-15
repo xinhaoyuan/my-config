@@ -1095,7 +1095,7 @@ do
     }
 
     local function render_priority(pri)
-        return ({ "☺", "☆", "★" })[pri]
+        return ({ "+", "*", "#" })[pri]
     end
 
     local function render_orgenda_items(items)

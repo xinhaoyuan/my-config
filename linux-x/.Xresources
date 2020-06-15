@@ -175,7 +175,7 @@ URxvt.keysym.C-S-Left:           \033[1;6D
 URxvt.keysym.C-M-Left:           \033[1;7D
 URxvt.keysym.C-M-S-Left:         \033[1;8D
 
-st.font: Iosevka Fixed SS03:size=10
+st.font: Iosevka XY:size=10
 st.bold_font: 1
 st.borderpx: 0
 st.cursorColor: #222
