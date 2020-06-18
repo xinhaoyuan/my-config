@@ -109,7 +109,7 @@ setmetatable(
 
 local mod = klass{}
 
-hotpot.config.on_ready(
+hotpot.on_ready(
     function ()
         mod:init()
     end

@@ -15,7 +15,7 @@ local shared = {
    on_start_functions = {},
 }
 
-hotpot.config.on_ready(function ()
+hotpot.on_ready(function ()
         for _, f in ipairs(shared.on_start_functions) do
             f()
         end

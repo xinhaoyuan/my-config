@@ -94,7 +94,7 @@ function mod.reset()
     end
 end
 
-hotpot.config.on_ready(
+hotpot.on_ready(
     function ()
         if #mod.config.files == 0 then
             hotpot.logging.warning("orgenda: no files to watch - will do nothing.")
