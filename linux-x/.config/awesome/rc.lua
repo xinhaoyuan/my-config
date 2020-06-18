@@ -93,3 +93,5 @@ on_newuserdata = function (userdata)
     }
     __userdata_info_counter = __userdata_info_counter + 1
 end
+
+require("hotpot").config.force_gc_timeout = 30
