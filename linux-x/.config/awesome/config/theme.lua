@@ -274,7 +274,7 @@ theme.bar_style = "auto"
 theme.bar_styles = {"simple", "split", "auto"}
 theme.tasklist_plain_task_name = true
 
-local function size_transform_function(size) return dpi(300) end
+local function size_transform_function(size) return dpi(400) end
 local flexer = require("flexer")
 -- custom property
 theme.tasklist_layout = {
