@@ -17,14 +17,15 @@ DEP_ARRAY=(
     nitrogen
     fortune
     rofi
+    cbatticon
     dex
-    # common
+    # dev common
     build-essential
-    # st
+    # st dev
     libfontconfig-dev
     libx11-dev
     libxft-dev
-    # awesome
+    # awesome dev
     cmake
     liblua5.3-dev
     lua-ldoc
