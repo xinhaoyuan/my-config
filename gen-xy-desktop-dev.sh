@@ -10,6 +10,14 @@ function join_by {
 
 
 DEP_ARRAY=(
+    # utils
+    xcape
+    fcitx
+    fcitx-pinyin
+    nitrogen
+    fortune
+    rofi
+    dex
     # common
     build-essential
     # st
