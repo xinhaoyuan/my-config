@@ -100,60 +100,18 @@ local function context_focused(context)
     context.focus = true
 end
 
-local function button(args)
+local function simple_button(args)
    local width
    if not args.no_force_width then
-       width = args.width or (waffle_width - button_padding * 2)
+       width = args.width or waffle_width
    end
-
-   local label = args.label_widget or
-      wibox.widget {
-         markup = args.markup or nil,
-         text = args.text or nil,
-         font = font_normal,
-         forced_height = button_height,
-         align = "center",
-         valign = "center",
-         widget = wibox.widget.textbox,
-      }
 
    local button_action = args.button_action or args.action
    local key_action = args.key_action or args.action
 
    local ret = wibox.widget {
       {
-         {
-             args.icon_widget or (
-                 args.icon and
-                     wibox.widget {
-                         image = args.icon,
-                         resize = true,
-                         forced_width = args.icon_width or button_height,
-                         forced_height = args.icon_height or button_height,
-                         widget = masked_imagebox,
-                     }
-                                 ),
-            label,
-            args.indicator and {
-                {
-                    {
-                        text = args.indicator,
-                        font = font_normal,
-                        forced_height = args.height or button_height,
-                        align = "center",
-                        valign = "center",
-                        widget = wibox.widget.textbox,
-                    },
-                    halign = "right",
-                    widget = wibox.container.place
-                },
-                fg_function = {"special_"},
-                widget = cbg
-            },
-            forced_width = width,
-            expand = "inside",
-            layout = fixed_align.horizontal,
-         },
+         args.widget,
          buttons = args.buttons or
             (button_action and
                 awful.util.table.join(
@@ -162,6 +120,7 @@ local function button(args)
          margins = button_padding,
          widget = wibox.container.margin,
       },
+      forced_width = width,
       fg_function = {"fg_"},
       bg_function = {"bg_"},
       widget = cbg
@@ -200,6 +159,55 @@ local function button(args)
       end
    end
 
+   return ret
+end
+
+
+local function button(args)
+   local label = args.label_widget or
+      wibox.widget {
+         markup = args.markup or nil,
+         text = args.text or nil,
+         font = font_normal,
+         forced_height = button_height,
+         align = "center",
+         valign = "center",
+         widget = wibox.widget.textbox,
+      }
+
+   args.widget = wibox.widget {
+       args.icon_widget or (
+           args.icon and
+               wibox.widget {
+                   image = args.icon,
+                   resize = true,
+                   forced_width = args.icon_width or button_height,
+                   forced_height = args.icon_height or button_height,
+                   widget = masked_imagebox,
+               }
+                           ),
+       label,
+       args.indicator and {
+           {
+               {
+                   text = args.indicator,
+                   font = font_normal,
+                   forced_height = args.height or button_height,
+                   align = "center",
+                   valign = "center",
+                   widget = wibox.widget.textbox,
+               },
+               halign = "right",
+               widget = wibox.container.place
+           },
+           fg_function = {"special_"},
+           widget = cbg
+                          },
+       expand = "inside",
+       layout = fixed_align.horizontal,
+   }
+
+   local ret = simple_button(args)
    ret.label = label
 
    return ret
@@ -236,7 +244,8 @@ local function decorate_panel(widget)
             {
                 panel,
                 margins = beautiful.border_width,
-                widget = wibox.container.margin,
+                draw_empty = false,
+                widget = fixed_margin,
             },
             bgimage = function (context, cr, width, height)
                 border:draw({ theme = border_theme, color = beautiful.border_focus }, cr, width, height, decorate_border)
@@ -373,7 +382,6 @@ do
           },
          layout = wibox.layout.manual
       },
-      width = cpu_widget_width,
       height = button_height,
       widget = wibox.container.constraint,
    }
@@ -474,7 +482,6 @@ do
            },
            layout = wibox.layout.manual
        },
-       width = ram_widget_width,
        height = button_height,
        widget = wibox.container.constraint,
    }
@@ -505,7 +512,6 @@ local net_widget
 do
     local netgraph_rx_widget = wibox.widget {
         background_color = graph_background,
-        forced_width = net_widget_width,
         forced_height = button_height / 2,
         step_width = dpi(2),
         step_spacing = dpi(1),
@@ -515,7 +521,6 @@ do
     }
 
     local rx_text_widget = wibox.widget {
-        forced_width = net_widget_width,
         forced_height = button_height,
         align = "center",
         point = {x = 0, y = 0},
@@ -545,16 +550,14 @@ do
                 layout = wibox.layout.fixed.vertical,
             },
             rx_text_widget,
-            layout = wibox.layout.manual,
+            layout = wibox.layout.stack,
         },
-        width = net_widget_width,
         height = button_height,
         widget = wibox.container.constraint,
     }
 
     local netgraph_tx_widget = wibox.widget {
         background_color = graph_background,
-        forced_width = net_widget_width,
         forced_height = button_height / 2,
         step_width = dpi(2),
         step_spacing = dpi(1),
@@ -564,7 +567,6 @@ do
     }
 
     local tx_text_widget = wibox.widget {
-        forced_width = net_widget_width,
         forced_height = button_height,
         align = "center",
         point = { x = 0, y = 0 },
@@ -593,9 +595,8 @@ do
                 layout = wibox.layout.fixed.vertical,
             },
             tx_text_widget,
-            layout = wibox.layout.manual,
+            layout = wibox.layout.stack,
         },
-        width = net_widget_width,
         height = button_height,
         widget = wibox.container.constraint,
     }
@@ -607,10 +608,19 @@ do
             forced_width = button_height,
             widget = wibox.widget.imagebox,
         },
-        net_rx_layout,
-        net_tx_layout,
-        spacing = button_padding,
-        layout = wibox.layout.fixed.horizontal,
+        {
+            {
+                net_rx_layout,
+                net_tx_layout,
+                spacing = button_padding,
+                layout = wibox.layout.flex.horizontal
+            },
+            left = button_padding,
+            right = button_padding,
+            layout = wibox.container.margin
+        },
+        expand = "inside",
+        layout = wibox.layout.align.horizontal,
     }
 
     local prev_recv = nil
@@ -634,7 +644,7 @@ do
 
         if prev_recv ~= nil then
             local rx = (recv - prev_recv) / update_interval_s
-            local markup = "<span font_desc='" .. font_info .. "'>RX " .. format_size(rx) .. "B/s</span>"
+            local markup = "<span font_desc='" .. font_info .. "'>R " .. format_size(rx) .. "B/s</span>"
             rx_text_widget:set_markup(markup)
             netgraph_rx_widget.max_value = 256 * 1024
             netgraph_rx_widget:add_value(rx)
@@ -642,7 +652,7 @@ do
         prev_recv = recv
         if prev_send ~= nil then
             local tx = (send - prev_send) / update_interval_s
-            local markup = "<span font_desc='" .. font_info .. "'>TX " .. format_size(tx) .. "B/s</span>"
+            local markup = "<span font_desc='" .. font_info .. "'>T " .. format_size(tx) .. "B/s</span>"
             tx_text_widget:set_markup(markup)
             netgraph_tx_widget.max_value = 256 * 1024
             netgraph_tx_widget:add_value(tx)
@@ -1127,38 +1137,79 @@ end
 
 local waffle_root_status_widget = decorate_panel {
     {
+        button {
+            label_widget = {
+                {
+                    {
+                        image = gcolor.recolor_image(icons.cpu, beautiful.fg_normal),
+                        forced_height = button_height,
+                        forced_width = button_height,
+                        widget = wibox.widget.imagebox,
+                    },
+                    {
+                        cpu_widget,
+                        left = button_padding,
+                        right = button_padding,
+                        widget = wibox.container.margin
+                    },
+                    layout = wibox.layout.align.horizontal
+                },
+                {
+                    {
+                        image = gcolor.recolor_image(icons.ram, beautiful.fg_normal),
+                        forced_height = button_height,
+                        forced_width = button_height,
+                        widget = wibox.widget.imagebox,
+                    },
+                    {
+                        ram_widget,
+                        left = button_padding,
+                        right = button_padding,
+                        widget = wibox.container.margin
+                    },
+                    expand = "inside",
+                    layout = wibox.layout.align.horizontal
+                },
+                spacing = button_padding,
+                layout = wibox.layout.flex.horizontal,
+            },
+            key = "x",
+            indicator = em("x"),
+            action = function (alt)
+                shared.action.terminal({"htop"})
+                waffle:hide()
+            end,
+        },
+        button {
+            label_widget = net_widget,
+            indicator = em("n"),
+        },
         {
-            {
-                image = gcolor.recolor_image(icons.cpu, beautiful.fg_normal),
-                forced_height = button_height,
-                forced_width = button_height,
-                widget = wibox.widget.imagebox,
+            button {
+                icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
+                label_widget = wibox.widget {
+                    volumebar_widget,
+                    widget = wibox.container.place
+                },
+                buttons = volumebar_buttons,
+                indicator = em("a"),
+                key = "a",
+                action = function (alt)
+                    local cmd = {"pavucontrol"}
+                    awful.spawn(cmd)
+                    waffle:hide()
+                end,
             },
-            cpu_widget,
-            {
-                image = gcolor.recolor_image(icons.ram, beautiful.fg_normal),
-                forced_height = button_height,
-                forced_width = button_height,
-                widget = wibox.widget.imagebox,
-            },
-            ram_widget,
-            spacing = button_padding,
             layout = wibox.layout.fixed.horizontal,
         },
         {
-            top = button_padding,
-            net_widget,
-            widget = fixed_margin
-        },
-        {
             battery_widget,
-            top = button_padding,
+            margins = button_padding,
             draw_empty = false,
             widget = fixed_margin,
         },
         layout = wibox.layout.fixed.vertical,
     },
-    margins = button_padding,
     widget = wibox.container.margin,
 }
 
@@ -1259,24 +1310,10 @@ local waffle_root_action_widget = decorate_panel {
     layout = wibox.layout.fixed.vertical,
 }
 
-local waffle_root_audio_widget = decorate_panel {
-    button {
-        icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
-        label_widget = wibox.widget {
-            volumebar_widget,
-            widget = wibox.container.place
-        },
-        buttons = volumebar_buttons,
-        indicator = em("a"),
-        key = "a",
-        action = function (alt)
-            local cmd = {"pavucontrol"}
-            awful.spawn(cmd)
-            waffle:hide()
-        end,
-    },
+local waffle_root_mpd_widget = decorate_panel {
     mpd_widget,
-    layout = wibox.layout.fixed.vertical,
+    draw_empty = false,
+    layout = fixed_margin,
 }
 
 local waffle_root_admin_widget = decorate_panel {
@@ -1305,11 +1342,30 @@ local waffle_root_admin_widget = decorate_panel {
 local waffle_root_view = view {
     root = decorate_waffle {
         waffle_root_status_widget,
-        waffle_root_audio_widget,
-        waffle_root_agenda_widget,
-        waffle_root_action_widget,
-        waffle_root_admin_widget,
-        spacing = panel_padding,
+        {
+            waffle_root_mpd_widget,
+            draw_empty = false,
+            top = panel_padding,
+            widget = fixed_margin,
+        },
+        {
+            waffle_root_agenda_widget,
+            draw_empty = false,
+            top = panel_padding,
+            widget = fixed_margin,
+        },
+        {
+            waffle_root_action_widget,
+            draw_empty = false,
+            top = panel_padding,
+            widget = fixed_margin,
+        },
+        {
+            waffle_root_admin_widget,
+            draw_empty = false,
+            top = panel_padding,
+            widget = fixed_margin,
+        },
         layout = wibox.layout.fixed.vertical,
     }
 }
