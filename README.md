@@ -52,12 +52,7 @@ iterm2
 
 # Manual Setup
 
-change default shell to zsh
-oh-my-zsh:
-
-git clone https://github.com/robbyrussell/oh-my-zsh.git $HOME/.oh-my-zsh
-cp $HOME/.oh-my-zsh/templates/zshrc.zsh-template $HOME/.zshrc
-echo 'source $HOME/.zshrc.user' >> $HOME/.zshrc
+zsh: see `setup_zsh.sh`
 
 Xorg:
 In /etc/X11/Xwrapper.config, change allowed_users to anybody
