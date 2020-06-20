@@ -38,7 +38,7 @@ local font_info = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_sm
 local graph_background = "#00000000"
 local graph_normal_color = acolor.from_string(beautiful.bg_focus):blend_with(beautiful.bg_normal, 0.25):to_string()
 local graph_color = graph_normal_color -- "linear:0,0:0,22:0,#FF0000:0.5," .. graph_normal_color
-local update_interval_s = 1
+local update_interval_s = 2
 
 local function em(t)
     -- return "<span color='" .. beautiful.special_normal .. "'>" .. t .. "</span>"
