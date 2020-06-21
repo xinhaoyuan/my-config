@@ -661,6 +661,27 @@ local space_filler_with_left_right_borders = wibox.widget {
     widget = wibox.container.background
 }
 
+local space_filler_with_left_right_borders_no_min = wibox.widget {
+    bgimage = function (context, cr, width, height)
+        -- TODO: Support rotation.
+        local total_width = beautiful.border_width
+        cr:save()
+        cr:rectangle(0, 0, total_width, height)
+        cr:clip()
+        border:draw({ color = beautiful.border_focus }, cr, total_width, height,
+            border.directions{ right_index[shared.var.bar_position], top_index[shared.var.bar_position] })
+        cr:restore()
+        cr:save()
+        cr:translate(width - total_width, 0)
+        cr:rectangle(0, 0, total_width, height)
+        cr:clip()
+        border:draw({ color = beautiful.border_focus }, cr, total_width, height,
+            border.directions{ left_index[shared.var.bar_position], top_index[shared.var.bar_position] })
+        cr:restore()
+    end,
+    widget = wibox.container.background
+}
+
 local space_filler_left_with_top_border = with_top_border {
     {
         {
@@ -760,11 +781,25 @@ local function setup_screen(scr)
               if should_expand then
                   space_filler_left:set_children({space_filler_left_with_top_border})
                   space_filler_right:set_children({space_filler_right_with_top_border})
+              elseif #clients == 0 then
+                  space_filler_left:set_children({space_filler_with_left_right_borders_no_min})
+                  space_filler_right:set_children({space_filler_with_left_right_borders_no_min})
+              else
+                  space_filler_left:set_children({space_filler_with_left_right_borders})
+                  space_filler_right:set_children({space_filler_with_left_right_borders})
+              end
+          elseif beautiful.bar_style == "split" then
+              local space_filler_left = my_widgets[scr].wibar.widget:get_children_by_id("space_filler_left")[1]
+              local space_filler_right = my_widgets[scr].wibar.widget:get_children_by_id("space_filler_right")[1]
+              if #clients == 0 then
+                  space_filler_left:set_children({space_filler_with_left_right_borders_no_min})
+                  space_filler_right:set_children({space_filler_with_left_right_borders_no_min})
               else
                   space_filler_left:set_children({space_filler_with_left_right_borders})
                   space_filler_right:set_children({space_filler_with_left_right_borders})
               end
           end
+
           awful.widget.common.list_update(w, b, l, d, clients, args)
 
          -- below are not used any more. just for future reference
@@ -932,6 +967,7 @@ local function setup_screen(scr)
                    widget = wibox.container.background,
                },
                {
+                   beautiful.bar_style == "simple" and space_filler_left_with_top_border,
                    id = "space_filler_left",
                    buttons = root_buttons,
                    ["content_fill_horizontal"] = true,
@@ -958,6 +994,7 @@ local function setup_screen(scr)
            {
                nil,
                {
+                   beautiful.bar_style == "simple" and space_filler_right_with_top_border,
                    id = "space_filler_right",
                    buttons = root_buttons,
                    ["content_fill_horizontal"] = true,
