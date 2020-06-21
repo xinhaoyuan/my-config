@@ -5,15 +5,6 @@ set -e
 . libinstdep.sh
 
 DEP_ARRAY=(
-    # utils
-    xcape
-    fcitx
-    fcitx-pinyin
-    nitrogen
-    fortune
-    rofi
-    cbatticon
-    dex
     # dev common
     build-essential
     # st dev
