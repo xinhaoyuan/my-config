@@ -31,7 +31,6 @@ os.execute(HOME_DIR .. "/.xdesktoprc.awesome")
 
 local config = require("config")
 require("my-autofocus")
-require("my-menu")
 require("orgenda").config.files = {os.getenv("HOME").."/org/TODO.org"}
 
 require("gears.timer").delayed_call(
