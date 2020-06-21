@@ -19,7 +19,6 @@ local gcolor = require("gears.color")
 local gmath = require("gears.math")
 local waffle = require("waffle")
 local calendar = require("calendar.calendar")
-local menu = require("my-menu")
 local dpi = require("beautiful.xresources").apply_dpi
 local yams = require("yams")
 local yams_switcher = yams.create{opacity_other = 0, panel = false}
@@ -151,7 +150,6 @@ alayout.layouts = {
 
 local root_buttons = awful.util.table.join(
     awful.button({ }, 3, function () waffle:show() end),
-    -- awful.button({ }, 3, function () menu:show() end),
     capi.root.buttons()
 )
 
