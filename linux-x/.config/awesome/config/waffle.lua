@@ -606,7 +606,7 @@ do
             image = gcolor.recolor_image(icons.ethernet, beautiful.fg_normal),
             forced_height = button_height,
             forced_width = button_height,
-            widget = wibox.widget.imagebox,
+            widget = masked_imagebox,
         },
         {
             {
@@ -1145,7 +1145,7 @@ local waffle_root_status_widget = decorate_panel {
                         image = gcolor.recolor_image(icons.cpu, beautiful.fg_normal),
                         forced_height = button_height,
                         forced_width = button_height,
-                        widget = wibox.widget.imagebox,
+                        widget = masked_imagebox,
                     },
                     {
                         cpu_widget,
@@ -1160,7 +1160,7 @@ local waffle_root_status_widget = decorate_panel {
                         image = gcolor.recolor_image(icons.ram, beautiful.fg_normal),
                         forced_height = button_height,
                         forced_width = button_height,
-                        widget = wibox.widget.imagebox,
+                        widget = masked_imagebox,
                     },
                     {
                         ram_widget,
