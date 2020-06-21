@@ -636,7 +636,7 @@ do
                 end
             end
             if items[1] ~= "lo" and items[1]:match("^tun[0-9]*$") == nil then
-                -- Skips VPN for avoiding double-couting
+                -- Skips VPN for avoiding double-counting
                 recv = recv + tonumber(items[2])
                 send = send + tonumber(items[10])
             end
