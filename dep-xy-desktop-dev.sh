@@ -2,12 +2,7 @@
 
 set -e
 
-function join_by {
-    local IFS="$1"
-    shift
-    echo "$*"
-}
-
+. libinstdep.sh
 
 DEP_ARRAY=(
     # utils
@@ -51,20 +46,4 @@ DEP_ARRAY=(
     libxdg-basedir-dev
 )
     
-DEPS=$(join_by , "${DEP_ARRAY[@]}")
-
-[ -z "$TEMP_DIR" ] && TEMP_DIR=/tmp/xy-desktop-dev-workspace-$$
-mkdir $TEMP_DIR
-
-mkdir -p $TEMP_DIR/xy-desktop-dev/DEBIAN
-cat >$TEMP_DIR/xy-desktop-dev/DEBIAN/control <<EOF
-Package: xy-desktop-dev
-Maintainer: Xinhao Yuan
-Version: 1.0
-Architecture: all
-Depends: $DEPS
-Description: Development dependency of Xinhao Yuan's desktop configuration. 
-EOF
-dpkg-deb -b $TEMP_DIR/xy-desktop-dev
-sudo dpkg -i $TEMP_DIR/xy-desktop-dev.deb || sudo apt-get --fix-broken install
-rm -rf $TEMP_DIR
+install_dep xy-desktop-dev "${DEP_ARRAY[@]}"
