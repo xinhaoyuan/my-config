@@ -285,6 +285,17 @@ theme.tasklist_layout = {
         },
         simple = {
             forced_height = theme.bar_height,
+            spacing = dpi(10),
+            spacing_widget = {
+                {
+                    markup = "<span color='"..theme.sep_normal.."'>|</span>",
+                    font = theme.fontname_normal.." "..tostring(theme.fontsize_small),
+                    widget = wibox.widget.textbox
+                },
+                halign = "center",
+                valign = "center",
+                widget = wibox.container.place
+            },
             size_transform = size_transform_function,
             fill_space = true,
             expand_space = true,
