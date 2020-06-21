@@ -1098,7 +1098,8 @@ do
         {
             orgenda_text,
             margins = button_padding,
-            widget = wibox.container.margin
+            draw_empty = false,
+            widget = fixed_margin,
         },
         width = waffle_width,
         widget = wibox.container.constraint
