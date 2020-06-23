@@ -2,10 +2,7 @@
 
 set -e
 
-cd $HOME/.screenlayout
-
-choice=$(for f in *.sh; do
-             echo ${f%.sh}
-         done | rofi -dmenu -p "Screen layout" "$@")
-./${choice}.sh
+cd $HOME/.config/autorandr
+choice=$(ls | rofi -dmenu -p "Screen layout" "$@")
+autorandr "$choice"
 nitrogen --restore
