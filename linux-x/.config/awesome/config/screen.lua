@@ -621,7 +621,11 @@ end
 local function with_top_border(widget)
     return wibox.widget {
         {
-            widget,
+            {
+                widget,
+                bg = beautiful.bg_normal,
+                widget = wibox.container.background
+            },
             [top_index[shared.var.bar_position]] = beautiful.border_width,
             draw_empty = false,
             widget = fixed_margin,
