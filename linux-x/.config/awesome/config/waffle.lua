@@ -33,6 +33,7 @@ local waffle_width = beautiful.waffle_panel_width or dpi(240)
 local button_height = beautiful.waffle_item_height or dpi(20)
 local button_padding = dpi(4)
 local panel_padding = dpi(8)
+local panel_outer = true
 local font_normal = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_normal)
 local font_info = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small)
 local graph_background = "#00000000"
@@ -261,15 +262,19 @@ local function decorate_panel(widget)
 end
 
 local function decorate_waffle(widget)
-    return wibox.widget {
-        {
-            widget,
-            margins = panel_padding,
-            widget = wibox.container.margin,
-        },
-        bg = acolor.from_string(beautiful.fg_normal.."a0"):blend_with(beautiful.bg_normal.."a0", 0.75):to_string(),
-        widget = wibox.container.background,
-    }
+    if panel_outer then
+        return wibox.widget {
+            {
+                widget,
+                margins = panel_padding,
+                widget = wibox.container.margin,
+            },
+            bg = acolor.from_string(beautiful.fg_normal.."a0"):blend_with(beautiful.bg_normal.."a0", 0.75):to_string(),
+            widget = wibox.container.background,
+        }
+    else
+        return wibox.widget.base.make_widget_from_value(widget)
+    end
 end
 
 
