@@ -55,9 +55,9 @@ theme.sep_normal = acolor(theme.bg_normal):blend_with(acolor(theme.fg_normal), 0
 
 theme.useless_gap   = dpi(6)
 
-theme.border_width  = dpi(6)
-theme.border_outer_space = dpi(2)
-theme.border_inner_space = dpi(2)
+theme.border_width  = dpi(4)
+theme.border_outer_space = dpi(1)
+theme.border_inner_space = dpi(1)
 -- theme.border_radius = dpi(12)
 theme.border_space = theme.fg_focus
 theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
