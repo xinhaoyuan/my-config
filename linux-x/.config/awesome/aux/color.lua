@@ -10,21 +10,23 @@ function class:with_alpha(a)
     return self
 end
 
-function class:to_string(comp)
-   local ret = "#"
-   for i = 1, 4 do
-      ret = ret .. string.format("%02x", math.min(255, math.floor(self[i] * 256)))
-   end
-   return ret
+function class:to_string(args)
+    args = args or {}
+    local ret = "#"
+    local n_components = args.no_alpha and 3 or 4
+    for i = 1, n_components do
+        ret = ret .. string.format("%02x", math.min(255, math.floor(self[i] * 256)))
+    end
+    return ret
 end
 
 function class:blend_with(c, w)
-   c = type(c) == "string" and mod.from_string(c) or c
-   local ret = {}
-   for i = 1, 4 do
-       self[i] = self[i] * (1 - w) + c[i] * w
-   end
-   return self
+    c = type(c) == "string" and mod.from_string(c) or c
+    local ret = {}
+    for i = 1, 4 do
+        self[i] = self[i] * (1 - w) + c[i] * w
+    end
+    return self
 end
 
 function class:lightness()

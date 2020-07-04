@@ -39,13 +39,13 @@ local function is_light_color(color)
 end
 
 theme.bg_normal     = c_normal[2]
-theme.bg_focus      = c_blue[2]
+theme.bg_focus      = acolor(c_blue[1]):blend_with(acolor(theme.bg_normal), 0.3):to_string{no_alpha = true}
 theme.bg_urgent     = c_red[2]
 theme.bg_minimize   = theme.bg_normal
 
 theme.bg_systray    = theme.bg_normal
 
-theme.fg_normal     = xrdb.foreground
+theme.fg_normal     = c_normal[1]
 theme.fg_focus      = is_light_color(theme.bg_focus) and c_black[1] or c_white[2]
 theme.fg_urgent     = is_light_color(theme.bg_urgent) and c_black[1] or c_white[2]
 theme.fg_minimize   = acolor(is_light_color(theme.bg_minimize) and c_black[1] or c_white[2]):blend_with(acolor(theme.bg_minimize), 0.6):to_string()
@@ -59,7 +59,7 @@ theme.border_width  = dpi(4)
 theme.border_outer_space = dpi(1)
 theme.border_inner_space = dpi(1)
 -- theme.border_radius = dpi(12)
-theme.border_space = theme.fg_focus
+theme.border_space = is_light_color(theme.bg_normal) and c_white[2] or c_black[1]
 theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
 theme.border_normal = acolor(theme.bg_normal):blend_with(acolor(theme.border_focus), 0.3):to_string()
 -- theme.border_normal = theme.bg_normal
