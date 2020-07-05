@@ -270,6 +270,11 @@ local function decorate_waffle(widget)
                 widget = wibox.container.margin,
             },
             bg = acolor.from_string(beautiful.fg_normal.."a0"):blend_with(beautiful.bg_normal.."a0", 0.75):to_string(),
+            shape = beautiful.border_radius ~= nil and
+            function (cr, width, height)
+                gshape.rounded_rect(cr, width, height,
+                                    beautiful.border_radius + panel_padding)
+            end,
             widget = wibox.container.background,
         }
     else

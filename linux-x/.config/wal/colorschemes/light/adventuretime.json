@@ -7,7 +7,7 @@
         "color12": "#149cc1",
         "color13": "#fa9bdc",
         "color14": "#6ebaa8",
-        "color15": "#e0e0e0",
+        "color15": "#f4f4f4",
         "color2": "#598540",
         "color3": "#d29910",
         "color4": "#0f7793",
@@ -18,7 +18,7 @@
         "color9": "#bb1f14"
     },
     "special": {
-        "background": "#f4f4f4",
+        "background": "#e8e8e8",
         "cursor": "#3b3a47",
         "foreground": "#3b3a47"
     }
