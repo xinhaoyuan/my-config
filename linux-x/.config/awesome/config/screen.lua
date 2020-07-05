@@ -128,6 +128,17 @@ local machi = require("layout-machi")
 beautiful.layout_machi = machi.get_icon()
 machi.default_editor.set_gap(beautiful.useless_gap, beautiful.useless_gap)
 
+local border_theme
+if beautiful.border_radius == nil then
+    border_theme = border.default_theme
+else
+    border_theme = setmetatable({}, {__index = border.rounded_theme})
+    border_theme:init()
+    border_theme.size = beautiful.border_radius
+    border_theme.outer_space = beautiful.border_outer_space
+    border_theme.inner_space = beautiful.border_radius - beautiful.border_width + beautiful.border_inner_space
+end
+
 local alayout = require("awful.layout")
 alayout.layouts = {
    machi.default_layout,
@@ -618,25 +629,93 @@ local function alt_color(color)
    return alt_color_cache[color]
 end
 
-local function with_top_border(widget)
+local function rounded_rect_with_corners(cr, width, height, radius, corners)
+    radius = math.min(radius, width / 2, height / 2)
+    cr:move_to(radius, 0)
+    if corners.top_right then
+        cr:arc( width-radius, radius       , radius, 3*(math.pi/2),    math.pi*2  )
+    else
+        cr:line_to(width, 0)
+        cr:line_to(width, radius)
+    end
+    if corners.bottom_right then
+        cr:arc( width-radius, height-radius, radius,    math.pi*2 ,    math.pi/2  )
+    else
+        cr:line_to(width, height)
+        cr:line_to(width - radius, height)
+    end
+    if corners.bottom_left then
+        cr:arc( radius      , height-radius, radius,    math.pi/2 ,    math.pi    )
+    else
+        cr:line_to(0, height)
+        cr:line_to(0, height - radius)
+    end
+    if corners.top_left then
+        cr:arc( radius      , radius       , radius,    math.pi   , 3*(math.pi/2) )
+    else
+        cr:line_to(0, 0)
+        cr:line_to(radius, 0)
+    end
+    cr:close_path()
+end
+
+local function with_border(args)
+    args = args or nil
+    local directions = border.directions{
+        args.top and "top",
+        args.left and "left",
+        args.right and "right",
+        args.bottom and "bottom"
+    }
+    local corners = {
+        top_left = args.top and args.left,
+        top_right = args.top and args.right,
+        bottom_left = args.bottom and args.left,
+        bottom_right = args.bottom and args.right
+    }
     return wibox.widget {
         {
             {
-                widget,
+                args.widget,
                 bg = beautiful.bg_normal,
+                -- shape = beautiful.border_radius ~= nil and
+                --     function (cr, width, height)
+                --         rounded_rect_with_corners(cr, width, height,
+                --                      beautiful.border_radius -
+                --                          beautiful.border_width,
+                --                      corners)
+                --     end,
                 widget = wibox.container.background
             },
-            [top_index[shared.var.bar_position]] = beautiful.border_width,
-            draw_empty = false,
+            top = args.top and beautiful.border_width,
+            left = args.left and beautiful.border_width,
+            right = args.right and beautiful.border_width,
+            buttom = args.right and beautiful.border_width,
+            draw_empty = args.draw_empty,
             widget = fixed_margin,
         },
         bgimage = function (context, cr, width, height)
-            border:draw({ color = beautiful.border_focus }, cr, width, height,
-                border.directions{ top_index[shared.var.bar_position] })
+            border:draw({ -- theme = border_theme,
+                          color = beautiful.border_focus }, cr, width, height,
+                directions)
         end,
+        -- shape = beautiful.border_radius ~= nil and
+        --     function (cr, width, height)
+        --         rounded_rect_with_corners(cr, width, height,
+        --                                   beautiful.border_radius, corners)
+        --     end,
         widget = wibox.container.background
     }
 end
+
+local function with_top_border(widget)
+    return with_border { widget = widget, top = true }
+end
+
+local space_filler = wibox.widget {
+    forced_width = beautiful.useless_gap,
+    widget = wibox.container.constraint
+}
 
 local space_filler_with_left_right_borders = wibox.widget {
     {
@@ -963,10 +1042,9 @@ local function setup_screen(scr)
        }
        layout = wibox.widget {
            {
-               with_top_border {
-                   left_layout,
-                   bg = beautiful.bg_normal,
-                   widget = wibox.container.background,
+               with_border {
+                   widget = left_layout,
+                   top = true,
                },
                {
                    beautiful.bar_style == "simple" and space_filler_left_with_top_border,
@@ -1003,15 +1081,13 @@ local function setup_screen(scr)
                    ["content_fill_vertical"] = true,
                    widget = fixed_place
                },
-               with_top_border {
-                   {
+               with_border {
+                   widget = wibox.widget {
                        right_layout,
-                       draw_empty = false,
-                       [direction_index[shared.var.bar_position] == "horizontal" and "left" or "top"] = dpi(5),
-                       widget = wibox.container.margin,
+                       left = dpi(5),
+                       widget = fixed_margin
                    },
-                   bg = beautiful.bg_normal,
-                   widget = wibox.container.background,
+                   top = true,
                },
                expand = "inside",
                layout = fixed_align[direction_index[shared.var.bar_position]]
@@ -1143,7 +1219,7 @@ local global_keys = table_join(
             table.sort(
                clients,
                function (a, b)
-                   return fts.get(a) > fts.get(b)
+                   return fts.get(a) < fts.get(b)
                end
             )
 
