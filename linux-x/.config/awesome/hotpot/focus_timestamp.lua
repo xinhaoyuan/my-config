@@ -32,8 +32,8 @@ function mod.update(c)
         global_focus_timestamp = c.focus_timestamp
     end
     global_focus_timestamp = global_focus_timestamp + 1
-    try_compact_focus_timestamp()
     c.focus_timestamp = global_focus_timestamp
+    try_compact_focus_timestamp()
 end
 
 function mod.get(c)
