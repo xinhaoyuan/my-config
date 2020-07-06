@@ -15,10 +15,10 @@
 
 (font-family-list)
 ;; toggle small/big fonts
-(defcustom my-font-name "Iosevka SS03" "undocumented")
+(defcustom my-font-name "Iosevka XY" "undocumented")
 (defcustom my-font-toggle-flag 0 "undocumented")
 (defcustom my-font-big-size 16 "undocumented")
-(defcustom my-font-small-size 10 "undocumented")
+(defcustom my-font-small-size 11 "undocumented")
 (defcustom my-font-big (concat my-font-name "-" (number-to-string my-font-big-size)) "undocumented")
 (defcustom my-font-small (concat my-font-name "-" (number-to-string my-font-small-size)) "undocumented")
 (defun toggle-big-font ()
