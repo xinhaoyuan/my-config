@@ -102,11 +102,6 @@ local function context_focused(context)
 end
 
 local function simple_button(args)
-   local width
-   if not args.no_force_width then
-       width = args.width or waffle_width
-   end
-
    local button_action = args.button_action or args.action
    local key_action = args.key_action or args.action
 
@@ -121,7 +116,8 @@ local function simple_button(args)
          margins = button_padding,
          widget = wibox.container.margin,
       },
-      forced_width = width,
+      forced_width = args.width,
+      forced_height = args.height,
       fg_function = {"fg_"},
       bg_function = {"bg_"},
       widget = cbg
@@ -167,14 +163,16 @@ end
 local function button(args)
    local label = args.label_widget or
       wibox.widget {
-         markup = args.markup or nil,
-         text = args.text or nil,
+         markup = args.markup,
+         text = args.text,
          font = font_normal,
          forced_height = button_height,
          align = "center",
          valign = "center",
          widget = wibox.widget.textbox,
       }
+
+   args.width = args.width or waffle_width
 
    args.widget = wibox.widget {
        args.icon_widget or (
@@ -189,23 +187,18 @@ local function button(args)
                            ),
        label,
        args.indicator and {
-           {
                {
                    text = args.indicator,
                    font = font_normal,
-                   forced_height = args.height or button_height,
                    align = "center",
                    valign = "center",
                    widget = wibox.widget.textbox,
                },
-               halign = "right",
-               widget = wibox.container.place
-           },
            fg_function = {"special_"},
            widget = cbg
                           },
        expand = "inside",
-       layout = fixed_align.horizontal,
+       layout = args.button_layout or fixed_align.horizontal,
    }
 
    local ret = simple_button(args)
@@ -1478,92 +1471,107 @@ waffle_settings_view = view {
 local client_waffle = view {
     root = decorate_waffle {
         decorate_panel {
-                button({
-                        markup = "Close",
-                        indicator = em("c"),
-                        key = "c",
-                        action = function (alt)
-                            local client = shared.waffle_selected_client
+            button({
+                    width = dpi(48),
+                    height = dpi(64),
+                    button_layout = fixed_align.vertical,
+                    markup = "Close",
+                    indicator = em("c"),
+                    key = "c",
+                    action = function (alt)
+                        local client = shared.waffle_selected_client
+                        waffle:hide()
+                        if not client.valid then
+                            return
+                        end
+                        client:kill()
+                    end,
+            }),
+            button({
+                    width = dpi(48),
+                    height = dpi(64),
+                    button_layout = fixed_align.vertical,                    
+                    markup = "Max",
+                    indicator = em("m"),
+                    key = "m",
+                    action = function (alt)
+                        local client = shared.waffle_selected_client
+                        if not alt then
                             waffle:hide()
-                            if not client.valid then
-                                return
-                            end
-                            client:kill()
                         end
-                }),
-                button({
-                        markup = "Toggle max",
-                        indicator = em("m"),
-                        key = "m",
-                        action = function (alt)
-                            local client = shared.waffle_selected_client
-                            if not alt then
-                                waffle:hide()
-                            end
-                            if not client.valid then
-                                return
-                            end
-                            client.maximized = not client.maximized
+                        if not client.valid then
+                            return
                         end
-                }),
-                button({
-                        markup = "Toggle above",
-                        indicator = em("a"),
-                        key = "a",
-                        action = function (alt)
-                            local client = shared.waffle_selected_client
-                            if not alt then
-                                waffle:hide()
-                            end
-                            if not client.valid then
-                                return
-                            end
-                            client.above = not client.above
-                        end
-                }),
-                button({
-                        markup = "Toggle float",
-                        indicator = em("f"),
-                        key = "f",
-                        action = function (alt)
-                            local client = shared.waffle_selected_client
-                            if not alt then
-                                waffle:hide()
-                            end
-                            if not client.valid then
-                                return
-                            end
-                            client.floating = not client.floating
-                        end
-                }),
-                button({
-                        markup = "Move/resize",
-                        indicator = em("s"),
-                        key = "s",
-                        key_action = function (alt)
-                            local client = shared.waffle_selected_client
+                        client.maximized = not client.maximized
+                    end
+            }),
+            button({
+                    width = dpi(48),
+                    height = dpi(64),
+                    button_layout = fixed_align.vertical,                    
+                    markup = "Above",
+                    indicator = em("a"),
+                    key = "a",
+                    action = function (alt)
+                        local client = shared.waffle_selected_client
+                        if not alt then
                             waffle:hide()
-                            if not client.valid then
-                                return
-                            end
-                            shared.client.start_switcher(client, false)
-                        end,
-                        button_action = function (alt)
-                            local client = shared.waffle_selected_client
-                            waffle:hide()
-                            if not client.valid then
-                                return
-                            end
-                            if alt then
-                                awful.mouse.client.resize(client, "northeast")
-                            else
-                                local geo = client:geometry()
-                                mouse.coords({ x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 })
-                                awful.mouse.client.move(client)
-                            end
                         end
-                }),
-                layout = wibox.layout.fixed.vertical,
+                        if not client.valid then
+                            return
+                        end
+                        client.above = not client.above
+                    end
+            }),
+            button({
+                    width = dpi(48),
+                    height = dpi(64),
+                    button_layout = fixed_align.vertical,
+                    markup = "Float",
+                    indicator = em("f"),
+                    key = "f",
+                    action = function (alt)
+                        local client = shared.waffle_selected_client
+                        if not alt then
+                            waffle:hide()
+                        end
+                        if not client.valid then
+                            return
+                        end
+                        client.floating = not client.floating
+                    end
+            }),
+            button({
+                    width = dpi(48),
+                    height = dpi(64),
+                    button_layout = fixed_align.vertical,
+                    markup = "Pos",
+                    indicator = em("s"),
+                    key = "s",
+                    key_action = function (alt)
+                        local client = shared.waffle_selected_client
+                        waffle:hide()
+                        if not client.valid then
+                            return
+                        end
+                        shared.client.start_switcher(client, false)
+                    end,
+                    button_action = function (alt)
+                        local client = shared.waffle_selected_client
+                        waffle:hide()
+                        if not client.valid then
+                            return
+                        end
+                        if alt then
+                            awful.mouse.client.resize(client, "bottom_right")
+                        else
+                            local geo = client:geometry()
+                            mouse.coords({ x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 })
+                            awful.mouse.client.move(client)
+                        end
+                    end
+            }),
+            layout = wibox.layout.fixed.horizontal,
         },
         spacing = dpi(10),
         layout = wibox.layout.fixed.vertical,
