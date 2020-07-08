@@ -1475,40 +1475,6 @@ local client_waffle = view {
                     width = dpi(48),
                     height = dpi(64),
                     button_layout = fixed_align.vertical,
-                    markup = "Close",
-                    indicator = em("c"),
-                    key = "c",
-                    action = function (alt)
-                        local client = shared.waffle_selected_client
-                        waffle:hide()
-                        if not client.valid then
-                            return
-                        end
-                        client:kill()
-                    end,
-            }),
-            button({
-                    width = dpi(48),
-                    height = dpi(64),
-                    button_layout = fixed_align.vertical,                    
-                    markup = "Max",
-                    indicator = em("m"),
-                    key = "m",
-                    action = function (alt)
-                        local client = shared.waffle_selected_client
-                        if not alt then
-                            waffle:hide()
-                        end
-                        if not client.valid then
-                            return
-                        end
-                        client.maximized = not client.maximized
-                    end
-            }),
-            button({
-                    width = dpi(48),
-                    height = dpi(64),
-                    button_layout = fixed_align.vertical,                    
                     markup = "Above",
                     indicator = em("a"),
                     key = "a",
@@ -1570,6 +1536,40 @@ local client_waffle = view {
                             awful.mouse.client.move(client)
                         end
                     end
+            }),
+            button({
+                    width = dpi(48),
+                    height = dpi(64),
+                    button_layout = fixed_align.vertical,
+                    markup = "Max",
+                    indicator = em("m"),
+                    key = "m",
+                    action = function (alt)
+                        local client = shared.waffle_selected_client
+                        if not alt then
+                            waffle:hide()
+                        end
+                        if not client.valid then
+                            return
+                        end
+                        client.maximized = not client.maximized
+                    end
+            }),
+            button({
+                    width = dpi(48),
+                    height = dpi(64),
+                    button_layout = fixed_align.vertical,
+                    markup = "Close",
+                    indicator = em("c"),
+                    key = "c",
+                    action = function (alt)
+                        local client = shared.waffle_selected_client
+                        waffle:hide()
+                        if not client.valid then
+                            return
+                        end
+                        client:kill()
+                    end,
             }),
             layout = wibox.layout.fixed.horizontal,
         },
