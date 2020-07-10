@@ -974,7 +974,7 @@ local function setup_screen(scr)
    my_widgets[scr].indicator:buttons(
       awful.util.table.join(
           awful.button({ }, 1, function () waffle:show() end),
-          awful.button({ }, 3, function () revelation{curr_tag_only = true} end),
+          awful.button({ }, 3, function () if client.focus ~= nil then shared.waffle.show_client_waffle(client.focus) end end),
           awful.button({ }, 4, function () awful.layout.inc( 1) end),
           awful.button({ }, 5, function () awful.layout.inc(-1) end)))
    left_layout:add(my_widgets[scr].indicator)
