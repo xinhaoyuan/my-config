@@ -1467,15 +1467,61 @@ waffle_settings_view = view {
     }),
 }
 
+local sticky_cache
+local sticky_label = wibox.widget {
+    markup = "sticky",
+    widget = wibox.widget.textbox,
+    align = "center",
+}
 
+local above_cache
+local above_label = wibox.widget {
+    markup = "above",
+    widget = wibox.widget.textbox,
+    align = "center",
+}
+
+local float_cache
+local float_label = wibox.widget {
+    markup = "float",
+    widget = wibox.widget.textbox,
+    align = "center",
+}
+
+local max_cache
+local max_label = wibox.widget {
+    markus = "max",
+    widget = wibox.widget.textbox,
+    align = "center",
+}
+
+local update_client_waffle_labels
 local client_waffle = view {
     root = decorate_waffle {
         decorate_panel {
             button({
-                    width = dpi(48),
+                    width = dpi(64),
                     height = dpi(64),
                     button_layout = fixed_align.vertical,
-                    markup = "Above",
+                    label_widget = sticky_label,
+                    indicator = em("s"),
+                    key = "s",
+                    action = function (alt)
+                        local client = shared.waffle_selected_client
+                        if not alt then
+                            waffle:hide()
+                        end
+                        if not client.valid then
+                            return
+                        end
+                        client.sticky = not client.sticky
+                    end
+            }),
+            button({
+                    width = dpi(64),
+                    height = dpi(64),
+                    button_layout = fixed_align.vertical,
+                    label_widget = above_label,
                     indicator = em("a"),
                     key = "a",
                     action = function (alt)
@@ -1490,10 +1536,10 @@ local client_waffle = view {
                     end
             }),
             button({
-                    width = dpi(48),
+                    width = dpi(64),
                     height = dpi(64),
                     button_layout = fixed_align.vertical,
-                    markup = "Float",
+                    label_widget = float_label,
                     indicator = em("f"),
                     key = "f",
                     action = function (alt)
@@ -1508,12 +1554,30 @@ local client_waffle = view {
                     end
             }),
             button({
-                    width = dpi(48),
+                    width = dpi(64),
+                    height = dpi(64),
+                    button_layout = fixed_align.vertical,
+                    label_widget = max_label,
+                    indicator = em("m"),
+                    key = "m",
+                    action = function (alt)
+                        local client = shared.waffle_selected_client
+                        if not alt then
+                            waffle:hide()
+                        end
+                        if not client.valid then
+                            return
+                        end
+                        client.maximized = not client.maximized
+                    end
+            }),
+            button({
+                    width = dpi(64),
                     height = dpi(64),
                     button_layout = fixed_align.vertical,
                     markup = "Pos",
-                    indicator = em("s"),
-                    key = "s",
+                    indicator = em("p"),
+                    key = "p",
                     key_action = function (alt)
                         local client = shared.waffle_selected_client
                         waffle:hide()
@@ -1538,25 +1602,7 @@ local client_waffle = view {
                     end
             }),
             button({
-                    width = dpi(48),
-                    height = dpi(64),
-                    button_layout = fixed_align.vertical,
-                    markup = "Max",
-                    indicator = em("m"),
-                    key = "m",
-                    action = function (alt)
-                        local client = shared.waffle_selected_client
-                        if not alt then
-                            waffle:hide()
-                        end
-                        if not client.valid then
-                            return
-                        end
-                        client.maximized = not client.maximized
-                    end
-            }),
-            button({
-                    width = dpi(48),
+                    width = dpi(64),
                     height = dpi(64),
                     button_layout = fixed_align.vertical,
                     markup = "Close",
@@ -1589,6 +1635,44 @@ function shared.waffle.show_client_waffle(c, args)
     end
     shared.waffle_selected_client = c
     waffle:show(client_waffle, args)
+    update_client_waffle_labels()
 end
+
+update_client_waffle_labels = function ()
+    if not waffle:is_in_view(client_waffle) then
+        return
+    end
+
+    local now_sticky = (shared.waffle_selected_client and shared.waffle_selected_client.sticky)
+    if sticky_cache ~= now_sticky then
+        sticky_cache = now_sticky
+        sticky_label:set_markup(now_sticky and "STICKY" or "sticky")
+    end
+
+    local now_above = (shared.waffle_selected_client and shared.waffle_selected_client.above)
+    if above_cache ~= now_above then
+        above_cache = now_above
+        above_label:set_markup(now_above and "ABOVE" or "above")
+    end
+
+    local now_float = (shared.waffle_selected_client and shared.waffle_selected_client.floating)
+    if float_cache ~= now_float then
+        float_cache = now_float
+        float_label:set_markup(now_float and "FLOAT" or "float")
+    end
+
+    local now_max = (shared.waffle_selected_client and shared.waffle_selected_client.maximized)
+    if max_cache ~= now_max then
+        max_cache = now_max
+        max_label:set_markup(now_max and "MAX" or "max")
+    end
+end
+
+client.connect_signal("property::sticky", update_client_waffle_labels)
+client.connect_signal("property::above", update_client_waffle_labels)
+client.connect_signal("property::floating", update_client_waffle_labels)
+client.connect_signal("property::maximized", update_client_waffle_labels)
+
+
 
 return nil

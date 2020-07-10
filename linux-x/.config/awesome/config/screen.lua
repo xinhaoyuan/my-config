@@ -226,8 +226,8 @@ local property_to_text = {
    {"sticky", "S"},
    {"above", "A"},
    {"ontop", "T"},
-   {"maximized", "M"},
    {"floating", "F"},
+   {"maximized", "M"},
 }
 
 local function tasklist_update_function(widget, c, index, objects)
@@ -250,9 +250,7 @@ local function tasklist_update_function(widget, c, index, objects)
     for _, pp in ipairs(property_to_text) do
         local key, text = table.unpack(pp)
         if prop[key] == true then
-            if key ~= "floating" or not prop.maximized then
-                status_text = status_text .. text
-            end
+            status_text = status_text .. text
         end
     end
     if sb then

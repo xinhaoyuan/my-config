@@ -141,6 +141,10 @@ function waffle:set_view(view)
     self.widget_container.widget = view.widget
 end
 
+function waffle:is_in_view(view)
+    return self.view_ == view
+end
+
 local function get_waffle_wibox(screen)
     if screen.waffle_wibox == nil or
         screen.waffle_wibox.x ~= screen.geometry.x or
