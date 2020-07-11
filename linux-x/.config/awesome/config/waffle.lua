@@ -673,6 +673,167 @@ do
     }
 end
 
+local disk_widget_width = (waffle_width - button_height - button_padding * 4) / 2
+local disk_widget
+do
+    local diskgraph_rd_widget = wibox.widget {
+        background_color = graph_background,
+        forced_height = button_height / 2,
+        step_width = dpi(2),
+        step_spacing = dpi(1),
+        widget = wibox.widget.graph,
+        -- scale = true,
+        color = graph_color
+    }
+
+    local rd_text_widget = wibox.widget {
+        forced_height = button_height,
+        align = "center",
+        point = {x = 0, y = 0},
+        outline_color = beautiful.bg_normal,
+        outline_size = dpi(2),
+        widget = outlined_textbox,
+    }
+
+    local disk_rd_widget = wibox.widget {
+        diskgraph_rd_widget,
+        point = {x = 0, y = 0},
+        widget = wibox.container.margin
+    }
+
+    local disk_rd_layout = wibox.widget {
+        {
+            {
+                disk_rd_widget,
+                {
+                    disk_rd_widget,
+                    reflection = {
+                        horizontal = false,
+                        vertical = true,
+                    },
+                    widget = wibox.container.mirror,
+                },
+                layout = wibox.layout.fixed.vertical,
+            },
+            rd_text_widget,
+            layout = wibox.layout.stack,
+        },
+        height = button_height,
+        widget = wibox.container.constraint,
+    }
+
+    local diskgraph_wr_widget = wibox.widget {
+        background_color = graph_background,
+        forced_height = button_height / 2,
+        step_width = dpi(2),
+        step_spacing = dpi(1),
+        widget = wibox.widget.graph,
+        -- scale = true,
+        color = graph_color
+    }
+
+    local wr_text_widget = wibox.widget {
+        forced_height = button_height,
+        align = "center",
+        point = { x = 0, y = 0 },
+        outline_color = beautiful.bg_normal,
+        outline_size = dpi(2),
+        widget = outlined_textbox,
+    }
+
+    local disk_wr_widget = wibox.widget {
+        diskgraph_wr_widget,
+        widget = wibox.container.margin
+    }
+
+    local disk_wr_layout = wibox.widget {
+        {
+            {
+                disk_wr_widget,
+                {
+                    disk_wr_widget,
+                    reflection = {
+                        horizontal = false,
+                        vertical = true,
+                    },
+                    widget = wibox.container.mirror,
+                },
+                layout = wibox.layout.fixed.vertical,
+            },
+            wr_text_widget,
+            layout = wibox.layout.stack,
+        },
+        height = button_height,
+        widget = wibox.container.constraint,
+    }
+
+    disk_widget = wibox.widget {
+        {
+            image = gcolor.recolor_image(icons.disk, beautiful.fg_normal),
+            forced_height = button_height,
+            forced_width = button_height,
+            widget = masked_imagebox,
+        },
+        {
+            {
+                disk_rd_layout,
+                disk_wr_layout,
+                spacing = button_padding,
+                layout = wibox.layout.flex.horizontal
+            },
+            left = button_padding,
+            right = button_padding,
+            layout = wibox.container.margin
+        },
+        expand = "inside",
+        layout = wibox.layout.align.horizontal,
+    }
+
+    local prev_rd = nil
+    local prev_wr = nil
+    local function on_output(stdout, x)
+        local rd = 0
+        local wr = 0
+        for line in stdout:gmatch("[^\r\n]+") do
+            local items = {}
+            for item in line:gmatch("[^ \t:]+") do
+                if #item > 0 then
+                    table.insert(items, item)
+                end
+            end
+            rd = rd + tonumber(items[4]) * 512
+            wr = wr + tonumber(items[8]) * 512
+        end
+
+        if prev_rd ~= nil then
+            local rd = (rd - prev_rd) / update_interval_s
+            local markup = "<span font_desc='" .. font_info .. "'>R " .. format_size(rd) .. "B/s</span>"
+            rd_text_widget:set_markup(markup)
+            diskgraph_rd_widget.max_value = 256 * 1024
+            diskgraph_rd_widget:add_value(rd)
+        end
+        prev_rd = rd
+        if prev_wr ~= nil then
+            local wr = (wr - prev_wr) / update_interval_s
+            local markup = "<span font_desc='" .. font_info .. "'>W " .. format_size(wr) .. "B/s</span>"
+            wr_text_widget:set_markup(markup)
+            diskgraph_wr_widget.max_value = 256 * 1024
+            diskgraph_wr_widget:add_value(wr)
+        end
+        prev_wr = wr
+    end
+
+    gtimer {
+        timeout = update_interval_s,
+        call_now = true,
+        autostart = true,
+        callback = function ()
+            awful.spawn.easy_async({"cat", "/proc/diskstats"}, on_output)
+        end,
+    }
+end
+
+
 local battery_widget_width = waffle_width - button_height - button_padding * 3
 local battery_widget
 do
@@ -1188,23 +1349,9 @@ local waffle_root_status_widget = decorate_panel {
             label_widget = net_widget,
             indicator = em("n"),
         },
-        {
-            button {
-                icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
-                label_widget = wibox.widget {
-                    volumebar_widget,
-                    widget = wibox.container.place
-                },
-                buttons = volumebar_buttons,
-                indicator = em("a"),
-                key = "a",
-                action = function (alt)
-                    local cmd = {"pavucontrol"}
-                    awful.spawn(cmd)
-                    waffle:hide()
-                end,
-            },
-            layout = wibox.layout.fixed.horizontal,
+        button {
+            label_widget = disk_widget,
+            indicator = em("d"),
         },
         {
             battery_widget,
@@ -1314,10 +1461,28 @@ local waffle_root_action_widget = decorate_panel {
     layout = wibox.layout.fixed.vertical,
 }
 
-local waffle_root_mpd_widget = decorate_panel {
-    mpd_widget,
-    draw_empty = false,
-    layout = fixed_margin,
+local waffle_root_audio_widget = decorate_panel {
+    button {
+        icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
+        label_widget = wibox.widget {
+            volumebar_widget,
+            widget = wibox.container.place
+        },
+        buttons = volumebar_buttons,
+        indicator = em("a"),
+        key = "a",
+        action = function (alt)
+            local cmd = {"pavucontrol"}
+            awful.spawn(cmd)
+            waffle:hide()
+        end,
+    },
+    {
+        mpd_widget,
+        draw_empty = false,
+        layout = fixed_margin,
+    },
+    layout = wibox.layout.fixed.vertical,
 }
 
 local waffle_root_admin_widget = decorate_panel {
@@ -1347,7 +1512,7 @@ local waffle_root_view = view {
     root = decorate_waffle {
         waffle_root_status_widget,
         {
-            waffle_root_mpd_widget,
+            waffle_root_audio_widget,
             draw_empty = false,
             top = panel_padding,
             widget = fixed_margin,
@@ -1672,7 +1837,5 @@ client.connect_signal("property::sticky", update_client_waffle_labels)
 client.connect_signal("property::above", update_client_waffle_labels)
 client.connect_signal("property::floating", update_client_waffle_labels)
 client.connect_signal("property::maximized", update_client_waffle_labels)
-
-
 
 return nil
