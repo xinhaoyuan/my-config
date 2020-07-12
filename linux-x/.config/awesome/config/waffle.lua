@@ -1353,10 +1353,20 @@ local waffle_root_status_widget = decorate_panel {
         button {
             label_widget = net_widget,
             indicator = em("n"),
+            key = "n",
+            action = function (alt)
+                shared.action.terminal({"sudo", "iftop"})
+                waffle:hide()
+            end,
         },
         button {
             label_widget = disk_widget,
             indicator = em("d"),
+            key = "d",
+            action = function (alt)
+                shared.action.terminal({"sudo", "iotop"})
+                waffle:hide()
+            end,
         },
         {
             battery_widget,
