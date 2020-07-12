@@ -528,7 +528,13 @@ require("awful.rules").rules = {
                })
            end
        }
-   }
+   },
+   {
+       rule = { class = "mpv" },
+       properties = {
+           size_hints_honor = false,
+       },
+   },
 }
 
 return nil

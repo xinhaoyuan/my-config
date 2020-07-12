@@ -801,15 +801,15 @@ do
                     table.insert(items, item)
                 end
             end
-            rd = rd + tonumber(items[4]) * 512
-            wr = wr + tonumber(items[8]) * 512
+            rd = rd + tonumber(items[6]) * 512
+            wr = wr + tonumber(items[10]) * 512
         end
 
         if prev_rd ~= nil then
             local rd = (rd - prev_rd) / update_interval_s
             local markup = "<span font_desc='" .. font_info .. "'>R " .. format_size(rd) .. "B/s</span>"
             rd_text_widget:set_markup(markup)
-            diskgraph_rd_widget.max_value = 256 * 1024
+            diskgraph_rd_widget.max_value = 1024 * 1024
             diskgraph_rd_widget:add_value(rd)
         end
         prev_rd = rd
@@ -817,7 +817,7 @@ do
             local wr = (wr - prev_wr) / update_interval_s
             local markup = "<span font_desc='" .. font_info .. "'>W " .. format_size(wr) .. "B/s</span>"
             wr_text_widget:set_markup(markup)
-            diskgraph_wr_widget.max_value = 256 * 1024
+            diskgraph_wr_widget.max_value = 1024 * 1024
             diskgraph_wr_widget:add_value(wr)
         end
         prev_wr = wr
