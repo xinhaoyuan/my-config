@@ -801,8 +801,13 @@ do
                     table.insert(items, item)
                 end
             end
-            rd = rd + tonumber(items[6]) * 512
-            wr = wr + tonumber(items[10]) * 512
+            name = items[3]
+            local test_f = io.open("/sys/block/"..name, "r")
+            if test_f ~= nil then
+                io.close(test_f)
+                rd = rd + tonumber(items[6]) * 512
+                wr = wr + tonumber(items[10]) * 512
+            end
         end
 
         if prev_rd ~= nil then
