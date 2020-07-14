@@ -21,7 +21,7 @@ local waffle = require("waffle")
 local calendar = require("calendar.calendar")
 local dpi = require("beautiful.xresources").apply_dpi
 local yams = require("yams")
-local yams_switcher = yams.create{opacity_other = 0, panel = false}
+local yams_switcher = yams.create{opacity_other = 1, panel = false}
 local fallback = require("fallback")
 local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
