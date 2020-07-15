@@ -216,7 +216,7 @@ else
     border_theme.inner_space = beautiful.border_radius - beautiful.border_width + beautiful.border_inner_space
 end
 
-local sep_color = gcolor(beautiful.fg_normal)
+local sep_color = gcolor(acolor(beautiful.fg_normal):blend_with(acolor(beautiful.bg_normal), 0.75):to_string())
 local decorate_border = border.directions { "top", "bottom", "left", "right" }
 local function decorate_panel(args)
     if args.top_sep then
@@ -1490,29 +1490,30 @@ local waffle_root_action_widget = decorate_panel {
 
 local waffle_root_audio_widget = decorate_panel {
     top_sep = true,
+    widget = button {
+        icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
+        label_widget = wibox.widget {
+            volumebar_widget,
+            widget = wibox.container.place
+        },
+        buttons = volumebar_buttons,
+        indicator = em("a"),
+        key = "a",
+        action = function (alt)
+            local cmd = {"pavucontrol"}
+            awful.spawn(cmd)
+            waffle:hide()
+        end,
+    },
+}
+
+local waffle_root_mpd_widget = decorate_panel {
+    top_sep = true,
     widget = {
-        button {
-            icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
-            label_widget = wibox.widget {
-                volumebar_widget,
-                widget = wibox.container.place
-            },
-            buttons = volumebar_buttons,
-            indicator = em("a"),
-            key = "a",
-            action = function (alt)
-                local cmd = {"pavucontrol"}
-                awful.spawn(cmd)
-                waffle:hide()
-            end,
-        },
-        {
-            mpd_widget,
-            draw_empty = false,
-            layout = fixed_margin,
-        },
-        layout = wibox.layout.fixed.vertical,
-    }
+        mpd_widget,
+        draw_empty = false,
+        layout = fixed_margin,
+    },
 }
 
 local waffle_root_admin_widget = decorate_panel {
@@ -1545,6 +1546,7 @@ local waffle_root_view = view {
     root = decorate_waffle {
         waffle_root_status_widget,
         waffle_root_audio_widget,
+        waffle_root_mpd_widget,
         waffle_root_agenda_widget,
         waffle_root_action_widget,
         waffle_root_admin_widget,
