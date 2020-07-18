@@ -29,6 +29,7 @@ local fixed_align = require("fixed_align")
 local masked_imagebox = require("masked_imagebox")
 local border = require("border-theme")
 local debug_container = require("debug_container")
+local tasklist = require("config.tasklist")
 local cbg = require("contextual_background")
 local fts = require("hotpot").focus_timestamp
 local aux = require("aux")
@@ -58,68 +59,15 @@ local function go_by_direction(dir, with_client)
    end
 end
 
-local size_index = {
-    ["top"] = "height",
-    ["bottom"] = "height",
-    ["left"] = "width",
-    ["right"] = "width",
-}
-
-local dual_size_index = {
-    ["top"] = "width",
-    ["bottom"] = "width",
-    ["left"] = "height",
-    ["right"] = "height",
-}
-
-local top_index = {
-    ["bottom"] = "top",
-    ["top"] = "bottom",
-    ["left"] = "right",
-    ["right"] = "left",
-}
-
-local bottom_index = {
-    ["bottom"] = "bottom",
-    ["top"] = "top",
-    ["left"] = "left",
-    ["right"] = "right",
-}
-
-local left_index = {
-    ["bottom"] = "left",
-    ["top"] = "right",
-    ["left"] = "top",
-    ["right"] = "bottom",
-}
-
-local right_index = {
-    ["bottom"] = "right",
-    ["top"] = "left",
-    ["left"] = "bottom",
-    ["right"] = "top",
-}
-
-local direction_index = {
-    ["top"] = "horizontal",
-    ["bottom"] = "horizontal",
-    ["left"] = "vertical",
-    ["right"] = "vertical",
-}
-
-local dual_direction_index = {
-    ["top"] = "vertical",
-    ["bottom"] = "vertical",
-    ["left"] = "horizontal",
-    ["right"] = "horizontal",
-}
-
-local gravity_index = {
-    ["top"] = "northwest",
-    ["bottom"] = "southwest",
-    ["left"] = "northwest",
-    ["right"] = "northeast",
-}
+local size_index = shared.size_index
+local dual_size_index = shared.dual_size_index
+local top_index = shared.top_index
+local bottom_index = shared.bottom_index
+local left_index = shared.left_index
+local right_index = shared.right_index
+local direction_index = shared.direction_index
+local dual_direction_index = shared.dual_direction_index
+local gravity_index = shared.gravity_index
 
 -- add machi layout
 
@@ -206,7 +154,7 @@ local function switch_to_or_go_last(tag)
     end
 end
 
-local my_widgets = {}
+local my_wibars = {}
 local my_tray
 my_tray = wibox.widget.systray()
 my_tray.horizontal = direction_index[shared.var.bar_position] == "horizontal"
@@ -218,367 +166,6 @@ local my_tag_list_buttons = awful.util.table.join(
    awful.button({ "Mod4" }, 3, awful.client.toggletag),
    awful.button({ }, 4, function(t) awful.tag.viewnext(awful.tag.getscreen(t)) end),
    awful.button({ }, 5, function(t) awful.tag.viewprev(awful.tag.getscreen(t)) end)
-)
-
-local default_icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal)
-
-local property_to_text = {
-   {"sticky", "S"},
-   {"above", "A"},
-   {"ontop", "T"},
-   {"floating", "F"},
-   {"maximized", "M"},
-}
-
-local function tasklist_update_function(widget, c, index, objects)
-    local sb = widget:get_children_by_id("status_role")[1]
-    local bgb = widget:get_children_by_id("my_background_role")[1]
-    local title_text_role = widget:get_children_by_id("title_text_role")[1]
-    local status_text = ""
-    local prop = {}
-    if title_text_role ~= nil then
-        title_text_role.text = c.name or "<Untitled>"
-    end
-    for _, pp in ipairs(property_to_text) do
-        local key = pp[1]
-        if c.saved and c.saved[key] ~= nil then
-            prop[key] = c.saved[key]
-        elseif c[key] ~= nil then
-            prop[key] = c[key]
-        end
-    end
-    for _, pp in ipairs(property_to_text) do
-        local key, text = table.unpack(pp)
-        if prop[key] == true then
-            status_text = status_text .. text
-        end
-    end
-    if sb then
-        if #status_text > 0 then
-            sb.text = status_text
-        else
-            sb.text = ""
-        end
-    end
-    local focus
-    if client.focus ~= nil then
-        focus = client.focus == c
-    else
-        focus = shared.waffle_selected_client == c
-    end
-    bgb:set_context_transform_function({focus = focus, minimized = c.minimized, is_odd = index % 2 == 1})
-end
-
-local function tasklist_create_function(widget, c, index, objects)
-    -- local al = widget:get_children_by_id("action_layer")[1]
-    -- local ac = widget:get_children_by_id("action_container")[1]
-
-    -- for _, b in ipairs(widget:get_children_by_id("base_action")) do
-    --     b:buttons(awful.util.table.join(
-    --                    awful.button({ }, 1, function ()
-    --                            if c == capi.client.focus then
-    --                                capi.mouse.coords({
-    --                                        x = c.x + c.width / 2,
-    --                                        y = c.y + c.height / 2,
-    --                                                  }, true)
-    --                                delayed(function () awful.mouse.client.move(c) end)
-    --                            else
-    --                                -- Without this, the following
-    --                                -- :isvisible() makes no sense
-    --                                c.minimized = false
-    --                                if not c:isvisible() then
-    --                                    awful.tag.viewonly(c:tags()[1])
-    --                                end
-    --                                -- This will also un-minimize
-    --                                -- the client, if needed
-    --                                capi.client.focus = c
-    --                                c:raise()
-    --                            end
-    --                    end),
-    --                    awful.button({ }, 2,
-    --                        function ()
-    --                            shared.client.titlebar_enable(c)
-    --                        end
-    --                    ),
-    --                    awful.button({ }, 3,
-    --                        function ()
-    --                            if c == capi.client.focus then
-    --                                delayed(function () awful.mouse.client.resize(c, "bottom_right") end)
-    --                            elseif c.minimized then
-    --                                c:kill()
-    --                            end
-    --                        end
-    --                    ),
-    --                    awful.button({ }, 4,
-    --                        function ()
-    --                            if not c.maximized then
-    --                                shared.client.enlarge(c)
-    --                            end
-    --                        end
-    --                    ),
-    --                    awful.button({ }, 5,
-    --                        function ()
-    --                            shared.client.shrink(c)
-    --                        end
-    --                    )
-    --     ))
-    -- end
-
-    -- if al then
-    --     widget:connect_signal(
-    --         "mouse::enter",
-    --         function (w)
-    --             al.visible = true
-    --         end
-    --     )
-    --     widget:connect_signal(
-    --         "mouse::leave",
-    --         function (w)
-    --             al.visible = false
-    --         end
-    --     )
-    -- end
-    -- if ac then
-    --     ac:set_children({
-    --             awful.titlebar.widget.floatingbutton (c),
-    --             awful.titlebar.widget.maximizedbutton(c),
-    --             awful.titlebar.widget.stickybutton   (c),
-    --             awful.titlebar.widget.ontopbutton    (c),
-    --             awful.titlebar.widget.closebutton    (c),
-    --             layout = wibox.layout.fixed.horizontal()
-    --     })
-    -- end
-    tasklist_update_function(widget, c, index, objects)
-end
-
-local alt_color_cache = {}
-local function alt_color(color)
-   if alt_color_cache[color] == nil then
-      local comp = aux.color.from_string(color)
-      for i = 1, 3 do
-         if comp[i] > 0.5 then
-            comp[i] = comp[i] - 0.1
-         else
-            comp[i] = comp[i] + 0.1
-         end
-      end
-      alt_color_cache[color] = comp:to_string()
-   end
-   return alt_color_cache[color]
-end
-
-local tasklist_template = {
-    {
-        {
-            {
-                {
-                    
-                    {
-                        {
-                            {
-                                widget = awful.widget.clienticon,
-                            },
-                            {
-                                id = "default_icon",
-                                image = default_icon,
-                                widget = masked_imagebox,
-                            },
-                            widget = fallback,
-                        },
-                        [top_index[shared.var.bar_position]] = dpi(2),
-                        [bottom_index[shared.var.bar_position]] = dpi(2),
-                        [right_index[shared.var.bar_position]] = dpi(4),
-                        widget = wibox.container.margin,
-                    },
-                    {
-                        id = "title_text_role",
-                        widget = wibox.widget.textbox,
-                    },
-                    {
-                        {
-                            {
-                                {
-                                    id = "status_role",
-                                    valign = "center",
-                                    align = "center",
-                                    widget = wibox.widget.textbox,
-                                },
-                                direction = direction_index[shared.var.bar_position] == "horizontal" and "north" or "west",
-                                widget = wibox.container.rotate
-                            },
-                            fg_function = function (context)
-                                if context.focus or context.minimized then
-                                    return beautiful.special_focus
-                                else
-                                    return beautiful.special_normal
-                                end
-                            end,
-                            widget = cbg
-                        },
-                        left = dpi(4),
-                        widget = wibox.container.margin,
-                    },
-                    layout = wibox.layout.align[direction_index[shared.var.bar_position]],
-                },
-                direction = direction_index[shared.var.bar_position] == "horizontal" and "north" or "west",
-                widget = wibox.container.rotate
-            },
-            [left_index[shared.var.bar_position]]  = dpi(4),
-            [right_index[shared.var.bar_position]] = dpi(4),
-            widget = wibox.container.margin
-        },
-        -- {
-        --     {
-        --         {
-        --             {
-        --                 id = "base_action",
-        --                 {
-        --                     forced_height = beautiful.bar_height,
-        --                     forced_width = dpi(30),
-        --                     bg_function = function (context)
-        --                         local to
-        --                         to = beautiful.bg_normal
-        --                         if context.is_odd then
-        --                             to = alt_color(to)
-        --                         end
-        --                         local ret = "linear:0,0:" .. tostring(dpi(30)) .. ",0:0," .. to:sub(1, 7) .. "00" .. ":1," .. to:sub(1, 7) .. "ff"
-        --                         return ret
-        --                     end,
-        --                     widget = cbg,
-        --                 },
-        --                 halign = "right",
-        --                 widget = fixed_place,
-        --             },
-        --             {
-        --                 {
-        --                     id = "action_container",
-        --                     layout = wibox.layout.fixed.horizontal,
-        --                 },
-        --                 bg_function = function (context)
-        --                     local ret
-        --                     ret = beautiful.bg_normal
-        --                     if context.is_odd then
-        --                         ret = alt_color(ret)
-        --                     end
-        --                     return ret
-        --                 end,
-        --                 widget = cbg,
-        --             },
-        --             {
-        --                 id = "base_action",
-        --                 {
-        --                     forced_height = beautiful.bar_height,
-        --                     forced_width = dpi(30),
-        --                     bg_function = function (context)
-        --                         local to
-        --                         to = beautiful.bg_normal
-        --                         if context.is_odd then
-        --                             to = alt_color(to)
-        --                         end
-        --                         local ret = "linear:0,0:" .. tostring(dpi(30)) .. ",0:0," .. to:sub(1, 7) .. "ff" .. ":1," .. to:sub(1, 7) .. "00"
-        --                         return ret
-        --                     end,
-        --                     widget = cbg,
-        --                 },
-        --                 halign = "left",
-        --                 widget = fixed_place,
-        --             },
-        --             expand = "outside",
-        --             widget = fixed_align.horizontal,
-        --         },
-        --         id = "action_layer",
-        --         visible = false,
-        --         -- bg_function = function (context)
-        --         --     local ret
-        --         --     if context.focus then
-        --         --         ret = beautiful.bg_focus
-        --         --     elseif context.minimized then
-        --         --         ret = beautiful.bg_minimize
-        --         --     else
-        --         --         ret = beautiful.bg_normal
-        --         --     end
-        --         --     if context.is_odd then
-        --         --         ret = alt_color(ret)
-        --         --     end
-        --         --     return ret
-        --         -- end,
-        --         widget = cbg,
-        --     },
-        --     content_fill_horizontal = true,
-        --     --- fill_horizontal = true,
-        --     widget = fixed_place,
-        -- },
-        layout = wibox.layout.stack,
-    },
-    id     = "my_background_role",
-    fg_function = function (context)
-        if context.focus then
-            return beautiful.fg_focus
-        elseif context.minimized then
-            return beautiful.fg_minimize
-        else
-            return beautiful.fg_normal
-        end
-    end,
-    bg_function = function (context)
-        local ret
-        if context.focus then
-            ret = beautiful.bg_focus
-        elseif context.minimized then
-            ret = beautiful.bg_minimize
-        else
-            ret = beautiful.bg_normal
-        end
-        -- if context.is_odd and not context.focus then
-        --     ret = alt_color(ret)
-        -- end
-        return ret
-    end,
-    widget = cbg,
-    create_callback = tasklist_create_function,
-    update_callback = tasklist_update_function,
-}
-
-
-local my_tasklist_buttons = awful.util.table.join(
-    awful.button({ }, 1, function (c)
-            if capi.client.focus == c then
-                c.minimized = true
-            else
-                -- Without this, the following
-                -- :isvisible() makes no sense
-                c.minimized = false
-                if not c:isvisible() then
-                    awful.tag.viewonly(c:tags()[1])
-                end
-                -- This will also un-minimize
-                -- the client, if needed
-                capi.client.focus = c
-                c:raise()
-            end
-    end),
-    awful.button({ }, 2,
-        function (c)
-            shared.client.titlebar_enable(c)
-        end
-    ),
-    awful.button({ }, 3,
-        function (c)
-            shared.waffle.show_client_waffle(c)
-        end
-    ),
-    awful.button({ }, 4,
-        function (c)
-            if not c.maximized then
-                shared.client.enlarge(c)
-            end
-        end
-    ),
-    awful.button({ }, 5,
-        function (c)
-            shared.client.shrink(c)
-        end
-    )
 )
 
 local current_screen = nil
@@ -606,22 +193,6 @@ local function sort(l, c)
       end
    end
    return ret
-end
-
-local alt_color_cache = {}
-local function alt_color(color)
-   if alt_color_cache[color] == nil then
-      local comp = aux.color.from_string(color)
-      for i = 1, 3 do
-         if comp[i] > 0.5 then
-            comp[i] = comp[i] - 0.10
-         else
-            comp[i] = comp[i] + 0.10
-         end
-      end
-      alt_color_cache[color] = comp:to_string()
-   end
-   return alt_color_cache[color]
 end
 
 local function rounded_rect_with_corners(cr, width, height, radius, corners)
@@ -813,108 +384,8 @@ local space_filler_right = wibox.widget {
 local function setup_screen(scr)
    scr.mypromptbox = awful.widget.prompt()
 
-   my_widgets[scr] = {}
-   local tasklist -- leave it there for reference inside its definition.
-   tasklist = awful.widget.tasklist {
-      screen = scr,
-      filter = function (c, s)
-         if not awful.widget.tasklist.filter.currenttags(c, s) then
-            return false
-         end
-         -- WIP - disable the hiding for now
-         -- return not (c:isvisible() and shared.var.hide_clients_with_titlebars and c.has_titlebar)
-         return true
-      end,
-      buttons = my_tasklist_buttons,
-      style = { font = beautiful.font },
-      layout = beautiful.tasklist_layout[direction_index[shared.var.bar_position]][beautiful.bar_style],
-      source = function ()
-         -- Sort clients with their constant ids to make the order stable.
-         local cls = awful.widget.tasklist.source.all_clients()
-         table.sort(cls,
-                    function (a, b)
-                       -- this makes minimized windows appear at last
-                       -- if a.minimized ~= b.minimized then return b.minimized else return a.window < b.window end
-                       return a.manage_ticket < b.manage_ticket
-                    end
-         )
-         return cls
-      end,
-      update_function = function (w, b, l, d, clients, args)
-
-          if beautiful.bar_style == "auto" then
-              local should_expand = false
-              for _, c in ipairs(clients) do
-                  if c.maximized then
-                      should_expand = true
-                      break
-                  end
-              end
-
-              -- tasklist.expand_space = should_expand
-              local space_filler_left = my_widgets[scr].wibar.widget:get_children_by_id("space_filler_left")[1]
-              local space_filler_right = my_widgets[scr].wibar.widget:get_children_by_id("space_filler_right")[1]
-              if should_expand then
-                  space_filler_left:set_children({space_filler_left_with_top_border})
-                  space_filler_right:set_children({space_filler_right_with_top_border})
-              elseif #clients == 0 then
-                  space_filler_left:set_children({space_filler_with_left_right_borders_no_min})
-                  space_filler_right:set_children({space_filler_with_left_right_borders_no_min})
-              else
-                  space_filler_left:set_children({space_filler_with_left_right_borders})
-                  space_filler_right:set_children({space_filler_with_left_right_borders})
-              end
-          elseif beautiful.bar_style == "split" then
-              local space_filler_left = my_widgets[scr].wibar.widget:get_children_by_id("space_filler_left")[1]
-              local space_filler_right = my_widgets[scr].wibar.widget:get_children_by_id("space_filler_right")[1]
-              if #clients == 0 then
-                  space_filler_left:set_children({space_filler_with_left_right_borders_no_min})
-                  space_filler_right:set_children({space_filler_with_left_right_borders_no_min})
-              else
-                  space_filler_left:set_children({space_filler_with_left_right_borders})
-                  space_filler_right:set_children({space_filler_with_left_right_borders})
-              end
-          end
-
-          awful.widget.common.list_update(w, b, l, d, clients, args)
-
-         -- below are not used any more. just for future reference
-
-         -- -- Reorder the clients so that floating clients are on the right side
-         -- fl_clients = {}
-         -- clients = {}
-         -- for i, obj in ipairs(objects) do
-         --    if obj.floating or obj.maximized or obj.maximized_horizontal or obj.maximized_vertical then
-         --       fl_clients[#fl_clients + 1] = obj
-         --    else
-         --       clients[#clients + 1] = obj
-         --    end
-         -- end
-         -- for i, obj in ipairs(fl_clients) do
-         --    clients[#clients + 1] = obj
-         -- end
-
-         -- A hacky way to alternate the colors of tasklist items
-         -- awful.widget.common.list_update(
-         --    w, b,
-         --    function (c, tb)
-         --       local ret = table.pack(l(c, tb))
-         --       -- bg is stored as [2]
-         --       -- fg is embedded as color='...' in [1]
-         --       if c.minimized and c.saved and not c.saved.minimized then
-         --           local fg = beautiful.tasklist_fg_normal or beautiful.fg_normal
-         --           ret[1] = ret[1]:gsub("'#(%w+)'", "'" .. fg .. "'")
-         --           ret[2] = beautiful.tasklist_bg_normal or beautiful.bg_normal
-         --       end
-         --       if tb.is_odd_child then
-         --          ret[2] = alt_color(ret[2])
-         --       end
-         --       return table.unpack(ret)
-         --    end,
-         --    d, clients, args)
-      end,
-      widget_template = tasklist_template,
-   }
+   scr.widgets = {}
+   local tasklist = tasklist.create(scr)
    local tasklist_with_fallback = {
        tasklist,
        {
@@ -925,7 +396,7 @@ local function setup_screen(scr)
        widget = fallback,
    }
 
-   my_widgets[scr].tag_list = awful.widget.taglist {
+   scr.widgets.tag_list = awful.widget.taglist {
        screen = scr,
        filter = function (t) return true end,
        buttons = my_tag_list_buttons,
@@ -946,7 +417,7 @@ local function setup_screen(scr)
        }
    }
 
-   my_widgets[scr].wibar = awful.wibar({
+   scr.widgets.wibar = awful.wibar({
          screen = scr,
          fg = beautiful.fg_normal,
          ontop = false,
@@ -958,24 +429,25 @@ local function setup_screen(scr)
          border_width = 0,
          cursor = "cross",
    })
+   my_wibars[#my_wibars + 1] = scr.widgets.wibar
 
    local left_layout = wibox.layout.fixed[direction_index[shared.var.bar_position]]()
    local layoutbox = awful.widget.layoutbox{screen = scr}
    masked_imagebox.convert(layoutbox.imagebox)
-   my_widgets[scr].indicator = wibox.widget {
+   scr.widgets.indicator = wibox.widget {
        layoutbox,
        fg_function = {"fg_"},
        bg_function = {"bg_"},
        widget = cbg
    }
-   my_widgets[scr].indicator:buttons(
+   scr.widgets.indicator:buttons(
       awful.util.table.join(
           awful.button({ }, 1, function () waffle:show() end),
           awful.button({ }, 3, function () if client.focus ~= nil then shared.waffle.show_client_waffle(client.focus) end end),
           awful.button({ }, 4, function () awful.layout.inc( 1) end),
           awful.button({ }, 5, function () awful.layout.inc(-1) end)))
-   left_layout:add(my_widgets[scr].indicator)
-   left_layout:add(my_widgets[scr].tag_list)
+   left_layout:add(scr.widgets.indicator)
+   left_layout:add(scr.widgets.tag_list)
    left_layout:add(scr.mypromptbox)
    local right_layout = wibox.widget {
       spacing        = dpi(5),
@@ -1091,17 +563,17 @@ local function setup_screen(scr)
            layout = fixed_align[direction_index[shared.var.bar_position]],
        }
    end
-   my_widgets[scr].wibar:set_widget(layout)
+   scr.widgets.wibar:set_widget(layout)
 end
 
 -- Avoid nested call of reset_widgets
 local reset_widgets_flag = false
 
 local function reset_widgets()
-    for _, w in pairs(my_widgets) do
-        w.wibar:remove()
+    for _, wb in ipairs(my_wibars) do
+        wb:remove()
     end
-    my_widgets = {}
+    my_wibars = {}
     current_screen = nil
     primary_screen = capi.screen.primary
 
@@ -1148,9 +620,9 @@ gtimer {
         local nscreen = capi.mouse.screen
         if nscreen ~= current_screen then
             if current_screen ~= nil then
-                my_widgets[current_screen].indicator:set_context_transform_function(nil)
+                current_screen.widgets.indicator:set_context_transform_function(nil)
             end
-            my_widgets[nscreen].indicator:set_context_transform_function({focus = true})
+            nscreen.widgets.indicator:set_context_transform_function({focus = true})
             -- switch active screen
             current_screen = nscreen
         end
