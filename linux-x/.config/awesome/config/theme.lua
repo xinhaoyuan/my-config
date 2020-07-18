@@ -38,6 +38,18 @@ local function is_light_color(color)
     return acolor(color):lightness() > 0.7
 end
 
+local function fix_color(color_pair)
+    if acolor(color_pair[1]):lightness() > acolor(color_pair[2]):lightness() then
+        local tmp = color_pair[1]; color_pair[1] = color_pair[2]; color_pair[2] = tmp
+    end
+end
+
+if acolor(c_white[1]):lightness() < acolor(c_black[1]):lightness() then
+    local tmp = c_white; c_white = c_black; c_black = tmp
+end
+fix_color(c_white)
+fix_color(c_black)
+
 theme.bg_normal     = c_normal[2]
 theme.bg_focus      = acolor(c_blue[1]):blend_with(acolor(theme.bg_normal), 0.3):to_string{no_alpha = true}
 theme.bg_urgent     = c_red[2]
