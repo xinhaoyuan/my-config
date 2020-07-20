@@ -172,10 +172,10 @@ end
 capi.screen.connect_signal(
     "removed",
     function (s)
-        print("Screen "..tostring(s).." is removed. Removing its waffle wibox.")
-        if screen.waffle_wibox ~= nil then
-            screen.waffle_wibox:remove()
-            screen.waffle_wibox = nil
+        if s.waffle_wibox ~= nil then
+            print("Screen "..tostring(s).." is removed. Removing its waffle wibox.")
+            s.waffle_wibox:remove()
+            s.waffle_wibox = nil
         end
     end
 )
