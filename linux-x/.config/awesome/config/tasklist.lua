@@ -142,17 +142,11 @@ local space_filler_with_left_right_borders_no_min = wibox.widget {
 
 local space_filler_left_with_top_border = with_top_border {
     {
-        {
-            {
-                markup = "<span color='"..beautiful.sep_normal.."'>|</span>",
-                font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
-                widget = wibox.widget.textbox
-            },
-            forced_width = dpi(10),
-            widget = wibox.container.place
-        },
-        background = beautiful.bg_normal,
-        widget = wibox.container.background
+        beautiful.sep_widget,
+        forced_width = dpi(10),
+        content_fill_vertical = true,
+        content_fill_horizontal = true,
+        widget = wibox.container.place
     },
     halign = "right",
     widget = fixed_place,
@@ -160,17 +154,11 @@ local space_filler_left_with_top_border = with_top_border {
 
 local space_filler_right_with_top_border = with_top_border {
     {
-        {
-            {
-                markup = "<span color='"..beautiful.sep_normal.."'>|</span>",
-                font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
-                widget = wibox.widget.textbox
-            },
-            forced_width = dpi(10),
-            widget = wibox.container.place
-        },
-        background = beautiful.bg_normal,
-        widget = wibox.container.background
+        beautiful.sep_widget,
+        forced_width = dpi(10),
+        content_fill_vertical = true,
+        content_fill_horizontal = true,
+        widget = wibox.container.place
     },
     halign = "left",
     widget = fixed_place,

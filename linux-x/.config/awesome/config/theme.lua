@@ -286,6 +286,18 @@ theme.bar_style = "auto"
 theme.bar_styles = {"simple", "split", "auto"}
 theme.tasklist_plain_task_name = true
 
+local sep_color = gcolor(acolor(theme.fg_normal):blend_with(acolor(theme.bg_normal), 0.6):to_string())
+theme.sep_widget = wibox.widget {
+    background = beautiful.bg_normal,
+    bgimage = function(context, cr, width, height)
+        local dot_r = dpi(2)
+        cr:set_source(sep_color)
+        cr:arc(width / 2, height / 2, dot_r, 0, 2 * math.pi)
+        cr:fill()
+    end,
+    widget = wibox.container.background
+}
+
 local function size_transform_function(size) return dpi(400) end
 local flexer = require("flexer")
 -- custom property
@@ -298,16 +310,7 @@ theme.tasklist_layout = {
         simple = {
             forced_height = theme.bar_height,
             spacing = dpi(10),
-            spacing_widget = {
-                {
-                    markup = "<span color='"..theme.sep_normal.."'>|</span>",
-                    font = theme.fontname_normal.." "..tostring(theme.fontsize_small),
-                    widget = wibox.widget.textbox
-                },
-                halign = "center",
-                valign = "center",
-                widget = wibox.container.place
-            },
+            spacing_widget = theme.sep_widget,
             size_transform = size_transform_function,
             fill_space = true,
             expand_space = true,
@@ -316,16 +319,7 @@ theme.tasklist_layout = {
         split = {
             forced_height = theme.bar_height,
             spacing = dpi(10),
-            spacing_widget = {
-                {
-                    markup = "<span color='"..theme.sep_normal.."'>|</span>",
-                    font = theme.fontname_normal.." "..tostring(theme.fontsize_small),
-                    widget = wibox.widget.textbox
-                },
-                halign = "center",
-                valign = "center",
-                widget = wibox.container.place
-            },
+            spacing_widget = theme.sep_widget,
             size_transform = size_transform_function,
             fill_space = true,
             layout = flexer.horizontal
@@ -333,16 +327,7 @@ theme.tasklist_layout = {
         auto = {
             forced_height = theme.bar_height,
             spacing = dpi(10),
-            spacing_widget = {
-                {
-                    markup = "<span color='"..theme.sep_normal.."'>|</span>",
-                    font = theme.fontname_normal.." "..tostring(theme.fontsize_small),
-                    widget = wibox.widget.textbox
-                },
-                halign = "center",
-                valign = "center",
-                widget = wibox.container.place
-            },
+            spacing_widget = theme.sep_widget,
             size_transform = size_transform_function,
             fill_space = true,
             layout = flexer.horizontal
