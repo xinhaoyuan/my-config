@@ -1448,7 +1448,7 @@ local waffle_root_action_widget = decorate_panel {
         }),
         button({
                 icon = gcolor.recolor_image(icons.browser, beautiful.fg_normal),
-                markup = "Web browser",
+                markup = "Web",
                 indicator = em("w"),
                 key = "w",
                 action = function (alt)
@@ -1458,7 +1458,7 @@ local waffle_root_action_widget = decorate_panel {
         }),
         button({
                 icon = gcolor.recolor_image(icons.file_manager, beautiful.fg_normal),
-                markup = "File manager",
+                markup = "Files",
                 indicator = em("e"),
                 key = "e",
                 action = function (alt)
@@ -1525,7 +1525,7 @@ local waffle_root_admin_widget = decorate_panel {
     widget = {
         button {
             icon = gcolor.recolor_image(icons.lock, beautiful.fg_normal),
-            markup = "Lock screen",
+            markup = "Lock",
             indicator = em("l"),
             key = "l",
             action = function (alt)
@@ -1535,7 +1535,7 @@ local waffle_root_admin_widget = decorate_panel {
         },
         button {
             icon = gcolor.recolor_image(icons.poweroff, beautiful.fg_normal),
-            markup = "Shut down",
+            markup = "Power",
             indicator = em("u"),
             key = "u",
             action = function (alt)
