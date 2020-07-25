@@ -292,8 +292,11 @@ theme.sep_widget = wibox.widget {
     bgimage = function(context, cr, width, height)
         local dot_r = dpi(2)
         cr:set_source(sep_color)
-        cr:arc(width / 2, height / 2, dot_r, 0, 2 * math.pi)
-        cr:fill()
+        cr:move_to(width / 2, height / 4)
+        cr:line_to(width / 2, 3 * height / 4)
+        cr:stroke()
+        -- cr:arc(width / 2, height / 2, dot_r, 0, 2 * math.pi)
+        -- cr:fill()
     end,
     widget = wibox.container.background
 }

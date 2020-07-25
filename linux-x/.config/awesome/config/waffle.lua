@@ -228,14 +228,18 @@ local function decorate_panel(args)
                 widget = fixed_margin,
             },
             bgimage = function(context, cr, width, height)
-                local dot_r = dpi(2)
+                height = panel_padding
+                local dot_r = dpi(1)
                 local distance = dpi(10)
                 cr:set_source(sep_color)
-                cr:arc(width / 2 - distance, panel_padding / 2, dot_r, 0, 2 * math.pi)
+                -- cr:arc(width / 2 - distance, height / 2, dot_r, 0, 2 * math.pi)
+                cr:rectangle(width / 2 - distance - dot_r, height / 2 - dot_r, dot_r * 2, dot_r * 2)
                 cr:fill()
-                cr:arc(width / 2, panel_padding / 2, dot_r, 0, 2 * math.pi)
+                -- cr:arc(width / 2, height / 2, dot_r, 0, 2 * math.pi)
+                cr:rectangle(width / 2 - dot_r, height / 2 - dot_r, dot_r * 2, dot_r * 2)
                 cr:fill()
-                cr:arc(width / 2 + distance, panel_padding / 2, dot_r, 0, 2 * math.pi)
+                -- cr:arc(width / 2 + distance, height / 2, dot_r, 0, 2 * math.pi)
+                cr:rectangle(width / 2 + distance - dot_r, height / 2 - dot_r, dot_r * 2, dot_r * 2)
                 cr:fill()
             end,
             widget = wibox.container.background
