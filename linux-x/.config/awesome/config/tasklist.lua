@@ -279,13 +279,11 @@ local function tasklist_update_function(widget, c, index, objects)
             sb.text = ""
         end
     end
-    local focus
-    if client.focus ~= nil then
-        focus = client.focus == c
-    else
-        focus = shared.waffle_selected_client == c
-    end
-    bgb:set_context_transform_function({focus = focus, minimized = c.minimized, is_odd = index % 2 == 1})
+    bgb:set_context_transform_function({
+            focus = client.focus == c,
+            selected = shared.waffle_selected_client == c,
+            minimized = c.minimized,
+            is_odd = index % 2 == 1})
 end
 
 local function tasklist_create_function(widget, c, index, objects)
@@ -349,7 +347,7 @@ local tasklist_template = {
                                 widget = wibox.container.rotate
                             },
                             fg_function = function (context)
-                                if context.focus or context.minimized then
+                                if context.selected or context.focus or context.minimized then
                                     return beautiful.special_focus
                                 else
                                     return beautiful.special_normal
@@ -454,7 +452,9 @@ local tasklist_template = {
     },
     id     = "my_background_role",
     fg_function = function (context)
-        if context.focus then
+        if context.selected then
+            return beautiful.fg_focus
+        elseif context.focus then
             return beautiful.fg_focus
         elseif context.minimized then
             return beautiful.fg_minimize
@@ -464,7 +464,9 @@ local tasklist_template = {
     end,
     bg_function = function (context)
         local ret
-        if context.focus then
+        if context.selected then
+            return beautiful.bg_focus
+        elseif context.focus then
             ret = beautiful.bg_focus
         elseif context.minimized then
             ret = beautiful.bg_minimize

@@ -227,6 +227,7 @@ function waffle:show(view, args)
     end
     if self.wibox_ == nil then
         af.manage_focus(screen)
+        self.focused_client = capi.client.focus
         capi.client.focus = nil
         self.wibox_ = get_waffle_wibox(screen)
     end
@@ -300,6 +301,7 @@ function waffle:hide()
         self.keygrabber_ = nil
     end
     if self.wibox_ ~= nil then
+        self.focused_client = nil
         af.unmanage_focus(self.wibox_.screen)
         self.wibox_.input_passthrough = true
         self.wibox_.widget = nil
