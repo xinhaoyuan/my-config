@@ -1,12 +1,15 @@
 local capi = {
     mouse = mouse,
     screen = screen,
+    awesome = awesome,
     client = client,
+    drawable = drawable,
 }
 local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local gears = require("gears")
+local gtimer = require("gears.timer")
 local gtable = require("gears.table")
 local lgi = require("lgi")
 local dpi = require("beautiful.xresources").apply_dpi
@@ -35,6 +38,15 @@ function PlacementLayout:layout(context, width, height)
     local w, h = wibox.widget.base.fit_widget(self, context, self._private.widget, width, height)
     local place_func = self._private.place_func or self.default_place_func
     local x, y = place_func(self, context, width, height, w, h)
+    if self._private.shape_x ~= x or self._private.shape_y ~= y or self._private.shape_w ~= w or self._private.shape_h ~= h then
+        self._private.shape_x = x
+        self._private.shape_y = y
+        self._private.shape_w = w
+        self._private.shape_h = h
+        context["wibox"].shape = function(cr, width, height)
+            cr:rectangle(x, y, w, h)
+        end
+    end
     return { wibox.widget.base.place_widget_at(self._private.widget, x, y, w, h) }
 end
 
@@ -94,15 +106,15 @@ setmetatable(PlacementLayout, PlacementLayout.mt)
 waffle.widget_container = wibox.widget {
     widget = PlacementLayout,
 }
-waffle.widget_container:connect_signal(
-    "button::press",
-    function (_, x, y, button, _, info)
-        local f = info.drawable:find_widgets(x, y)
-        if #f == 1 then
-            -- Only happens only if clicking the empty area
-            waffle:hide()
-        end
-end)
+-- waffle.widget_container:connect_signal(
+--     "button::press",
+--     function (_, x, y, button, _, info)
+--         local f = info.drawable:find_widgets(x, y)
+--         if #f == 1 then
+--             -- Only happens only if clicking the empty area
+--             waffle:hide()
+--         end
+-- end)
 
 function waffle:update_layout(screen)
     screen = screen or (self.wibox_ and self.wibox_.screen)
@@ -180,8 +192,30 @@ capi.screen.connect_signal(
     end
 )
 
-local function on_client_button_press()
+local function on_root_button_press(x, y, details, state)
     waffle:hide()
+end
+
+local function on_client_button_press(c, x, y, details, state)
+    waffle:hide()
+end
+
+local function on_drawable_button_press(d, x, y, details, state)
+    if d ~= waffle.wibox_.drawable and not waffle.to_be_activated then
+        waffle:hide()
+    end
+end
+
+function waffle:connect_button_signals()
+    capi.awesome.connect_signal("root_button::press", on_root_button_press)
+    capi.client.connect_signal("button::press", on_client_button_press)
+    capi.drawable.connect_signal("button::press", on_drawable_button_press)
+end
+
+function waffle:disconnect_button_signals()
+    capi.awesome.disconnect_signal("root_button::press", on_root_button_press)
+    capi.client.disconnect_signal("button::press", on_client_button_press)
+    capi.drawable.disconnect_signal("button::press", on_drawable_button_press)
 end
 
 function waffle:show(view, args)
@@ -207,37 +241,46 @@ function waffle:show(view, args)
     waffle:set_view(view)
 
     if self.wibox_.input_passthrough then
-        capi.client.connect_signal("button::press", on_client_button_press)
-        if type(args.anchor) == "table" then
-            self.wibox_.anchor = args.anchor
-        elseif args.anchor == false or capi.mouse.screen ~= screen then
-            local avail_area = screen.workarea
-            self.wibox_.anchor = { x = avail_area.x + avail_area.width / 2,
-                                   y = avail_area.y + avail_area.height / 2 }
-        else
-            local coords = capi.mouse.coords()
-            self.wibox_.anchor = coords
-        end
-        self.keygrabber_ = awful.keygrabber.run(
-            function (mod, key, event)
-                if #key == 1 then
-                    key = key:lower()
-                end
-                if self.view_.key_handler and self.view_.key_handler(mod, key, event) then
-                    -- pass
-                elseif key == "Escape" or key == "F12" then
-                    if event == "press" then
-                        self:hide()
-                    end
-                elseif key == "BackSpace" then
-                    if event == "press" then
-                        self:go_back()
-                    end
-                end
-            end
-        )
+        self:connect_button_signals()
         self.wibox_.input_passthrough = false
     end
+
+    if type(args.anchor) == "table" then
+        self.wibox_.anchor = args.anchor
+    elseif args.anchor == "screen" or capi.mouse.screen ~= screen then
+        local avail_area = screen.workarea
+        self.wibox_.anchor = { x = avail_area.x + avail_area.width / 2,
+                               y = avail_area.y + avail_area.height / 2 }
+    elseif args.anchor == "mouse" then
+        local coords = capi.mouse.coords()
+        self.wibox_.anchor = coords
+    end
+    if self.keygrabber_ ~= nil then
+        awful.keygrabber.stop(self.keygrabber_)
+        self.keygrabber_ = nil
+    end
+    self.keygrabber_ = awful.keygrabber.run(
+        function (mod, key, event)
+            if #key == 1 then
+                key = key:lower()
+            end
+            if self.view_.key_handler and self.view_.key_handler(mod, key, event) then
+                -- pass
+            elseif key == "Escape" or key == "F12" then
+                if event == "press" then
+                    self:hide()
+                end
+            elseif key == "BackSpace" then
+                if event == "press" then
+                    self:go_back()
+                end
+            end
+        end
+    )
+
+    self.to_be_activated = true
+    local self_ = self
+    gtimer.delayed_call(function () self_.to_be_activated = false end)
 end
 
 function waffle:go_back()
@@ -274,7 +317,7 @@ function waffle:hide()
     end
     self.view_ = nil
     self.stack_ = nil
-    capi.client.disconnect_signal("button::press", on_client_button_press)
+    self:disconnect_button_signals()
 end
 
 function waffle:set_root_view(v)

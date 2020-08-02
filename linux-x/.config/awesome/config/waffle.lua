@@ -1818,13 +1818,14 @@ local client_waffle = view {
 
 function shared.waffle.show_client_waffle(c, args)
     args = args or {}
-    if args.anchor == false then
+    if args.anchor == "client" then
         local geo = c:geometry()
         args.anchor = { x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 }
     end
-    shared.waffle_selected_client = c
     waffle:show(client_waffle, args)
+    shared.waffle_selected_client = c
     update_client_waffle_labels()
+    capi.client.emit_signal("list")
 end
 
 update_client_waffle_labels = function ()
