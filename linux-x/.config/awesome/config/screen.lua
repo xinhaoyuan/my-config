@@ -278,11 +278,6 @@ local function with_top_border(widget)
     return with_border { widget = widget, top = true }
 end
 
-local space_filler = wibox.widget {
-    forced_width = beautiful.useless_gap,
-    widget = wibox.container.constraint
-}
-
 local space_filler_with_left_right_borders = wibox.widget {
     {
         forced_width = beautiful.useless_gap + beautiful.border_width * 2,
@@ -306,79 +301,6 @@ local space_filler_with_left_right_borders = wibox.widget {
         cr:restore()
     end,
     widget = wibox.container.background
-}
-
-local space_filler_with_left_right_borders_no_min = wibox.widget {
-    bgimage = function (context, cr, width, height)
-        -- TODO: Support rotation.
-        local total_width = beautiful.border_width
-        cr:save()
-        cr:rectangle(0, 0, total_width, height)
-        cr:clip()
-        border:draw({ color = beautiful.border_focus }, cr, total_width, height,
-            border.directions{ right_index[shared.var.bar_position], top_index[shared.var.bar_position] })
-        cr:restore()
-        cr:save()
-        cr:translate(width - total_width, 0)
-        cr:rectangle(0, 0, total_width, height)
-        cr:clip()
-        border:draw({ color = beautiful.border_focus }, cr, total_width, height,
-            border.directions{ left_index[shared.var.bar_position], top_index[shared.var.bar_position] })
-        cr:restore()
-    end,
-    widget = wibox.container.background
-}
-
-local space_filler_left_with_top_border = with_top_border {
-    {
-        {
-            {
-                markup = "<span color='"..beautiful.sep_normal.."'>|</span>",
-                font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
-                widget = wibox.widget.textbox
-            },
-            forced_width = dpi(10),
-            widget = wibox.container.place
-        },
-        background = beautiful.bg_normal,
-        widget = wibox.container.background
-    },
-    halign = "right",
-    widget = fixed_place,
-}
-
-local space_filler_right_with_top_border = with_top_border {
-    {
-        {
-            {
-                markup = "<span color='"..beautiful.sep_normal.."'>|</span>",
-                font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
-                widget = wibox.widget.textbox
-            },
-            forced_width = dpi(10),
-            widget = wibox.container.place
-        },
-        background = beautiful.bg_normal,
-        widget = wibox.container.background
-    },
-    halign = "left",
-    widget = fixed_place,
-}
-
-local space_filler_left = wibox.widget {
-    space_filler_with_left_right_borders,
-    buttons = root_buttons,
-    ["content_fill_horizontal"] = true,
-    ["content_fill_vertical"] = true,
-    widget = fixed_place
-}
-
-local space_filler_right = wibox.widget {
-    space_filler_with_left_right_borders,
-    buttons = root_buttons,
-    ["content_fill_horizontal"] = true,
-    ["content_fill_vertical"] = true,
-    widget = fixed_place
 }
 
 local function setup_screen(scr)
@@ -514,7 +436,6 @@ local function setup_screen(scr)
                    top = true,
                },
                {
-                   beautiful.bar_style == "simple" and space_filler_left_with_top_border,
                    id = "space_filler_left",
                    buttons = root_buttons,
                    ["content_fill_horizontal"] = true,
@@ -541,7 +462,6 @@ local function setup_screen(scr)
            {
                nil,
                {
-                   beautiful.bar_style == "simple" and space_filler_right_with_top_border,
                    id = "space_filler_right",
                    buttons = root_buttons,
                    ["content_fill_horizontal"] = true,

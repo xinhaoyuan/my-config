@@ -37,11 +37,12 @@ function shared.client.titlebar_disable(c)
 end
 
 function shared.client.titlebar_show(c)
-    local geo = c:geometry()
-    for _, d in ipairs({"top", "bottom", "left", "right"}) do
-        awful.titlebar.show(c, d)
-    end
     if not c.has_titlebar then
+        local geo = c:geometry()
+        -- c:geometry{ x = geo.x - beautiful.border_width, y = geo.y - beautiful.border_width, width = geo.width, height = geo.height }
+        for _, d in ipairs({"top", "bottom", "left", "right"}) do
+            awful.titlebar.show(c, d)
+        end
         c.has_titlebar = true
         if shared.var.hide_clients_with_titlebars then
             capi.client.emit_signal("list")
@@ -52,10 +53,10 @@ end
 
 function shared.client.titlebar_hide(c)
     local geo = c:geometry()
-    for _, d in ipairs({"top", "bottom", "left", "right"}) do
-        awful.titlebar.hide(c, d)
-    end
     if c.has_titlebar then
+        for _, d in ipairs({"top", "bottom", "left", "right"}) do
+            awful.titlebar.hide(c, d)
+        end
         c.has_titlebar = false
         if shared.var.hide_clients_with_titlebars then
             capi.client.emit_signal("list")

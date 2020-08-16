@@ -316,7 +316,7 @@ theme.tasklist_layout = {
             spacing_widget = theme.sep_widget,
             size_transform = size_transform_function,
             fill_space = true,
-            expand_space = true,
+            -- expand_space = true,
             layout = flexer.horizontal
         },
         split = {

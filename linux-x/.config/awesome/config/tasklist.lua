@@ -142,26 +142,36 @@ local space_filler_with_left_right_borders_no_min = wibox.widget {
 
 local space_filler_left_with_top_border = with_top_border {
     {
-        beautiful.sep_widget,
-        forced_width = dpi(10),
-        content_fill_vertical = true,
-        content_fill_horizontal = true,
-        widget = wibox.container.place
+        {
+            beautiful.sep_widget,
+            forced_width = dpi(10),
+            content_fill_vertical = true,
+            content_fill_horizontal = true,
+            widget = wibox.container.place
+        },
+        halign = "right",
+        widget = fixed_place,
     },
-    halign = "right",
-    widget = fixed_place,
+    width = beautiful.border_width * 2 + beautiful.useless_gap,
+    strategy = "min",
+    widget = wibox.container.constraint
 }
 
 local space_filler_right_with_top_border = with_top_border {
     {
-        beautiful.sep_widget,
-        forced_width = dpi(10),
-        content_fill_vertical = true,
-        content_fill_horizontal = true,
-        widget = wibox.container.place
+        {
+            beautiful.sep_widget,
+            forced_width = dpi(10),
+            content_fill_vertical = true,
+            content_fill_horizontal = true,
+            widget = wibox.container.place
+        },
+        halign = "left",
+        widget = fixed_place,
     },
-    halign = "left",
-    widget = fixed_place,
+    width = beautiful.border_width * 2 + beautiful.useless_gap,
+    strategy = "min",
+    widget = wibox.container.constraint
 }
 
 local space_filler_left = wibox.widget {
@@ -544,6 +554,11 @@ function module.create(scr)
                     space_filler_left:set_children({space_filler_with_left_right_borders})
                     space_filler_right:set_children({space_filler_with_left_right_borders})
                 end
+            elseif beautiful.bar_style == "simple" then
+                local space_filler_left = scr.widgets.wibar.widget:get_children_by_id("space_filler_left")[1]
+                local space_filler_right = scr.widgets.wibar.widget:get_children_by_id("space_filler_right")[1]
+                space_filler_left:set_children({space_filler_left_with_top_border})
+                space_filler_right:set_children({space_filler_right_with_top_border})
             end
 
             awful.widget.common.list_update(w, b, l, d, clients, args)
