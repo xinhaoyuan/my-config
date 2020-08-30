@@ -27,7 +27,7 @@ awesome.connect_signal(
 
 local HOME_DIR = os.getenv("HOME")
 
-os.execute(HOME_DIR .. "/.xdesktoprc.awesome")
+os.execute(HOME_DIR .. "/.xdesktoprc")
 
 local config = require("config")
 require("my-autofocus")
