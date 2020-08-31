@@ -112,7 +112,7 @@ function shared.client.start_switcher(c, quick_mode)
 end
 
 local client_keys = table_join(
-    awful.key({ "Mod4", "Shift" }, "F12", function (c)
+    awful.key({ "Mod4" }, "Escape", function (c)
             shared.waffle.show_client_waffle(c, { anchor = "client" })
     end),
     awful.key({ "Mod4" }, ".", function (c)

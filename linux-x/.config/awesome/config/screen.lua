@@ -35,9 +35,6 @@ local fts = require("hotpot").focus_timestamp
 local aux = require("aux")
 local icons = require("icons")
 require("manage_ticket")
-local revelation = require("revelation")
-revelation.init()
-revelation.property_to_watch.maximized = false
 
 -- helper functions
 
@@ -571,7 +568,6 @@ local global_keys = table_join(
    awful.key({ }, "XF86AudioMute",          function () shared.action.audio_setup("mute-toggle") end),
    awful.key({ }, "XF86MonBrightnessUp",    function () awful.spawn("xbacklight -inc 5", false) end),
    awful.key({ }, "XF86MonBrightnessDown",  function () awful.spawn("xbacklight -dec 5", false) end),
-   awful.key({ "Mod4" }, "Escape",          function () revelation{curr_tag_only = true} end),
    awful.key({ "Mod4" }, "Return",          function () shared.action.terminal() end),
    awful.key({ "Mod4" }, "w",               function () shared.action.web_browser() end),
    awful.key({ "Mod4" }, "e",               function () shared.action.file_manager() end),
