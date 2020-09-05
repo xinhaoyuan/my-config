@@ -1,1 +1,5 @@
 xorg-conf-xps9350.tgz - extra configure for XPS 9350
+
+userChrome.css - firefox UI style, copy to $HOME/.mozilla/firefox/${ProfileName}/chrome directory. Create chrome directory if there is none.
+
+configs-treestyletab@piro.sakura.ne.jp.json - exported TreeStyleTab configure.

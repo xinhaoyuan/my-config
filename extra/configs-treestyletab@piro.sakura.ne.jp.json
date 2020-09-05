@@ -1,0 +1,29 @@
+{
+  "animation": false,
+  "autoAttachOnDuplicated": 2,
+  "autoAttachOnNewTabButtonMiddleClick": 2,
+  "autoAttachOnNewTabCommand": 0,
+  "autoAttachSameSiteOrphan": 2,
+  "autoCollapseExpandSubtreeOnAttach": false,
+  "autoCollapseExpandSubtreeOnSelect": false,
+  "baseIndent": 0,
+  "chunkedUserStyleRules0": "OnJvb3QgewogIC0tZmF2aWNvbi1zaXplOiAyMHB4Cn0KCi5mYXZpY29uIHsKICBtYXJnaW4tcmlnaHQ6IDJweDsKfQoKLyogU2hvdyB0aXRsZSBvZiB1bnJlYWQgdGFicyB3aXRoIHJlZCBhbmQgaXRhbGljIGZvbnQgKi8KLyoKOnJvb3Quc2lkZWJhciB0YWItaXRlbS51bnJlYWQgLmxhYmVsLWNvbnRlbnQgewogIGNvbG9yOiByZWQgIWltcG9ydGFudDsKICBmb250LXN0eWxlOiBpdGFsaWMgIWltcG9ydGFudDsKfQoqLwoKLyogQWRkIHByaXZhdGUgYnJvd3NpbmcgaW5kaWNhdG9yIHBlciB0YWIgKi8KLyoKOnJvb3Quc2lkZWJhciB0YWItaXRlbS5wcml2YXRlLWJyb3dzaW5nIHRhYi1sYWJlbDpiZWZvcmUgewogIGNvbnRlbnQ6ICLwn5W2IjsKfQoqLwoKLmNsb3NlYm94IHsKICBkaXNwbGF5OiBub25lOwp9CgovKgo6cm9vdC5zaWRlYmFyIHRhYi1pdGVtIHRhYi1sYWJlbCB7CiAgZGlzcGxheTogbm9uZTsKfQoKOnJvb3Quc2lkZWJhcjpob3ZlciB0YWItaXRlbSB0YWItbGFiZWwgewogIGRpc3BsYXk6IGJsb2NrOwp9CiovCgo6cm9vdC5oYXZlLXBpbm5lZC10YWJzICNhbGwtdGFicyB7CiAgYm9yZGVyLXRvcDogNHB4IHNvbGlkIHZhcigtLXNoYWRvdy1jb2xvcik7Cn0KCnRhYi1pdGVtLnBpbm5lZCB7CiAgYm9yZGVyLXJpZ2h0OiBub25lOwp9Cgp0YWItaXRlbTpob3ZlciAuY2xvc2Vib3ggewogIGRpc3BsYXk6IGJsb2NrOwp9Cgp0YWItaXRlbS5waW5uZWQgLmhpZ2hsaWdodGVyOjpiZWZvcmUgewogIGJhY2tncm91bmQ6ICMyMGEwNDA7Cn0gCgoudHdpc3R5IHsKICBtYXJnaW4tbGVmdDogLTRweDsKICBtaW4td2lkdGg6IDE0cHg7CiAgbWF4LXdpZHRoOiAxNHB4Owp9CgoudHdpc3R5OjpiZWZvcmUgewogIG1pbi13aWR0aDogMTRweCAhaW1wb3J0YW50OwogIG1heC13aWR0aDogMTRweCAhaW1wb3J0YW50Owp9",
+  "configsVersion": 14,
+  "faviconizePinnedTabs": false,
+  "lastConfirmedToCloseTabs": 1594337706485,
+  "lastDraggedTabs": {
+    "tabIds": [
+      2
+    ],
+    "urlsDigest": "dad71273517355eaa5e1830ec00fe9138386c041"
+  },
+  "notifiedFeaturesVersion": 6,
+  "optionsExpandedSections": [
+    "section-advanced",
+    "section-addons",
+    "section-debug",
+    "section-appearance"
+  ],
+  "style": "plain",
+  "userStyleRules": ""
+}
