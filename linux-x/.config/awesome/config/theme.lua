@@ -128,9 +128,9 @@ theme.notification_icon_size = dpi(48)
 
 -- custom property string
 -- Interesting fonts: Hack, Iosevka SS08 (or SS03), Lato, Quicksand, Lobster Two, Purisa, Dosis
-theme.fontname_normal = "Iosevka XY"
+theme.fontname_normal = "Iosevka XY Slab"
 -- custom property string
-theme.fontname_mono = "Iosevka XY"
+theme.fontname_mono = "Iosevka XY Slab"
 -- custom property number
 theme.fontsize_normal = 11
 theme.fontsize_small = 9
