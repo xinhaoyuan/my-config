@@ -223,56 +223,57 @@ local function rounded_rect_with_corners(cr, width, height, radius, corners)
 end
 
 local function with_border(args)
-    args = args or nil
-    local directions = border.directions{
-        args.top and "top",
-        args.left and "left",
-        args.right and "right",
-        args.bottom and "bottom"
-    }
-    local corners = {
-        top_left = args.top and args.left,
-        top_right = args.top and args.right,
-        bottom_left = args.bottom and args.left,
-        bottom_right = args.bottom and args.right
-    }
-    return wibox.widget {
+    args = args or {}
+    local widget
+    widget = wibox.widget {
         {
             {
                 args.widget,
                 bg = beautiful.bg_normal,
-                -- shape = beautiful.border_radius ~= nil and
-                --     function (cr, width, height)
-                --         rounded_rect_with_corners(cr, width, height,
-                --                      beautiful.border_radius -
-                --                          beautiful.border_width,
-                --                      corners)
-                --     end,
+                shape = beautiful.border_radius ~= nil and
+                    function (cr, width, height)
+                        rounded_rect_with_corners(cr, width, height,
+                                     beautiful.border_radius -
+                                         beautiful.border_width,
+                                         {
+                                             top_left = widget.widget.top > 0 and widget.widget.left > 0,
+                                             top_right = widget.widget.top > 0 and widget.widget.right > 0,
+                                             bottom_left = widget.widget.bottom > 0 and widget.widget.left > 0,
+                                             bottom_right = widget.widget.bottom > 0 and widget.widget.right > 0,
+                        })
+                    end,
                 widget = wibox.container.background
             },
             top = args.top and beautiful.border_width,
             left = args.left and beautiful.border_width,
             right = args.right and beautiful.border_width,
-            buttom = args.right and beautiful.border_width,
+            bottom = args.bottom and beautiful.border_width,
             draw_empty = args.draw_empty,
             widget = fixed_margin,
         },
         bgimage = function (context, cr, width, height)
-            border:draw({ -- theme = border_theme,
+            border:draw({ theme = border_theme,
                           color = beautiful.border_focus }, cr, width, height,
-                directions)
+                border.directions{
+                    widget.widget.top > 0 and "top",
+                    widget.widget.left > 0 and "left",
+                    widget.widget.right > 0 and "right",
+                    widget.widget.bottom > 0 and "bottom"
+            })
         end,
-        -- shape = beautiful.border_radius ~= nil and
-        --     function (cr, width, height)
-        --         rounded_rect_with_corners(cr, width, height,
-        --                                   beautiful.border_radius, corners)
-        --     end,
+        shape = beautiful.border_radius ~= nil and
+            function (cr, width, height)
+                rounded_rect_with_corners(cr, width, height,
+                                          beautiful.border_radius, {
+                                              top_left = widget.widget.top > 0 and widget.widget.left > 0,
+                                              top_right = widget.widget.top > 0 and widget.widget.right > 0,
+                                              bottom_left = widget.widget.bottom > 0 and widget.widget.left > 0,
+                                              bottom_right = widget.widget.bottom > 0 and widget.widget.right > 0,
+                })
+            end,
         widget = wibox.container.background
     }
-end
-
-local function with_top_border(widget)
-    return with_border { widget = widget, top = true }
+    return widget
 end
 
 local space_filler_with_left_right_borders = wibox.widget {
@@ -404,34 +405,50 @@ local function setup_screen(scr)
    right_layout:add(clock)
 
    local layout
-
+   local left_margin_container, middle_margin_container, right_margin_container
    if beautiful.bar_style == "minimal" then
-       layout = with_top_border {
-           left_layout,
-           {
-               tasklist_with_fallback,
-               ["content_fill_"..direction_index[shared.var.bar_position]] = true,
-               widget = wibox.container.place,
+       layout = with_border {
+           widget = {
+               left_layout,
+               {
+                   tasklist_with_fallback,
+                   ["content_fill_"..direction_index[shared.var.bar_position]] = true,
+                   widget = wibox.container.place,
+               },
+               {
+                   right_layout,
+                   [direction_index[shared.var.bar_position] == "horizontal" and "left" or "top"] = dpi(5),
+                   widget = wibox.container.margin,
+               },
+               layout = wibox.layout.align[direction_index[shared.var.bar_position]],
            },
-           {
-               right_layout,
-               [direction_index[shared.var.bar_position] == "horizontal" and "left" or "top"] = dpi(5),
-               widget = wibox.container.margin,
-           },
-           layout = wibox.layout.align[direction_index[shared.var.bar_position]],
+           top = true
        }
    else
-       local middle = with_top_border {
-           tasklist_with_fallback,
-           bg = beautiful.bg_normal,
-           widget = wibox.container.background,
+       middle_margin_container = with_border {
+           widget = {
+               tasklist_with_fallback,
+               bg = beautiful.bg_normal,
+               widget = wibox.container.background,
+           },
+           top = true
+       }
+       left_margin_container = with_border {
+           widget = left_layout,
+           top = true,
+       }
+       right_margin_container = with_border {
+           id = "right_margin_container",
+           widget = wibox.widget {
+               right_layout,
+               left = dpi(5),
+               widget = fixed_margin
+           },
+           top = true,
        }
        layout = wibox.widget {
            {
-               with_border {
-                   widget = left_layout,
-                   top = true,
-               },
+               left_margin_container,
                {
                    id = "space_filler_left",
                    buttons = root_buttons,
@@ -444,7 +461,7 @@ local function setup_screen(scr)
                layout = fixed_align[direction_index[shared.var.bar_position]]
            },
            {
-               middle,
+               middle_margin_container,
                {
                    space_filler_with_left_right_borders,
                    ["content_fill_horizontal"] = true,
@@ -465,14 +482,7 @@ local function setup_screen(scr)
                    ["content_fill_vertical"] = true,
                    widget = fixed_place
                },
-               with_border {
-                   widget = wibox.widget {
-                       right_layout,
-                       left = dpi(5),
-                       widget = fixed_margin
-                   },
-                   top = true,
-               },
+               right_margin_container,
                expand = "inside",
                layout = fixed_align[direction_index[shared.var.bar_position]]
            },
@@ -481,6 +491,9 @@ local function setup_screen(scr)
        }
    end
    scr.widgets.wibar:set_widget(layout)
+   scr.widgets.wibar.left_margin_container = left_margin_container
+   scr.widgets.wibar.right_margin_container = right_margin_container
+   scr.widgets.wibar.middle_margin_container = middle_margin_container
 end
 
 -- Avoid nested call of reset_widgets

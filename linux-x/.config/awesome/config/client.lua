@@ -269,7 +269,7 @@ local border_top = border.directions{ "top", "left", "right" }
 local function draw_tb_border_bgimage_top(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    if beautiful.border_radius > 0 then
+    if beautiful.border_radius then
         gshape.partially_rounded_rect(cr, width, height + beautiful.border_radius, true, true, false, false, beautiful.border_radius)
         cr:clip()
     end
@@ -281,7 +281,7 @@ local border_bottom = border.directions{ "bottom", "left", "right" }
 local function draw_tb_border_bgimage_bottom(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    if beautiful.border_radius > 0 then
+    if beautiful.border_radius then
         cr:translate(0, -beautiful.border_radius)
         gshape.partially_rounded_rect(cr, width, height + beautiful.border_radius, false, false, true, true, beautiful.border_radius)
         cr:clip()

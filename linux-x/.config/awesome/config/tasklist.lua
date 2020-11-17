@@ -119,6 +119,14 @@ local space_filler_with_left_right_borders = wibox.widget {
     widget = wibox.container.background
 }
 
+local space_filler = wibox.widget {
+    {
+        forced_width = beautiful.useless_gap,
+        widget = wibox.container.constraint,
+    },
+    widget = wibox.container.background
+}
+
 local space_filler_with_left_right_borders_no_min = wibox.widget {
     bgimage = function (context, cr, width, height)
         -- TODO: Support rotation.
@@ -137,6 +145,10 @@ local space_filler_with_left_right_borders_no_min = wibox.widget {
             border.directions{ left_index[shared.var.bar_position], top_index[shared.var.bar_position] })
         cr:restore()
     end,
+    widget = wibox.container.background
+}
+
+local space_filler_no_min = wibox.widget {
     widget = wibox.container.background
 }
 
@@ -493,6 +505,42 @@ local tasklist_template = {
     update_callback = tasklist_update_function,
 }
 
+local function set_expanded(tasklist_wibar)
+    local space_filler_left = tasklist_wibar.widget:get_children_by_id("space_filler_left")[1]
+    local space_filler_right = tasklist_wibar.widget:get_children_by_id("space_filler_right")[1]
+    space_filler_left:set_children({space_filler_left_with_top_border})
+    space_filler_right:set_children({space_filler_right_with_top_border})
+
+    tasklist_wibar.left_margin_container.widget.right = 0
+    tasklist_wibar.middle_margin_container.widget.left = 0
+    tasklist_wibar.middle_margin_container.widget.right = 0
+    tasklist_wibar.right_margin_container.widget.left = 0
+end
+
+local function set_splitted_no_min(tasklist_wibar)
+    local space_filler_left = tasklist_wibar.widget:get_children_by_id("space_filler_left")[1]
+    local space_filler_right = tasklist_wibar.widget:get_children_by_id("space_filler_right")[1]
+    space_filler_left:set_children({space_filler_no_min})
+    space_filler_right:set_children({space_filler_no_min})
+
+    tasklist_wibar.left_margin_container.widget.right = beautiful.border_width
+    tasklist_wibar.middle_margin_container.widget.left = beautiful.border_width
+    tasklist_wibar.middle_margin_container.widget.right = beautiful.border_width
+    tasklist_wibar.right_margin_container.widget.left = beautiful.border_width
+end
+
+local function set_splitted(tasklist_wibar)
+    local space_filler_left = tasklist_wibar.widget:get_children_by_id("space_filler_left")[1]
+    local space_filler_right = tasklist_wibar.widget:get_children_by_id("space_filler_right")[1]
+    space_filler_left:set_children({space_filler})
+    space_filler_right:set_children({space_filler})
+
+    tasklist_wibar.left_margin_container.widget.right = beautiful.border_width
+    tasklist_wibar.middle_margin_container.widget.left = beautiful.border_width
+    tasklist_wibar.middle_margin_container.widget.right = beautiful.border_width
+    tasklist_wibar.right_margin_container.widget.left = beautiful.border_width
+end
+
 function module.create(scr)
     local tasklist -- leave it there for reference inside its definition.
     tasklist = awful.widget.tasklist {
@@ -532,33 +580,21 @@ function module.create(scr)
                 end
 
                 -- tasklist.expand_space = should_expand
-                local space_filler_left = scr.widgets.wibar.widget:get_children_by_id("space_filler_left")[1]
-                local space_filler_right = scr.widgets.wibar.widget:get_children_by_id("space_filler_right")[1]
                 if should_expand then
-                    space_filler_left:set_children({space_filler_left_with_top_border})
-                    space_filler_right:set_children({space_filler_right_with_top_border})
-                elseif #clients == 0 then
-                    space_filler_left:set_children({space_filler_with_left_right_borders_no_min})
-                    space_filler_right:set_children({space_filler_with_left_right_borders_no_min})
+                    set_expanded(scr.widgets.wibar)
+                -- elseif #clients == 0 then
+                --     set_splitted_no_min(scr.widgets.wibar)
                 else
-                    space_filler_left:set_children({space_filler_with_left_right_borders})
-                    space_filler_right:set_children({space_filler_with_left_right_borders})
+                    set_splitted(scr.widgets.wibar)
                 end
             elseif beautiful.bar_style == "split" then
-                local space_filler_left = scr.widgets.wibar.widget:get_children_by_id("space_filler_left")[1]
-                local space_filler_right = scr.widgets.wibar.widget:get_children_by_id("space_filler_right")[1]
-                if #clients == 0 then
-                    space_filler_left:set_children({space_filler_with_left_right_borders_no_min})
-                    space_filler_right:set_children({space_filler_with_left_right_borders_no_min})
-                else
-                    space_filler_left:set_children({space_filler_with_left_right_borders})
-                    space_filler_right:set_children({space_filler_with_left_right_borders})
-                end
+                -- if #clients == 0 then
+                --     set_splitted_no_min(scr.widgets.wibar)
+                -- else
+                    set_splitted(scr.widgets.wibar)
+                -- end
             elseif beautiful.bar_style == "simple" then
-                local space_filler_left = scr.widgets.wibar.widget:get_children_by_id("space_filler_left")[1]
-                local space_filler_right = scr.widgets.wibar.widget:get_children_by_id("space_filler_right")[1]
-                space_filler_left:set_children({space_filler_left_with_top_border})
-                space_filler_right:set_children({space_filler_right_with_top_border})
+                set_expanded(scr.widgets.wibar)
             end
 
             awful.widget.common.list_update(w, b, l, d, clients, args)
