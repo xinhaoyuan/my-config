@@ -290,13 +290,17 @@ local sep_color = gcolor(acolor(theme.fg_normal):blend_with(acolor(theme.bg_norm
 theme.sep_widget = wibox.widget {
     background = beautiful.bg_normal,
     bgimage = function(context, cr, width, height)
-        local dot_r = dpi(2)
+        local dot_r = dpi(1)
         cr:set_source(sep_color)
-        cr:move_to(width / 2, height / 4)
-        cr:line_to(width / 2, 3 * height / 4)
-        cr:stroke()
+        -- cr:move_to(width / 2, height / 4)
+        -- cr:line_to(width / 2, 3 * height / 4)
+        -- cr:stroke()
         -- cr:arc(width / 2, height / 2, dot_r, 0, 2 * math.pi)
         -- cr:fill()
+        cr:move_to(width / 2, width / 2)
+        cr:line_to(width / 2, height - width / 2)
+        cr:set_dash({dpi(2), dpi(2)})
+        cr:stroke()
     end,
     widget = wibox.container.background
 }
