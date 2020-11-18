@@ -18,7 +18,7 @@ local gshape = require("gears.shape")
 local gcolor = require("gears.color")
 local gmath = require("gears.math")
 local waffle = require("waffle")
-local calendar = require("calendar.calendar")
+local mycalendar = require("my-calendar")
 local dpi = require("beautiful.xresources").apply_dpi
 local yams = require("yams")
 local yams_switcher = yams.create{opacity_other = 1, panel = false}
@@ -331,7 +331,7 @@ local cal_widget = wibox.widget {
             widget = wibox.container.margin
         }
     end,
-    widget = wibox.widget.calendar.month
+    widget = mycalendar.month
 }
 
 local cal_popup = awful.popup {
@@ -452,20 +452,6 @@ local function setup_screen(scr)
    end
    clock.align = "center"
    clock:set_font(beautiful.font)
-   local calendar_widget = calendar({
-         fdow = 7,
-         html = "<span font_desc='" .. beautiful.font_mono .. "'>\n%s</span>",
-         today_color = beautiful.special_normal,
-   })
-   if shared.var.bar_position == "bottom" then
-       calendar_widget.position = "bottom_right"
-   elseif shared.var.bar_position == "left" then
-       calendar_widget.position = "bottom_left"
-   elseif shared.var.bar_position == "top" then
-       calendar_widget.position = "top_right"
-   elseif shared.var.bar_position == "right" then
-       calendar_widget.position = "bottom_right"
-   end
    clock:connect_signal('mouse::enter', function() cal_popup.visible = true end)
    clock:connect_signal('mouse::leave', function() cal_popup.visible = false end)
    clock:buttons(awful.util.table.join(
