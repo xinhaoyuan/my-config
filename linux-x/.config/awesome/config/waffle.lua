@@ -216,7 +216,7 @@ else
     border_theme.inner_space = beautiful.border_radius - beautiful.border_width + beautiful.border_inner_space
 end
 
-local sep_color = gcolor(acolor(beautiful.fg_normal):blend_with(acolor(beautiful.bg_normal), 0.6):to_string())
+local sep_color = gcolor(acolor(beautiful.fg_normal):blend_with(acolor(beautiful.bg_normal), 0.75):to_string())
 local decorate_border = border.directions { "top", "bottom", "left", "right" }
 local function decorate_panel(args)
     if args.top_sep then

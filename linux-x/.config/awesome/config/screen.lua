@@ -301,6 +301,71 @@ local space_filler_with_left_right_borders = wibox.widget {
     widget = wibox.container.background
 }
 
+-- Calendar popup
+
+local cal_widget = wibox.widget {
+    date = os.date('*t'),
+    font = beautiful.font,
+    week_numbers = true,
+    -- start_sunday = true,
+    long_weekdays = true,
+    spacing = 0,
+    fn_embed = function (widget, flag, date)
+        if flag == 'header' then
+            widget.font = beautiful.fontname_normal..' 12'
+        elseif flag == 'focus' then
+            return wibox.widget {
+                {
+                    widget,
+                    margins = dpi(2),
+                    widget = wibox.container.margin
+                },
+                fg = beautiful.fg_focus,
+                bg = beautiful.bg_focus,
+                widget = wibox.container.background
+            }
+        end
+        return wibox.widget {
+            widget,
+            margins = dpi(2),
+            widget = wibox.container.margin
+        }
+    end,
+    widget = wibox.widget.calendar.month
+}
+
+local cal_popup = awful.popup {
+    widget = wibox.widget {
+        with_border {
+            widget = cal_widget,
+            top = true,
+            bottom = true,
+            left = true,
+            right = true,
+        },
+        margins = beautiful.useless_gap,
+        widget = wibox.container.margin
+    },
+    placement = function (d) awful.placement.bottom_right(d, {honor_workarea=true}) end,
+    bg = "#00000000",
+    ontop = true,
+    visible = false,
+}
+
+local function cal_reset()
+    cal_widget:set_date(nil)
+    cal_widget:set_date(os.date('*t'))
+end
+
+local function cal_switch(delta)
+    local date = cal_widget:get_date()
+    if delta.day ~= nil then date.day = date.day + delta.day end
+    if delta.month ~= nil then date.month = date.month + delta.month end
+    if delta.year ~= nil then date.year = date.year + delta.year end
+    cal_widget:set_date(nil)
+    cal_widget:set_date(date)
+end
+
 local function setup_screen(scr)
    scr.mypromptbox = awful.widget.prompt()
 
@@ -401,7 +466,19 @@ local function setup_screen(scr)
    elseif shared.var.bar_position == "right" then
        calendar_widget.position = "bottom_right"
    end
-   calendar_widget:attach(clock)
+   clock:connect_signal('mouse::enter', function() cal_popup.visible = true end)
+   clock:connect_signal('mouse::leave', function() cal_popup.visible = false end)
+   clock:buttons(awful.util.table.join(
+                     awful.button({         }, 1, function() cal_switch({ month = -1 }) end),
+                     awful.button({         }, 2, function() cal_reset() end),
+                     awful.button({         }, 3, function() cal_switch({ month =  1 }) end),
+                     awful.button({         }, 4, function() cal_switch({ month =  -1 }) end),
+                     awful.button({         }, 5, function() cal_switch({ month =   1 }) end),
+                     awful.button({ 'Shift' }, 1, function() cal_switch({ year = -1 }) end),
+                     awful.button({ 'Shift' }, 3, function() cal_switch({ year =  1 }) end),
+                     awful.button({ 'Shift' }, 4, function() cal_switch({ year = -1 }) end),
+                     awful.button({ 'Shift' }, 5, function() cal_switch({ year =  1 }) end)
+   ))
    right_layout:add(clock)
 
    local layout

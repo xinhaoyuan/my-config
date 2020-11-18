@@ -286,7 +286,7 @@ theme.bar_style = "auto"
 theme.bar_styles = {"simple", "split", "auto"}
 theme.tasklist_plain_task_name = true
 
-local sep_color = gcolor(acolor(theme.fg_normal):blend_with(acolor(theme.bg_normal), 0.6):to_string())
+local sep_color = gcolor(acolor(theme.fg_normal):blend_with(acolor(theme.bg_normal), 0.75):to_string())
 theme.sep_widget = wibox.widget {
     background = beautiful.bg_normal,
     bgimage = function(context, cr, width, height)
