@@ -502,10 +502,18 @@ do
    }
 
    local function on_output(stdout)
-       local total, available = stdout:match('MemTotal:%s+([0-9]+) .*MemAvailable:%s+([0-9]+)')
-       local usage = math.floor((total - available) / total * 100 + 0.5)
+       local mem = {}
+       for line in string.gmatch(stdout,"[^\r\n]+") do
+           local key, value = line:match("(.*):%s+([0-9]+) .*")
+           mem[key] = value
+       end
+       -- Match the calculation in htop.
+       local total = mem["MemTotal"]
+       local cached = mem["Cached"] + mem["SReclaimable"] - mem["Shmem"]
+       local used = total - mem["MemFree"] - mem["Buffers"] - cached
+       local usage = math.floor(used / total * 100 + 0.5)
 
-       local markup = "<span font_desc='" .. font_info .. "'>" .. format_size((total - available) * 1000) .. "B</span>"
+       local markup = "<span font_desc='" .. font_info .. "'>" .. format_size(used * 1024) .. "B</span>"
        -- widget:get_children_by_id("text")[1]:set_markup(markup)
        -- widget:get_children_by_id("graph")[1]:add_value(usage)
        ram_text_widget:set_markup(markup)
@@ -517,7 +525,7 @@ do
        call_now = true,
        autostart = true,
        callback = function ()
-           awful.spawn.easy_async({"egrep", "-e", "MemTotal:|MemAvailable:", "/proc/meminfo"}, on_output)
+           awful.spawn.easy_async({"egrep", "-e", "MemTotal:|MemFree:|Buffers:|Cached:|Shmem:|SReclaimable", "/proc/meminfo"}, on_output)
        end,
    }
 end
