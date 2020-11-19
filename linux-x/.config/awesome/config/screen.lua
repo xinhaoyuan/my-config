@@ -346,11 +346,25 @@ local cal_popup = awful.popup {
         margins = beautiful.useless_gap,
         widget = wibox.container.margin
     },
-    placement = function (d) awful.placement.bottom_right(d, {honor_workarea=true}) end,
+    -- TODO: find out how to do this properly
+    placement = function (d)
+            local _, corner = awful.placement.closest_corner(mouse, {pretend=true})
+            awful.placement[corner](d, {honor_workarea=true})
+    end,
     bg = "#00000000",
     ontop = true,
     visible = false,
 }
+
+local function cal_show()
+    local _, corner = awful.placement.closest_corner(mouse, {pretend=true})
+    awful.placement[corner](cal_popup, {honor_workarea=true})
+    cal_popup.visible = true
+end
+
+local function cal_hide()
+    cal_popup.visible = false
+end
 
 local function cal_reset()
     cal_widget:set_date(nil)
@@ -452,8 +466,8 @@ local function setup_screen(scr)
    end
    clock.align = "center"
    clock:set_font(beautiful.font)
-   clock:connect_signal('mouse::enter', function() cal_popup.visible = true end)
-   clock:connect_signal('mouse::leave', function() cal_popup.visible = false end)
+   clock:connect_signal('mouse::enter', function() cal_show() end)
+   clock:connect_signal('mouse::leave', function() cal_hide() end)
    clock:buttons(awful.util.table.join(
                      awful.button({         }, 1, function() cal_switch({ month = -1 }) end),
                      awful.button({         }, 2, function() cal_reset() end),
