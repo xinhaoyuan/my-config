@@ -349,7 +349,7 @@ local cal_popup = awful.popup {
     -- TODO: find out how to do this properly
     placement = function (d)
             local _, corner = awful.placement.closest_corner(mouse, {pretend=true})
-            awful.placement[corner](d, {honor_workarea=true})
+            awful.placement[corner](d, {bounding_rect=mouse.screen.workarea})
     end,
     bg = "#00000000",
     ontop = true,
@@ -358,7 +358,7 @@ local cal_popup = awful.popup {
 
 local function cal_show()
     local _, corner = awful.placement.closest_corner(mouse, {pretend=true})
-    awful.placement[corner](cal_popup, {honor_workarea=true})
+    awful.placement[corner](cal_popup, {bounding_rect=mouse.screen.workarea})
     cal_popup.visible = true
 end
 
