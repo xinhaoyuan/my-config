@@ -359,10 +359,9 @@ local function delayed_update_shape(c)
     if c.container_shape_update_scheduled == nil then
         c.container_shape_update_scheduled = true
         gtimer.delayed_call(function ()
-                if c.valid then
-                    update_shape(c)
-                    c.container_shape_update_scheduled = nil
-                end
+                if not c.valid then return end
+                update_shape(c)
+                c.container_shape_update_scheduled = nil
         end)
     end
 end
