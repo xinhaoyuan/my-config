@@ -508,6 +508,7 @@ local function setup_screen(scr)
                bg = beautiful.bg_normal,
                widget = wibox.container.background,
            },
+           draw_empty = false,
            top = true
        }
        left_margin_container = with_border {
@@ -537,19 +538,7 @@ local function setup_screen(scr)
                expand = "inside",
                layout = fixed_align[direction_index[shared.var.bar_position]]
            },
-           {
-               middle_margin_container,
-               {
-                   space_filler_with_left_right_borders,
-                   ["content_fill_horizontal"] = true,
-                   ["content_fill_vertical"] = true,
-                   ["fill_horizontal"] = true,
-                   ["fill_vertical"] = true,
-                   widget = fixed_place
-               },
-               draw_last = true,
-               widget = fallback,
-           },
+           middle_margin_container,
            {
                nil,
                {
