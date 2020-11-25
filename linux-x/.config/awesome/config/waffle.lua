@@ -1275,17 +1275,12 @@ end
 
 local orgenda_widget
 do
-    local orgenda_lines = {}
-    local orgenda_text = wibox.widget {
-        font = font_info,
-        ellipsize = "end",
-        align = "left",
-        wrap = "word_char",
-        widget = wibox.widget.textbox
+    local todo_item_container = wibox.widget {
+        widget = wibox.layout.fixed.vertical
     }
     orgenda_widget = wibox.widget {
         {
-            orgenda_text,
+            todo_item_container,
             margins = button_padding,
             draw_empty = false,
             widget = fixed_margin,
@@ -1295,7 +1290,7 @@ do
     }
 
     local function render_priority(pri)
-        return ({ "+", "*", "#" })[pri]
+        return ({ " +", " *","<span foreground='"..beautiful.fg_urgent.."' background='"..beautiful.bg_urgent.."'>!!</span>" })[pri]
     end
 
     local function render_orgenda_items(items)
@@ -1310,17 +1305,62 @@ do
         return lines
     end
 
+    local todo_item_widget_cache = {}
+
+    local function get_todo_item_widget(item, cache_key)
+        if todo_item_widget_cache[cache_key] == nil then
+            todo_item_widget_cache[cache_key] = wibox.widget {
+                {
+                    {
+                        markup = render_priority(item.priority)..' ',
+                        font = font_info,
+                        widget = wibox.widget.textbox
+                    },
+                    valign = "top",
+                    widget = wibox.container.place
+                },
+                {
+                    item.date and {
+                        markup = '<b>['..tostring(item.date)..']</b>',
+                        font = font_info,
+                        widget = wibox.widget.textbox
+                                  },
+                    {
+                        text = item.text,
+                        font = font_info,
+                        ellipsize = "end",
+                        align = "left",
+                        wrap = "word_char",
+                        widget = wibox.widget.textbox
+                    },
+                    widget = wibox.layout.fixed.vertical
+                },
+                widget = wibox.layout.fixed.horizontal
+            }
+        end
+        return todo_item_widget_cache[cache_key]
+    end
+
     orgenda.topic:connect_signal(
         "update",
         function (_, path, items)
-            orgenda_lines[path] = render_orgenda_items(items)
-            local lines = {}
-            for k, v in pairs(orgenda_lines) do
-                for _, l in ipairs(v) do
-                    table.insert(lines, l)
+            todo_item_container:reset()
+            local cache_keys = {}
+            for index, item in ipairs(items) do
+                local cache_key = tostring(item.date)..':'..tostring(item.priority)..':'..item.text
+                cache_keys[cache_key] = true
+                todo_item_container:add(get_todo_item_widget(item, cache_key))
+            end
+            for k, v in pairs(todo_item_widget_cache) do
+                if not cache_keys[k] then
+                    todo_item_widget_cache[k] = nil
                 end
             end
-            orgenda_text.markup = table.concat(lines, "\n")
+            -- local count = 0
+            -- for _, _ in pairs(todo_item_widget_cache) do
+            --     count = count + 1
+            -- end
+            -- print(tostring(count)..' items remaining in the cache')
         end
     )
 end
