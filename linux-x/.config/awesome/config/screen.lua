@@ -115,6 +115,7 @@ local fortune_widget = wibox.widget {
     valign = "center",
     align = "center",
     forced_height = beautiful.bar_height,
+    buttons = awful.util.table.join(awful.button({ }, 3, function () waffle:show(nil, { anchor = "mouse" }) end)),
     widget = wibox.widget.textbox
 }
 fortune_widget.watch = require("watchcommand").create({"fortune", "-s"}, 300)
