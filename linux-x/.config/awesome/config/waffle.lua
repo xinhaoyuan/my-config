@@ -349,6 +349,37 @@ local waffle_shutdown_view = view {
 }
 
 local waffle_settings_view
+local waffle_tray_view
+local waffle_tray_wrapper = wibox.widget {
+    margins = beautiful.border_width,
+    widget = wibox.container.margin
+}
+local function show_tray_view()
+    -- waffle_tray_wrapper.widget = shared.screen.detach_tray_widget()
+    -- waffle:show(waffle_tray_view, { push = true })
+
+    local widget = { layout = wibox.layout.fixed.vertical }
+    for index, info in ipairs(awesome.systray_list()) do
+        table.insert(widget, button {
+                         text = info[2],
+                         indicator = em(tostring(index)),
+                         key = tostring(index),
+                         action = function (alt)
+                             awful.spawn({'activate-tray-window', tostring(info[1]), alt and '1' or ''}, false)
+                             waffle:hide()
+                         end,
+        })
+    end
+
+    waffle:show(view {
+                    root = decorate_waffle(
+                        decorate_panel {
+                            widget = wibox.widget(widget)
+                        }
+                    )
+                     },
+                { push = true })
+end
 
 local cpu_widget_width = (waffle_width - button_padding) / 2 - button_height - button_padding * 2
 local cpu_widget
@@ -1290,7 +1321,7 @@ do
     }
 
     local function render_priority(pri)
-        return ({ " +", " *","<span foreground='"..beautiful.fg_urgent.."' background='"..beautiful.bg_urgent.."'>!!</span>" })[pri]
+        return ({ " +", " *","<span foreground='"..beautiful.fg_urgent.."' background='"..beautiful.bg_urgent.."'><b>!!</b></span>" })[pri]
     end
 
     local function render_orgenda_items(items)
@@ -1540,6 +1571,15 @@ local waffle_root_action_widget = decorate_panel {
                     waffle:show(waffle_settings_view, { push = true })
                 end,
         }),
+        button({
+                icon = gcolor.recolor_image(icons.setup, beautiful.fg_normal),
+                markup = "Tray",
+                indicator = em("r"),
+                key = "r",
+                action = function (alt)
+                    show_tray_view()
+                end,
+        }),
         layout = wibox.layout.fixed.vertical,
     }
 }
@@ -1705,6 +1745,19 @@ waffle_settings_view = view {
             }
     }),
 }
+
+-- Unused.
+waffle_tray_view = view {
+    root = decorate_waffle(
+        decorate_panel {
+            widget = waffle_tray_wrapper
+    }),
+    on_close = function()
+        waffle_tray_wrapper.widget = nil
+        shared.screen.attach_tray_widget()
+    end
+}
+ 
 
 local sticky_cache
 local sticky_label = wibox.widget {

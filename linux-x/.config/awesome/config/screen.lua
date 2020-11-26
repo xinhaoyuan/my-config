@@ -157,6 +157,20 @@ local my_tray
 my_tray = wibox.widget.systray()
 my_tray.horizontal = direction_index[shared.var.bar_position] == "horizontal"
 my_tray.base_size = beautiful.bar_height
+local bar_tray_wrapper = wibox.widget {
+    my_tray,
+    widget = wibox.container.background
+}
+
+function shared.screen.detach_tray_widget()
+    bar_tray_wrapper.widget = nil
+    return my_tray
+end
+
+function shared.screen.attach_tray_widget()
+    bar_tray_wrapper.widget = my_tray
+end
+
 local my_tag_list_buttons = awful.util.table.join(
    awful.button({ }, 1, switch_to_or_go_last),
    awful.button({ "Mod4" }, 1, awful.client.movetotag),
@@ -455,8 +469,8 @@ local function setup_screen(scr)
       layout         = wibox.layout.fixed[direction_index[shared.var.bar_position]]
    }
 
-   if scr == primary_screen and my_tray ~= nil then
-       right_layout:add(my_tray)
+   if scr == primary_screen then
+       right_layout:add(bar_tray_wrapper)
    end
 
    local clock

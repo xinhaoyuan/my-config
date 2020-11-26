@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -euf -o pipefail
+
+window=$1
+if [ -z "$2" ]; then
+    button=3
+else
+    button=1
+fi
+
+xdotool mousemove -w "$window" 0 0 click "$button"
