@@ -1550,6 +1550,15 @@ local waffle_root_action_widget = decorate_panel {
                 end
         }),
         button({
+                icon = gcolor.recolor_image(icons.dots, beautiful.fg_normal),
+                markup = "Tray",
+                indicator = em("r"),
+                key = "r",
+                action = function (alt)
+                    show_tray_view()
+                end,
+        }),
+        button({
                 icon = gcolor.recolor_image(icons.fortune, beautiful.fg_normal),
                 markup = "Fortune",
                 indicator = em("f"),
@@ -1569,15 +1578,6 @@ local waffle_root_action_widget = decorate_panel {
                 key = "s",
                 action = function (alt)
                     waffle:show(waffle_settings_view, { push = true })
-                end,
-        }),
-        button({
-                icon = gcolor.recolor_image(icons.setup, beautiful.fg_normal),
-                markup = "Tray",
-                indicator = em("r"),
-                key = "r",
-                action = function (alt)
-                    show_tray_view()
                 end,
         }),
         layout = wibox.layout.fixed.vertical,

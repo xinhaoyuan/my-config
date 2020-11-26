@@ -16,7 +16,7 @@ icons.file_manager = local_path .. "file_manager.svg"
 icons.setup = local_path .. "setup.svg"
 icons.battery_full = local_path .. "battery-full.svg"
 icons.battery_half = local_path .. "battery-half.svg"
-
+icons.dots = local_path .. "dots.svg"
 icons.lock = local_path .. "lock.svg"
 icons.sleep = local_path .. "sleep.svg"
 icons.poweroff = local_path .. "poweroff.svg"
