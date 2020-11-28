@@ -354,6 +354,15 @@ local waffle_tray_wrapper = wibox.widget {
     margins = beautiful.border_width,
     widget = wibox.container.margin
 }
+local function get_tray_item_key(index)
+    if index < 10 then
+        return tostring(index)
+    elseif index < 36 then
+        return string.char(87 + index)
+    else
+        return nil
+    end
+end
 local function show_tray_view()
     -- waffle_tray_wrapper.widget = shared.screen.detach_tray_widget()
     -- waffle:show(waffle_tray_view, { push = true })
@@ -362,8 +371,8 @@ local function show_tray_view()
     for index, info in ipairs(awesome.systray_list()) do
         table.insert(widget, button {
                          text = info[2],
-                         indicator = em(tostring(index)),
-                         key = tostring(index),
+                         indicator = em(get_tray_item_key(index)),
+                         key = get_tray_item_key(index),
                          action = function (alt)
                              awful.spawn({'activate-tray-window', tostring(info[1]), alt and '1' or ''}, false)
                              waffle:hide()
@@ -1359,9 +1368,10 @@ do
                     {
                         text = item.text,
                         font = font_info,
-                        ellipsize = "end",
+                        ellipsize = "none",
                         align = "left",
                         wrap = "word_char",
+                        forced_width = waffle_width, -- Needed to calculate the extents properly.
                         widget = wibox.widget.textbox
                     },
                     widget = wibox.layout.fixed.vertical
