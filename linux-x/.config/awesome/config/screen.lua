@@ -371,19 +371,20 @@ local cal_popup = awful.popup {
     visible = false,
 }
 
+local function cal_reset()
+    cal_widget:set_date(nil)
+    cal_widget:set_date(os.date('*t'))
+end
+
 local function cal_show()
     local _, corner = awful.placement.closest_corner(mouse, {pretend=true})
     awful.placement[corner](cal_popup, {bounding_rect=mouse.screen.workarea})
+    cal_reset()
     cal_popup.visible = true
 end
 
 local function cal_hide()
     cal_popup.visible = false
-end
-
-local function cal_reset()
-    cal_widget:set_date(nil)
-    cal_widget:set_date(os.date('*t'))
 end
 
 local function cal_switch(delta)
