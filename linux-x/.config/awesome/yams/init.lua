@@ -41,8 +41,14 @@ local function create(config)
         config.same_screen = true
     end
 
-    if config.filter == nil then
-        config.filter = default_filter
+    if config.source == nil then
+        config.source = function(args)
+            local tablist = {}
+            for c in awful.client.iterate(default_filter, nil, config.same_screen and args.screen or nil) do
+                tablist[#tablist + 1] = c
+            end
+            return tablist
+        end
     end
 
     config.keys = config.keys or { ["Alt_L"] = "release_to_exit", ["Tab"] = "switch", ["q"] = "switch_back" }
@@ -59,7 +65,7 @@ local function create(config)
         config.panel = true
     end
 
-    local function start(screen)
+    local function start(args)
         local tablist_font_desc = beautiful.get_merged_font(
             beautiful.font, dpi(10))
         local font_color = with_alpha(gears.color(beautiful.fg_normal), 1)
@@ -68,14 +74,14 @@ local function create(config)
         local fill_color = with_alpha(gears.color(beautiful.bg_normal), 0.85)
         local fill_color_hl = with_alpha(gears.color(beautiful.bg_focus), 1)
 
-        if screen == nil then
+        if args.screen == nil then
             if capi.client.focus then
-                screen = capi.client.focus.screen
+                args.screen = capi.client.focus.screen
             else
-                screen = awful.screen.focused()
+                args.screen = awful.screen.focused()
             end
         end
-
+        local screen = args.screen
         local start_x = screen.workarea.x
         local start_y = screen.workarea.y
 
@@ -115,10 +121,7 @@ local function create(config)
         end
 
         local function initialize()
-            tablist = {}
-            for c in awful.client.iterate(config.filter, nil, config.same_screen and screen or nil) do
-                tablist[#tablist + 1] = c
-            end
+            tablist = config.source(args)
             table.sort(
                 tablist,
                 function (a, b)

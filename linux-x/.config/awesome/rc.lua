@@ -9,11 +9,14 @@ local capi = {
 }
 
 capi.client.connect_signal(
-    "unmanage",
+    "before::unmanage",
     function (c)
+        c.tomb = true
 	c.tomb_floating = c.floating
 	c.tomb_class = c.class
 	c.tomb_pid = c.pid
+        c.tomb_geometry = c:geometry()
+        c.tomb_tags = c:tags()
     end
 )
 

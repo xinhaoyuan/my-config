@@ -280,18 +280,22 @@ local function tasklist_update_function(widget, c, index, objects)
     if title_text_role ~= nil then
         title_text_role.text = c.name or "<Untitled>"
     end
-    for _, pp in ipairs(property_to_text) do
-        local key = pp[1]
-        if c.saved and c.saved[key] ~= nil then
-            prop[key] = c.saved[key]
-        elseif c[key] ~= nil then
-            prop[key] = c[key]
+    if c.cgroup and c.cgroup.current_client ~= c then
+        status_text = "G"
+    else
+        for _, pp in ipairs(property_to_text) do
+            local key = pp[1]
+            if c.saved and c.saved[key] ~= nil then
+                prop[key] = c.saved[key]
+            elseif c[key] ~= nil then
+                prop[key] = c[key]
+            end
         end
-    end
-    for _, pp in ipairs(property_to_text) do
-        local key, text = table.unpack(pp)
-        if prop[key] == true then
-            status_text = status_text .. text
+        for _, pp in ipairs(property_to_text) do
+            local key, text = table.unpack(pp)
+            if prop[key] == true then
+                status_text = status_text .. text
+            end
         end
     end
     if sb then
@@ -546,6 +550,9 @@ function module.create(scr)
     tasklist = awful.widget.tasklist {
         screen = scr,
         filter = function (c, s)
+            if c.cgroup ~= nil then
+                c = c.cgroup.current_client
+            end
             if not awful.widget.tasklist.filter.currenttags(c, s) then
                 return false
             end
@@ -560,11 +567,24 @@ function module.create(scr)
         source = function ()
             -- Sort clients with their constant ids to make the order stable.
             local cls = awful.widget.tasklist.source.all_clients()
+            local ticket = {}
+            for _, c in ipairs(cls) do
+                if c.cgroup then
+                    local old_ticket = ticket[c.cgroup]
+                    ticket[c.cgroup] = (old_ticket == nil) and c.manage_ticket or math.min(old_ticket, c.manage_ticket)
+                end
+            end
             table.sort(cls,
                        function (a, b)
                            -- this makes minimized windows appear at last
                            -- if a.minimized ~= b.minimized then return b.minimized else return a.window < b.window end
-                           return a.manage_ticket < b.manage_ticket
+                           local a_ticket = a.cgroup and ticket[a.cgroup] or a.manage_ticket
+                           local b_ticket = b.cgroup and ticket[b.cgroup] or b.manage_ticket
+                           if a_ticket == b_ticket then
+                               return a.manage_ticket < b.manage_ticket
+                           else
+                               return a_ticket < b_ticket
+                           end
                        end
             )
             return cls

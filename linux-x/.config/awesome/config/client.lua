@@ -17,6 +17,19 @@ local gcolor = require("gears.color")
 local machi = require("layout-machi")
 local border = require("border-theme")
 local cairo = require("lgi").cairo
+local cgroup = require("cgroup")
+local cgroup_switcher = require("yams").create {
+    source = function(args)
+        local r = {}
+        for c in awful.client.iterate(function (c) return c.cgroup == args.client.cgroup end) do
+            r[#r + 1] = c
+        end
+        return r
+    end,
+    keys = { ["Super_L"] = "release_to_exit", ["q"] = "switch" },
+    opacity_other = 1,
+    panel = false
+}
 
 function shared.client.titlebar_toggle(c)
    if not c.has_titlebar_enabled then
@@ -129,6 +142,29 @@ local client_keys = table_join(
     awful.key({ "Mod4" }, "-", function (c) c.sticky = not c.sticky end),
 
     awful.key({ "Mod4" }, "t", function (c) shared.client.titlebar_toggle(c) end),
+
+    awful.key({ "Mod4" }, "g", function (c)
+            local sel = nil
+            for _, other in ipairs(capi.client.get()) do
+                if c:isvisible() then
+                    if (sel == nil or sel.focus_timestamp < other.focus_timestamp) and other ~= c and (c.cgroup == nil or not c.cgroup.clients[other])then
+                        sel = other
+                    end
+                end
+            end
+            if sel then
+                cgroup.pull(sel, c)
+                c.cgroup:switch(c)
+            end
+    end),
+
+    awful.key({ "Mod4", "Shift" }, "g", function (c)
+            if c.cgroup then c.cgroup:detach(c) end
+    end),
+
+    awful.key({ "Mod4" }, "q", function (c)
+            if c.cgroup then cgroup_switcher.start{client = c} end
+    end),
 
     awful.key({ "Mod4" }, "f", function (c)
             if c.fullscreen then

@@ -645,7 +645,7 @@ gtimer {
 local global_keys = table_join(
    awful.key({ "Mod1" }, "Tab",
       function ()
-         yams_switcher.start(nil)
+          yams_switcher.start{}
    end),
    awful.key({ "Mod4" }, "/",               function () machi.default_editor.start_interactive() end),
    awful.key({ "Mod4" }, "[",               function () alayout.inc(alayout.layouts, -1) end),
@@ -707,24 +707,24 @@ local global_keys = table_join(
             end
          end
    end),
-   awful.key({ "Mod4" }, "q",               function ()
-         local to_restore = true
-         for s in capi.screen do
-            if #s.selected_tags > 0 then
-               to_restore = false
-               s.orig_selected_tags = s.selected_tags
-               awful.tag.viewnone(s)
-            end
-         end
+   -- awful.key({ "Mod4" }, "q",               function ()
+   --       local to_restore = true
+   --       for s in capi.screen do
+   --          if #s.selected_tags > 0 then
+   --             to_restore = false
+   --             s.orig_selected_tags = s.selected_tags
+   --             awful.tag.viewnone(s)
+   --          end
+   --       end
 
-         if not to_restore then return end
-         for s in capi.screen do
-            if s.orig_selected_tags ~= nil then
-               awful.tag.viewmore(s.orig_selected_tags, s)
-               s.orig_selected_tags = nil
-            end
-         end
-   end),
+   --       if not to_restore then return end
+   --       for s in capi.screen do
+   --          if s.orig_selected_tags ~= nil then
+   --             awful.tag.viewmore(s.orig_selected_tags, s)
+   --             s.orig_selected_tags = nil
+   --          end
+   --       end
+   -- end),
    awful.key({ "Mod4", "Control" }, "r",      capi.awesome.restart),
    awful.key({ "Mod4", "Control" }, "Escape", capi.awesome.quit)
 )
