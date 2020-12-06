@@ -18,14 +18,16 @@ local machi = require("layout-machi")
 local border = require("border-theme")
 local cairo = require("lgi").cairo
 local cgroup = require("cgroup")
+local function get_cgroup_client(anchor_client)
+    local r = {}
+    for c in awful.client.iterate(function (c)
+            return c.cgroup == anchor_client.cgroup
+    end) do
+        r[#r + 1] = c
+    end
+    return r
+end
 local cgroup_switcher = require("yams").create {
-    source = function(args)
-        local r = {}
-        for c in awful.client.iterate(function (c) return c.cgroup == args.client.cgroup end) do
-            r[#r + 1] = c
-        end
-        return r
-    end,
     keys = { ["Super_L"] = "release_to_exit", ["q"] = "switch" },
     opacity_other = 1,
     panel = false
@@ -163,7 +165,7 @@ local client_keys = table_join(
     end),
 
     awful.key({ "Mod4" }, "q", function (c)
-            if c.cgroup then cgroup_switcher.start{client = c} end
+            if c.cgroup then cgroup_switcher.start{clients = get_cgroup_client(c)} end
     end),
 
     awful.key({ "Mod4" }, "f", function (c)

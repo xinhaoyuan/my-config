@@ -17,11 +17,6 @@ local awful = require('awful')
 
 local cgroup = {}
 
-local function cgroup_on_client_unmanage(client)
-    if client.cgroup == nil then return end
-    client.cgroup:detach(client)
-end
-
 local function pick_other_client(cgroup)
     local pick = nil
     for c, _ in pairs(cgroup.clients) do
@@ -32,6 +27,30 @@ local function pick_other_client(cgroup)
         end
     end
     return pick
+end
+
+local function sync_clients(from_client, to_client)
+    local properties_to_sync = {
+        'floating', 'above', 'below', 'maximized_vertical', 'maximized_horizontal', 'maximized', 'fullscreen', 'minimized',
+    }
+    for _, prop in ipairs(properties_to_sync) do
+        local tomb_prop = 'tomb_'..prop
+        if from_client[tomb_prop] ~= nil then
+            to_client[prop] = from_client[tomb_prop]
+        else
+            to_client[prop] = from_client[prop]
+        end
+    end
+    to_client:geometry(from_client:geometry())
+    to_client:tags(from_client.tomb_tags or from_client:tags())
+    if from_client.tomb_focused then
+        client.focus = to_client
+    end
+end
+
+local function cgroup_on_client_unmanage(client)
+    if client.cgroup == nil then return end
+    client.cgroup:detach(client)
 end
 
 local function cgroup_on_client_minimized(client)
@@ -51,6 +70,8 @@ function cgroup:detach(client)
         if replacement ~= nil then
             self:switch(replacement)
         end
+    else
+        sync_clients(client, self.current_client)
     end
 
     client:disconnect_signal('unmanage', cgroup_on_client_unmanage)
@@ -78,25 +99,6 @@ function cgroup:attach(client)
     client:connect_signal('property::minimized', cgroup_on_client_minimized)
 
     self:emit_signal('attach', client)
-end
-
-local function sync_clients(from_client, to_client)
-    local properties_to_sync = {
-        'floating', 'maximized_vertical', 'maximized_horizontal', 'maximized', 'fullscreen', 'minimized',
-    }
-    for _, prop in ipairs(properties_to_sync) do
-        local tomb_prop = 'tomb_'..prop
-        if from_client[tomb_prop] ~= nil then
-            to_client[prop] = from_client[tomb_prop]
-        else
-            to_client[prop] = from_client[prop]
-        end
-    end
-    to_client:geometry(from_client:geometry())
-    to_client:tags(from_client.tomb_tags or from_client:tags())
-    if from_client.tomb_focused then
-        client.focus = to_client
-    end
 end
 
 function cgroup:switch(client, force_show)

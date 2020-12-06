@@ -13,6 +13,7 @@ local fts = require("hotpot").focus_timestamp
 local lgi = require("lgi")
 local dpi = require("beautiful.xresources").apply_dpi
 local border = require("border-theme")
+local unpack = unpack or table.unpack
 
 local function with_alpha(col, alpha)
     local r, g, b
@@ -24,30 +25,30 @@ local function activate_client(c)
     c:emit_signal("request::activate", "mouse.move", {raise=false})
 end
 
-local function create(config)
-    -- the default filter will get all focusable client with any selected tags
-    local function default_filter(c)
-        if not awful.client.focus.filter(c) then return false end
-        for _, t in ipairs(c:tags()) do
-            if t.selected then
-                return true
-            end
+-- the default filter will get all focusable client with any selected tags
+local function default_filter(c)
+    if not awful.client.focus.filter(c) then return false end
+    for _, t in ipairs(c:tags()) do
+        if t.selected then
+            return true
         end
-        return false
     end
+    return false
+end
 
-    config = config or {}
-    if config.same_screen == nil then
-        config.same_screen = true
+local function default_clients(screen)
+    local result = {}
+    for c in awful.client.iterate(default_filter, nil, screen) do
+        result[#result + 1] = c
     end
+    return result
+end
+
+local function create(config)
+    config = config or {}
 
     if config.source == nil then
         config.source = function(args)
-            local tablist = {}
-            for c in awful.client.iterate(default_filter, nil, config.same_screen and args.screen or nil) do
-                tablist[#tablist + 1] = c
-            end
-            return tablist
         end
     end
 
@@ -121,7 +122,11 @@ local function create(config)
         end
 
         local function initialize()
-            tablist = config.source(args)
+            if args.clients then
+                tablist = {unpack(args.clients)}
+            else
+                tablist = default_clients(args.screen)
+            end
             table.sort(
                 tablist,
                 function (a, b)
