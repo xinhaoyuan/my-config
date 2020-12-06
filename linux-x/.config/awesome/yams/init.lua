@@ -158,10 +158,11 @@ local function create(config)
         local function finalize()
             for i = 1, #tablist do
                 local c = tablist[i]
+                -- To work well with cgroup, minimized needs to be restored first.
+                c.minimized = c.saved.minimized
                 c.ontop = c.saved.ontop
                 c.above = c.saved.above
                 c.below = c.saved.below
-                c.minimized = c.saved.minimized
                 c.opacity = c.saved.opacity
                 c.saved = nil
             end
