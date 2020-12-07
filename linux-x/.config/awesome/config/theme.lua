@@ -318,7 +318,7 @@ theme.tasklist_layout = {
             forced_height = theme.bar_height,
             spacing = dpi(10),
             spacing_widget = theme.sep_widget,
-            size_transform = size_transform_function,
+            -- size_transform = size_transform_function,
             fill_space = true,
             -- expand_space = true,
             layout = flexer.horizontal
@@ -327,7 +327,7 @@ theme.tasklist_layout = {
             forced_height = theme.bar_height,
             spacing = dpi(10),
             spacing_widget = theme.sep_widget,
-            size_transform = size_transform_function,
+            -- size_transform = size_transform_function,
             fill_space = true,
             layout = flexer.horizontal
         },
@@ -335,7 +335,7 @@ theme.tasklist_layout = {
             forced_height = theme.bar_height,
             spacing = dpi(10),
             spacing_widget = theme.sep_widget,
-            size_transform = size_transform_function,
+            -- size_transform = size_transform_function,
             fill_space = true,
             layout = flexer.horizontal
         },
@@ -347,19 +347,19 @@ theme.tasklist_layout = {
         },
         simple = {
             forced_width = theme.bar_height,
-            size_transform = size_transform_function,
+            -- size_transform = size_transform_function,
             fill_space = true,
             expand_space = true,
             layout = flexer.vertical
         },
         split = {
             forced_width = theme.bar_height,
-            size_transform = size_transform_function,
+            -- size_transform = size_transform_function,
             layout = flexer.vertical
         },
         auto = {
             forced_width = theme.bar_height,
-            size_transform = size_transform_function,
+            -- size_transform = size_transform_function,
             fill_space = true,
             layout = flexer.vertical
         },
