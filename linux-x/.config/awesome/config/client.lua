@@ -28,7 +28,7 @@ local function get_cgroup_client(anchor_client)
     return r
 end
 local cgroup_switcher = require("yams").create {
-    keys = { ["Super_L"] = "release_to_exit", ["q"] = "switch" },
+    keys = { ["Alt_L"] = "release_to_exit", ["Alt_R"] = "release_to_exit", ["Escape"] = "switch" },
     opacity_other = 1,
     panel = false
 }
@@ -164,7 +164,7 @@ local client_keys = table_join(
             if c.cgroup then c.cgroup:detach(c) end
     end),
 
-    awful.key({ "Mod4" }, "q", function (c)
+    awful.key({ "Mod1" }, "Escape", function (c)
             if c.cgroup then cgroup_switcher.start{clients = get_cgroup_client(c)} end
     end),
 
