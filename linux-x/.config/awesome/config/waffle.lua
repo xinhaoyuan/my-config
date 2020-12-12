@@ -1771,7 +1771,14 @@ waffle_tray_view = view {
         shared.screen.attach_tray_widget()
     end
 }
- 
+
+
+local group_cache
+local group_label = wibox.widget {
+    markup = "group",
+    widget = wibox.widget.textbox,
+    align = "center",
+}
 
 local sticky_cache
 local sticky_label = wibox.widget {
@@ -1806,6 +1813,24 @@ local client_waffle = view {
     root = decorate_waffle {
         decorate_panel {
             widget = {
+                button({
+                        width = dpi(64),
+                        height = dpi(64),
+                        button_layout = fixed_align.vertical,
+                        label_widget = group_label,
+                        indicator = em("g"),
+                        key = "g",
+                        action = function (alt)
+                            local client = shared.waffle_selected_client
+                            if not alt then
+                                waffle:hide()
+                            end
+                            if not client.valid then
+                                return
+                            end
+                            shared.client.toggle_grouping(client)
+                        end
+                }),
                 button({
                         width = dpi(64),
                         height = dpi(64),
@@ -1952,6 +1977,13 @@ update_client_waffle_labels = function ()
         return
     end
 
+    local now_group = (shared.waffle_selected_client and shared.waffle_selected_client.cgroup ~= nil)
+    print(now_group)
+    if group_cache ~= now_group then
+        group_cache = now_group
+        group_label:set_markup(now_group and "GROUP" or "group")
+    end
+
     local now_sticky = (shared.waffle_selected_client and shared.waffle_selected_client.sticky)
     if sticky_cache ~= now_sticky then
         sticky_cache = now_sticky
@@ -1977,6 +2009,7 @@ update_client_waffle_labels = function ()
     end
 end
 
+client.connect_signal("property::cgroup", update_client_waffle_labels)
 client.connect_signal("property::sticky", update_client_waffle_labels)
 client.connect_signal("property::above", update_client_waffle_labels)
 client.connect_signal("property::floating", update_client_waffle_labels)

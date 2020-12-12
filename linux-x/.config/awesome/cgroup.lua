@@ -63,6 +63,7 @@ end
 function cgroup:detach(client)
     if not self.clients[client] then return end
 
+    self.nclients = self.nclients - 1
     self.clients[client] = nil
     client.cgroup = nil
     if client == self.current_client then
@@ -78,11 +79,16 @@ function cgroup:detach(client)
     client:disconnect_signal('property::minimized', cgroup_on_client_minimized)
 
     self:emit_signal('detach', client)
+
+    if self.nclients == 1 then
+        self:detach(self.current_client)
+    end
 end
 
 function cgroup:attach(client)
     if self.clients[client] then return end
 
+    self.nclients = self.nclients + 1
     if client.cgroup ~= nil then
         client.cgroup:detach(client)
     end
@@ -129,6 +135,7 @@ end
 local function cgroup_new()
     local result = gears.object { class = cgroup }
     result.clients = {}
+    result.nclients = 0
     return result
 end
 

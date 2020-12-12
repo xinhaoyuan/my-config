@@ -261,11 +261,15 @@ local function attach_tasklist_item_buttons(w, c)
     w:connect_signal('mouse::leave', function (w, x, y, button)
                          if w.button_pressed[1] then
                              c:raise()
+                             c.maximized = false
+                             c.minimized = false
                              local geo = c:geometry()
                              mouse.coords({ x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 })
                              awful.mouse.client.move(c)
                          elseif w.button_pressed[3] then
                              c:raise()
+                             c.maximized = false
+                             c.minimized = false
                              awful.mouse.client.resize(c, "bottom_right")
                          end
                          w.button_pressed = {}

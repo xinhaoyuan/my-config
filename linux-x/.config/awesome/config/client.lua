@@ -80,6 +80,25 @@ function shared.client.titlebar_hide(c)
     c:geometry(geo)
 end
 
+function shared.client.toggle_grouping(c)
+    if c.cgroup == nil then
+        local sel = nil
+        for _, other in ipairs(capi.client.get()) do
+            if c:isvisible() then
+                if (sel == nil or sel.focus_timestamp < other.focus_timestamp) and other ~= c and (c.cgroup == nil or not c.cgroup.clients[other])then
+                    sel = other
+                end
+            end
+        end
+        if sel then
+            cgroup.pull(sel, c)
+            c.cgroup:switch(c)
+        end
+    else
+        c.cgroup:detach(c)
+    end
+end
+
 local table_join = awful.util.table.join
 local delayed = gtimer.delayed_call
 
@@ -146,22 +165,7 @@ local client_keys = table_join(
     awful.key({ "Mod4" }, "t", function (c) shared.client.titlebar_toggle(c) end),
 
     awful.key({ "Mod4" }, "g", function (c)
-            local sel = nil
-            for _, other in ipairs(capi.client.get()) do
-                if c:isvisible() then
-                    if (sel == nil or sel.focus_timestamp < other.focus_timestamp) and other ~= c and (c.cgroup == nil or not c.cgroup.clients[other])then
-                        sel = other
-                    end
-                end
-            end
-            if sel then
-                cgroup.pull(sel, c)
-                c.cgroup:switch(c)
-            end
-    end),
-
-    awful.key({ "Mod4", "Shift" }, "g", function (c)
-            if c.cgroup then c.cgroup:detach(c) end
+            shared.client.toggle_grouping(c)
     end),
 
     awful.key({ "Mod1" }, "Escape", function (c)
