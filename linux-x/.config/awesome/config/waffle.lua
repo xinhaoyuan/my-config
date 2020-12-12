@@ -74,7 +74,11 @@ local function view(args)
         end
     end
 
-    view.widget = root
+    view.widget = wibox.widget {
+        root,
+        margins = beautiful.useless_gap,
+        widget = wibox.container.margin,
+    }
     view.key_handler = function (mod, key, event)
         if event == "press" and view.keys[key] then
             view.keys[key](mod, key, event)
