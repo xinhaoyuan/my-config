@@ -309,7 +309,8 @@ local function draw_tb_border_bgimage_top(context, cr, width, height)
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
     if beautiful.border_radius then
         gshape.partially_rounded_rect(cr, width, height + beautiful.border_radius, true, true, false, false, beautiful.border_radius)
-        cr:clip()
+        cr:fill()
+        cr:set_operator('ATOP')
     end
     border:draw({ theme = border_theme, color = border_color }, cr, width, height, border_top)
 end
@@ -322,7 +323,8 @@ local function draw_tb_border_bgimage_bottom(context, cr, width, height)
     if beautiful.border_radius then
         cr:translate(0, -beautiful.border_radius)
         gshape.partially_rounded_rect(cr, width, height + beautiful.border_radius, false, false, true, true, beautiful.border_radius)
-        cr:clip()
+        cr:fill()
+        cr:set_operator('ATOP')
         cr:translate(0, beautiful.border_radius)
     end
     border:draw({ theme = border_theme, color = border_color }, cr, width, height, border_bottom)
