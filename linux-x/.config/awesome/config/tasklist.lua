@@ -203,9 +203,10 @@ local space_filler_right = wibox.widget {
 
 -- }}}
 
+local waffle_was_there = false
 local function tasklist_item_button(w, c, b)
     if b == 1 then
-        if capi.client.focus == c then
+        if capi.client.focus == c and not waffle_was_there then
             c.minimized = true
         else
             -- Without this, the following
@@ -249,7 +250,7 @@ end
 local function attach_tasklist_item_buttons(w, c)
     w.button_pressed = {}
     w:connect_signal('button::press', function (w, x, y, button)
-                         if waffle.view_ ~= nil then return end
+                         waffle_was_there = waffle.view_ ~= nil
                          w.button_pressed[button] = true
     end)
     w:connect_signal('button::release', function (w, x, y, button)
