@@ -20,6 +20,7 @@ local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
 local fixed_align = require("fixed_align")
 local matrix = require("gears.matrix")
+local waffle = require("waffle")
 
 local module = {}
 
@@ -248,11 +249,14 @@ end
 local function attach_tasklist_item_buttons(w, c)
     w.button_pressed = {}
     w:connect_signal('button::press', function (w, x, y, button)
+                         if waffle.view_ ~= nil then return end
                          w.button_pressed[button] = true
     end)
     w:connect_signal('button::release', function (w, x, y, button)
-                         w.button_pressed[button] = false
-                         tasklist_item_button(w, c, button)
+                         if w.button_pressed[button] then
+                             w.button_pressed[button] = false
+                             tasklist_item_button(w, c, button)
+                         end
     end)
     w:connect_signal('mouse::leave', function (w, x, y, button)
                          if w.button_pressed[1] then
