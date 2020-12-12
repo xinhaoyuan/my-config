@@ -202,66 +202,71 @@ local space_filler_right = wibox.widget {
 
 -- }}}
 
-local my_tasklist_buttons = awful.util.table.join(
-    awful.button({ }, 1, function (client_and_widget)
-            local c = client_and_widget[1]
-            if capi.client.focus == client_and_widget[1] then
-                c.minimized = true
-            else
-                -- Without this, the following
-                -- :isvisible() makes no sense
-                c.minimized = false
-                if not c:isvisible() then
-                    awful.tag.viewonly(c:tags()[1])
-                end
-                -- This will also un-minimize
-                -- the client, if needed
-                capi.client.focus = c
-                c:raise()
+local function tasklist_item_button(w, c, b)
+    if b == 1 then
+        if capi.client.focus == c then
+            c.minimized = true
+        else
+            -- Without this, the following
+            -- :isvisible() makes no sense
+            c.minimized = false
+            if not c:isvisible() then
+                awful.tag.viewonly(c:tags()[1])
             end
-    end),
-    awful.button({ }, 2,
-        function (client_and_widget)
-            local c = client_and_widget[1]
-            shared.client.titlebar_enable(c)
+            -- This will also un-minimize
+            -- the client, if needed
+            capi.client.focus = c
+            c:raise()
         end
-    ),
-    awful.button({ }, 3,
-        function (client_and_widget)
-            local c = client_and_widget[1]
-            local w = client_and_widget[2]
-            local wb = capi.mouse.current_wibox
-            local geos = capi.mouse.current_widget_geometries
-            local wgeo
-            for _, geo in ipairs(geos) do
-                if geo.widget == w then
-                    wgeo = geo
-                    break
-                end
-            end
-            if wgeo ~= nil then
-                local m = wgeo.hierarchy:get_matrix_from_device()
-                shared.waffle.show_client_waffle(c, { anchor = { x = wb.x + wgeo.x + wgeo.width / 2, y = wb.y + wgeo.y + wgeo.height / 2 } })
-            else
-                shared.waffle.show_client_waffle(c)
+    elseif b == 3 then
+        local wb = capi.mouse.current_wibox
+        local geos = capi.mouse.current_widget_geometries
+        local wgeo
+        for _, geo in ipairs(geos) do
+            if geo.widget == w then
+                wgeo = geo
+                break
             end
         end
-    ),
-    awful.button({ }, 4,
-        function (client_and_widget)
-            local c = client_and_widget[1]
-            if not c.maximized then
-                shared.client.enlarge(c)
-            end
+        if wgeo ~= nil then
+            local m = wgeo.hierarchy:get_matrix_from_device()
+            shared.waffle.show_client_waffle(c, { anchor = { x = wb.x + wgeo.x + wgeo.width / 2, y = wb.y + wgeo.y + wgeo.height / 2 } })
+        else
+            shared.waffle.show_client_waffle(c)
         end
-    ),
-    awful.button({ }, 5,
-        function (client_and_widget)
-            local c = client_and_widget[1]
+    elseif b == 4 then
+        if not c.maximized then
+            shared.client.enlarge(c)
+        end
+    elseif b == 5 then
+        if c.maximized then
             shared.client.shrink(c)
         end
-    )
-)
+    end
+end
+
+local function attach_tasklist_item_buttons(w, c)
+    w.button_pressed = {}
+    w:connect_signal('button::press', function (w, x, y, button)
+                         w.button_pressed[button] = true
+    end)
+    w:connect_signal('button::release', function (w, x, y, button)
+                         w.button_pressed[button] = false
+                         tasklist_item_button(w, c, button)
+    end)
+    w:connect_signal('mouse::leave', function (w, x, y, button)
+                         if w.button_pressed[1] then
+                             c:raise()
+                             local geo = c:geometry()
+                             mouse.coords({ x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 })
+                             awful.mouse.client.move(c)
+                         elseif w.button_pressed[3] then
+                             c:raise()
+                             awful.mouse.client.resize(c, "bottom_right")
+                         end
+                         w.button_pressed = {}
+    end)
+end
 
 local property_to_text = {
     {"sticky", "S"},
@@ -319,7 +324,8 @@ local function tasklist_update_function(widget, c, index, objects)
 end
 
 local function tasklist_create_function(widget, c, index, objects)
-    widget.buttons = awful.widget.common.create_buttons(my_tasklist_buttons, {c, widget})
+    -- widget.buttons = awful.widget.common.create_buttons(my_tasklist_buttons, {c, widget})
+    attach_tasklist_item_buttons(widget, c)
     tasklist_update_function(widget, c, index, objects)
 end
 
