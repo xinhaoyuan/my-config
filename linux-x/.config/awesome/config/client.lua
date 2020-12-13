@@ -54,7 +54,7 @@ end
 function shared.client.titlebar_show(c)
     if not c.has_titlebar then
         local geo = c:geometry()
-        -- c:geometry{ x = geo.x - beautiful.border_width, y = geo.y - beautiful.border_width, width = geo.width, height = geo.height }
+        c:geometry{ x = geo.x, y = geo.y, width = geo.width - beautiful.border_width * 2, height = geo.height - beautiful.border_width * 2}
         for _, d in ipairs({"top", "bottom", "left", "right"}) do
             awful.titlebar.show(c, d)
         end
