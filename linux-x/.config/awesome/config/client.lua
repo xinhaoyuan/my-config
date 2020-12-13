@@ -14,9 +14,12 @@ local dpi = require("beautiful.xresources").apply_dpi
 local gtimer = require("gears.timer")
 local gshape = require("gears.shape")
 local gcolor = require("gears.color")
+local gdebug = require("gears.debug")
 local machi = require("layout-machi")
 local border = require("border-theme")
 local cairo = require("lgi").cairo
+local table_join = awful.util.table.join
+local delayed = gtimer.delayed_call
 local cgroup = require("cgroup")
 local function get_cgroup_client(anchor_client)
     local r = {}
@@ -53,31 +56,32 @@ end
 
 function shared.client.titlebar_show(c)
     if not c.has_titlebar then
-        local geo = c:geometry()
-        c:geometry{ x = geo.x, y = geo.y, width = geo.width - beautiful.border_width * 2, height = geo.height - beautiful.border_width * 2}
+        local geo
+        if c.titlebar_created then geo = c:geometry() end
         for _, d in ipairs({"top", "bottom", "left", "right"}) do
             awful.titlebar.show(c, d)
         end
+        if geo then c:geometry(geo) end
         c.has_titlebar = true
         if shared.var.hide_clients_with_titlebars then
             capi.client.emit_signal("list")
         end
     end
-    -- c:geometry(geo)
 end
 
 function shared.client.titlebar_hide(c)
-    local geo = c:geometry()
     if c.has_titlebar then
+        local geo
+        if c.titlebar_created then geo = c:geometry() end
         for _, d in ipairs({"top", "bottom", "left", "right"}) do
             awful.titlebar.hide(c, d)
         end
+        if geo then c:geometry(geo) end
         c.has_titlebar = false
         if shared.var.hide_clients_with_titlebars then
             capi.client.emit_signal("list")
         end
     end
-    c:geometry(geo)
 end
 
 function shared.client.toggle_grouping(c)
@@ -98,9 +102,6 @@ function shared.client.toggle_grouping(c)
         c.cgroup:detach(c)
     end
 end
-
-local table_join = awful.util.table.join
-local delayed = gtimer.delayed_call
 
 function shared.client.enlarge(c)
    if c.fullscreen then
@@ -461,6 +462,7 @@ local function create_titlebars(c)
         c:titlebar_bottom(tw, to)
     end
 
+    c.titlebar_created = true
     c:connect_signal("property::size", delayed_update_shape)
     delayed_update_shape(c)
 end
