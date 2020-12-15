@@ -22,12 +22,13 @@ local function with_alpha(col, alpha)
 end
 
 local function activate_client(c)
-    c:emit_signal("request::activate", "mouse.move", {raise=false})
+    c:emit_signal("request::activate", "switch", {raise=true})
 end
 
 -- the default filter will get all focusable client with any selected tags
 local function default_filter(c)
     if not awful.client.focus.filter(c) then return false end
+    if c.cgroup ~= nil and c.cgroup.current_client ~= c then return false end
     for _, t in ipairs(c:tags()) do
         if t.selected then
             return true
@@ -173,7 +174,7 @@ local function create(config)
                     c.minimized = false
                 end
                 activate_client(c)
-                c:raise()
+                -- c:raise()
             end
         end
 

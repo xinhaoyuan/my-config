@@ -84,14 +84,23 @@ function shared.client.titlebar_hide(c)
     end
 end
 
+local function group_client_filter(c)
+    if not awful.client.focus.filter(c) then return false end
+    if c.cgroup ~= nil and c.cgroup.current_client ~= c then return false end
+    for _, t in ipairs(c:tags()) do
+        if t.selected then
+            return true
+        end
+    end
+    return false
+end
+
 function shared.client.toggle_grouping(c)
     if c.cgroup == nil then
         local sel = nil
-        for _, other in ipairs(capi.client.get()) do
-            if c:isvisible() then
-                if (sel == nil or sel.focus_timestamp < other.focus_timestamp) and other ~= c and (c.cgroup == nil or not c.cgroup.clients[other])then
-                    sel = other
-                end
+        for other in awful.client.iterate(group_client_filter, nil, c.screen) do
+            if (sel == nil or sel.focus_timestamp < other.focus_timestamp) and other ~= c and (c.cgroup == nil or not c.cgroup.clients[other])then
+                sel = other
             end
         end
         if sel then

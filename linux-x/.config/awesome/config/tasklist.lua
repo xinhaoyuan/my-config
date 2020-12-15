@@ -295,14 +295,14 @@ local function tasklist_update_function(widget, c, index, objects)
         title_text_role.text = c.name or "<Untitled>"
     end
     if c.cgroup and c.cgroup.current_client ~= c then
-        widget.forced_width = dpi(200)
+        widget.forced_width = dpi(150)
         if c.cgroup.current_client.manage_ticket < c.manage_ticket then
             status_text = "<G"
         else
             status_text = "G>"
         end
     else
-        widget.forced_width = dpi(400)
+        widget.forced_width = dpi(300)
         for _, pp in ipairs(property_to_text) do
             local key = pp[1]
             if c.saved and c.saved[key] ~= nil then
