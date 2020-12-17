@@ -520,6 +520,11 @@ capi.client.connect_signal("property::maximized", reset_decoration)
 
 -- rules
 
+function awful.placement.centered_new_only(c, args, ...)
+    if c.focus_timestamp ~= nil then return nil end
+    return awful.placement.centered(c, args, ...)
+end
+
 require("awful.rules").rules = {
    {
       rule = { },
@@ -531,7 +536,7 @@ require("awful.rules").rules = {
          border_color = beautiful.border_normal,
          screen = function(c) return capi.awesome.startup and c.screen or awful.screen.focused() end,
          floating = shared.var.floating_by_default,
-         placement = awful.placement.centered,
+         placement = awful.placement.centered_new_only,
          border_width = 0,
       }
    },
@@ -583,20 +588,6 @@ require("awful.rules").rules = {
            sticky = true,
            fullscreen = false,
        },
-   },
-   {
-       rule = { class = "tabbed" },
-       properties = {
-           callback = function(c)
-               local screen_geo = c.screen.geometry
-               c:geometry({
-                       x = screen_geo.x + screen_geo.width / 4,
-                       y = screen_geo.y + screen_geo.height / 4,
-                       width = screen_geo.width / 2,
-                       height = screen_geo.height / 2
-               })
-           end
-       }
    },
    {
        rule = { class = "mpv" },
