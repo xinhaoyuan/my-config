@@ -35,12 +35,23 @@ os.execute(HOME_DIR .. "/.xdesktoprc")
 local config = require("config")
 require("my-autofocus")
 require("orgenda").config.files = {os.getenv("HOME").."/org/TODO.org"}
+local hotpot = require("hotpot")
+local fts = hotpot.focus_timestamp
 
 require("gears.timer").delayed_call(
     function ()
-	if capi.client.focus then
-	    capi.client.focus:emit_signal("request::activate", "mouse.move", {raise=true})
-	end
+        local clients = client.get()
+        table.sort(
+               clients,
+               function (a, b)
+                   return fts.get(a) < fts.get(b)
+               end
+        )
+        for _, c in ipairs(clients) do
+            if c:isvisible() then
+                c:raise()
+            end
+        end
     end
                                    )
 
@@ -96,4 +107,4 @@ on_newuserdata = function (userdata)
     __userdata_info_counter = __userdata_info_counter + 1
 end
 
-require("hotpot").config.force_gc_timeout = 30
+hotpot.config.force_gc_timeout = 30
