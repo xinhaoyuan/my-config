@@ -520,10 +520,22 @@ capi.client.connect_signal("property::maximized", reset_decoration)
 
 -- rules
 
-function awful.placement.centered_new_only(c, args, ...)
-    if c.focus_timestamp ~= nil then return nil end
-    return awful.placement.centered(c, args, ...)
+function placement_skip_existing(placement)
+    return function(c, args)
+        if c.focus_timestamp ~= nil then return nil end
+        return placement(c, args)
+    end
 end
+
+awful.placement.centered_on_new = placement_skip_existing(awful.placement.centered)
+awful.placement.centered_with_half_size_on_new = placement_skip_existing(
+    function (c, args)
+        local sgeo = c.screen.workarea
+        local geo = {x = sgeo.x + sgeo.width / 4, y = sgeo.y + sgeo.height / 4, width = sgeo.width / 2, height = sgeo.height / 2}
+        c:geometry(geo)
+        return geo
+    end
+)
 
 require("awful.rules").rules = {
    {
@@ -536,7 +548,7 @@ require("awful.rules").rules = {
          border_color = beautiful.border_normal,
          screen = function(c) return capi.awesome.startup and c.screen or awful.screen.focused() end,
          floating = shared.var.floating_by_default,
-         placement = awful.placement.centered_new_only,
+         placement = awful.placement.centered_on_new,
          border_width = 0,
       }
    },
@@ -587,6 +599,12 @@ require("awful.rules").rules = {
            borderless = true,
            sticky = true,
            fullscreen = false,
+       },
+   },
+   {
+       rule = { class = "tabbed" },
+       properties = {
+           placement = awful.placement.centered_with_half_size_on_new,
        },
    },
    {
