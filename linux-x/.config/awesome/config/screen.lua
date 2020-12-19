@@ -34,6 +34,7 @@ local cbg = require("contextual_background")
 local fts = require("hotpot").focus_timestamp
 local aux = require("aux")
 local icons = require("icons")
+local orgenda = require("orgenda")
 require("manage_ticket")
 
 -- helper functions
@@ -422,7 +423,15 @@ orgenda.topic:connect_signal(
 local cal_popup = awful.popup {
     widget = wibox.widget {
         with_border {
-            widget = cal_widget,
+            widget = {
+                orgenda.widget.create {
+                    width = dpi(240),
+                    indent_width = dpi(26),
+                    item_margin = dpi(5),
+                },
+                cal_widget,
+                layout = wibox.layout.fixed.vertical,
+            },
             top = true,
             bottom = true,
             left = true,
@@ -475,7 +484,11 @@ local orgenda_counter_widget = wibox.widget {
 orgenda.topic:connect_signal(
     "update",
     function (_, path, items)
-        orgenda_counter_widget:set_markup('<span foreground="'..beautiful.fg_focus..'" background="'..beautiful.bg_focus..'"> '..tostring(#items)..' </span>')
+        if #items > 0 then
+            orgenda_counter_widget.text = '📓'..tostring(#items)..' '
+        else
+            orgenda_counter_widget.text = ''
+        end
     end
 )
 
@@ -557,8 +570,6 @@ local function setup_screen(scr)
        right_layout:add(bar_tray_wrapper)
    end
 
-   right_layout:add(orgenda_counter_widget)
-
    local clock
    if direction_index[shared.var.bar_position] == "horizontal" then
        clock = wibox.widget.textclock("<span color='" .. beautiful.border_focus .. "'>%m<b>%d</b></span> %H<b>%M</b> ")
@@ -567,9 +578,15 @@ local function setup_screen(scr)
    end
    clock.align = "center"
    clock:set_font(beautiful.font)
-   clock:connect_signal('mouse::enter', function() cal_show() end)
-   clock:connect_signal('mouse::leave', function() cal_hide() end)
-   clock:buttons(awful.util.table.join(
+
+   clock_and_orgenda = wibox.widget {
+       orgenda_counter_widget,
+       clock,
+       layout = wibox.layout.fixed.horizontal
+   }
+   clock_and_orgenda:connect_signal('mouse::enter', function() cal_show() end)
+   clock_and_orgenda:connect_signal('mouse::leave', function() cal_hide() end)
+   clock_and_orgenda:buttons(awful.util.table.join(
                      awful.button({         }, 1, function() cal_switch({ month = -1 }) end),
                      awful.button({         }, 2, function() cal_reset() end),
                      awful.button({         }, 3, function() cal_switch({ month =  1 }) end),
@@ -580,7 +597,7 @@ local function setup_screen(scr)
                      awful.button({ 'Shift' }, 4, function() cal_switch({ year = -1 }) end),
                      awful.button({ 'Shift' }, 5, function() cal_switch({ year =  1 }) end)
    ))
-   right_layout:add(clock)
+   right_layout:add(clock_and_orgenda)
 
    local layout
    local left_margin_container, middle_margin_container, right_margin_container
