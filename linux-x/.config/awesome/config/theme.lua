@@ -287,11 +287,10 @@ theme.bar_styles = {"simple", "split", "auto"}
 theme.tasklist_plain_task_name = true
 
 local sep_color = gcolor(acolor(theme.fg_normal):blend_with(acolor(theme.bg_normal), 0.75):to_string())
-theme.sep_widget = wibox.widget {
-    background = beautiful.bg_normal,
-    bgimage = function(context, cr, width, height)
-        local dot_r = dpi(1)
-        cr:set_source(sep_color)
+function theme.draw_separator(cr, width, height)
+    local dot_r = dpi(1)
+    cr:set_source(sep_color)
+    if width < height then
         -- cr:move_to(width / 2, height / 4)
         -- cr:line_to(width / 2, 3 * height / 4)
         -- cr:stroke()
@@ -299,8 +298,18 @@ theme.sep_widget = wibox.widget {
         -- cr:fill()
         cr:move_to(width / 2, width / 2)
         cr:line_to(width / 2, height - width / 2)
-        cr:set_dash({dpi(2), dpi(2)})
-        cr:stroke()
+        cr:set_dash({width / 3, width / 3})
+    else
+        cr:move_to(height / 2, height / 2)
+        cr:line_to(width - height / 2, height / 2)
+        cr:set_dash({height / 3, height / 3})
+    end
+    cr:stroke()
+end
+theme.sep_widget = wibox.widget {
+    background = beautiful.bg_normal,
+    bgimage = function(context, cr, width, height)
+        theme.draw_separator(cr, width, height)
     end,
     widget = wibox.container.background
 }
@@ -316,7 +325,7 @@ theme.tasklist_layout = {
         },
         simple = {
             forced_height = theme.bar_height,
-            spacing = dpi(10),
+            spacing = dpi(6),
             spacing_widget = theme.sep_widget,
             -- size_transform = size_transform_function,
             fill_space = true,
@@ -325,7 +334,7 @@ theme.tasklist_layout = {
         },
         split = {
             forced_height = theme.bar_height,
-            spacing = dpi(10),
+            spacing = dpi(6),
             spacing_widget = theme.sep_widget,
             -- size_transform = size_transform_function,
             fill_space = true,
@@ -333,7 +342,7 @@ theme.tasklist_layout = {
         },
         auto = {
             forced_height = theme.bar_height,
-            spacing = dpi(10),
+            spacing = dpi(6),
             spacing_widget = theme.sep_widget,
             -- size_transform = size_transform_function,
             fill_space = true,

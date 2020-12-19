@@ -157,7 +157,7 @@ local space_filler_left_with_top_border = with_top_border {
     {
         {
             beautiful.sep_widget,
-            forced_width = dpi(10),
+            forced_width = dpi(6),
             content_fill_vertical = true,
             content_fill_horizontal = true,
             widget = wibox.container.place
@@ -174,7 +174,7 @@ local space_filler_right_with_top_border = with_top_border {
     {
         {
             beautiful.sep_widget,
-            forced_width = dpi(10),
+            forced_width = dpi(6),
             content_fill_vertical = true,
             content_fill_horizontal = true,
             widget = wibox.container.place

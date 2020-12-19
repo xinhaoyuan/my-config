@@ -233,22 +233,7 @@ local function decorate_panel(args)
             },
             bgimage = function(context, cr, width, height)
                 height = panel_padding
-                local dot_r = dpi(1)
-                local distance = dpi(10)
-                cr:set_source(sep_color)
-                -- -- cr:arc(width / 2 - distance, height / 2, dot_r, 0, 2 * math.pi)
-                -- cr:rectangle(width / 2 - distance - dot_r, height / 2 - dot_r, dot_r * 2, dot_r * 2)
-                -- cr:fill()
-                -- -- cr:arc(width / 2, height / 2, dot_r, 0, 2 * math.pi)
-                -- cr:rectangle(width / 2 - dot_r, height / 2 - dot_r, dot_r * 2, dot_r * 2)
-                -- cr:fill()
-                -- -- cr:arc(width / 2 + distance, height / 2, dot_r, 0, 2 * math.pi)
-                -- cr:rectangle(width / 2 + distance - dot_r, height / 2 - dot_r, dot_r * 2, dot_r * 2)
-                -- cr:fill()
-                cr:move_to(height / 2, height / 2)
-                cr:line_to(width - height / 2, height / 2)
-                cr:set_dash({dpi(4), dpi(4)})
-                cr:stroke()
+                beautiful.draw_separator(cr, width, height)
             end,
             widget = wibox.container.background
         }

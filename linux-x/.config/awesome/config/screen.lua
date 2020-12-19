@@ -430,6 +430,8 @@ local cal_popup = awful.popup {
                     item_margin = dpi(5),
                 },
                 cal_widget,
+                spacing = dpi(12),
+                spacing_widget = beautiful.sep_widget,
                 layout = wibox.layout.fixed.vertical,
             },
             top = true,
