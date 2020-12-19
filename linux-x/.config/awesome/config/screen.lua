@@ -318,6 +318,8 @@ local space_filler_with_left_right_borders = wibox.widget {
 
 -- Calendar popup
 
+local today = os.date("*t")
+local active_dates = {}
 local cal_widget = wibox.widget {
     date = os.date('*t'),
     font = beautiful.font,
@@ -326,9 +328,39 @@ local cal_widget = wibox.widget {
     long_weekdays = true,
     spacing = 0,
     fn_embed = function (widget, flag, date)
+        local inverted = false
         if flag == 'header' then
             widget.font = beautiful.fontname_normal..' 12'
-        elseif flag == 'focus' then
+        end
+
+        if flag == "normal" or flag == "focus" then
+            if today.year == date.year and today.month == date.month and today.day == date.day then
+                inverted = true
+            end
+
+            if active_dates[date.year] and active_dates[date.year][date.month] and active_dates[date.year][date.month][date.day] then
+                widget = wibox.widget {
+                    {
+                        {
+                            {
+                                text = '•',
+                                widget = wibox.widget.textbox,
+                            },
+                            fg_function = function(context)
+                                if context.inverted then return beautiful.special_focus else return beautiful.special_normal end
+                            end,
+                            widget = cbg,
+                        },
+                        halign = 'left',
+                        widget = wibox.container.place
+                    },
+                    widget,
+                    layout = wibox.layout.stack,
+                }
+            end
+        end
+
+        if inverted then
             return wibox.widget {
                 {
                     widget,
@@ -337,17 +369,55 @@ local cal_widget = wibox.widget {
                 },
                 fg = beautiful.fg_focus,
                 bg = beautiful.bg_focus,
-                widget = wibox.container.background
+                context_transform_function = function (context)
+                    context.inverted = true
+                end,
+                widget = cbg,
+            }
+        else
+            return wibox.widget {
+                widget,
+                margins = dpi(2),
+                widget = wibox.container.margin
             }
         end
-        return wibox.widget {
-            widget,
-            margins = dpi(2),
-            widget = wibox.container.margin
-        }
     end,
     widget = mycalendar.month
 }
+gtimer {
+    timeout = 10,
+    autostart = true,
+    callback = function()
+        local new_today = os.date("*t")
+        if today.day ~= new_today.day then
+            today = new_today
+            cal_widget:emit_signal("widget::layout_changed")
+        end
+    end
+}
+orgenda.topic:connect_signal(
+    "update",
+    function (_, path, items)
+        active_dates = {}
+        for _, item in ipairs(items) do
+            if item.date then
+                local parsed_array = {string.gmatch(item.date, "(%d+)-(%d+)-(%d+)")()}
+                if #parsed_array == 3 then
+                    parsed_array[1] = tonumber(parsed_array[1])
+                    parsed_array[2] = tonumber(parsed_array[2])
+                    parsed_array[3] = tonumber(parsed_array[3])
+                    local y = active_dates[parsed_array[1]] or {}
+                    local m = y[parsed_array[2]] or {}
+                    m[parsed_array[3]] = true
+                    y[parsed_array[2]] = m
+                    active_dates[parsed_array[1]] = y
+                end
+            end
+        end
+        cal_widget:emit_signal("widget::layout_changed")
+    end
+)
+
 
 local cal_popup = awful.popup {
     widget = wibox.widget {
@@ -395,6 +465,19 @@ local function cal_switch(delta)
     cal_widget:set_date(nil)
     cal_widget:set_date(date)
 end
+
+-- Orgenda
+
+local orgenda_counter_widget = wibox.widget {
+    widget = wibox.widget.textbox
+}
+
+orgenda.topic:connect_signal(
+    "update",
+    function (_, path, items)
+        orgenda_counter_widget:set_markup('<span foreground="'..beautiful.fg_focus..'" background="'..beautiful.bg_focus..'"> '..tostring(#items)..' </span>')
+    end
+)
 
 local function setup_screen(scr)
    scr.mypromptbox = awful.widget.prompt()
@@ -473,6 +556,8 @@ local function setup_screen(scr)
    if scr == primary_screen then
        right_layout:add(bar_tray_wrapper)
    end
+
+   right_layout:add(orgenda_counter_widget)
 
    local clock
    if direction_index[shared.var.bar_position] == "horizontal" then

@@ -1317,98 +1317,12 @@ do
     end
 end
 
-local orgenda_widget
-do
-    local todo_item_container = wibox.widget {
-        widget = wibox.layout.fixed.vertical
-    }
-    orgenda_widget = wibox.widget {
-        {
-            todo_item_container,
-            margins = button_padding,
-            draw_empty = false,
-            widget = fixed_margin,
-        },
-        width = waffle_width,
-        widget = wibox.container.constraint
-    }
-
-    local function render_priority(pri)
-        return ({ " +", " *","<span foreground='"..beautiful.fg_urgent.."' background='"..beautiful.bg_urgent.."'><b>!!</b></span>" })[pri]
-    end
-
-    local function render_orgenda_items(items)
-        local lines = {}
-        for _, item in ipairs(items) do
-            if item.date ~= nil then
-                table.insert(lines, "<b>["..tostring(item.date).."]</b>"..render_priority(item.priority).." "..gstring.xml_escape(item.text))
-            else
-                table.insert(lines, render_priority(item.priority).." "..gstring.xml_escape(item.text))
-            end
-        end
-        return lines
-    end
-
-    local todo_item_widget_cache = {}
-
-    local function get_todo_item_widget(item, cache_key)
-        if todo_item_widget_cache[cache_key] == nil then
-            todo_item_widget_cache[cache_key] = wibox.widget {
-                {
-                    {
-                        markup = render_priority(item.priority)..' ',
-                        font = font_info,
-                        widget = wibox.widget.textbox
-                    },
-                    valign = "top",
-                    widget = wibox.container.place
-                },
-                {
-                    item.date and {
-                        markup = '<b>['..tostring(item.date)..']</b>',
-                        font = font_info,
-                        widget = wibox.widget.textbox
-                                  },
-                    {
-                        text = item.text,
-                        font = font_info,
-                        ellipsize = "none",
-                        align = "left",
-                        wrap = "word_char",
-                        forced_width = waffle_width, -- Needed to calculate the extents properly.
-                        widget = wibox.widget.textbox
-                    },
-                    widget = wibox.layout.fixed.vertical
-                },
-                widget = wibox.layout.fixed.horizontal
-            }
-        end
-        return todo_item_widget_cache[cache_key]
-    end
-
-    orgenda.topic:connect_signal(
-        "update",
-        function (_, path, items)
-            todo_item_container:reset()
-            local cache_keys = {}
-            for index, item in ipairs(items) do
-                local cache_key = tostring(item.date)..':'..tostring(item.priority)..':'..item.text
-                cache_keys[cache_key] = true
-                todo_item_container:add(get_todo_item_widget(item, cache_key))
-            end
-            for k, v in pairs(todo_item_widget_cache) do
-                if not cache_keys[k] then
-                    todo_item_widget_cache[k] = nil
-                end
-            end
-            -- local count = 0
-            -- for _, _ in pairs(todo_item_widget_cache) do
-            --     count = count + 1
-            -- end
-            -- print(tostring(count)..' items remaining in the cache')
-        end
-    )
-end
+local orgenda_widget = orgenda.widget.create {
+    font = font_info,
+    item_margin = button_padding,
+    width = waffle_width,
+    indent_width = dpi(20),
+}
 
 local waffle_root_status_widget = decorate_panel {
     widget = {
