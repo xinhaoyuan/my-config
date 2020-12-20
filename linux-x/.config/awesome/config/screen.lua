@@ -563,8 +563,8 @@ local function setup_screen(scr)
    left_layout:add(scr.widgets.tag_list)
    left_layout:add(scr.mypromptbox)
    local right_layout = wibox.widget {
-      spacing        = dpi(5),
-      spacing_widget = { color = beautiful.bg_normal, widget = wibox.widget.separator },
+      spacing        = dpi(6),
+      spacing_widget = beautiful.sep_widget,
       layout         = wibox.layout.fixed[direction_index[shared.var.bar_position]]
    }
 
