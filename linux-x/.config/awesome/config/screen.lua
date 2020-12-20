@@ -241,25 +241,26 @@ end
 local function with_border(args)
     args = args or {}
     local widget
+    local inner_widget = wibox.widget {
+        args.widget,
+        bg = beautiful.bg_normal,
+        shape = beautiful.border_radius ~= nil and
+            function (cr, width, height)
+                rounded_rect_with_corners(cr, width, height,
+                             beautiful.border_radius -
+                                 beautiful.border_width,
+                                 {
+                                     top_left = widget.widget.top > 0 and widget.widget.left > 0,
+                                     top_right = widget.widget.top > 0 and widget.widget.right > 0,
+                                     bottom_left = widget.widget.bottom > 0 and widget.widget.left > 0,
+                                     bottom_right = widget.widget.bottom > 0 and widget.widget.right > 0,
+                })
+            end,
+        widget = wibox.container.background
+    }
     widget = wibox.widget {
         {
-            {
-                args.widget,
-                bg = beautiful.bg_normal,
-                shape = beautiful.border_radius ~= nil and
-                    function (cr, width, height)
-                        rounded_rect_with_corners(cr, width, height,
-                                     beautiful.border_radius -
-                                         beautiful.border_width,
-                                         {
-                                             top_left = widget.widget.top > 0 and widget.widget.left > 0,
-                                             top_right = widget.widget.top > 0 and widget.widget.right > 0,
-                                             bottom_left = widget.widget.bottom > 0 and widget.widget.left > 0,
-                                             bottom_right = widget.widget.bottom > 0 and widget.widget.right > 0,
-                        })
-                    end,
-                widget = wibox.container.background
-            },
+            inner_widget,
             top = args.top and beautiful.border_width,
             left = args.left and beautiful.border_width,
             right = args.right and beautiful.border_width,
@@ -268,6 +269,7 @@ local function with_border(args)
             widget = fixed_margin,
         },
         bgimage = function (context, cr, width, height)
+            if width == 0 or height == 0 then return end
             border:draw({ theme = border_theme,
                           color = beautiful.border_focus }, cr, width, height,
                 border.directions{
