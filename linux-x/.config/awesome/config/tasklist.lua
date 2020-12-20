@@ -162,7 +162,7 @@ local space_filler_left_with_top_border = with_top_border {
             content_fill_horizontal = true,
             widget = wibox.container.place
         },
-        halign = "right",
+        halign = "left",
         widget = fixed_place,
     },
     width = beautiful.border_width * 2 + beautiful.useless_gap,
@@ -179,7 +179,7 @@ local space_filler_right_with_top_border = with_top_border {
             content_fill_horizontal = true,
             widget = wibox.container.place
         },
-        halign = "left",
+        halign = "right",
         widget = fixed_place,
     },
     width = beautiful.border_width * 2 + beautiful.useless_gap,

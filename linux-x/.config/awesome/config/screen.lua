@@ -641,7 +641,7 @@ local function setup_screen(scr)
            id = "right_margin_container",
            widget = wibox.widget {
                right_layout,
-               left = dpi(5),
+               -- left = dpi(5),
                widget = fixed_margin
            },
            top = true,
