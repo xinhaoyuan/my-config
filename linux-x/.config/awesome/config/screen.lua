@@ -481,17 +481,30 @@ end
 
 -- Orgenda
 
+local orgenda_counter_text_widget = wibox.widget.textbox()
 local orgenda_counter_widget = wibox.widget {
-    widget = wibox.widget.textbox
+    {
+        {
+            image = gcolor.recolor_image(icons.note, beautiful.fg_normal),
+            forced_height = beautiful.bar_height - dpi(6),
+            forced_width = beautiful.bar_height - dpi(6),
+            widget = wibox.widget.imagebox,
+        },
+        valign = "center",
+        widget = wibox.container.place
+    },
+    orgenda_counter_text_widget,
+    layout = wibox.layout.fixed.horizontal
 }
 
 orgenda.topic:connect_signal(
     "update",
     function (_, path, items)
         if #items > 0 then
-            orgenda_counter_widget.text = '📓'..tostring(#items)..' '
+            orgenda_counter_widget.visible = true
+            orgenda_counter_text_widget.text = tostring(#items)
         else
-            orgenda_counter_widget.text = ''
+            orgenda_counter_widget.visible = false
         end
     end
 )
@@ -586,6 +599,7 @@ local function setup_screen(scr)
    clock_and_orgenda = wibox.widget {
        orgenda_counter_widget,
        clock,
+       spacing = dpi(6),
        layout = wibox.layout.fixed.horizontal
    }
    clock_and_orgenda:connect_signal('mouse::enter', function() cal_show() end)
