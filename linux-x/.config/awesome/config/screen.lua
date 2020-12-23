@@ -242,20 +242,23 @@ local function with_border(args)
     args = args or {}
     local widget
     local inner_widget = wibox.widget {
-        args.widget,
-        bg = beautiful.bg_normal,
+        {
+            args.widget,
+            widget = fixed_margin,
+        },
         shape = beautiful.border_radius ~= nil and
             function (cr, width, height)
                 rounded_rect_with_corners(cr, width, height,
-                             beautiful.border_radius -
-                                 beautiful.border_width,
-                                 {
-                                     top_left = widget.widget.top > 0 and widget.widget.left > 0,
-                                     top_right = widget.widget.top > 0 and widget.widget.right > 0,
-                                     bottom_left = widget.widget.bottom > 0 and widget.widget.left > 0,
-                                     bottom_right = widget.widget.bottom > 0 and widget.widget.right > 0,
+                                          beautiful.border_radius -
+                                          beautiful.border_width,
+                                          {
+                                              top_left = widget.widget.top > 0 and widget.widget.left > 0,
+                                              top_right = widget.widget.top > 0 and widget.widget.right > 0,
+                                              bottom_left = widget.widget.bottom > 0 and widget.widget.left > 0,
+                                              bottom_right = widget.widget.bottom > 0 and widget.widget.right > 0,
                 })
             end,
+        bg = beautiful.bg_normal,
         widget = wibox.container.background
     }
     widget = wibox.widget {
