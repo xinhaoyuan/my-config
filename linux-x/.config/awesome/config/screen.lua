@@ -429,14 +429,24 @@ local cal_popup = awful.popup {
     widget = wibox.widget {
         with_border {
             widget = {
-                orgenda.widget.create {
-                    width = dpi(240),
-                    indent_width = dpi(26),
-                    item_margin = dpi(5),
-                },
                 cal_widget,
-                spacing = dpi(12),
-                spacing_widget = beautiful.sep_widget,
+                {
+                    {
+                        orgenda.widget.create {
+                            width = dpi(240),
+                            indent_width = dpi(26),
+                            item_margin = dpi(5),
+                        },
+                        draw_empty = false,
+                        top = dpi(12),
+                        widget = fixed_margin,
+                    },
+                    bgimage = function(context, cr, width, height)
+                        height = dpi(12)
+                        beautiful.draw_separator(cr, width, height)
+                    end,
+                    widget = wibox.container.background
+                },
                 layout = wibox.layout.fixed.vertical,
             },
             top = true,
