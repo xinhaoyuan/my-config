@@ -1,1 +1,2 @@
 export LC_CTYPE=zh_CN.UTF-8
+export QT_AUTO_SCREEN_SCALE_FACTOR=0

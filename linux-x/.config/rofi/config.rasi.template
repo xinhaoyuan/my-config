@@ -25,8 +25,8 @@ configuration {
     selected-urgent-foreground:  @x-color1;
     selected-urgent-background:  @x-color12;
 
-    active-foreground:           @x-color3;
-    alternate-active-foreground: @x-color3;
+    active-foreground:           @x-color1;
+    alternate-active-foreground: @x-color1;
     active-background:           @background;
     alternate-active-background: @background;
     selected-active-foreground:  @x-color11;
@@ -105,10 +105,10 @@ element alternate.active {
     text-color:       @alternate-active-foreground;
 }
 scrollbar {
-    width:        0.4em;
+    width:        0.2em;
     border:       0;
     handle-color: @normal-foreground;
-    handle-width: 0.6em;
+    handle-width: 0.2em;
     padding:      0;
 }
 sidebar {
