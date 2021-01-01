@@ -12,8 +12,8 @@ DEP_ARRAY=(
     # hotkeys
     xcape
     # im
-    fcitx
-    fcitx-pinyin
+    fcitx5
+    fcitx5-pinyin
     # launcher
     rofi
     dex

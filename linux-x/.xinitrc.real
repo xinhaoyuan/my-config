@@ -2,19 +2,9 @@
 
 # X basic configure
 
-#xrandr --output DFP2 --right-of DFP1
-#xrandr --output DFP2 --primary
-
-xrandr --output VGA-0 --auto
-xrandr --output VGA-0 --dpi 192
-
 xrdb -merge ~/.Xresources
 xset fp+ ~/.fonts
 xset m 1 10
-
-export GTK_IM_MODULE=fcitx
-export QT_IM_MODULE=fcitx
-export XMODIFIERS="@im=fcitx"
 
 # start WM
 export PATH="$HOME/xbin:$PATH"

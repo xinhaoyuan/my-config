@@ -6,7 +6,7 @@ if [ ! -e $HOME/.xsession-init-guard ]; then
     xcape -e 'Super_L=Super_L|F12;Super_R=Super_R|F12'
     nitrogen --restore
     update-rofi-config
-    fcitx
+    # fcitx5 -d
     compton --config $HOME/.config/compton/compton.conf &
     cbatticon -n &
     pasystray --notify=all &

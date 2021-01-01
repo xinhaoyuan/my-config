@@ -472,7 +472,10 @@ local function set_splitted_no_min(tasklist_wibar)
     tasklist_wibar.middle_margin_container.widget.left = beautiful.border_width
     tasklist_wibar.middle_margin_container.widget.right = beautiful.border_width
     tasklist_wibar.right_margin_container.widget.left = beautiful.border_width
-    tasklist_wibar.right_margin_container.widget.widget.widget.left = beautiful.border_radius and beautiful.border_radius - beautiful.border_width or 0
+    tasklist_wibar.right_margin_container.widget.widget.widget.left =
+        tasklist_wibar.screen == capi.screen.primary and
+        beautiful.border_radius and
+        beautiful.border_radius - beautiful.border_width or 0
 end
 
 local function set_splitted(tasklist_wibar)
@@ -485,7 +488,10 @@ local function set_splitted(tasklist_wibar)
     tasklist_wibar.middle_margin_container.widget.left = beautiful.border_width
     tasklist_wibar.middle_margin_container.widget.right = beautiful.border_width
     tasklist_wibar.right_margin_container.widget.left = beautiful.border_width
-    tasklist_wibar.right_margin_container.widget.widget.widget.left = beautiful.border_radius and beautiful.border_radius - beautiful.border_width or 0
+    tasklist_wibar.right_margin_container.widget.widget.widget.left =
+        tasklist_wibar.screen == capi.screen.primary and
+        beautiful.border_radius and
+        beautiful.border_radius - beautiful.border_width or 0
 end
 
 function module.create(scr)
