@@ -322,6 +322,119 @@ local space_filler_with_left_right_borders = wibox.widget {
     widget = wibox.container.background
 }
 
+local space_filler = wibox.widget {
+    forced_width = beautiful.useless_gap,
+    widget = wibox.container.constraint
+}
+
+local function with_top_border(widget)
+    return with_border { widget = widget, top = true }
+end
+
+local space_filler_left_with_top_border = with_top_border {
+    {
+        {
+            beautiful.sep_widget,
+            forced_width = dpi(6),
+            content_fill_vertical = true,
+            content_fill_horizontal = true,
+            widget = wibox.container.place
+        },
+        halign = "left",
+        widget = fixed_place,
+    },
+    width = beautiful.border_width * 2 + beautiful.useless_gap,
+    strategy = "min",
+    widget = wibox.container.constraint
+}
+
+local space_filler_right_with_top_border = with_top_border {
+    {
+        {
+            beautiful.sep_widget,
+            forced_width = dpi(6),
+            content_fill_vertical = true,
+            content_fill_horizontal = true,
+            widget = wibox.container.place
+        },
+        halign = "right",
+        widget = fixed_place,
+    },
+    width = beautiful.border_width * 2 + beautiful.useless_gap,
+    strategy = "min",
+    widget = wibox.container.constraint
+}
+
+local function set_expanded(bar)
+    local space_filler_left = bar.widget:get_children_by_id("space_filler_left")[1]
+    local space_filler_right = bar.widget:get_children_by_id("space_filler_right")[1]
+    space_filler_left:set_children({space_filler_left_with_top_border})
+    space_filler_right:set_children({space_filler_right_with_top_border})
+
+    bar.left_margin_container.widget.right = 0
+    bar.middle_margin_container.widget.left = 0
+    bar.middle_margin_container.widget.right = 0
+    bar.right_margin_container.widget.left = 0
+    bar.right_margin_container.widget.widget.widget.left = 0
+end
+
+local function set_splitted_no_min(bar)
+    local space_filler_left = bar.widget:get_children_by_id("space_filler_left")[1]
+    local space_filler_right = bar.widget:get_children_by_id("space_filler_right")[1]
+    space_filler_left:set_children({space_filler_no_min})
+    space_filler_right:set_children({space_filler_no_min})
+
+    bar.left_margin_container.widget.right = beautiful.border_width
+    bar.middle_margin_container.widget.left = beautiful.border_width
+    bar.middle_margin_container.widget.right = beautiful.border_width
+    bar.right_margin_container.widget.left = beautiful.border_width
+    bar.right_margin_container.widget.widget.widget.left =
+        bar.screen == capi.screen.primary and
+        beautiful.border_radius and
+        beautiful.border_radius - beautiful.border_width or 0
+end
+
+local function set_splitted(bar)
+    local space_filler_left = bar.widget:get_children_by_id("space_filler_left")[1]
+    local space_filler_right = bar.widget:get_children_by_id("space_filler_right")[1]
+    space_filler_left:set_children({space_filler})
+    space_filler_right:set_children({space_filler})
+
+    bar.left_margin_container.widget.right = beautiful.border_width
+    bar.middle_margin_container.widget.left = beautiful.border_width
+    bar.middle_margin_container.widget.right = beautiful.border_width
+    bar.right_margin_container.widget.left = beautiful.border_width
+    bar.right_margin_container.widget.widget.widget.left =
+        bar.screen == capi.screen.primary and
+        beautiful.border_radius and
+        beautiful.border_radius - beautiful.border_width or 0
+end
+
+capi.awesome.connect_signal(
+    "tasklist::update::before",
+    function (s)
+        if beautiful.bar_style == "split" then
+            set_splitted(s.widgets.wibar)
+            return
+        elseif beautiful.bar_style == "simple" then
+            set_expanded(s.widgets.wibar)
+            return
+        elseif beautiful.bar_style ~= "auto" then
+            print("Expecting auto bar_style but got", beautiful.bar_style)
+        end
+
+        local has_maximized = false
+        for _, c in ipairs(s.clients) do
+            has_maximized = has_maximized or c.maximized
+        end
+        if has_maximized then
+            set_expanded(s.widgets.wibar)
+        else
+            set_splitted(s.widgets.wibar)
+        end
+    end
+)
+
 -- Calendar popup
 
 local today = os.date("*t")
