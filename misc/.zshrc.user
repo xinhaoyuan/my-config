@@ -111,7 +111,7 @@ preexec_date() {
 
     if [[ "$1" == *$'\n'* ]]; then
         # print simple time for multiline command
-        echo -e "$fg_bold[green][${DATE}]$reset_color"
+        echo -e "$fg_bold[green][${DATE}]${reset_color}"
     elif [[ "$MY_PROMPT_MODE" = "0" ]]; then
         # Assume expr length S calculate the char width of S on terminal.
         # This would work only for regular ascii cmd ...
@@ -120,9 +120,11 @@ preexec_date() {
         echo -ne "\033[${C}A$fg_bold[black][${STYLED_DATE}$fg_bold[black]]$reset_color\033[${C}B\r"
         # export TIME_PREEXEC=`date +%s`
     else
-        # similar to above, but don't count the pwd in
-        C=$(( ( ${#1} + ${DATE_FORMAT_LEN} + 2 ) / $COLUMNS + 1 ))
-        echo -ne "\033[${C}A$fg_bold[black][${STYLED_DATE}$fg_bold[black]]$reset_color\033[${C}B\r"
+        # similar to above, but don't count the pwd in. Also swallow the header line.
+        W=$(( ${#1} + ${DATE_FORMAT_LEN} + 2 ))
+        C=$(( W / COLUMNS + 1 ))
+        NC=$(( (W + ${#PWD} + 2) / $COLUMNS + 1 ))
+        echo -ne "\033[$((C + 1))A\033[$((C + 1))M$fg_bold[black][${STYLED_DATE}$fg_bold[black]]$fg_bold[green]$PWD${reset_color} $1\033[$((NC - C))B\r"
     fi
 }
 
@@ -158,7 +160,7 @@ set_prompt() {
   fi
 }
 
-MY_PROMPT_MODE=0
+MY_PROMPT_MODE=1
 set_prompt
 
 change_prompt() {
