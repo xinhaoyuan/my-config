@@ -310,12 +310,31 @@ local border_top = border.directions{ "top", "left", "right" }
 local function draw_tb_border_bgimage_top(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
+    local indicator = beautiful.border_radius and beautiful.border_radius_cut and capi.client.focus == c
     if beautiful.border_radius then
-        beautiful.rect_with_corners(cr, width, height + beautiful.border_radius, true, true, false, false, beautiful.border_radius)
+        if indicator then
+            gshape.rectangle(cr, width, height)
+        else
+            beautiful.rect_with_corners(cr, width, height + beautiful.border_radius, true, true, false, false, beautiful.border_radius)
+        end
         cr:fill()
         cr:set_operator('ATOP')
     end
     border:draw({ theme = beautiful.get_border_theme(), color = border_color }, cr, width, height, border_top)
+    if indicator then
+        cr:set_source(gcolor(beautiful.fg_focus))
+        local indent = (2 - math.sqrt(2)) * (beautiful.border_radius) - beautiful.border_outer_space
+
+        cr:move_to(beautiful.border_outer_space, beautiful.border_outer_space)
+        cr:line_to(beautiful.border_outer_space, indent)
+        cr:line_to(indent, beautiful.border_outer_space)
+        cr:fill()
+
+        cr:move_to(width - indent, beautiful.border_outer_space)
+        cr:line_to(width - beautiful.border_outer_space, beautiful.border_outer_space)
+        cr:line_to(width - beautiful.border_outer_space, indent)
+        cr:fill()
+    end
 end
 
 
@@ -323,14 +342,33 @@ local border_bottom = border.directions{ "bottom", "left", "right" }
 local function draw_tb_border_bgimage_bottom(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
+    local indicator = beautiful.border_radius and beautiful.border_radius_cut and capi.client.focus == c
     if beautiful.border_radius then
-        cr:translate(0, -beautiful.border_radius)
-        beautiful.rect_with_corners(cr, width, height + beautiful.border_radius, false, false, true, true, beautiful.border_radius)
+        if indicator then
+            gshape.rectangle(cr, width, height)
+        else
+            cr:translate(0, -beautiful.border_radius)
+            beautiful.rect_with_corners(cr, width, height + beautiful.border_radius, false, false, true, true, beautiful.border_radius)
+            cr:translate(0, beautiful.border_radius)
+        end
         cr:fill()
         cr:set_operator('ATOP')
-        cr:translate(0, beautiful.border_radius)
     end
     border:draw({ theme = beautiful.get_border_theme(), color = border_color }, cr, width, height, border_bottom)
+    if indicator then
+        cr:set_source(gcolor(beautiful.fg_focus))
+        local indent = (2 - math.sqrt(2)) * (beautiful.border_radius) - beautiful.border_outer_space
+
+        cr:move_to(width - indent, height - beautiful.border_outer_space)
+        cr:line_to(width - beautiful.border_outer_space, height - beautiful.border_outer_space)
+        cr:line_to(width - beautiful.border_outer_space, height - indent)
+        cr:fill()
+
+        cr:move_to(indent, height - beautiful.border_outer_space)
+        cr:line_to(beautiful.border_outer_space, height - beautiful.border_outer_space)
+        cr:line_to(beautiful.border_outer_space, height - indent)
+        cr:fill()
+    end
 end
 
 local border_left = border.directions{ "left" }

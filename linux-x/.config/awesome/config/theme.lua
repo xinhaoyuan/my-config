@@ -410,7 +410,7 @@ theme.tasklist_layout = {
 
 function gshape.partially_cut_rect(cr, width, height, top_left, top_right, bottom_right, bottom_left, radius)
     -- radius = math.min(radius, width / 2, height / 2)
-    cut = (2 - math.sqrt(2)) * radius 
+    cut = (2 - math.sqrt(2)) * radius
     cr:move_to(cut, 0)
     if top_right then
         cr:line_to(width - cut , 0)
@@ -498,6 +498,21 @@ theme.apply_border_to_widget = function(args)
         },
         bgimage = function (context, cr, width, height)
             if width == 0 or height == 0 then return end
+            local tl = widget.widget.top > 0 and widget.widget.left > 0
+            local tr = widget.widget.top > 0 and widget.widget.right > 0
+            local br = widget.widget.bottom > 0 and widget.widget.right > 0
+            local bl = widget.widget.bottom > 0 and widget.widget.left > 0
+            local indicator = beautiful.border_radius and beautiful.border_radius_cut
+            if indicator then
+                gshape.rectangle(cr, width, height)
+            else
+                beautiful.rect_with_corners(
+                    cr, width, height,
+                    tl, tr, br, bl,
+                    beautiful.border_radius)
+            end
+            cr:fill()
+            cr:set_operator('ATOP')
             border:draw({ theme = beautiful.get_border_theme(),
                           color = beautiful.border_focus }, cr, width, height,
                 border.directions{
@@ -506,17 +521,38 @@ theme.apply_border_to_widget = function(args)
                     widget.widget.right > 0 and "right",
                     widget.widget.bottom > 0 and "bottom"
             })
+            if indicator then
+                cr:set_source(gcolor(beautiful.fg_focus))
+                local indent = (2 - math.sqrt(2)) * (beautiful.border_radius) - beautiful.border_outer_space
+                if tl then
+                    cr:move_to(beautiful.border_outer_space, beautiful.border_outer_space)
+                    cr:line_to(beautiful.border_outer_space, indent)
+                    cr:line_to(indent, beautiful.border_outer_space)
+                    cr:fill()
+                end
+
+                if tr then
+                    cr:move_to(width - indent, beautiful.border_outer_space)
+                    cr:line_to(width - beautiful.border_outer_space, beautiful.border_outer_space)
+                    cr:line_to(width - beautiful.border_outer_space, indent)
+                    cr:fill()
+                end
+
+                if br then
+                    cr:move_to(width - indent, height - beautiful.border_outer_space)
+                    cr:line_to(width - beautiful.border_outer_space, height - beautiful.border_outer_space)
+                    cr:line_to(width - beautiful.border_outer_space, height - indent)
+                    cr:fill()
+                end
+
+                if bl then
+                    cr:move_to(indent, height - beautiful.border_outer_space)
+                    cr:line_to(beautiful.border_outer_space, height - beautiful.border_outer_space)
+                    cr:line_to(beautiful.border_outer_space, height - indent)
+                    cr:fill()
+                end
+            end
         end,
-        shape = beautiful.border_radius ~= nil and
-            function (cr, width, height)
-                beautiful.rect_with_corners(
-                    cr, width, height,
-                    widget.widget.top > 0 and widget.widget.left > 0,
-                    widget.widget.top > 0 and widget.widget.right > 0,
-                    widget.widget.bottom > 0 and widget.widget.right > 0,
-                    widget.widget.bottom > 0 and widget.widget.left > 0,
-                    beautiful.border_radius)
-            end,
         widget = wibox.container.background
     }
     return widget
