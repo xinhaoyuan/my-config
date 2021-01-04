@@ -297,31 +297,6 @@ local function with_border(args)
     return widget
 end
 
-local space_filler_with_left_right_borders = wibox.widget {
-    {
-        forced_width = beautiful.useless_gap + beautiful.border_width * 2,
-        widget = wibox.container.constraint,
-    },
-    bgimage = function (context, cr, width, height)
-        -- TODO: Support rotation.
-        local total_width = beautiful.border_width
-        cr:save()
-        cr:rectangle(0, 0, total_width, height)
-        cr:clip()
-        border:draw({ color = beautiful.border_focus }, cr, total_width, height,
-            border.directions{ right_index[shared.var.bar_position], top_index[shared.var.bar_position] })
-        cr:restore()
-        cr:save()
-        cr:translate(width - total_width, 0)
-        cr:rectangle(0, 0, total_width, height)
-        cr:clip()
-        border:draw({ color = beautiful.border_focus }, cr, total_width, height,
-            border.directions{ left_index[shared.var.bar_position], top_index[shared.var.bar_position] })
-        cr:restore()
-    end,
-    widget = wibox.container.background
-}
-
 local space_filler = wibox.widget {
     forced_width = beautiful.useless_gap,
     widget = wibox.container.constraint
