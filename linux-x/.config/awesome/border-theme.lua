@@ -126,9 +126,9 @@ local rounded_theme = {}
 
 function rounded_theme:init()
     if self.inited == nil then
-        self.size = beautiful.border_width
-        self.outer_space = beautiful.border_outer_space
-        self.inner_space = beautiful.border_inner_space
+        self.size = self.size or beautiful.border_width
+        self.outer_space = self.outer_space or beautiful.border_outer_space
+        self.inner_space = self.inner_space or beautiful.border_inner_space
         self.inited = true
     end
 end
@@ -212,6 +212,122 @@ function rounded_theme:after_draw(context, cr)
 end
 
 mod.rounded_theme = rounded_theme
+
+------
+
+local cut_theme = {}
+local cut_a = math.sqrt(2) - 1
+
+function cut_theme:init()
+    if self.inited == nil then
+        self.size = self.size or beautiful.border_width
+        self.outer_space = self.outer_space or beautiful.border_outer_space
+        self.inner_space = self.inner_space or beautiful.border_inner_space
+        self.outer_indent = cut_a * (self.size - self.outer_space)
+        self.inner_indent = cut_a * self.inner_space
+        self.inited = true
+    end
+end
+
+function cut_theme:before_draw(context, cr)
+    self:init()
+    cr:save()
+    cr:set_source(gcolor(beautiful.border_space))
+    cr:paint()
+    cr:set_line_width(self.line_width)
+    cr:set_source(gcolor(context.color))
+end
+
+function cut_theme:top_left(context, cr)
+    cr:move_to(self.outer_space, self.size)
+    cr:line_to(self.outer_space, self.size - self.outer_indent)
+    cr:line_to(self.size - self.outer_indent, self.outer_space)
+    cr:line_to(self.size, self.outer_space)
+    cr:line_to(self.size, self.size - self.inner_space)
+    cr:line_to(self.size - self.inner_indent, self.size - self.inner_space)
+    cr:line_to(self.size - self.inner_space, self.size - self.inner_indent)
+    cr:line_to(self.size - self.inner_space, self.size)
+    cr:close_path()
+    cr:fill()
+end
+
+function cut_theme:top_right(context, cr)
+    cr:move_to(0, self.outer_space)
+    cr:line_to(self.outer_indent, self.outer_space)
+    cr:line_to(self.size - self.outer_space, self.size - self.outer_indent)
+    cr:line_to(self.size - self.outer_space, self.size)
+    cr:line_to(self.inner_space, self.size)
+    cr:line_to(self.inner_space, self.size - self.inner_indent)
+    cr:line_to(self.inner_indent, self.size - self.inner_space)
+    cr:line_to(0, self.size - self.inner_space)
+    cr:close_path()
+    cr:fill()
+end
+
+function cut_theme:bottom_left(context, cr)
+    cr:move_to(self.outer_space, 0)
+    cr:line_to(self.outer_space, self.outer_indent)
+    cr:line_to(self.size - self.outer_indent, self.size - self.outer_space)
+    cr:line_to(self.size, self.size - self.outer_space)
+    cr:line_to(self.size, self.inner_space)
+    cr:line_to(self.size - self.inner_indent, self.inner_space)
+    cr:line_to(self.size - self.inner_space, self.inner_indent)
+    cr:line_to(self.size - self.inner_space, 0)
+    cr:close_path()
+    cr:fill()
+end
+
+function cut_theme:bottom_right(context, cr)
+    cr:move_to(self.inner_space, 0)
+    cr:line_to(self.inner_space, self.inner_indent)
+    cr:line_to(self.inner_indent, self.inner_space)
+    cr:line_to(0, self.inner_space)
+    cr:line_to(0, self.size - self.outer_space)
+    cr:line_to(self.outer_indent, self.size - self.outer_space)
+    cr:line_to(self.size - self.outer_space, self.outer_indent)
+    cr:line_to(self.size - self.outer_space, 0)
+    cr:close_path()
+    cr:fill()
+end
+
+function cut_theme:top(context, cr, length)
+    if length <= 0 then
+        return
+    end
+    cr:rectangle(0, self.outer_space, length, self.size - self.outer_space - self.inner_space)
+    cr:fill()
+end
+
+function cut_theme:bottom(context, cr, length)
+    if length <= 0 then
+        return
+    end
+    cr:rectangle(0, self.inner_space, length, self.size - self.outer_space - self.inner_space)
+    cr:fill()
+end
+
+function cut_theme:left(context, cr, length)
+    if length <= 0 then
+        return
+    end
+    cr:rectangle(self.outer_space, 0, self.size - self.outer_space - self.inner_space, length)
+    cr:fill()
+end
+
+
+function cut_theme:right(context, cr, length)
+    if length <= 0 then
+        return
+    end
+    cr:rectangle(self.inner_space, 0, self.size - self.outer_space - self.inner_space, length)
+    cr:fill()
+end
+
+function cut_theme:after_draw(context, cr)
+    cr:restore()
+end
+
+mod.cut_theme = cut_theme
 
 ------
 

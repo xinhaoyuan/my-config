@@ -27,7 +27,6 @@ local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
 local fixed_align = require("fixed_align")
 local masked_imagebox = require("masked_imagebox")
-local border = require("border-theme")
 local debug_container = require("debug_container")
 local tasklist = require("config.tasklist")
 local cbg = require("contextual_background")
@@ -73,17 +72,6 @@ local machi = require("layout-machi")
 
 beautiful.layout_machi = machi.get_icon()
 machi.default_editor.set_gap(beautiful.useless_gap, beautiful.useless_gap)
-
-local border_theme
-if beautiful.border_radius == nil then
-    border_theme = border.default_theme
-else
-    border_theme = setmetatable({}, {__index = border.rounded_theme})
-    border_theme:init()
-    border_theme.size = beautiful.border_radius
-    border_theme.outer_space = beautiful.border_outer_space
-    border_theme.inner_space = beautiful.border_radius - beautiful.border_width + beautiful.border_inner_space
-end
 
 local alayout = require("awful.layout")
 alayout.layouts = {
@@ -208,99 +196,12 @@ local function sort(l, c)
    return ret
 end
 
-local function rounded_rect_with_corners(cr, width, height, radius, corners)
-    radius = math.min(radius, width / 2, height / 2)
-    cr:move_to(radius, 0)
-    if corners.top_right then
-        cr:arc( width-radius, radius       , radius, 3*(math.pi/2),    math.pi*2  )
-    else
-        cr:line_to(width, 0)
-        cr:line_to(width, radius)
-    end
-    if corners.bottom_right then
-        cr:arc( width-radius, height-radius, radius,    math.pi*2 ,    math.pi/2  )
-    else
-        cr:line_to(width, height)
-        cr:line_to(width - radius, height)
-    end
-    if corners.bottom_left then
-        cr:arc( radius      , height-radius, radius,    math.pi/2 ,    math.pi    )
-    else
-        cr:line_to(0, height)
-        cr:line_to(0, height - radius)
-    end
-    if corners.top_left then
-        cr:arc( radius      , radius       , radius,    math.pi   , 3*(math.pi/2) )
-    else
-        cr:line_to(0, 0)
-        cr:line_to(radius, 0)
-    end
-    cr:close_path()
-end
-
-local function with_border(args)
-    args = args or {}
-    local widget
-    local inner_widget = wibox.widget {
-        {
-            args.widget,
-            widget = fixed_margin,
-        },
-        shape = beautiful.border_radius ~= nil and
-            function (cr, width, height)
-                rounded_rect_with_corners(cr, width, height,
-                                          beautiful.border_radius -
-                                          beautiful.border_width,
-                                          {
-                                              top_left = widget.widget.top > 0 and widget.widget.left > 0,
-                                              top_right = widget.widget.top > 0 and widget.widget.right > 0,
-                                              bottom_left = widget.widget.bottom > 0 and widget.widget.left > 0,
-                                              bottom_right = widget.widget.bottom > 0 and widget.widget.right > 0,
-                })
-            end,
-        bg = beautiful.bg_normal,
-        widget = wibox.container.background
-    }
-    widget = wibox.widget {
-        {
-            inner_widget,
-            top = args.top and beautiful.border_width,
-            left = args.left and beautiful.border_width,
-            right = args.right and beautiful.border_width,
-            bottom = args.bottom and beautiful.border_width,
-            draw_empty = args.draw_empty,
-            widget = fixed_margin,
-        },
-        bgimage = function (context, cr, width, height)
-            if width == 0 or height == 0 then return end
-            border:draw({ theme = border_theme,
-                          color = beautiful.border_focus }, cr, width, height,
-                border.directions{
-                    widget.widget.top > 0 and "top",
-                    widget.widget.left > 0 and "left",
-                    widget.widget.right > 0 and "right",
-                    widget.widget.bottom > 0 and "bottom"
-            })
-        end,
-        shape = beautiful.border_radius ~= nil and
-            function (cr, width, height)
-                rounded_rect_with_corners(cr, width, height,
-                                          beautiful.border_radius, {
-                                              top_left = widget.widget.top > 0 and widget.widget.left > 0,
-                                              top_right = widget.widget.top > 0 and widget.widget.right > 0,
-                                              bottom_left = widget.widget.bottom > 0 and widget.widget.left > 0,
-                                              bottom_right = widget.widget.bottom > 0 and widget.widget.right > 0,
-                })
-            end,
-        widget = wibox.container.background
-    }
-    return widget
-end
-
 local space_filler = wibox.widget {
     forced_width = beautiful.useless_gap,
     widget = wibox.container.constraint
 }
+
+local with_border = beautiful.apply_border_to_widget
 
 local function with_top_border(widget)
     return with_border { widget = widget, top = true }

@@ -11,8 +11,10 @@ local xrdb  = xresources.get_current_theme()
 local gears = require("gears")
 local gcolor = require("gears.color")
 local gshape = require("gears.shape")
+local border = require("border-theme")
 local fallback = require("fallback")
 local masked_imagebox = require("masked_imagebox")
+local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
 local acolor = require("aux").color
 local cbg = require("contextual_background")
@@ -70,7 +72,8 @@ theme.useless_gap   = dpi(6)
 theme.border_width  = dpi(4)
 theme.border_outer_space = dpi(1)
 theme.border_inner_space = dpi(1)
-theme.border_radius = dpi(12)
+theme.border_radius = dpi(16)
+theme.border_radius_cut = true
 theme.border_space = is_light_color(theme.bg_normal) and c_white[2] or c_black[1]
 theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
 theme.border_normal = acolor(theme.bg_normal):blend_with(acolor(theme.border_focus), 0.3):to_string()
@@ -374,5 +377,150 @@ theme.tasklist_layout = {
         },
     }
 }
+
+-- local function rounded_rect_with_corners(cr, width, height, radius, corners)
+--     radius = math.min(radius, width / 2, height / 2)
+--     cr:move_to(radius, 0)
+--     if corners.top_right then
+--         cr:arc( width-radius, radius       , radius, 3*(math.pi/2),    math.pi*2  )
+--     else
+--         cr:line_to(width, 0)
+--         cr:line_to(width, radius)
+--     end
+--     if corners.bottom_right then
+--         cr:arc( width-radius, height-radius, radius,    math.pi*2 ,    math.pi/2  )
+--     else
+--         cr:line_to(width, height)
+--         cr:line_to(width - radius, height)
+--     end
+--     if corners.bottom_left then
+--         cr:arc( radius      , height-radius, radius,    math.pi/2 ,    math.pi    )
+--     else
+--         cr:line_to(0, height)
+--         cr:line_to(0, height - radius)
+--     end
+--     if corners.top_left then
+--         cr:arc( radius      , radius       , radius,    math.pi   , 3*(math.pi/2) )
+--     else
+--         cr:line_to(0, 0)
+--         cr:line_to(radius, 0)
+--     end
+--     cr:close_path()
+-- end
+
+function gshape.partially_cut_rect(cr, width, height, top_left, top_right, bottom_right, bottom_left, radius)
+    -- radius = math.min(radius, width / 2, height / 2)
+    cut = (2 - math.sqrt(2)) * radius 
+    cr:move_to(cut, 0)
+    if top_right then
+        cr:line_to(width - cut , 0)
+        cr:line_to(width, cut)
+    else
+        cr:line_to(width, 0)
+        cr:line_to(width, cut)
+    end
+    if bottom_right then
+        cr:line_to(width, height - cut)
+        cr:line_to(width - cut, height)
+    else
+        cr:line_to(width, height)
+        cr:line_to(width - cut, height)
+    end
+    if bottom_left then
+        cr:line_to(cut, height)
+        cr:line_to(0, height - cut)
+    else
+        cr:line_to(0, height)
+        cr:line_to(0, height - cut)
+    end
+    if top_left then
+        cr:line_to(0, cut)
+        cr:line_to(cut, 0)
+    else
+        cr:line_to(0, 0)
+        cr:line_to(cut, 0)
+    end
+    cr:close_path()
+end
+
+local border_theme
+function theme.get_border_theme()
+    if border_theme == nil then
+        if beautiful.border_radius == nil then
+            border_theme = border.default_theme
+        else
+            if beautiful.border_radius_cut then
+                border_theme = setmetatable({}, {__index = border.cut_theme})
+            else
+                border_theme = setmetatable({}, {__index = border.rounded_theme})
+            end
+            border_theme.size = beautiful.border_radius
+            border_theme.outer_space = beautiful.border_outer_space
+            border_theme.inner_space = beautiful.border_radius - beautiful.border_width + beautiful.border_inner_space
+            border_theme:init()
+        end
+    end
+    return border_theme
+end
+
+theme.rect_with_corners = theme.border_radius_cut and gshape.partially_cut_rect or gshape.partially_rounded_rect
+theme.apply_border_to_widget = function(args)
+    args = args or {}
+    local widget
+    local inner_widget = wibox.widget {
+        {
+            args.widget,
+            widget = fixed_margin,
+        },
+        shape = beautiful.border_radius ~= nil and
+            function (cr, width, height)
+                beautiful.rect_with_corners(
+                    cr, width, height,
+                    widget.widget.top > 0 and widget.widget.left > 0,
+                    widget.widget.top > 0 and widget.widget.right > 0,
+                    widget.widget.bottom > 0 and widget.widget.right > 0,
+                    widget.widget.bottom > 0 and widget.widget.left > 0,
+                    beautiful.border_radius -
+                    beautiful.border_width)
+            end,
+        bg = beautiful.bg_normal,
+        widget = wibox.container.background
+    }
+    widget = wibox.widget {
+        {
+            inner_widget,
+            top = args.top and beautiful.border_width,
+            left = args.left and beautiful.border_width,
+            right = args.right and beautiful.border_width,
+            bottom = args.bottom and beautiful.border_width,
+            draw_empty = args.draw_empty,
+            widget = fixed_margin,
+        },
+        bgimage = function (context, cr, width, height)
+            if width == 0 or height == 0 then return end
+            border:draw({ theme = beautiful.get_border_theme(),
+                          color = beautiful.border_focus }, cr, width, height,
+                border.directions{
+                    widget.widget.top > 0 and "top",
+                    widget.widget.left > 0 and "left",
+                    widget.widget.right > 0 and "right",
+                    widget.widget.bottom > 0 and "bottom"
+            })
+        end,
+        shape = beautiful.border_radius ~= nil and
+            function (cr, width, height)
+                beautiful.rect_with_corners(
+                    cr, width, height,
+                    widget.widget.top > 0 and widget.widget.left > 0,
+                    widget.widget.top > 0 and widget.widget.right > 0,
+                    widget.widget.bottom > 0 and widget.widget.right > 0,
+                    widget.widget.bottom > 0 and widget.widget.left > 0,
+                    beautiful.border_radius)
+            end,
+        widget = wibox.container.background
+    }
+    return widget
+end
+
 
 return theme

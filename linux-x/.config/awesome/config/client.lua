@@ -306,27 +306,16 @@ local opposite_dir = {
 --     c.titlebar_container = titlebar_container
 -- end
 
-local border_theme
-if beautiful.border_radius == nil then
-    border_theme = border.default_theme
-else
-    border_theme = setmetatable({}, {__index = border.rounded_theme})
-    border_theme:init()
-    border_theme.size = beautiful.border_radius
-    border_theme.outer_space = beautiful.border_outer_space
-    border_theme.inner_space = beautiful.border_radius - beautiful.border_width + beautiful.border_inner_space
-end
-
 local border_top = border.directions{ "top", "left", "right" }
 local function draw_tb_border_bgimage_top(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
     if beautiful.border_radius then
-        gshape.partially_rounded_rect(cr, width, height + beautiful.border_radius, true, true, false, false, beautiful.border_radius)
+        beautiful.rect_with_corners(cr, width, height + beautiful.border_radius, true, true, false, false, beautiful.border_radius)
         cr:fill()
         cr:set_operator('ATOP')
     end
-    border:draw({ theme = border_theme, color = border_color }, cr, width, height, border_top)
+    border:draw({ theme = beautiful.get_border_theme(), color = border_color }, cr, width, height, border_top)
 end
 
 
@@ -336,26 +325,26 @@ local function draw_tb_border_bgimage_bottom(context, cr, width, height)
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
     if beautiful.border_radius then
         cr:translate(0, -beautiful.border_radius)
-        gshape.partially_rounded_rect(cr, width, height + beautiful.border_radius, false, false, true, true, beautiful.border_radius)
+        beautiful.rect_with_corners(cr, width, height + beautiful.border_radius, false, false, true, true, beautiful.border_radius)
         cr:fill()
         cr:set_operator('ATOP')
         cr:translate(0, beautiful.border_radius)
     end
-    border:draw({ theme = border_theme, color = border_color }, cr, width, height, border_bottom)
+    border:draw({ theme = beautiful.get_border_theme(), color = border_color }, cr, width, height, border_bottom)
 end
 
 local border_left = border.directions{ "left" }
 local function draw_tb_border_bgimage_left(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    border:draw({ theme = border_theme, color = border_color }, cr, width, height, border_left)
+    border:draw({ theme = beautiful.get_border_theme(), color = border_color }, cr, width, height, border_left)
 end
 
 local border_right = border.directions{ "right" }
 local function draw_tb_border_bgimage_right(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    border:draw({ theme = border_theme, color = border_color }, cr, width, height, border_right)
+    border:draw({ theme = beautiful.get_border_theme(), color = border_color }, cr, width, height, border_right)
 end
 
 local function apply_container_shape(client, shape, ...)
@@ -378,10 +367,6 @@ local function apply_container_shape(client, shape, ...)
   img:finish()
 end
 
-local function my_client_shape(cr, width, height)
-    gshape.rounded_rect(cr, width, height, beautiful.border_radius)
-end
-
 local function update_shape(c)
     if beautiful.border_radius == nil then
         return
@@ -393,17 +378,15 @@ local function update_shape(c)
             c.shape = nil
         end
     else
-        -- if c._shape ~= my_client_shape then
-        --     c.shape = my_client_shape
-        -- end
         apply_container_shape(
             c,
             function (cr, width, height)
                 cr:translate(beautiful.border_width, beautiful.border_width)
-                gshape.rounded_rect(cr,
-                                    width - beautiful.border_width * 2,
-                                    height - beautiful.border_width * 2,
-                                    beautiful.border_radius - beautiful.border_width)
+                beautiful.rect_with_corners(cr,
+                                            width - beautiful.border_width * 2,
+                                            height - beautiful.border_width * 2,
+                                            true, true, true, true,
+                                            beautiful.border_radius - beautiful.border_width)
             end
         )
     end

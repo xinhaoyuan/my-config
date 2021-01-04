@@ -22,7 +22,6 @@ local outlined_textbox = require("outlined_textbox")
 local cbg = require("contextual_background")
 local debug_container = require("debug_container")
 local masked_imagebox = require("masked_imagebox")
-local border = require("border-theme")
 local acolor = require("aux").color
 local mpc_gobject = require("mpc-gobject")
 local orgenda = require("orgenda")
@@ -209,19 +208,7 @@ local function button(args)
    return ret
 end
 
-local border_theme
-if beautiful.border_radius == nil then
-    border_theme = border.default_theme
-else
-    border_theme = setmetatable({}, {__index = border.rounded_theme})
-    border_theme:init()
-    border_theme.size = beautiful.border_radius
-    border_theme.outer_space = beautiful.border_outer_space
-    border_theme.inner_space = beautiful.border_radius - beautiful.border_width + beautiful.border_inner_space
-end
-
 local sep_color = gcolor(acolor(beautiful.fg_normal):blend_with(acolor(beautiful.bg_normal), 0.75):to_string())
-local decorate_border = border.directions { "top", "bottom", "left", "right" }
 local function decorate_panel(args)
     if args.top_sep then
         return wibox.widget {
@@ -243,34 +230,13 @@ local function decorate_panel(args)
 end
 
 local function decorate_waffle(widget)
-    local decorated = wibox.widget {
-        {
-            wibox.widget {
-                widget,
-                bg = beautiful.bg_normal,
-                fg = beautiful.fg_normal,
-                shape = beautiful.border_radius ~= nil and
-                    function (cr, width, height)
-                        gshape.rounded_rect(cr, width, height,
-                                            beautiful.border_radius -
-                                                beautiful.border_width)
-                    end,
-                widget = wibox.container.background
-            },
-            margins = beautiful.border_width,
-            draw_empty = false,
-            widget = fixed_margin,
-        },
-        bgimage = function (context, cr, width, height)
-            border:draw({ theme = border_theme, color = beautiful.border_focus }, cr, width, height, decorate_border)
-        end,
-        shape = beautiful.border_radius ~= nil and function (cr, width, height)
-            gshape.rounded_rect(cr, width, height, beautiful.border_radius)
-                                                   end,
-        widget = wibox.container.background
+    return beautiful.apply_border_to_widget {
+        widget = widget,
+        top = true,
+        bottom = true,
+        left = true,
+        right = true,
     }
-
-    return decorated
 end
 
 
