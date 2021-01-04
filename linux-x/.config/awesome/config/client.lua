@@ -312,6 +312,7 @@ local function draw_tb_border_bgimage_top(context, cr, width, height)
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
     local indicator = beautiful.border_radius and beautiful.border_radius_cut and capi.client.focus == c
     if beautiful.border_radius then
+        cr:set_source(gcolor(beautiful.border_space))
         if indicator then
             gshape.rectangle(cr, width, height)
         else
@@ -322,7 +323,7 @@ local function draw_tb_border_bgimage_top(context, cr, width, height)
     end
     border:draw({ theme = beautiful.get_border_theme(), color = border_color }, cr, width, height, border_top)
     if indicator then
-        cr:set_source(gcolor(beautiful.fg_focus))
+        cr:set_source(gcolor(beautiful.fg_normal))
         local indent = (2 - math.sqrt(2)) * (beautiful.border_radius) - beautiful.border_outer_space
 
         cr:move_to(beautiful.border_outer_space, beautiful.border_outer_space)
@@ -344,6 +345,7 @@ local function draw_tb_border_bgimage_bottom(context, cr, width, height)
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
     local indicator = beautiful.border_radius and beautiful.border_radius_cut and capi.client.focus == c
     if beautiful.border_radius then
+        cr:set_source(gcolor(beautiful.border_space))
         if indicator then
             gshape.rectangle(cr, width, height)
         else
@@ -356,7 +358,7 @@ local function draw_tb_border_bgimage_bottom(context, cr, width, height)
     end
     border:draw({ theme = beautiful.get_border_theme(), color = border_color }, cr, width, height, border_bottom)
     if indicator then
-        cr:set_source(gcolor(beautiful.fg_focus))
+        cr:set_source(gcolor(beautiful.fg_normal))
         local indent = (2 - math.sqrt(2)) * (beautiful.border_radius) - beautiful.border_outer_space
 
         cr:move_to(width - indent, height - beautiful.border_outer_space)

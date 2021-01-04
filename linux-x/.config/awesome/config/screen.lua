@@ -267,7 +267,7 @@ local function set_splitted_no_min(bar)
     bar.right_margin_container.widget.widget.widget.left =
         bar.screen == capi.screen.primary and
         beautiful.border_radius and
-        beautiful.border_radius - beautiful.border_width or 0
+        math.floor((beautiful.border_radius_cut and 2 - math.sqrt(2) or 1) * (beautiful.border_radius - beautiful.border_width)) or 0
 end
 
 local function set_splitted(bar)
@@ -283,7 +283,7 @@ local function set_splitted(bar)
     bar.right_margin_container.widget.widget.widget.left =
         bar.screen == capi.screen.primary and
         beautiful.border_radius and
-        beautiful.border_radius - beautiful.border_width or 0
+        math.floor((beautiful.border_radius_cut and 2 - math.sqrt(2) or 1) * (beautiful.border_radius - beautiful.border_width)) or 0
 end
 
 capi.awesome.connect_signal(
@@ -905,16 +905,27 @@ awful.screen.connect_for_each_screen(
 local gears = require("gears")
 local gsurf = require("gears.surface")
 local cairo = require("lgi").cairo
-function shared.screen.xkcd()
-    awful.spawn.easy_async({"xkcd_fetcher.py", "--recolor="..beautiful.fg_normal.."-"..beautiful.bg_normal, "-o", "/tmp/xkcd.png"}, function (_, _, reason, code)
+function shared.screen.xkcd(num)
+    local cmd = {"xkcd_fetcher.py", "--recolor="..beautiful.fg_normal.."-"..beautiful.bg_normal}
+    if num ~= nil then
+        cmd[#cmd + 1] = "-n"
+        cmd[#cmd + 1] = tostring(num)
+    end
+    awful.spawn.easy_async(cmd, function (stdout, stderr, reason, code)
             if reason ~= "exit" or code ~= 0 then
                 print("Failed to fetch xkcd. reason: "..reason..", code: "..tostring(code))
+                print("Stdout:", stdout)
+                print("Stderr:", stderr)
                 return
+            else
+                print("Fetched image. stderr:", stderr)
             end
 
-            local surf = gsurf.load_uncached("/tmp/xkcd.png")
+            local filename = stdout:match("^(.*)\n")
+
+            local surf = gsurf.load_uncached(filename)
             local w, h = gsurf.get_size(surf)
-            local ratio = 0.5
+            local ratio = 0.6
 
             for s in screen do
                 local geom, cr = gears.wallpaper.prepare_context(s)
@@ -924,7 +935,8 @@ function shared.screen.xkcd()
                 else
                     scale = ratio * geom.height / h
                 end
-                if scale > 1 then scale = math.floor(scale) end
+                if scale > dpi(1) then scale = dpi(1) end
+                if scale > 1 then scale = math.floor(scale + 0.5) end
                 target_w = scale * w
                 target_h = scale * h
 
@@ -932,20 +944,23 @@ function shared.screen.xkcd()
                 cr:set_source(gcolor(beautiful.bg_normal))
                 cr:paint()
 
-                print("gw", geom.width, "gh", geom.height, "w", w, "h", h, "tw", target_w, "th", target_h, "scale", scale)
+                -- print("gw", geom.width, "gh", geom.height, "w", w, "h", h, "tw", target_w, "th", target_h, "scale", scale)
                 cr:translate(geom.width / 2 - target_w / 2, geom.height / 2 - target_h / 2)
                 cr:rectangle(0, 0, target_w, target_h)
                 cr:clip()
                 cr:scale(scale, scale)
 
                 local pattern = cairo.Pattern.create_for_surface(surf)
-                pattern:set_extend("REPEAT")
+                -- pattern:set_extend("REPEAT")
                 if scale == math.floor(scale) then pattern:set_filter("NEAREST") else pattern:set_filter("BILINEAR") end
 
+                cr:set_operator("OVER")
                 cr:set_source(pattern)
                 cr:paint()
                 surf:finish()
             end
+
+            os.remove(filename)
     end)
 end
 

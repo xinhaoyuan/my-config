@@ -503,6 +503,7 @@ theme.apply_border_to_widget = function(args)
             local br = widget.widget.bottom > 0 and widget.widget.right > 0
             local bl = widget.widget.bottom > 0 and widget.widget.left > 0
             local indicator = beautiful.border_radius and beautiful.border_radius_cut
+            cr:set_source(gcolor(beautiful.border_space))
             if indicator then
                 gshape.rectangle(cr, width, height)
             else
@@ -522,7 +523,7 @@ theme.apply_border_to_widget = function(args)
                     widget.widget.bottom > 0 and "bottom"
             })
             if indicator then
-                cr:set_source(gcolor(beautiful.fg_focus))
+                cr:set_source(gcolor(beautiful.fg_normal))
                 local indent = (2 - math.sqrt(2)) * (beautiful.border_radius) - beautiful.border_outer_space
                 if tl then
                     cr:move_to(beautiful.border_outer_space, beautiful.border_outer_space)
