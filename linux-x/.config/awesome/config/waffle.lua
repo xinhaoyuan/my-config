@@ -1443,9 +1443,13 @@ local waffle_root_action_widget = decorate_panel {
                 indicator = em("f"),
                 key = "f",
                 action = function (alt)
-                    local fortune = shared.screen.get_fortune()
-                    if fortune then
-                        shared.action.web_browser("? " .. fortune)
+                    if alt then
+                        shared.screen.xkcd()
+                    else
+                        local fortune = shared.screen.get_fortune()
+                        if fortune then
+                            shared.action.web_browser("? " .. fortune)
+                        end
                     end
                     waffle:hide()
                 end

@@ -902,4 +902,51 @@ awful.screen.connect_for_each_screen(
    end
 )
 
+local gears = require("gears")
+local gsurf = require("gears.surface")
+local cairo = require("lgi").cairo
+function shared.screen.xkcd()
+    awful.spawn.easy_async({"xkcd_fetcher.py", "--recolor="..beautiful.fg_normal.."-"..beautiful.bg_normal, "-o", "/tmp/xkcd.png"}, function (_, _, reason, code)
+            if reason ~= "exit" or code ~= 0 then
+                print("Failed to fetch xkcd. reason: "..reason..", code: "..tostring(code))
+                return
+            end
+
+            local surf = gsurf.load_uncached("/tmp/xkcd.png")
+            local w, h = gsurf.get_size(surf)
+            local ratio = 0.5
+
+            for s in screen do
+                local geom, cr = gears.wallpaper.prepare_context(s)
+                local scale, target_w, target_h
+                if geom.width / w < geom.height / h then
+                    scale = ratio * geom.width / w
+                else
+                    scale = ratio * geom.height / h
+                end
+                if scale > 1 then scale = math.floor(scale) end
+                target_w = scale * w
+                target_h = scale * h
+
+                cr:set_operator("SOURCE")
+                cr:set_source(gcolor(beautiful.bg_normal))
+                cr:paint()
+
+                print("gw", geom.width, "gh", geom.height, "w", w, "h", h, "tw", target_w, "th", target_h, "scale", scale)
+                cr:translate(geom.width / 2 - target_w / 2, geom.height / 2 - target_h / 2)
+                cr:rectangle(0, 0, target_w, target_h)
+                cr:clip()
+                cr:scale(scale, scale)
+
+                local pattern = cairo.Pattern.create_for_surface(surf)
+                pattern:set_extend("REPEAT")
+                if scale == math.floor(scale) then pattern:set_filter("NEAREST") else pattern:set_filter("BILINEAR") end
+
+                cr:set_source(pattern)
+                cr:paint()
+                surf:finish()
+            end
+    end)
+end
+
 return nil
