@@ -503,17 +503,19 @@ theme.apply_border_to_widget = function(args)
             local br = widget.widget.bottom > 0 and widget.widget.right > 0
             local bl = widget.widget.bottom > 0 and widget.widget.left > 0
             local indicator = beautiful.border_radius and beautiful.border_radius_cut
-            cr:set_source(gcolor(beautiful.border_space))
-            if indicator then
-                gshape.rectangle(cr, width, height)
-            else
-                beautiful.rect_with_corners(
-                    cr, width, height,
-                    tl, tr, br, bl,
-                    beautiful.border_radius)
+            if beautiful.border_radius then
+                cr:set_source(gcolor(beautiful.border_space))
+                if indicator then
+                    gshape.rectangle(cr, width, height)
+                else
+                    beautiful.rect_with_corners(
+                        cr, width, height,
+                        tl, tr, br, bl,
+                        beautiful.border_radius)
+                end
+                cr:fill()
+                cr:set_operator('ATOP')
             end
-            cr:fill()
-            cr:set_operator('ATOP')
             border:draw({ theme = beautiful.get_border_theme(),
                           color = beautiful.border_focus }, cr, width, height,
                 border.directions{
