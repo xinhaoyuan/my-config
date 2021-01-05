@@ -924,6 +924,8 @@ function shared.screen.xkcd(num)
             local filename = stdout:match("^(.*)\n")
 
             local surf = gsurf.load_uncached(filename)
+            local pattern = cairo.Pattern.create_for_surface(surf)
+            -- pattern:set_extend("REPEAT")
             local w, h = gsurf.get_size(surf)
             local ratio = 0.6
 
@@ -950,16 +952,13 @@ function shared.screen.xkcd(num)
                 cr:clip()
                 cr:scale(scale, scale)
 
-                local pattern = cairo.Pattern.create_for_surface(surf)
-                -- pattern:set_extend("REPEAT")
-                if scale == math.floor(scale) then pattern:set_filter("NEAREST") else pattern:set_filter("BILINEAR") end
-
                 cr:set_operator("OVER")
+                if scale == math.floor(scale) then pattern:set_filter("NEAREST") else pattern:set_filter("BILINEAR") end
                 cr:set_source(pattern)
                 cr:paint()
-                surf:finish()
             end
 
+            surf:finish()
             os.remove(filename)
     end)
 end
