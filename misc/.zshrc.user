@@ -96,11 +96,13 @@ local DATE_FORMAT_WITH_STYLE="+$fg_bold[green]%y$fg_no_bold[green]%m$fg_bold[gre
 local DATE_PLACEHOLDER="000000000000"
 local DATE_FORMAT_LEN=12
 local DATE_HFORMAT="+%y-%m-%d %H:%M:%S"
+export CMD_EXECUTED=""
 
 preexec_date() {
     emulate -L zsh
     setopt extended_glob
 
+    export CMD_EXECUTED="1"
     # cmd name only, or if this is sudo or ssh, the next cmd
     local CMD=${1[(wr)^(*=*|sudo|ssh|mosh|rake|-*)]:gs/%/%%}
     local LINE="${2:gs/%/%%}"
@@ -135,6 +137,10 @@ precmd_date() {
     export DATE_PRECMD=$(date "$DATE_FORMAT_WITH_STYLE")
 
     my_title $ZSH_THEME_TERM_TAB_TITLE_IDLE $ZSH_THEME_TERM_TITLE_IDLE
+    if [[ -z "$CMD_EXECUTED" ]]; then
+        echo -ne '\033[2A\033[2M\r'
+    fi
+    export CMD_EXECUTED=""
 }
 
 LSPACE() {
