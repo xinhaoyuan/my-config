@@ -24,6 +24,7 @@ if type -p dircolors > /dev/null; then
 fi
 
 local ret_status="%(?:%{$fg_bold[green]%}-:%{$fg_bold[red]%}%?)"
+export LAST_CMD_STATUS=$ret_status
 
 ZSH_THEME_GIT_PROMPT_PREFIX="git:(%{$fg[red]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}"
@@ -96,13 +97,12 @@ local DATE_FORMAT_WITH_STYLE="+$fg_bold[green]%y$fg_no_bold[green]%m$fg_bold[gre
 local DATE_PLACEHOLDER="000000000000"
 local DATE_FORMAT_LEN=12
 local DATE_HFORMAT="+%y-%m-%d %H:%M:%S"
-export CMD_EXECUTED=""
+export LAST_CMD_TS=""
 
 preexec_date() {
     emulate -L zsh
     setopt extended_glob
 
-    export CMD_EXECUTED="1"
     # cmd name only, or if this is sudo or ssh, the next cmd
     local CMD=${1[(wr)^(*=*|sudo|ssh|mosh|rake|-*)]:gs/%/%%}
     local LINE="${2:gs/%/%%}"
@@ -123,24 +123,36 @@ preexec_date() {
         # export TIME_PREEXEC=`date +%s`
     else
         # similar to above, but don't count the pwd in. Also swallow the header line.
-        W=$(( ${#1} + ${DATE_FORMAT_LEN} + 2 ))
+        W=$(( ${#1} + 1 ))
         C=$(( W / COLUMNS + 1 ))
         NC=$(( (W + ${#PWD} + 2) / $COLUMNS + 1 ))
         echo -ne "\033[$((C + 1))A\033[$((C + 1))M$fg_bold[black][${STYLED_DATE}$fg_bold[black]]$fg_bold[green]$PWD${reset_color} $1\033[$((NC - C))B\r"
     fi
+
+    export LAST_CMD_TS=$(date +%s%3N)
 }
 
 precmd_date() {
+    ev=$(print -P "$ret_status")
     emulate -L zsh
 
     # export TIME_PRECMD=`date +%s`
     export DATE_PRECMD=$(date "$DATE_FORMAT_WITH_STYLE")
 
     my_title $ZSH_THEME_TERM_TAB_TITLE_IDLE $ZSH_THEME_TERM_TITLE_IDLE
-    if [[ -z "$CMD_EXECUTED" ]]; then
-        echo -ne '\033[2A\033[2M\r'
+    if [[ -z "$LAST_CMD_TS" ]]; then
+        if [[ "$MY_PROMPT_MODE" = "0" ]]; then
+            echo -ne '\033[1A\033[1M\r'
+        else
+            echo -ne '\033[2A\033[2M\r'
+        fi
+    else
+        export LAST_CMD_STATUS="$(($(date +%s%3N) - LAST_CMD_TS))ms $ret_status"
+        if [[ "$MY_PROMPT_MODE" = "1" ]]; then
+            print -P "\e[1m↑ $(($(date +%s%3N) - LAST_CMD_TS))ms $ev"
+        fi
     fi
-    export CMD_EXECUTED=""
+    export LAST_CMD_TS=""
 }
 
 LSPACE() {
@@ -154,10 +166,10 @@ add-zsh-hook precmd precmd_date
 set_prompt() {
   if [[ "$MY_PROMPT_MODE" = "0" ]]; then
     PROMPT=' %{$DATE_PRECMD%'$DATE_FORMAT_LEN'G%} %{$fg_bold[cyan]%}%c%{$reset_color%} '
-    RPROMPT=' %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%} ${ret_status}%{$fg_bold[green]%}%p:${SSH_TTY:+%n@%m:}%j%{$reset_color%}'
+    RPROMPT=' %{$fg_bold[blue]%}$(git_prompt_info)%{$reset_color%} ${LAST_CMD_STATUS}%{$fg_bold[green]%}%p:${SSH_TTY:+%n@%m:}%j%{$reset_color%}'
   else
-    PROMPT=' ${ret_status}%{$fg_bold[green]%}:${SSH_TTY:+%n@%m:}%j%{$fg_bold[blue]%} %{$fg_bold[cyan]%}%~%{$fg_bold[blue]%}$(LSPACE $(git_prompt_info))%{$reset_color%}
- %{$DATE_PRECMD%'$DATE_FORMAT_LEN'G%} %{$reset_color%}'
+    PROMPT=' %{$DATE_PRECMD%'$DATE_FORMAT_LEN'G%}%{$fg_bold[green]%}:${SSH_TTY:+%n@%m:}%j%{$fg_bold[blue]%} %{$fg_bold[cyan]%}%~%{$fg_bold[blue]%}$(LSPACE $(git_prompt_info))%{$reset_color%}
+ '
     RPROMPT=''
   fi
 
