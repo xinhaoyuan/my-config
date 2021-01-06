@@ -22,7 +22,8 @@ local function with_alpha(col, alpha)
 end
 
 local function activate_client(c)
-    c:emit_signal("request::activate", "switch", {raise=true})
+    -- Do not raise the window to preserve the stacking order.
+    c:emit_signal("request::activate", "switch", {raise=false})
 end
 
 -- the default filter will get all focusable client with any selected tags
@@ -174,7 +175,7 @@ local function create(config)
                     c.minimized = false
                 end
                 activate_client(c)
-                -- c:raise()
+                c:raise()
             end
         end
 
