@@ -169,8 +169,8 @@ set_prompt() {
     PROMPT='%{$fg_bold[default]%}→%{$DATE_PRECMD%'$DATE_FORMAT_LEN'G%} %{$fg_bold[cyan]%}%c%{$reset_color%} '
     RPROMPT=' %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[default]%} ↑${LAST_CMD_STATUS}%{$fg_bold[green]%}%p:${SSH_TTY:+%n@%m:}%j%{$reset_color%}'
   else
-    PROMPT='┏%{$DATE_PRECMD%'$DATE_FORMAT_LEN'G%}%{$fg_bold[green]%}:${SSH_TTY:+%n@%m:}%j%{$fg_bold[blue]%} %{$fg_bold[cyan]%}%~%{$fg_bold[blue]%}$(LSPACE $(git_prompt_info))%{$reset_color%}
-┗'
+    PROMPT='╓%{$DATE_PRECMD%'$DATE_FORMAT_LEN'G%}%{$fg_bold[green]%}:${SSH_TTY:+%n@%m:}%j%{$fg_bold[blue]%} %{$fg_bold[cyan]%}%~%{$fg_bold[blue]%}$(LSPACE $(git_prompt_info))%{$reset_color%}
+╙'
     RPROMPT=''
   fi
 
