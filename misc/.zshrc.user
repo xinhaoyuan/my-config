@@ -92,11 +92,11 @@ fi
 
 autoload -Uz add-zsh-hook
 
-local DATE_FORMAT="+%y%m%d%H%M%S"
-local DATE_FORMAT_WITH_STYLE="+$fg_bold[green]%y$fg_no_bold[green]%m$fg_bold[green]%d$fg_no_bold[cyan]%H$fg_bold[cyan]%M$fg_no_bold[cyan]%S"
+local DATE_FORMAT="%y%m%d%H%M%S"
+local DATE_FORMAT_WITH_STYLE="$fg_bold[green]%y$fg_no_bold[green]%m$fg_bold[green]%d$fg_no_bold[cyan]%H$fg_bold[cyan]%M$fg_no_bold[cyan]%S"
 local DATE_PLACEHOLDER="000000000000"
 local DATE_FORMAT_LEN=12
-local DATE_HFORMAT="+%y-%m-%d %H:%M:%S"
+local DATE_HFORMAT="%y-%m-%d %H:%M:%S"
 export LAST_CMD_TS=""
 
 timestamp_ms() {
@@ -110,9 +110,9 @@ preexec_date() {
     # cmd name only, or if this is sudo or ssh, the next cmd
     local CMD=${1[(wr)^(*=*|sudo|ssh|mosh|rake|-*)]:gs/%/%%}
     local LINE="${2:gs/%/%%}"
-    local DATE=$(date "${DATE_FORMAT}")
-    local HDATE=$(date "${DATE_HFORMAT}")
-    local STYLED_DATE=$(date "${DATE_FORMAT_WITH_STYLE}")
+    local DATE=$(print -nP "%D{${DATE_FORMAT}}")
+    local HDATE=$(print -nP "%D{${DATE_HFORMAT}}")
+    local STYLED_DATE=$(print -nP "%D{${DATE_FORMAT_WITH_STYLE}}")
     my_title '$CMD' '[$HDATE] %100>...>$LINE%<<'
 
     if [[ "$1" == *$'\n'* ]]; then
@@ -138,7 +138,7 @@ precmd_date() {
     ev=$(print -P "$ret_status")
     emulate -L zsh
 
-    export DATE_PRECMD=$(date "$DATE_FORMAT_WITH_STYLE")
+    export DATE_PRECMD=$(print -nP "%D{${DATE_FORMAT_WITH_STYLE}}")
 
     my_title $ZSH_THEME_TERM_TAB_TITLE_IDLE $ZSH_THEME_TERM_TITLE_IDLE
     if [[ -z "$LAST_CMD_TS" ]]; then
