@@ -148,9 +148,10 @@ precmd_date() {
             print -n '\033[2A\033[2M\r'
         fi
     else
-        export LAST_CMD_STATUS="$(($(timestamp_ms) - LAST_CMD_TS))ms $ret_status"
+        duration="$(print -f "%'d" $(($(timestamp_ms) - LAST_CMD_TS)))"
+        export LAST_CMD_STATUS="${duration}ms $ret_status"
         if [[ "$MY_PROMPT_MODE" = "1" ]]; then
-            print -P '\e[1m↑$(($(date +%s%3N) - LAST_CMD_TS))ms $ev'
+            print -P '\e[1m↑${duration}ms $ev'
         fi
     fi
     export LAST_CMD_TS=""
