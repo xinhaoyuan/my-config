@@ -144,6 +144,7 @@ theme.useless_gap = dpi(8)
 -- custom property number
 theme.bar_height = dpi(24)
 theme.menu_width = dpi(150)
+theme.bar_icon_size = dpi(20)
 -- custom property color
 theme.special_normal = is_light_color(theme.bg_normal) and c_red[1] or c_yellow[2]
 -- custom property color

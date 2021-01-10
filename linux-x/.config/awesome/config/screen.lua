@@ -145,10 +145,11 @@ local my_wibars = {}
 local my_tray
 my_tray = wibox.widget.systray()
 my_tray.horizontal = direction_index[shared.var.bar_position] == "horizontal"
-my_tray.base_size = beautiful.bar_height
+my_tray.base_size = beautiful.bar_icon_size
 local bar_tray_wrapper = wibox.widget {
     my_tray,
-    widget = wibox.container.background
+    valign = "center",
+    widget = wibox.container.place
 }
 
 function shared.screen.detach_tray_widget()
@@ -488,8 +489,8 @@ local orgenda_counter_widget = wibox.widget {
     {
         {
             image = gcolor.recolor_image(icons.note, beautiful.fg_normal),
-            forced_height = beautiful.bar_height - dpi(6),
-            forced_width = beautiful.bar_height - dpi(6),
+            forced_height = beautiful.bar_icon_size,
+            forced_width = beautiful.bar_icon_size,
             widget = wibox.widget.imagebox,
         },
         valign = "center",

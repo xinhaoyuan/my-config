@@ -181,8 +181,8 @@ local function button(args)
                wibox.widget {
                    image = args.icon,
                    resize = true,
-                   forced_width = args.icon_width or button_height,
-                   forced_height = args.icon_height or button_height,
+                   forced_width = args.icon_size or button_height,
+                   forced_height = args.icon_size or button_height,
                    widget = masked_imagebox,
                }
                            ),
