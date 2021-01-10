@@ -156,9 +156,11 @@
              (nlinum-mode 1))
       ))
 
-(add-hook 'c-mode-common-hook 'turn-on-linum-mode)
-(add-hook 'scheme-mode-hook   'turn-on-linum-mode)
-(add-hook 'erlang-mode-hook   'turn-on-linum-mode)
+;; Turn on linum for all file-based buffers.
+(add-hook 'find-file-hook 'turn-on-linum-mode)
+;; (add-hook 'c-mode-common-hook 'turn-on-linum-mode)
+;; (add-hook 'scheme-mode-hook   'turn-on-linum-mode)
+;; (add-hook 'erlang-mode-hook   'turn-on-linum-mode)
 
 (require 'gas-mode)
 (add-to-list 'auto-mode-alist '("\\.S\\'" . gas-mode))
