@@ -128,7 +128,8 @@ preexec_date() {
         # similar to above, but don't count the pwd in. Also swallow the header line.
         W=$(( ${#1} + 1 ))
         C=$(( W / COLUMNS + 1 ))
-        print -P '%{\033[$((C + 1))A\033[$((C + 1))M$fg_bold[default]%}↓%{${STYLED_DATE}%'$DATE_FORMAT_LEN'G $fg_bold[green]%G%}%~%{${reset_color}%} $1'
+        print -nP '%{\033[$((C + 1))A\033[$((C + 1))M$fg_bold[default]%}↓%{${STYLED_DATE}%'$DATE_FORMAT_LEN'G $fg_bold[green]%G%}%~%{${reset_color}%} '
+        print -r "$1"
     fi
 
     export LAST_CMD_TS=$(timestamp_ms)
