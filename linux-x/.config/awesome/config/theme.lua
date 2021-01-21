@@ -162,6 +162,8 @@ theme.titlebar_bg_focus = theme.bg_normal
 theme.titlebar_fg_focus = theme.fg_normal
 -- custom property
 theme.titlebar_size = theme.bar_height
+theme.mini_titlebar_width = theme.titlebar_size + (theme.border_radius and theme.border_radius * 2 or theme.useless_gap)
+theme.client_default_icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal)
 
 local function shape_to_surface(shape, fill_color, stroke_color, outer_size, inner_size)
     shape = shape or
@@ -444,6 +446,43 @@ function gshape.partially_cut_rect(cr, width, height, top_left, top_right, botto
     cr:close_path()
 end
 
+-- Modified from gshape.partially_rounded_rect by removing the rad limit.
+function gshape.partially_rounded_rect(cr, width, height, tl, tr, br, bl, rad)
+    -- In case there is already some other path on the cairo context:
+    -- Make sure the close_path() below goes to the right position.
+    cr:new_sub_path()
+
+    -- Top left
+    if tl then
+        cr:arc( rad, rad, rad, math.pi, 3*(math.pi/2))
+    else
+        cr:move_to(0,0)
+    end
+
+    -- Top right
+    if tr then
+        cr:arc( width-rad, rad, rad, 3*(math.pi/2), math.pi*2)
+    else
+        cr:line_to(width, 0)
+    end
+
+    -- Bottom right
+    if br then
+        cr:arc( width-rad, height-rad, rad, math.pi*2 , math.pi/2)
+    else
+        cr:line_to(width, height)
+    end
+
+    -- Bottom left
+    if bl then
+        cr:arc( rad, height-rad, rad, math.pi/2, math.pi)
+    else
+        cr:line_to(0, height)
+    end
+
+    cr:close_path()
+end
+
 local border_theme
 function theme.get_border_theme()
     if border_theme == nil then
@@ -477,10 +516,10 @@ theme.apply_border_to_widget = function(args)
             function (cr, width, height)
                 beautiful.rect_with_corners(
                     cr, width, height,
-                    widget.widget.top > 0 and widget.widget.left > 0,
-                    widget.widget.top > 0 and widget.widget.right > 0,
-                    widget.widget.bottom > 0 and widget.widget.right > 0,
-                    widget.widget.bottom > 0 and widget.widget.left > 0,
+                    args.tl ~= false and widget.widget.top > 0 and widget.widget.left > 0,
+                    args.tr ~= false and widget.widget.top > 0 and widget.widget.right > 0,
+                    args.br ~= false and widget.widget.bottom > 0 and widget.widget.right > 0,
+                    args.bl ~= false and widget.widget.bottom > 0 and widget.widget.left > 0,
                     beautiful.border_radius -
                     beautiful.border_width)
             end,
@@ -490,20 +529,20 @@ theme.apply_border_to_widget = function(args)
     widget = wibox.widget {
         {
             inner_widget,
-            top = args.top and beautiful.border_width,
-            left = args.left and beautiful.border_width,
-            right = args.right and beautiful.border_width,
-            bottom = args.bottom and beautiful.border_width,
+            top = args.top and beautiful.border_width or 0,
+            left = args.left and beautiful.border_width or 0,
+            right = args.right and beautiful.border_width or 0,
+            bottom = args.bottom and beautiful.border_width or 0,
             draw_empty = args.draw_empty,
             widget = fixed_margin,
         },
         bgimage = function (context, cr, width, height)
             if width == 0 or height == 0 then return end
-            local tl = widget.widget.top > 0 and widget.widget.left > 0
-            local tr = widget.widget.top > 0 and widget.widget.right > 0
-            local br = widget.widget.bottom > 0 and widget.widget.right > 0
-            local bl = widget.widget.bottom > 0 and widget.widget.left > 0
-            local indicator = beautiful.border_radius and beautiful.border_radius_cut
+            local tl = args.tl ~= false and widget.widget.top > 0 and widget.widget.left > 0
+            local tr = args.tr ~= false and widget.widget.top > 0 and widget.widget.right > 0
+            local br = args.br ~= false and widget.widget.bottom > 0 and widget.widget.right > 0
+            local bl = args.bl ~= false and widget.widget.bottom > 0 and widget.widget.left > 0
+            local indicator = args.indicator ~= false and beautiful.border_radius and beautiful.border_radius_cut
             if beautiful.border_radius then
                 cr:set_source(gcolor(beautiful.border_space))
                 if indicator then
@@ -514,8 +553,12 @@ theme.apply_border_to_widget = function(args)
                         tl, tr, br, bl,
                         beautiful.border_radius)
                 end
-                cr:fill()
-                cr:set_operator('ATOP')
+                if args.clip then
+                    cr:clip()
+                else
+                    cr:fill()
+                    cr:set_operator('ATOP')
+                end
             end
             border:draw({ theme = beautiful.get_border_theme(),
                           color = beautiful.border_focus }, cr, width, height,

@@ -24,8 +24,6 @@ local waffle = require("waffle")
 
 local module = {}
 
-local default_icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal)
-
 local size_index = shared.size_index
 local dual_size_index = shared.dual_size_index
 local top_index = shared.top_index
@@ -200,7 +198,7 @@ local tasklist_template = {
                             },
                             {
                                 id = "default_icon",
-                                image = default_icon,
+                                image = beautiful.client_default_icon,
                                 widget = masked_imagebox,
                             },
                             widget = fallback,
