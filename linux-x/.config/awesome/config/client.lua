@@ -440,7 +440,7 @@ end
 
 local function update_shape(c)
     local mini_titlebar_shape
-    local padding = (c.has_border and beautiful.border_outer_space * 2 or 0)
+    local padding = (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or 0)
     if not c.has_titlebar then
         mini_titlebar_shape = nil
     elseif c.titlebar_style == "mini" then
@@ -450,8 +450,7 @@ local function update_shape(c)
             beautiful.rect_with_corners(cr,
                                         beautiful.mini_titlebar_width + padding,
                                         beautiful.titlebar_size + padding,
-                                        false, false, false, beautiful.border_radius,
-                                        beautiful.border_radius)
+                                        false, false, false, beautiful.border_radius - beautiful.border_outer_space + beautiful.border_inner_space)
             cr:restore()
         end
     elseif c.titlebar_style == "mini_bottom" then
@@ -461,8 +460,7 @@ local function update_shape(c)
             beautiful.rect_with_corners(cr,
                                         beautiful.mini_titlebar_width + padding,
                                         beautiful.titlebar_size + padding,
-                                        beautiful.border_radius, false, false, false,
-                                        beautiful.border_radius)
+                                        beautiful.border_radius - beautiful.border_outer_space + beautiful.border_inner_space, false, false, false)
             cr:restore()
         end
     end
@@ -510,7 +508,7 @@ function decorate(c)
     end
 
     if c.has_titlebar and c.titlebar_style == "mini" then
-        local tw_top = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space * 2 or 0)
+        local tw_top = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or 0)
         local to_top = tw_top - (c.has_border and beautiful.border_width or 0)
         awful.titlebar(c,
                        {
@@ -549,11 +547,14 @@ function decorate(c)
                             end,
                             widget = cbg
                         },
-                        margins = c.has_border and beautiful.border_outer_space or 0,
+                        top = c.has_border and beautiful.border_outer_space or 0,
+                        right = c.has_border and beautiful.border_outer_space or 0,
+                        left = c.has_border and beautiful.border_inner_space or 0,
+                        bottom = c.has_border and beautiful.border_inner_space or 0,
                         widget = wibox.container.margin
                     },
-                    forced_height = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space * 2 or 0),
-                    forced_width = beautiful.mini_titlebar_width + (c.has_border and beautiful.border_outer_space * 2 or 0),
+                    forced_height = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or 0),
+                    forced_width = beautiful.mini_titlebar_width + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or 0),
                     widget = wibox.container.constraint
                 },
                 halign = "right",
@@ -562,7 +563,7 @@ function decorate(c)
                  )
         c:titlebar_top(tw_top, to_top)
     elseif c.has_titlebar and c.titlebar_style == "full" then
-        local tw_top = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space or 0)
+        local tw_top = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or 0)
         local to_top = 0
         awful.titlebar(c,
                        {
@@ -599,7 +600,10 @@ function decorate(c)
                     end,
                     widget = cbg
                 },
-                margins = c.has_border and beautiful.border_outer_space or 0,
+                top = c.has_border and beautiful.border_outer_space or 0,
+                left = c.has_border and beautiful.border_outer_space or 0,
+                right = c.has_border and beautiful.border_outer_space or 0,
+                bottom = c.has_border and beautiful.border_inner_space or 0,
                 widget = wibox.container.margin
             }
                  )
@@ -619,7 +623,7 @@ function decorate(c)
     end
 
     if c.has_titlebar and c.titlebar_style == "mini_bottom" then
-        local tw_bottom = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space * 2 or 0)
+        local tw_bottom = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or 0)
         local to_bottom = tw_bottom - (c.has_border and beautiful.border_width or 0)
         awful.titlebar(c,
                        {
@@ -658,11 +662,14 @@ function decorate(c)
                             end,
                             widget = cbg
                         },
-                        margins = c.has_border and beautiful.border_outer_space or 0,
+                        top = c.has_border and beautiful.border_inner_space or 0,
+                        left = c.has_border and beautiful.border_inner_space or 0,
+                        right = c.has_border and beautiful.border_outer_space or 0,
+                        bottom = c.has_border and beautiful.border_outer_space or 0,
                         widget = wibox.container.margin
                     },
-                    forced_height = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space * 2 or 0),
-                    forced_width = beautiful.mini_titlebar_width + (c.has_border and beautiful.border_outer_space * 2 or 0),
+                    forced_height = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or 0),
+                    forced_width = beautiful.mini_titlebar_width + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or 0),
                     widget = wibox.container.constraint
                 },
                 halign = "right",
@@ -671,7 +678,7 @@ function decorate(c)
                  )
         c:titlebar_bottom(tw_bottom, to_bottom)
     elseif c.has_titlebar and c.titlebar_style == "full_bottom" then
-        local tw_bottom = beautiful.titlebar_size + beautiful.border_outer_space
+        local tw_bottom = beautiful.titlebar_size + beautiful.border_outer_space + beautiful.border_inner_space
         local to_bottom = 0
         awful.titlebar(c,
                        {
@@ -708,7 +715,10 @@ function decorate(c)
                     end,
                     widget = cbg
                 },
-                margins = c.has_border and beautiful.border_outer_space or 0,
+                top = c.has_border and beautiful.border_inner_space or 0,
+                left = c.has_border and beautiful.border_outer_space or 0,
+                right = c.has_border and beautiful.border_outer_space or 0,
+                bottom = c.has_border and beautiful.border_outer_space or 0,
                 widget = wibox.container.margin
             }
                  )
