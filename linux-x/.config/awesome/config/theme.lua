@@ -411,71 +411,85 @@ theme.tasklist_layout = {
 --     cr:close_path()
 -- end
 
+local function get_number(num_or_bool, alt_num)
+    return type(num_or_bool) == "number" and num_or_bool
+        or (num_or_bool and alt_num or 0)
+end
+
+local fac = 2 - math.sqrt(2)
 function gshape.partially_cut_rect(cr, width, height, top_left, top_right, bottom_right, bottom_left, radius)
-    -- radius = math.min(radius, width / 2, height / 2)
-    cut = (2 - math.sqrt(2)) * radius
-    cr:move_to(cut, 0)
-    if top_right then
-        cr:line_to(width - cut , 0)
-        cr:line_to(width, cut)
+    -- TODO: remove this eveutally
+    top_left = get_number(top_left, radius)
+    top_right = get_number(top_right, radius)
+    bottom_right = get_number(bottom_right, radius)
+    bottom_left = get_number(bottom_left, radius)
+
+    cr:new_sub_path()
+    cr:move_to(fac * top_left, 0)
+    if top_right > 0 then
+        cr:line_to(width - fac * top_right , 0)
+        cr:line_to(width, fac * top_right)
     else
         cr:line_to(width, 0)
-        cr:line_to(width, cut)
+        cr:line_to(width, fac * top_right)
     end
-    if bottom_right then
-        cr:line_to(width, height - cut)
-        cr:line_to(width - cut, height)
+
+    if bottom_right > 0 then
+        cr:line_to(width, height - fac * bottom_right)
+        cr:line_to(width - fac * bottom_right, height)
     else
         cr:line_to(width, height)
-        cr:line_to(width - cut, height)
+        cr:line_to(width - fac * bottom_right, height)
     end
-    if bottom_left then
-        cr:line_to(cut, height)
-        cr:line_to(0, height - cut)
+
+    if bottom_left > 0 then
+        cr:line_to(fac * bottom_left, height)
+        cr:line_to(0, height - fac * bottom_left)
     else
         cr:line_to(0, height)
-        cr:line_to(0, height - cut)
+        cr:line_to(0, height - fac * bottom_left)
     end
-    if top_left then
-        cr:line_to(0, cut)
-        cr:line_to(cut, 0)
+
+    if top_left > 0 then
+        cr:line_to(0, fac * top_left)
+        cr:line_to(fac * top_left, 0)
     else
         cr:line_to(0, 0)
-        cr:line_to(cut, 0)
+        cr:line_to(fac * top_left, 0)
     end
+
     cr:close_path()
 end
 
--- Modified from gshape.partially_rounded_rect by removing the rad limit.
-function gshape.partially_rounded_rect(cr, width, height, tl, tr, br, bl, rad)
-    -- In case there is already some other path on the cairo context:
-    -- Make sure the close_path() below goes to the right position.
+function gshape.partially_rounded_rect(cr, width, height, top_left, top_right, bottom_right, bottom_left, radius)
+    -- TODO: remove this eveutally
+    top_left = get_number(top_left, radius)
+    top_right = get_number(top_right, radius)
+    bottom_right = get_number(bottom_right, radius)
+    bottom_left = get_number(bottom_left, radius)
+
     cr:new_sub_path()
 
-    -- Top left
-    if tl then
-        cr:arc( rad, rad, rad, math.pi, 3*(math.pi/2))
+    if top_left > 0 then
+        cr:arc(top_left, top_left, top_left, math.pi, 3*(math.pi/2))
     else
         cr:move_to(0,0)
     end
 
-    -- Top right
-    if tr then
-        cr:arc( width-rad, rad, rad, 3*(math.pi/2), math.pi*2)
+    if top_right > 0 then
+        cr:arc(width - top_right, top_right, top_right, 3*(math.pi/2), math.pi*2)
     else
         cr:line_to(width, 0)
     end
 
-    -- Bottom right
-    if br then
-        cr:arc( width-rad, height-rad, rad, math.pi*2 , math.pi/2)
+    if bottom_right then
+        cr:arc(width - bottom_right, height - bottom_right, bottom_right, math.pi*2 , math.pi/2)
     else
         cr:line_to(width, height)
     end
 
-    -- Bottom left
-    if bl then
-        cr:arc( rad, height-rad, rad, math.pi/2, math.pi)
+    if bottom_left then
+        cr:arc(bottom_left, height - bottom_left, bottom_left, math.pi/2, math.pi)
     else
         cr:line_to(0, height)
     end
