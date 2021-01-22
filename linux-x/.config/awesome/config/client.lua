@@ -985,6 +985,12 @@ require("awful.rules").rules = {
        },
    },
    {
+       rule = { class = "Firefox" },
+       properties = {
+           titlebar_style = "mini_bottom",
+       },
+   },
+   {
       rule = { type = "dock" },
       properties = {
          floating = true,
