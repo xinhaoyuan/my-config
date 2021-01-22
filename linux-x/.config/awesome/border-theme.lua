@@ -428,10 +428,12 @@ function mod:draw(context, cr, width, height, directions)
     elseif directions == 1 then
         theme:top(context, cr, width)
     elseif directions == 2 then
+        cr:translate(0, height - theme.size)
         theme:bottom(context, cr, width)
     elseif directions == 4 then
         theme:left(context, cr, height)
     elseif directions == 8 then
+        cr:translate(width - theme.size, 0)
         theme:right(context, cr, height)
     end
     theme:after_draw(context, cr)

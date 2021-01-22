@@ -178,14 +178,16 @@ local client_keys = table_join(
     awful.key({ "Mod4" }, "-", function (c) c.sticky = not c.sticky end),
 
     awful.key({ "Mod4" }, "'", function (c)
-            if c.titlebar_style == "mini" then
-                c.titlebar_style = "full"
-            elseif c.titlebar_style == "full" then
+            if c.titlebar_style == "mini_top" then
+                c.titlebar_style = "full_top"
+            elseif c.titlebar_style == "full_top" then
                 c.titlebar_style = "full_bottom"
             elseif c.titlebar_style == "full_bottom" then
                 c.titlebar_style = "mini_bottom"
+            elseif c.titlebar_style == "mini_bottom" then
+                c.titlebar_style = "mini_mid"
             else
-                c.titlebar_style = "mini"
+                c.titlebar_style = "mini_top"
             end
     end),
 
@@ -440,25 +442,39 @@ end
 
 local function update_shape(c)
     local mini_titlebar_shape
-    local padding = (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or 0)
+    local padding = (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or beautiful.border_inner_space)
     if not c.has_titlebar then
         mini_titlebar_shape = nil
-    elseif c.titlebar_style == "mini" then
+    elseif c.titlebar_style == "mini_top" then
         mini_titlebar_shape = function (cr, width, height)
             cr:save()
-            cr:translate(width - beautiful.mini_titlebar_width - padding, 0)
+            cr:translate(width - beautiful.mini_titlebar_width - padding - beautiful.border_indent * 2, 0)
             beautiful.rect_with_corners(cr,
-                                        beautiful.mini_titlebar_width + padding,
+                                        beautiful.mini_titlebar_width + padding + beautiful.border_indent * 2,
                                         beautiful.titlebar_size + padding,
                                         false, false, false, beautiful.border_radius - beautiful.border_outer_space + beautiful.border_inner_space)
+            cr:restore()
+        end
+    elseif c.titlebar_style == "mini_mid" then
+        mini_titlebar_shape = function (cr, width, height)
+            cr:save()
+            local bar_overall_height = beautiful.mini_titlebar_width + beautiful.border_inner_space * 2 + beautiful.border_indent * 2
+            cr:translate(width - beautiful.titlebar_size - padding, (height - bar_overall_height) / 2)
+            beautiful.rect_with_corners(cr,
+                                        beautiful.titlebar_size + padding,
+                                        bar_overall_height,
+                                        beautiful.border_radius - beautiful.border_outer_space + beautiful.border_inner_space,
+                                        false,
+                                        false,
+                                        beautiful.border_radius - beautiful.border_outer_space + beautiful.border_inner_space)
             cr:restore()
         end
     elseif c.titlebar_style == "mini_bottom" then
         mini_titlebar_shape = function (cr, width, height)
             cr:save()
-            cr:translate(width - beautiful.mini_titlebar_width - padding, height - beautiful.titlebar_size - padding)
+            cr:translate(width - beautiful.mini_titlebar_width - padding - beautiful.border_indent * 2, height - beautiful.titlebar_size - padding)
             beautiful.rect_with_corners(cr,
-                                        beautiful.mini_titlebar_width + padding,
+                                        beautiful.mini_titlebar_width + padding + beautiful.border_indent * 2,
                                         beautiful.titlebar_size + padding,
                                         beautiful.border_radius - beautiful.border_outer_space + beautiful.border_inner_space, false, false, false)
             cr:restore()
@@ -491,8 +507,36 @@ local function delayed_update_shape(c)
     end
 end
 
+local function get_mini_titlebar(c)
+    if c.mini_titlebar == nil then
+        c.mini_titlebar = wibox.widget {
+            {
+                {
+                    {
+                        awful.widget.clienticon(c),
+                        {
+                            image = beautiful.client_default_icon,
+                            widget = masked_imagebox,
+                        },
+                        widget = fallback,
+                    },
+                    margins = (beautiful.titlebar_size - beautiful.bar_icon_size) / 2,
+                    widget = wibox.container.margin,
+                },
+                halign = "center",
+                valign = "center",
+                widget = wibox.container.background,
+            },
+            forced_height = beautiful.titlebar_size,
+            forced_width = beautiful.mini_titlebar_width,
+            widget = wibox.container.constraint
+        }
+    end
+    return c.mini_titlebar
+end
+
 -- Note that the awesome native titlebars ared used for both borders and titlebar here.
-function decorate(c)
+local function decorate(c)
     if not c.valid then return end
     local geo
     if c.decoration_created then geo = c:geometry() end
@@ -507,14 +551,14 @@ function decorate(c)
         to = tw - beautiful.border_width
     end
 
-    if c.has_titlebar and c.titlebar_style == "mini" then
-        local tw_top = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or 0)
+    if c.has_titlebar and c.titlebar_style == "mini_top" then
+        local tw_top = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or beautiful.border_inner_space)
         local to_top = tw_top - (c.has_border and beautiful.border_width or 0)
         awful.titlebar(c,
                        {
                            position = "top",
                            size = tw_top,
-                           bg = "#00000000",
+                           bg = c.has_border and "#00000000" or beautiful.border_space,
                            bgimage = c.has_border and draw_tb_border_bgimage_top,
                        }
         ) : setup(
@@ -524,20 +568,16 @@ function decorate(c)
                         {
                             {
                                 {
-
-                                    awful.widget.clienticon(c),
-                                    {
-                                        image = beautiful.client_default_icon,
-                                        widget = masked_imagebox,
-                                    },
-                                    widget = fallback,
+                                    get_mini_titlebar(c),
+                                    right = beautiful.border_indent,
+                                    widget = wibox.container.margin
                                 },
-                                halign = "center",
+                                halign = "right",
                                 widget = wibox.container.place
                             },
                             shape = function (cr, width, height)
                                 if not c.valid then return end
-                                beautiful.rect_with_corners(cr, width, height, false, beautiful.border_radius and c.has_border, false, beautiful.border_radius, beautiful.border_radius and beautiful.border_radius - beautiful.border_outer_space)
+                                beautiful.rect_with_corners(cr, width, height, false, beautiful.border_radius and c.has_border, false, beautiful.border_radius and true, beautiful.border_radius and beautiful.border_radius - beautiful.border_outer_space)
                             end,
                             bg_function = function (context, cr, width, height)
                                 return context["client"] == capi.client.focus and beautiful.border_focus or beautiful.border_normal
@@ -549,12 +589,12 @@ function decorate(c)
                         },
                         top = c.has_border and beautiful.border_outer_space or 0,
                         right = c.has_border and beautiful.border_outer_space or 0,
-                        left = c.has_border and beautiful.border_inner_space or 0,
-                        bottom = c.has_border and beautiful.border_inner_space or 0,
+                        left = beautiful.border_inner_space,
+                        bottom = beautiful.border_inner_space,
                         widget = wibox.container.margin
                     },
-                    forced_height = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or 0),
-                    forced_width = beautiful.mini_titlebar_width + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or 0),
+                    forced_height = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or beautiful.border_inner_space),
+                    forced_width = beautiful.mini_titlebar_width + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or beautiful.border_inner_space) + beautiful.border_indent * 2,
                     widget = wibox.container.constraint
                 },
                 halign = "right",
@@ -562,7 +602,7 @@ function decorate(c)
             }
                  )
         c:titlebar_top(tw_top, to_top)
-    elseif c.has_titlebar and c.titlebar_style == "full" then
+    elseif c.has_titlebar and c.titlebar_style == "full_top" then
         local tw_top = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or 0)
         local to_top = 0
         awful.titlebar(c,
@@ -623,13 +663,13 @@ function decorate(c)
     end
 
     if c.has_titlebar and c.titlebar_style == "mini_bottom" then
-        local tw_bottom = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or 0)
+        local tw_bottom = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or beautiful.border_inner_space)
         local to_bottom = tw_bottom - (c.has_border and beautiful.border_width or 0)
         awful.titlebar(c,
                        {
                            position = "bottom",
                            size = tw_bottom,
-                           bg = "#00000000",
+                           bg = c.has_border and "#00000000" or beautiful.border_space,
                            bgimage = c.has_border and draw_tb_border_bgimage_bottom,
                        }
         ) : setup(
@@ -639,20 +679,16 @@ function decorate(c)
                         {
                             {
                                 {
-
-                                    awful.widget.clienticon(c),
-                                    {
-                                        image = beautiful.client_default_icon,
-                                        widget = masked_imagebox,
-                                    },
-                                    widget = fallback,
+                                    get_mini_titlebar(c),
+                                    right = beautiful.border_indent,
+                                    widget = wibox.container.margin
                                 },
-                                halign = "center",
+                                halign = "right",
                                 widget = wibox.container.place
                             },
                             shape = function (cr, width, height)
                                 if not c.valid then return end
-                                beautiful.rect_with_corners(cr, width, height, beautiful.border_radius, false, beautiful.border_radius and c.has_border, false, beautiful.border_radius and beautiful.border_radius - beautiful.border_outer_space)
+                                beautiful.rect_with_corners(cr, width, height, beautiful.border_radius and true, false, beautiful.border_radius and c.has_border, false, beautiful.border_radius and beautiful.border_radius - beautiful.border_outer_space)
                             end,
                             bg_function = function (context, cr, width, height)
                                 return context["client"] == capi.client.focus and beautiful.border_focus or beautiful.border_normal
@@ -662,14 +698,14 @@ function decorate(c)
                             end,
                             widget = cbg
                         },
-                        top = c.has_border and beautiful.border_inner_space or 0,
-                        left = c.has_border and beautiful.border_inner_space or 0,
+                        top = beautiful.border_inner_space,
+                        left = beautiful.border_inner_space,
                         right = c.has_border and beautiful.border_outer_space or 0,
                         bottom = c.has_border and beautiful.border_outer_space or 0,
                         widget = wibox.container.margin
                     },
-                    forced_height = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or 0),
-                    forced_width = beautiful.mini_titlebar_width + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or 0),
+                    forced_height = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or beautiful.border_inner_space),
+                    forced_width = beautiful.mini_titlebar_width + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or beautiful.border_inner_space) + beautiful.border_indent * 2,
                     widget = wibox.container.constraint
                 },
                 halign = "right",
@@ -737,6 +773,72 @@ function decorate(c)
         c:titlebar_bottom(0, 0)
     end
 
+    if c.has_titlebar and c.titlebar_style == "mini_mid" then
+        local tw_right = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or beautiful.border_inner_space)
+        local to_right = tw_right - (c.has_border and beautiful.border_width or 0)
+        awful.titlebar(c,
+                       {
+                           position = "right",
+                           size = tw_right,
+                           bg = c.has_border and "#00000000" or beautiful.border_space,
+                           bgimage = c.has_border and draw_tb_border_bgimage_right,
+                       }
+        ) : setup(
+            {
+                {
+                    {
+                        {
+                            {
+                                {
+                                    get_mini_titlebar(c),
+                                    direction = "west",
+                                    widget = wibox.container.rotate
+                                },
+                                top = beautiful.border_indent,
+                                bottom = beautiful.border_indent,
+                                widget = wibox.container.margin,
+                            },
+                            shape = function (cr, width, height)
+                                if not c.valid then return end
+                                beautiful.rect_with_corners(cr, width, height, beautiful.border_radius and beautiful.border_radius - beautiful.border_outer_space, false, false, beautiful.border_radius and beautiful.border_radius - beautiful.border_outer_space)
+                            end,
+                            bg_function = function (context, cr, width, height)
+                                return context["client"] == capi.client.focus and beautiful.border_focus or beautiful.border_normal
+                            end,
+                            fg_function = function (context, cr, width, height)
+                                return context["client"] == capi.client.focus and beautiful.fg_focus or beautiful.fg_normal
+                            end,
+                            widget = cbg
+                        },
+                        top = beautiful.border_inner_space,
+                        left = beautiful.border_inner_space,
+                        right = c.has_border and beautiful.border_outer_space or 0,
+                        bottom = beautiful.border_inner_space,
+                        widget = wibox.container.margin
+                    },
+                    forced_width = beautiful.titlebar_size + (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or beautiful.border_inner_space),
+                    forced_height = beautiful.mini_titlebar_width + beautiful.border_inner_space * 2 + beautiful.border_indent * 2,
+                    widget = wibox.container.constraint
+                },
+                valign = "center",
+                widget = wibox.container.place
+            }
+                 )
+        c:titlebar_right(tw_right, to_right)
+    elseif c.has_border then
+        awful.titlebar(c,
+                       {
+                           position = "right",
+                           size = tw,
+                           bg = "#00000000",
+                           bgimage = draw_tb_border_bgimage_right,
+                       }
+        ) : setup({ widget = wibox.container.background })
+        c:titlebar_right(tw, to)
+    else
+        c:titlebar_right(0, 0)
+    end
+
     if not c.decoration_created then
         awful.titlebar(c,
                        {
@@ -746,22 +848,12 @@ function decorate(c)
                            bgimage = draw_tb_border_bgimage_left,
                        }
         ) : setup({ widget = wibox.container.background })
-        awful.titlebar(c,
-                       {
-                           position = "right",
-                           size = tw,
-                           bg = "#00000000",
-                           bgimage = draw_tb_border_bgimage_right,
-                       }
-        ) : setup({ widget = wibox.container.background })
     end
 
     if c.has_border then
         c:titlebar_left(tw, to)
-        c:titlebar_right(tw, to)
     else
         c:titlebar_left(0, 0)
-        c:titlebar_right(0, 0)
     end
 
     c.decoration_created = true
@@ -873,7 +965,7 @@ require("awful.rules").rules = {
          screen = function(c) return capi.awesome.startup and c.screen or awful.screen.focused() end,
          floating = shared.var.floating_by_default,
          placement = awful.placement.centered_on_new,
-         titlebar_style = "mini",
+         titlebar_style = "mini_top",
       }
    },
    {
@@ -882,13 +974,6 @@ require("awful.rules").rules = {
          ontop = true,
       },
    },
-   {
-      rule = { class = "Firefox" },
-      properties = {
-         titlebar_style = "mini_bottom",
-      },
-   },
-
    {
        rule = { class = "Rofi" },
        properties = {

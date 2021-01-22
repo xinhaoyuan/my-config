@@ -74,6 +74,7 @@ theme.border_outer_space = dpi(1)
 theme.border_inner_space = dpi(1)
 theme.border_radius = dpi(16)
 theme.border_radius_cut = true
+theme.border_indent = theme.border_radius_cut and (2 - math.sqrt(2)) * (theme.border_radius - theme.border_outer_space or 0) or (theme.border_radius - theme.border_outer_space or 0)
 theme.border_space = is_light_color(theme.bg_normal) and c_white[2] or c_black[1]
 theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
 theme.border_normal = acolor(theme.bg_normal):blend_with(acolor(theme.border_focus), 0.3):to_string()
@@ -162,7 +163,7 @@ theme.titlebar_bg_focus = theme.bg_normal
 theme.titlebar_fg_focus = theme.fg_normal
 -- custom property
 theme.titlebar_size = theme.bar_height
-theme.mini_titlebar_width = theme.titlebar_size + (theme.border_radius and theme.border_radius * 2 or theme.useless_gap)
+theme.mini_titlebar_width = theme.titlebar_size
 theme.client_default_icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal)
 
 local function shape_to_surface(shape, fill_color, stroke_color, outer_size, inner_size)
