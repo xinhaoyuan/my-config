@@ -1847,7 +1847,6 @@ update_client_waffle_labels = function ()
     end
 
     local now_group = (shared.waffle_selected_client and shared.waffle_selected_client.cgroup ~= nil)
-    print(now_group)
     if group_cache ~= now_group then
         group_cache = now_group
         group_label:set_markup(now_group and "GROUP" or "group")
