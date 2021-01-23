@@ -444,6 +444,11 @@ local function apply_container_shape(client, shape, mini_titlebar_shape)
 end
 
 local function update_shape(c)
+    if c.fullscreen then
+        -- Awesome handles fullscreen window differently. Assume no border or titlebar.
+        apply_container_shape(c, nil, nil)
+        return
+    end
     local mini_titlebar_shape
     local padding = (c.has_border and beautiful.border_outer_space + beautiful.border_inner_space or beautiful.border_inner_space)
     if not c.has_titlebar then
