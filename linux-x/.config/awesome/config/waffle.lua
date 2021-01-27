@@ -306,7 +306,7 @@ local waffle_shutdown_view = view {
 local waffle_settings_view
 local waffle_tray_view
 local waffle_tray_wrapper = wibox.widget {
-    margins = beautiful.border_width,
+    margins = beautiful.xborder_width,
     widget = wibox.container.margin
 }
 local function get_tray_item_key(index)
@@ -859,7 +859,7 @@ local battery_widget
 do
    local bar_color = graph_normal_color
    local charging_color = acolor.from_string(beautiful.special_normal):blend_with(beautiful.bg_normal, 0.25):to_string()
-   local background_color = beautiful.border_normal
+   local background_color = beautiful.xborder_normal
 
    local battery_status_widget = wibox.widget {
         text = "",
@@ -965,7 +965,7 @@ do
 
    local bar_color = graph_normal_color
    local mute_color = beautiful.special_normal
-   local background_color = beautiful.border_normal
+   local background_color = beautiful.xborder_normal
 
    volumebar_widget = wibox.widget {
       max_value = 1,
@@ -1099,7 +1099,7 @@ do
         value         = 0,
         forced_height = dpi(2),
         color = graph_normal_color,
-        background_color = beautiful.border_normal,
+        background_color = beautiful.xborder_normal,
         widget        = wibox.widget.progressbar,
     }
 
