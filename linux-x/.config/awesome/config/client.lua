@@ -1045,6 +1045,14 @@ awful.placement.centered_with_half_size_on_new = placement_skip_existing(
         return geo
     end
 )
+awful.placement.centered_with_full_size_on_new = placement_skip_existing(
+    function (c, args)
+        local sgeo = c.screen.workarea
+        local geo = {x = sgeo.x, y = sgeo.y, width = sgeo.width, height = sgeo.height}
+        c:geometry(geo)
+        return geo
+    end
+)
 
 require("awful.rules").rules = {
    {
@@ -1070,10 +1078,11 @@ require("awful.rules").rules = {
    {
        rule = { class = "Rofi" },
        properties = {
-           placement = awful.placement.centered,
+           placement = awful.placement.centered_on_new,
            skip_taskbar = true,
            callback = function (c)
                c:connect_signal("unfocus", function() c:kill() end)
+               c:deny("geometry", "ewmh")
            end,
        },
    },
@@ -1134,6 +1143,14 @@ require("awful.rules").rules = {
            size_hints_honor = false,
        },
    },
+   {
+       rule = { class = "Steam" },
+       properties = {
+           callback = function (c)
+               c:deny("geometry", "ewmh")
+           end,
+       },
+   }
 }
 
 return nil
