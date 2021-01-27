@@ -31,11 +31,11 @@ local default_theme = {}
 
 function default_theme:init()
     if self.inited == nil then
-        local inner_space = beautiful.border_inner_space or 0
-        local outer_space = beautiful.border_outer_space or 0
-        self.line_width = beautiful.border_width - inner_space - outer_space
+        local inner_space = beautiful.xborder_inner_space or 0
+        local outer_space = beautiful.xborder_outer_space or 0
+        self.line_width = beautiful.xborder_width - inner_space - outer_space
         self.padding = outer_space + self.line_width / 2
-        self.size = beautiful.border_width
+        self.size = beautiful.xborder_width
         self.inited = true
     end
 end
@@ -43,7 +43,7 @@ end
 function default_theme:before_draw(context, cr)
     self:init()
     cr:save()
-    cr:set_source(gcolor(beautiful.border_space))
+    cr:set_source(gcolor(beautiful.xborder_space))
     cr:paint()
     cr:set_line_width(self.line_width)
     cr:set_source(gcolor(context.color))
@@ -126,9 +126,9 @@ local rounded_theme = {}
 
 function rounded_theme:init()
     if self.inited == nil then
-        self.size = self.size or beautiful.border_width
-        self.outer_space = self.outer_space or beautiful.border_outer_space
-        self.inner_space = self.inner_space or beautiful.border_inner_space
+        self.size = self.size or beautiful.xborder_width
+        self.outer_space = self.outer_space or beautiful.xborder_outer_space
+        self.inner_space = self.inner_space or beautiful.xborder_inner_space
         self.inited = true
     end
 end
@@ -136,7 +136,7 @@ end
 function rounded_theme:before_draw(context, cr)
     self:init()
     cr:save()
-    cr:set_source(gcolor(beautiful.border_space))
+    cr:set_source(gcolor(beautiful.xborder_space))
     cr:paint()
     cr:set_line_width(self.line_width)
     cr:set_source(gcolor(context.color))
@@ -220,9 +220,9 @@ local cut_a = math.sqrt(2) - 1
 
 function cut_theme:init()
     if self.inited == nil then
-        self.size = self.size or beautiful.border_width
-        self.outer_space = self.outer_space or beautiful.border_outer_space
-        self.inner_space = self.inner_space or beautiful.border_inner_space
+        self.size = self.size or beautiful.xborder_width
+        self.outer_space = self.outer_space or beautiful.xborder_outer_space
+        self.inner_space = self.inner_space or beautiful.xborder_inner_space
         self.outer_indent = cut_a * (self.size - self.outer_space)
         self.inner_indent = cut_a * self.inner_space
         self.inited = true
@@ -232,7 +232,7 @@ end
 function cut_theme:before_draw(context, cr)
     self:init()
     cr:save()
-    cr:set_source(gcolor(beautiful.border_space))
+    cr:set_source(gcolor(beautiful.xborder_space))
     cr:paint()
     cr:set_line_width(self.line_width)
     cr:set_source(gcolor(context.color))

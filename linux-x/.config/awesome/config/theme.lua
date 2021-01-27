@@ -69,17 +69,20 @@ theme.sep_normal = acolor(theme.bg_normal):blend_with(acolor(theme.fg_normal), 0
 
 theme.useless_gap   = dpi(6)
 
-theme.border_width  = dpi(4)
-theme.border_outer_space = dpi(1)
-theme.border_inner_space = dpi(1)
-theme.border_radius = dpi(16)
-theme.border_radius_cut = true
-theme.border_indent = theme.border_radius_cut and math.floor((2 - math.sqrt(2)) * (theme.border_radius - theme.border_outer_space or 0)) or (theme.border_radius - theme.border_outer_space or 0)
-theme.border_space = is_light_color(theme.bg_normal) and c_white[2] or c_black[1]
-theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
-theme.border_normal = acolor(theme.bg_normal):blend_with(acolor(theme.border_focus), 0.3):to_string()
--- theme.border_normal = theme.bg_normal
-theme.border_marked = theme.bg_urgent
+-- Disabling the native border.
+theme.border_width  = 0
+
+theme.xborder_width  = 9
+theme.xborder_outer_space = 3
+theme.xborder_inner_space = 3
+theme.xborder_radius = dpi(16)
+theme.xborder_radius_cut = true
+theme.xborder_indent = theme.xborder_radius_cut and math.floor((2 - math.sqrt(2)) * (theme.xborder_radius - theme.xborder_outer_space or 0)) or (theme.xborder_radius - theme.xborder_outer_space or 0)
+theme.xborder_space = is_light_color(theme.bg_normal) and c_white[2] or c_black[1]
+theme.xborder_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
+theme.xborder_normal = acolor(theme.bg_normal):blend_with(acolor(theme.xborder_focus), 0.3):to_string()
+-- theme.xborder_normal = theme.bg_normal
+theme.xborder_marked = theme.bg_urgent
 
 -- There are other variable sets
 -- overriding the default one when
@@ -238,27 +241,27 @@ local function set_titlebar_toggle_button(name, inactive_text, active_text)
 end
 
 local function set_titlebar_onetime_button_shape(name, shape, ratio, color)
-    theme["titlebar_" .. name .. "_button_normal"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * ratio)
-    theme["titlebar_" .. name .. "_button_normal_hover"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * ratio)
-    theme["titlebar_" .. name .. "_button_normal_press"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * ratio)
-    theme["titlebar_" .. name .. "_button_focus"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * ratio)
-    theme["titlebar_" .. name .. "_button_focus_hover"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * ratio)
-    theme["titlebar_" .. name .. "_button_focus_press"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * ratio)
+    theme["titlebar_" .. name .. "_button_normal"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * ratio)
+    theme["titlebar_" .. name .. "_button_normal_hover"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * ratio)
+    theme["titlebar_" .. name .. "_button_normal_press"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * ratio)
+    theme["titlebar_" .. name .. "_button_focus"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * ratio)
+    theme["titlebar_" .. name .. "_button_focus_hover"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * ratio)
+    theme["titlebar_" .. name .. "_button_focus_press"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * ratio)
 end
 
 local function set_titlebar_toggle_button_shape(name, shape, inactive_ratio, active_ratio, color)
-    theme["titlebar_" .. name .. "_button_normal_inactive"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
-    theme["titlebar_" .. name .. "_button_normal_inactive_hover"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
-    theme["titlebar_" .. name .. "_button_normal_inactive_press"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
-    theme["titlebar_" .. name .. "_button_focus_inactive"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
-    theme["titlebar_" .. name .. "_button_focus_inactive_hover"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
-    theme["titlebar_" .. name .. "_button_focus_inactive_press"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
-    theme["titlebar_" .. name .. "_button_normal_active"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * active_ratio)
-    theme["titlebar_" .. name .. "_button_normal_active_hover"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * active_ratio)
-    theme["titlebar_" .. name .. "_button_normal_active_press"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * active_ratio)
-    theme["titlebar_" .. name .. "_button_focus_active"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * active_ratio)
-    theme["titlebar_" .. name .. "_button_focus_active_hover"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * active_ratio)
-    theme["titlebar_" .. name .. "_button_focus_active_press"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * active_ratio)
+    theme["titlebar_" .. name .. "_button_normal_inactive"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
+    theme["titlebar_" .. name .. "_button_normal_inactive_hover"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
+    theme["titlebar_" .. name .. "_button_normal_inactive_press"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
+    theme["titlebar_" .. name .. "_button_focus_inactive"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
+    theme["titlebar_" .. name .. "_button_focus_inactive_hover"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
+    theme["titlebar_" .. name .. "_button_focus_inactive_press"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
+    theme["titlebar_" .. name .. "_button_normal_active"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * active_ratio)
+    theme["titlebar_" .. name .. "_button_normal_active_hover"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * active_ratio)
+    theme["titlebar_" .. name .. "_button_normal_active_press"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * active_ratio)
+    theme["titlebar_" .. name .. "_button_focus_active"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * active_ratio)
+    theme["titlebar_" .. name .. "_button_focus_active_hover"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * active_ratio)
+    theme["titlebar_" .. name .. "_button_focus_active_press"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * active_ratio)
 end
 
 -- set_titlebar_toggle_button("floating", "f", "F")
@@ -502,24 +505,24 @@ end
 local border_theme
 function theme.get_border_theme()
     if border_theme == nil then
-        if beautiful.border_radius == nil then
+        if beautiful.xborder_radius == nil then
             border_theme = border.default_theme
         else
-            if beautiful.border_radius_cut then
+            if beautiful.xborder_radius_cut then
                 border_theme = setmetatable({}, {__index = border.cut_theme})
             else
                 border_theme = setmetatable({}, {__index = border.rounded_theme})
             end
-            border_theme.size = beautiful.border_radius
-            border_theme.outer_space = beautiful.border_outer_space
-            border_theme.inner_space = beautiful.border_radius - beautiful.border_width + beautiful.border_inner_space
+            border_theme.size = beautiful.xborder_radius
+            border_theme.outer_space = beautiful.xborder_outer_space
+            border_theme.inner_space = beautiful.xborder_radius - beautiful.xborder_width + beautiful.xborder_inner_space
             border_theme:init()
         end
     end
     return border_theme
 end
 
-theme.rect_with_corners = theme.border_radius_cut and gshape.partially_cut_rect or gshape.partially_rounded_rect
+theme.rect_with_corners = theme.xborder_radius_cut and gshape.partially_cut_rect or gshape.partially_rounded_rect
 theme.apply_border_to_widget = function(args)
     args = args or {}
     local widget
@@ -528,7 +531,7 @@ theme.apply_border_to_widget = function(args)
             args.widget,
             widget = fixed_margin,
         },
-        shape = beautiful.border_radius ~= nil and
+        shape = beautiful.xborder_radius ~= nil and
             function (cr, width, height)
                 beautiful.rect_with_corners(
                     cr, width, height,
@@ -536,8 +539,8 @@ theme.apply_border_to_widget = function(args)
                     args.tr ~= false and widget.widget.top > 0 and widget.widget.right > 0,
                     args.br ~= false and widget.widget.bottom > 0 and widget.widget.right > 0,
                     args.bl ~= false and widget.widget.bottom > 0 and widget.widget.left > 0,
-                    beautiful.border_radius -
-                    beautiful.border_width)
+                    beautiful.xborder_radius -
+                    beautiful.xborder_width)
             end,
         bg = beautiful.bg_normal,
         widget = wibox.container.background
@@ -545,10 +548,10 @@ theme.apply_border_to_widget = function(args)
     widget = wibox.widget {
         {
             inner_widget,
-            top = args.top and beautiful.border_width or 0,
-            left = args.left and beautiful.border_width or 0,
-            right = args.right and beautiful.border_width or 0,
-            bottom = args.bottom and beautiful.border_width or 0,
+            top = args.top and beautiful.xborder_width or 0,
+            left = args.left and beautiful.xborder_width or 0,
+            right = args.right and beautiful.xborder_width or 0,
+            bottom = args.bottom and beautiful.xborder_width or 0,
             draw_empty = args.draw_empty,
             widget = fixed_margin,
         },
@@ -558,16 +561,16 @@ theme.apply_border_to_widget = function(args)
             local tr = args.tr ~= false and widget.widget.top > 0 and widget.widget.right > 0
             local br = args.br ~= false and widget.widget.bottom > 0 and widget.widget.right > 0
             local bl = args.bl ~= false and widget.widget.bottom > 0 and widget.widget.left > 0
-            local indicator = args.indicator ~= false and beautiful.border_radius and beautiful.border_radius_cut
-            if beautiful.border_radius then
-                cr:set_source(gcolor(beautiful.border_space))
+            local indicator = args.indicator ~= false and beautiful.xborder_radius and beautiful.xborder_radius_cut
+            if beautiful.xborder_radius then
+                cr:set_source(gcolor(beautiful.xborder_space))
                 if indicator then
                     gshape.rectangle(cr, width, height)
                 else
                     beautiful.rect_with_corners(
                         cr, width, height,
                         tl, tr, br, bl,
-                        beautiful.border_radius)
+                        beautiful.xborder_radius)
                 end
                 if args.clip then
                     cr:clip()
@@ -577,7 +580,7 @@ theme.apply_border_to_widget = function(args)
                 end
             end
             border:draw({ theme = beautiful.get_border_theme(),
-                          color = beautiful.border_focus }, cr, width, height,
+                          color = beautiful.xborder_focus }, cr, width, height,
                 border.directions{
                     widget.widget.top > 0 and "top",
                     widget.widget.left > 0 and "left",
@@ -586,32 +589,32 @@ theme.apply_border_to_widget = function(args)
             })
             if indicator then
                 cr:set_source(gcolor(beautiful.fg_normal))
-                local indent = (2 - math.sqrt(2)) * (beautiful.border_radius) - beautiful.border_outer_space
+                local indent = (2 - math.sqrt(2)) * (beautiful.xborder_radius) - beautiful.xborder_outer_space
                 if tl then
-                    cr:move_to(beautiful.border_outer_space, beautiful.border_outer_space)
-                    cr:line_to(beautiful.border_outer_space, indent)
-                    cr:line_to(indent, beautiful.border_outer_space)
+                    cr:move_to(beautiful.xborder_outer_space, beautiful.xborder_outer_space)
+                    cr:line_to(beautiful.xborder_outer_space, indent)
+                    cr:line_to(indent, beautiful.xborder_outer_space)
                     cr:fill()
                 end
 
                 if tr then
-                    cr:move_to(width - indent, beautiful.border_outer_space)
-                    cr:line_to(width - beautiful.border_outer_space, beautiful.border_outer_space)
-                    cr:line_to(width - beautiful.border_outer_space, indent)
+                    cr:move_to(width - indent, beautiful.xborder_outer_space)
+                    cr:line_to(width - beautiful.xborder_outer_space, beautiful.xborder_outer_space)
+                    cr:line_to(width - beautiful.xborder_outer_space, indent)
                     cr:fill()
                 end
 
                 if br then
-                    cr:move_to(width - indent, height - beautiful.border_outer_space)
-                    cr:line_to(width - beautiful.border_outer_space, height - beautiful.border_outer_space)
-                    cr:line_to(width - beautiful.border_outer_space, height - indent)
+                    cr:move_to(width - indent, height - beautiful.xborder_outer_space)
+                    cr:line_to(width - beautiful.xborder_outer_space, height - beautiful.xborder_outer_space)
+                    cr:line_to(width - beautiful.xborder_outer_space, height - indent)
                     cr:fill()
                 end
 
                 if bl then
-                    cr:move_to(indent, height - beautiful.border_outer_space)
-                    cr:line_to(beautiful.border_outer_space, height - beautiful.border_outer_space)
-                    cr:line_to(beautiful.border_outer_space, height - indent)
+                    cr:move_to(indent, height - beautiful.xborder_outer_space)
+                    cr:line_to(beautiful.xborder_outer_space, height - beautiful.xborder_outer_space)
+                    cr:line_to(beautiful.xborder_outer_space, height - indent)
                     cr:fill()
                 end
             end

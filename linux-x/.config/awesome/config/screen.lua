@@ -220,7 +220,7 @@ local space_filler_left_with_top_border = with_top_border {
         halign = "left",
         widget = fixed_place,
     },
-    width = beautiful.border_width * 2 + beautiful.useless_gap,
+    width = beautiful.xborder_width * 2 + beautiful.useless_gap,
     strategy = "min",
     widget = wibox.container.constraint
 }
@@ -237,7 +237,7 @@ local space_filler_right_with_top_border = with_top_border {
         halign = "right",
         widget = fixed_place,
     },
-    width = beautiful.border_width * 2 + beautiful.useless_gap,
+    width = beautiful.xborder_width * 2 + beautiful.useless_gap,
     strategy = "min",
     widget = wibox.container.constraint
 }
@@ -261,14 +261,14 @@ local function set_splitted_no_min(bar)
     space_filler_left:set_children({space_filler_no_min})
     space_filler_right:set_children({space_filler_no_min})
 
-    bar.left_margin_container.widget.right = beautiful.border_width
-    bar.middle_margin_container.widget.left = beautiful.border_width
-    bar.middle_margin_container.widget.right = beautiful.border_width
-    bar.right_margin_container.widget.left = beautiful.border_width
+    bar.left_margin_container.widget.right = beautiful.xborder_width
+    bar.middle_margin_container.widget.left = beautiful.xborder_width
+    bar.middle_margin_container.widget.right = beautiful.xborder_width
+    bar.right_margin_container.widget.left = beautiful.xborder_width
     bar.right_margin_container.widget.widget.widget.left =
         bar.screen == capi.screen.primary and
-        beautiful.border_radius and
-        math.floor((beautiful.border_radius_cut and 2 - math.sqrt(2) or 1) * (beautiful.border_radius - beautiful.border_width)) or 0
+        beautiful.xborder_radius and
+        math.floor((beautiful.xborder_radius_cut and 2 - math.sqrt(2) or 1) * (beautiful.xborder_radius - beautiful.xborder_width)) or 0
 end
 
 local function set_splitted(bar)
@@ -277,14 +277,14 @@ local function set_splitted(bar)
     space_filler_left:set_children({space_filler})
     space_filler_right:set_children({space_filler})
 
-    bar.left_margin_container.widget.right = beautiful.border_width
-    bar.middle_margin_container.widget.left = beautiful.border_width
-    bar.middle_margin_container.widget.right = beautiful.border_width
-    bar.right_margin_container.widget.left = beautiful.border_width
+    bar.left_margin_container.widget.right = beautiful.xborder_width
+    bar.middle_margin_container.widget.left = beautiful.xborder_width
+    bar.middle_margin_container.widget.right = beautiful.xborder_width
+    bar.right_margin_container.widget.left = beautiful.xborder_width
     bar.right_margin_container.widget.widget.widget.left =
         bar.screen == capi.screen.primary and
-        beautiful.border_radius and
-        math.floor((beautiful.border_radius_cut and 2 - math.sqrt(2) or 1) * (beautiful.border_radius - beautiful.border_width)) or 0
+        beautiful.xborder_radius and
+        math.floor((beautiful.xborder_radius_cut and 2 - math.sqrt(2) or 1) * (beautiful.xborder_radius - beautiful.xborder_width)) or 0
 end
 
 capi.awesome.connect_signal(
@@ -555,7 +555,7 @@ local function setup_screen(scr)
          bg = "#00000000",
          [size_index[shared.var.bar_position]] =
              beautiful.bar_height +
-             beautiful.border_width,
+             beautiful.xborder_width,
          position = shared.var.bar_position,
          border_width = 0,
          cursor = "cross",
@@ -592,9 +592,9 @@ local function setup_screen(scr)
 
    local clock
    if direction_index[shared.var.bar_position] == "horizontal" then
-       clock = wibox.widget.textclock("<span color='" .. beautiful.border_focus .. "'>%m<b>%d</b></span> %H<b>%M</b> ")
+       clock = wibox.widget.textclock("<span color='" .. beautiful.xborder_focus .. "'>%m<b>%d</b></span> %H<b>%M</b> ")
    else
-       clock = wibox.widget.textclock("<span color='" .. beautiful.border_focus .. "'>%m\n<b>%d</b></span>\n%H\n<b>%M</b>")
+       clock = wibox.widget.textclock("<span color='" .. beautiful.xborder_focus .. "'>%m\n<b>%d</b></span>\n%H\n<b>%M</b>")
    end
    clock.align = "center"
    clock:set_font(beautiful.font)
