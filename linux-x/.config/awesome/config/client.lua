@@ -648,6 +648,7 @@ end
 local function decorate(c)
     if not c.valid then return end
     local geo = c:geometry()
+    local restore_geo = not c._do_not_restore_geo_for_decoration and c.decoration_created
 
     local tw
     local to
@@ -951,7 +952,7 @@ local function decorate(c)
     c.decoration_created = true
     delayed_update_shape(c)
 
-    if geo then c:geometry(geo) end
+    if restore_geo then c:geometry(geo) end
 end
 
 capi.client.connect_signal("property::size", delayed_update_shape)
@@ -987,7 +988,7 @@ capi.client.connect_signal("property::titlebar_style",
 )
 
 local function reset_decoration(c)
-    if c.xborderless then
+    if c.borderless then
         c.has_xborder = false
         return
     elseif c.maximized then
@@ -1080,9 +1081,9 @@ require("awful.rules").rules = {
        properties = {
            placement = awful.placement.centered_on_new,
            skip_taskbar = true,
+           _do_not_restore_geo_for_decoration = true,
            callback = function (c)
                c:connect_signal("unfocus", function() c:kill() end)
-               c:deny("geometry", "ewmh")
            end,
        },
    },
