@@ -648,7 +648,7 @@ end
 local function decorate(c)
     if not c.valid then return end
     local geo = c:geometry()
-    local restore_geo = not c._do_not_restore_geo_for_decoration and c.decoration_created
+    local restore_geo = c.decoration_created
 
     local tw
     local to
@@ -990,7 +990,6 @@ capi.client.connect_signal("property::titlebar_style",
 local function reset_decoration(c)
     if c.borderless then
         c.has_xborder = false
-        return
     elseif c.maximized then
         c.has_xborder = false
     else
@@ -998,9 +997,8 @@ local function reset_decoration(c)
     end
     if c.type == "dock" then
         c.has_xtitlebar = false
-    else
-        if false -- c.maximized and not shared.var.enable_titlebar
-        then
+    elseif c.has_xtitlebar == nil then
+        if c.requests_no_titlebar and c.respect_titlebar_request then
             c.has_xtitlebar = false
         else
             c.has_xtitlebar = true
@@ -1081,7 +1079,7 @@ require("awful.rules").rules = {
        properties = {
            placement = awful.placement.centered_on_new,
            skip_taskbar = true,
-           _do_not_restore_geo_for_decoration = true,
+           respect_titlebar_request = true,
            callback = function (c)
                c:connect_signal("unfocus", function() c:kill() end)
            end,
@@ -1147,8 +1145,9 @@ require("awful.rules").rules = {
    {
        rule = { class = "Steam" },
        properties = {
+           borderless = true,
            callback = function (c)
-               c:deny("geometry", "ewmh")
+               -- c:deny("geometry", "ewmh")
            end,
        },
    }
