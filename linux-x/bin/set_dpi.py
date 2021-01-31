@@ -20,6 +20,8 @@ for line in dpy_info.split('\n'):
         continue
     dev_width = int(m.group(1))
     dev_height = int(m.group(2))
+    if dev_width < dev_height:
+        dev_width, dev_height = dev_height, dev_width
 
     if dev_width == 0:
         continue
@@ -29,12 +31,14 @@ for line in dpy_info.split('\n'):
         continue
     res_width = int(m.group(1))
     res_height = int(m.group(2))
+    if res_width < res_height:
+        res_width, res_height = res_height, res_width
 
     sys.stderr.write(
         "Info: {} {} {} {}\n".format(dev_width, dev_height, res_width, res_height))
 
     dpi_w = res_width / (dev_width / 25.4)
-    sys.stderr.write("Info dpi_w: {}".format(dpi_w))
+    sys.stderr.write("Info dpi_w: {}\n".format(dpi_w))
     cur_dpi = round(dpi_w / 48) * 48
     if dpi is None or dpi < cur_dpi:
         dpi = cur_dpi
