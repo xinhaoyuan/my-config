@@ -608,7 +608,7 @@ local function get_full_titlebar(c)
                     align  = 'center',
                     widget = awful.titlebar.widget.titlewidget(c)
                 },
-                spacing = dpi(4),
+                spacing = beautiful.sep_small_size,
                 layout = wibox.layout.fixed.horizontal,
             },
             halign = "center",

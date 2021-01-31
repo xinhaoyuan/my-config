@@ -66,6 +66,9 @@ theme.fg_minimize   = acolor(is_light_color(theme.bg_minimize) and c_black[1] or
 
 -- custom property
 theme.sep_normal = acolor(theme.bg_normal):blend_with(acolor(theme.fg_normal), 0.5):to_string()
+theme.sep_small_size = dpi(4)
+theme.sep_median_size = dpi(6)
+theme.sep_big_size = dpi(12)
 
 theme.useless_gap   = dpi(6)
 
@@ -301,6 +304,7 @@ local sep_color = gcolor(acolor(theme.fg_normal):blend_with(acolor(theme.bg_norm
 function theme.draw_separator(cr, width, height)
     local dot_r = dpi(1)
     cr:set_source(sep_color)
+    cr:set_line_cap("ROUND")
     if width < height then
         -- cr:move_to(width / 2, height / 4)
         -- cr:line_to(width / 2, 3 * height / 4)
@@ -309,11 +313,13 @@ function theme.draw_separator(cr, width, height)
         -- cr:fill()
         cr:move_to(width / 2, width / 2)
         cr:line_to(width / 2, height - width / 2)
-        cr:set_dash({width / 3, width / 3})
+        cr:set_dash({0, width / 2})
+        cr:set_line_width(width / 6)
     else
         cr:move_to(height / 2, height / 2)
         cr:line_to(width - height / 2, height / 2)
-        cr:set_dash({height / 3, height / 3})
+        cr:set_dash({0, height / 2})
+        cr:set_line_width(height / 6)
     end
     cr:stroke()
 end
@@ -336,7 +342,7 @@ theme.tasklist_layout = {
         },
         simple = {
             forced_height = theme.bar_height,
-            spacing = dpi(6),
+            spacing = theme.sep_median_size,
             spacing_widget = theme.sep_widget,
             -- size_transform = size_transform_function,
             fill_space = true,
@@ -345,7 +351,7 @@ theme.tasklist_layout = {
         },
         split = {
             forced_height = theme.bar_height,
-            spacing = dpi(6),
+            spacing = theme.sep_median_size,
             spacing_widget = theme.sep_widget,
             -- size_transform = size_transform_function,
             fill_space = true,
@@ -353,7 +359,7 @@ theme.tasklist_layout = {
         },
         auto = {
             forced_height = theme.bar_height,
-            spacing = dpi(6),
+            spacing = theme.sep_median_size,
             spacing_widget = theme.sep_widget,
             -- size_transform = size_transform_function,
             fill_space = true,

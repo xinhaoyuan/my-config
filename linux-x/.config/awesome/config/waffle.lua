@@ -29,8 +29,8 @@ local dpi = require("beautiful.xresources").apply_dpi
 
 local waffle_width = beautiful.waffle_panel_width or dpi(240)
 local button_height = beautiful.waffle_item_height or dpi(20)
-local button_padding = dpi(4)
-local panel_padding = dpi(12)
+local button_padding = beautiful.sep_small_size or dpi(4)
+local panel_padding = beautiful.sep_big_size or dpi(10)
 local font_normal = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_normal)
 local font_info = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small)
 local graph_background = "#00000000"
@@ -1821,7 +1821,7 @@ local client_waffle = view {
                 layout = wibox.layout.fixed.horizontal,
             }
         },
-        spacing = dpi(10),
+        spacing = button_padding,
         layout = wibox.layout.fixed.vertical,
     },
     on_close = function()

@@ -212,7 +212,7 @@ local space_filler_left_with_top_border = with_top_border {
     {
         {
             beautiful.sep_widget,
-            forced_width = dpi(6),
+            forced_width = beautiful.sep_median_size,
             content_fill_vertical = true,
             content_fill_horizontal = true,
             widget = wibox.container.place
@@ -229,7 +229,7 @@ local space_filler_right_with_top_border = with_top_border {
     {
         {
             beautiful.sep_widget,
-            forced_width = dpi(6),
+            forced_width = beautiful.sep_median_size,
             content_fill_vertical = true,
             content_fill_horizontal = true,
             widget = wibox.container.place
@@ -425,14 +425,14 @@ local cal_popup = awful.popup {
                         orgenda.widget.create {
                             width = dpi(240),
                             indent_width = dpi(26),
-                            item_margin = dpi(5),
+                            item_margin = beautiful.sep_small_size,
                         },
                         draw_empty = false,
-                        top = dpi(12),
+                        top = beautiful.sep_big_size,
                         widget = fixed_margin,
                     },
                     bgimage = function(context, cr, width, height)
-                        height = dpi(12)
+                        height = beautiful.sep_big_size
                         beautiful.draw_separator(cr, width, height)
                     end,
                     widget = wibox.container.background
@@ -581,7 +581,7 @@ local function setup_screen(scr)
    left_layout:add(scr.widgets.tag_list)
    left_layout:add(scr.mypromptbox)
    local right_layout = wibox.widget {
-      spacing        = dpi(6),
+      spacing        = beautiful.sep_median_size,
       spacing_widget = beautiful.sep_widget,
       layout         = wibox.layout.fixed[direction_index[shared.var.bar_position]]
    }
@@ -602,7 +602,7 @@ local function setup_screen(scr)
    clock_and_orgenda = wibox.widget {
        orgenda_counter_widget,
        clock,
-       spacing = dpi(6),
+       spacing = beautiful.sep_median_size,
        layout = wibox.layout.fixed.horizontal
    }
    clock_and_orgenda:connect_signal('mouse::enter', function() cal_show() end)
@@ -633,7 +633,7 @@ local function setup_screen(scr)
                },
                {
                    right_layout,
-                   [direction_index[shared.var.bar_position] == "horizontal" and "left" or "top"] = dpi(5),
+                   [direction_index[shared.var.bar_position] == "horizontal" and "left" or "top"] = beautiful.sep_median_size,
                    widget = wibox.container.margin,
                },
                layout = wibox.layout.align[direction_index[shared.var.bar_position]],
@@ -658,7 +658,7 @@ local function setup_screen(scr)
            id = "right_margin_container",
            widget = wibox.widget {
                right_layout,
-               -- left = dpi(5),
+               -- left = beautiful.sep_median_size,
                widget = fixed_margin
            },
            top = true,

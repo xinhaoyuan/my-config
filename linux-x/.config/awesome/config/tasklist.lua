@@ -205,7 +205,7 @@ local tasklist_template = {
                         },
                         [top_index[shared.var.bar_position]] = (beautiful.bar_height - beautiful.bar_icon_size) / 2,
                         [bottom_index[shared.var.bar_position]] = (beautiful.bar_height - beautiful.bar_icon_size) / 2,
-                        [right_index[shared.var.bar_position]] = dpi(4),
+                        [right_index[shared.var.bar_position]] = beautiful.sep_small_size,
                         widget = wibox.container.margin,
                     },
                     {
@@ -233,7 +233,7 @@ local tasklist_template = {
                             end,
                             widget = cbg
                         },
-                        left = dpi(4),
+                        left = beautiful.sep_small_size,
                         widget = wibox.container.margin,
                     },
                     layout = wibox.layout.align[direction_index[shared.var.bar_position]],
@@ -241,8 +241,8 @@ local tasklist_template = {
                 direction = direction_index[shared.var.bar_position] == "horizontal" and "north" or "west",
                 widget = wibox.container.rotate
             },
-            [left_index[shared.var.bar_position]]  = dpi(4),
-            [right_index[shared.var.bar_position]] = dpi(4),
+            [left_index[shared.var.bar_position]]  = beautiful.sep_small_size,
+            [right_index[shared.var.bar_position]] = beautiful.sep_small_size,
             widget = wibox.container.margin
         },
         layout = wibox.layout.stack,
