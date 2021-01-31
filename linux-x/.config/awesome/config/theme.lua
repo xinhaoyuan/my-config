@@ -70,7 +70,7 @@ theme.sep_normal = acolor(theme.bg_normal):blend_with(acolor(theme.fg_normal), 0
 theme.useless_gap   = dpi(6)
 
 -- Disabling the native border.
-theme.border_width  = 0
+theme.border_width = 0
 
 theme.xborder_width  = 9
 theme.xborder_outer_space = 3

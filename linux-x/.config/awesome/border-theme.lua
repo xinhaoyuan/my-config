@@ -129,6 +129,9 @@ function rounded_theme:init()
         self.size = self.size or beautiful.xborder_width
         self.outer_space = self.outer_space or beautiful.xborder_outer_space
         self.inner_space = self.inner_space or beautiful.xborder_inner_space
+        -- Ugly hack for dealing with unwanted artifacts on corners
+        if self.outer_space == 0 then self.outer_space = -1 end
+        if self.inner_space == 0 then self.inner_space = -1 end
         self.inited = true
     end
 end
@@ -225,6 +228,9 @@ function cut_theme:init()
         self.inner_space = self.inner_space or beautiful.xborder_inner_space
         self.outer_indent = cut_a * (self.size - self.outer_space)
         self.inner_indent = cut_a * self.inner_space
+        -- Ugly hack for dealing with unwanted artifacts on corners
+        if self.outer_space == 0 then self.outer_space = -1 end
+        if self.inner_space == 0 then self.inner_space = -1 end
         self.inited = true
     end
 end
