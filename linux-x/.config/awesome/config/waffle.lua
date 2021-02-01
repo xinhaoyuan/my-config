@@ -1355,7 +1355,7 @@ local waffle_root_agenda_widget = decorate_panel {
     top_sep = true,
     widget = {
         button {
-            icon = gcolor.recolor_image(icons.clock, beautiful.fg_normal),
+            icon = gcolor.recolor_image(icons.calendar_todo, beautiful.fg_normal),
             label_widget = wibox.widget {
                 align = "center",
                 format = "%m/%d %a %H:%M",

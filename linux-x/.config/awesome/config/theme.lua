@@ -171,7 +171,7 @@ theme.titlebar_fg_focus = theme.fg_normal
 theme.titlebar_size = dpi(20)
 theme.mini_titlebar_size = theme.bar_height
 theme.mini_titlebar_width = theme.bar_height
-theme.client_default_icon = gcolor.recolor_image(icons.terminal, theme.fg_normal)
+theme.client_default_icon = gcolor.recolor_image(icons.hexagon, theme.fg_normal)
 
 local function shape_to_surface(shape, fill_color, stroke_color, outer_size, inner_size)
     shape = shape or

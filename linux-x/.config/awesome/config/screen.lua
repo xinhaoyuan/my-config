@@ -488,7 +488,7 @@ local orgenda_counter_text_widget = wibox.widget.textbox()
 local orgenda_counter_widget = wibox.widget {
     {
         {
-            image = gcolor.recolor_image(icons.note, beautiful.fg_normal),
+            image = gcolor.recolor_image(icons.calendar_todo, beautiful.fg_normal),
             forced_height = beautiful.bar_icon_size,
             forced_width = beautiful.bar_icon_size,
             widget = wibox.widget.imagebox,
