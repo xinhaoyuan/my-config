@@ -1,5 +1,6 @@
 {
   "animation": false,
+  "autoAttach": false,
   "autoAttachOnDuplicated": 2,
   "autoAttachOnNewTabButtonMiddleClick": 2,
   "autoAttachOnNewTabCommand": 0,
@@ -14,29 +15,33 @@
   "lastConfirmedToCloseTabs": 1608093750383,
   "lastDraggedTabs": {
     "tabIds": [
-      14
+      1
     ],
-    "urlsDigest": "c399908ba995fb3a50e039d7beed73f5965c3da5"
+    "urlsDigest": "f1f3bd09de659fc955d2db1e439e3200802c4645"
   },
   "notifiedFeaturesVersion": 7,
+  "optionsExpandedGroups": [
+    "group-allConfigs"
+  ],
   "optionsExpandedSections": [
-    "section-advanced",
     "section-addons",
     "section-debug",
-    "section-appearance"
+    "section-appearance",
+    "section-treeBehavior",
+    "section-advanced"
   ],
   "syncDeviceInfo": {
     "id": "device-1605053890253-28131",
     "name": "Firefox on Linux",
     "icon": "device-desktop",
-    "timestamp": 1608825828824
+    "timestamp": 1612237216157
   },
   "syncDevices": {
     "device-1605053890253-28131": {
       "id": "device-1605053890253-28131",
       "name": "Firefox on Linux",
       "icon": "device-desktop",
-      "timestamp": 1608825828824
+      "timestamp": 1612237216157
     }
   },
   "syncDevicesLocalCache": {
@@ -44,7 +49,7 @@
       "id": "device-1605053890253-28131",
       "name": "Firefox on Linux",
       "icon": "device-desktop",
-      "timestamp": 1608825828824
+      "timestamp": 1612237216157
     }
   },
   "userStyleRules": ""
