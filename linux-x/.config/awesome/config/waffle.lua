@@ -1581,22 +1581,29 @@ waffle_settings_view = view {
                             shared.screen.toggle_fortune()
                         end
                 }),
-                button({
-                        markup = "Cycle bar styles",
-                        indicator = em("b"),
-                        key = "b",
-                        action = function (alt)
-                            for i, v in ipairs(beautiful.bar_styles) do
-                                if v == beautiful.bar_style then
-                                    beautiful.bar_style = beautiful.bar_styles[i % #beautiful.bar_styles + 1]
+                (
+                    function()
+                        local b
+                        b = button({
+                                indicator = em("b"),
+                                key = "b",
+                                action = function (alt)
+                                    for i, v in ipairs(beautiful.bar_styles) do
+                                        if v == beautiful.bar_style then
+                                            beautiful.bar_style = beautiful.bar_styles[i % #beautiful.bar_styles + 1]
+                                            b.label.text = "Cycle bar style: "..beautiful.bar_style
+                                            capi.screen.emit_signal("list")
+                                            return
+                                        end
+                                    end
+                                    beautiful.bar_style = "auto"
                                     capi.screen.emit_signal("list")
-                                    return
                                 end
-                            end
-                            beautiful.bar_style = "auto"
-                            capi.screen.emit_signal("list")
-                        end
-                }),
+                        })
+                        b.label.text = "Cycle bar style: "..beautiful.bar_style
+                        return b
+                    end
+                )(),
                 button({
                         markup = "Wallpaper",
                         indicator = em("w"),
