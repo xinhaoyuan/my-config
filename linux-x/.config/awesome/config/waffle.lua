@@ -1383,8 +1383,8 @@ local waffle_root_action_widget = decorate_panel {
         button {
             icon = gcolor.recolor_image(icons.launcher, beautiful.fg_normal),
             markup = "Launcher",
-            indicator = em("\\"),
-            key = {"\\","|"},
+            indicator = em("r"),
+            key = "r",
             action = function (alt)
                 if alt then
                     shared.action.app_finder()
@@ -1431,8 +1431,8 @@ local waffle_root_action_widget = decorate_panel {
         button({
                 icon = gcolor.recolor_image(icons.dots, beautiful.fg_normal),
                 markup = "Tray",
-                indicator = em("r"),
-                key = "r",
+                indicator = em("y"),
+                key = "y",
                 action = function (alt)
                     show_tray_view()
                 end,

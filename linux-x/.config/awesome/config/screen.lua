@@ -791,7 +791,7 @@ local global_keys = table_join(
    awful.key({ "Mod4" }, "e",               function () shared.action.file_manager() end),
    awful.key({ "Mod4" }, "l",               function () shared.action.screen_locker() end),
    awful.key({ "Mod4" }, "t",               function () shared.action.calendar() end),
-   awful.key({ "Mod4" }, "\\",              function () shared.action.launcher() end),
+   awful.key({ "Mod4" }, "r",              function () shared.action.launcher() end),
    awful.key({ "Mod4" }, "F1",              function () open_tmux_session("F1") end),
    awful.key({ "Mod4" }, "F2",              function () open_tmux_session("F2") end),
    awful.key({ "Mod4" }, "F3",              function () open_tmux_session("F3") end),
