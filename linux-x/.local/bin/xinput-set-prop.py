@@ -20,7 +20,7 @@ for line in subprocess.check_output("xinput").decode().split("\n"):
         continue
     dev_name = m.group(1).strip()
     dev_id = int(m.group(2))
-    m = re.search(dev_pat, dev_name)
+    m = re.search(dev_pat, line)
     if not m:
         continue
     dev_matched.append((line, dev_id, dev_name))
