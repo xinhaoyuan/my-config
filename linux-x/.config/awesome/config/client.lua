@@ -597,9 +597,8 @@ local function get_full_titlebar(c)
                             },
                             widget = fallback,
                         },
-                        height = beautiful.icon_size,
-                        widget = beautiful.icon_size,
-                        widget = wibox.container.constraint
+                        margins = (beautiful.bar_height - beautiful.bar_icon_size) / 2,
+                        widget = wibox.container.margin,
                     },
                     valign = "center",
                     widget = wibox.container.place
