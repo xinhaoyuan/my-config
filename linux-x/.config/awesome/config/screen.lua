@@ -462,7 +462,7 @@ local cal_popup = awful.popup {
                 {
                     {
                         {
-                            orgenda.widget.create {
+                            orgenda.widget {
                                 width = dpi(240),
                                 indent_width = dpi(26),
                                 item_margin = beautiful.sep_small_size,

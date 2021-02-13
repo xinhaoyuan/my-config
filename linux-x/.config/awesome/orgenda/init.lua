@@ -1,6 +1,12 @@
+-- orgenda: a Awesome WM module of org-mode integration.
+--
+-- Author: Xinhao Yuan <xinhaoyuan@gmail.com> 
+-- License: MIT license, see LICENSE file.
+
 local awful = require("awful")
 local gobject = require("gears.object")
-local hotpot = require("hotpot")
+local gtimer = require("gears.timer")
+local gdebug = require("gears.debug")
 
 local orgenda = {
     config = {
@@ -70,7 +76,7 @@ end
 local function parse_file(path, items)
     local fd = io.open(path, "r")
     if not fd then
-        hotpot.logging.error("cannot open file at "..tostring(path))
+        gdebug.print_error("cannot open file at "..tostring(path))
         return {}
     end
 
@@ -110,8 +116,7 @@ function orgenda.reset()
     orgenda.data.items = items
 end
 
-orgenda.widget = {}
-function orgenda.widget.create(args)
+function orgenda.widget(args)
     args = args or {}
 
     local orgenda_widget
@@ -206,11 +211,10 @@ function orgenda.widget.create(args)
     return orgenda_widget
 end
 
-
-hotpot.on_ready(
+gtimer.delayed_call(
     function ()
         if #orgenda.config.files == 0 then
-            hotpot.logging.warning("orgenda: no files to watch - will do nothing.")
+            gdebug.print_warning("orgenda: no files to watch - will do nothing.")
             return
         end
         local cmd = {"fswatch", "-x", "--event=Updated"}
@@ -221,7 +225,7 @@ hotpot.on_ready(
             cmd,
             {
                 stdout = function(line)
-                    hotpot.logging.info("Got fswatch line: ", line)
+                    -- gdebug.print_warning("Got fswatch line: "..line)
                     orgenda.reset()
                 end
             }

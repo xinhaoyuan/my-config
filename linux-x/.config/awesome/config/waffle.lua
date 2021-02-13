@@ -1268,7 +1268,7 @@ do
     end
 end
 
-local orgenda_widget = orgenda.widget.create {
+local orgenda_widget = orgenda.widget {
     font = font_info,
     item_margin = button_padding,
     width = waffle_width,
