@@ -34,11 +34,18 @@ os.execute(HOME_DIR .. "/.xdesktoprc")
 
 local config = require("config")
 require("my-autofocus")
-require("orgenda").config.files = {os.getenv("HOME").."/org/TODO.org"}
+local gcal_org_path = os.getenv("HOME").."/.cache/gcal.org"
+os.execute("touch "..gcal_org_path)
+require("orgenda").config.files = {
+    os.getenv("HOME").."/org/TODO.org",
+    gcal_org_path,
+}
 local hotpot = require("hotpot")
 local fts = hotpot.focus_timestamp
+local gtimer = require("gears.timer")
+local awful = require("awful")
 
-require("gears.timer").delayed_call(
+gtimer.delayed_call(
     function ()
         local clients = client.get()
         table.sort(
@@ -53,7 +60,16 @@ require("gears.timer").delayed_call(
             end
         end
     end
-                                   )
+)
+
+gtimer {
+    timeout = 900,
+    call_now = true,
+    autostart = true,
+    callback = function ()
+        awful.spawn({"fetch_gcal.py", "-o", gcal_org_path}, false)
+    end
+}
 
 __userdata_info = {}
 __userdata_info_counter = 0
