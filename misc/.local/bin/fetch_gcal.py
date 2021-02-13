@@ -23,6 +23,7 @@ import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-o", dest="output", required=True)
+parser.add_argument("-n", dest="num", default=1)
 parser.add_argument("-c", dest="credentials", default=os.environ.get("HOME")+"/.gcal_credentials.json")
 
 TOKEN_FILE=os.environ.get("HOME")+"/.cache/gcal_token.pickle"
@@ -59,10 +60,10 @@ def main(args):
 
         # Call the Calendar API
         now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-        print('Getting the upcoming 10 events')
+        print('Getting the upcoming {} events'.format(args.num))
         events_result = service.events().list(calendarId='primary', timeMin=now,
-                                            maxResults=10, singleEvents=True,
-                                            orderBy='startTime').execute()
+                                              maxResults=args.num, singleEvents=True,
+                                              orderBy='startTime').execute()
         events = events_result.get('items', [])
 
         if not events:
@@ -73,7 +74,7 @@ def main(args):
             if start is None:
                 start = event['start'].get('date')
             start = datetime.datetime.fromisoformat(start)
-            output.write("* TODO {}\n  SCHEDULED: <{}>\n".format(
+            output.write("* TODO Gcal: {}\n  SCHEDULED: <{}>\n".format(
                 event['summary'],
                 start.strftime("%Y-%m-%d %a %H:%M" if has_time else "%Y-%m-%d %a")))
 
