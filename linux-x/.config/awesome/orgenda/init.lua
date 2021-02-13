@@ -6,11 +6,23 @@ local orgenda = {
     config = {
         files = {}
     },
-    topic = gobject{class = {}},
+    data = gobject{
+        class = {},
+        enable_properties = true,
+        enable_auto_signals = true
+    },
 }
 
 local function parse_timestamp(timestamp)
-    return timestamp:match("[-0-9]+")
+    local year, month, day, weekday, opt_rest = timestamp:match("^([0-9][0-9][0-9][0-9])%-([0-9][0-9])%-([0-9][0-9]) ([A-Za-z]+)(.*)$")
+    local hour, minute
+    if opt_rest and #opt_rest > 5 then
+        hour, minute = opt_rest:match("^ ([0-9][0-9]):([0-9][0-9])")
+    end
+    return os.time{
+        year = tonumber(year), month = tonumber(month), day = tonumber(day),
+        hour = tonumber(hour), min = tonumber(minute)
+    }, hour ~= nil
 end
 
 local function parse_todo_match(todo_match)
@@ -34,35 +46,34 @@ local function parse_attributes(line, todo_item)
         match_begin = tag_end + 1
 
         if name == "SCHEDULED" or name == "DEADLINE" then
-            todo_item.date = parse_timestamp(timestamp)
+            todo_item.timestamp, todo_item.has_time = parse_timestamp(timestamp)
         end
     end
 end
 
-local function compare_todo_item(a, b)
+function orgenda.compare_todo_items(a, b)
     if a.priority > b.priority then
         return true
     elseif a.priority < b.priority then
         return false
     end
 
-    if a.date == nil then
+    if a.timestamp == nil then
         return false
-    elseif b.date == nil then
+    elseif b.timestamp == nil then
         return true
     else
-        return a.date < b.date
+        return a.timestamp < b.timestamp
     end
 end
 
-local function parse_file(path)
+local function parse_file(path, items)
     local fd = io.open(path, "r")
     if not fd then
         hotpot.logging.error("cannot open file at "..tostring(path))
         return {}
     end
 
-    local results = {}
     local todo_item = nil
     for line in fd:lines() do
         if line:find("^%s*#") == nil then
@@ -73,11 +84,12 @@ local function parse_file(path)
                 end
             else
                 if todo_item ~= nil then
-                    table.insert(results, todo_item)
+                    table.insert(items, todo_item)
                 end
                 local todo_type, todo_text = header_text:match("^(%u+)%s+(.*)$")
                 if todo_type == "TODO" then
                     todo_item = parse_todo_match(todo_text)
+                    todo_item.source = path
                 else
                     todo_item = nil
                 end
@@ -85,18 +97,17 @@ local function parse_file(path)
         end
     end
     if todo_item ~= nil then
-        table.insert(results, todo_item)
+        table.insert(items, todo_item)
     end
-    table.sort(results, compare_todo_item)
-    return results
 end
 
 function orgenda.reset()
-    for _, path in ipairs(orgenda.config.files) do
-        hotpot.logging.info("parsing ", path)
-        local data = parse_file(path)
-        orgenda.topic:emit_signal("update", path, data)
+    local items = {}
+    for _, path in pairs(orgenda.config.files) do
+        parse_file(path, items)
     end
+    table.sort(items, orgenda.compare_todo_items)
+    orgenda.data.items = items
 end
 
 orgenda.widget = {}
@@ -131,18 +142,6 @@ function orgenda.widget.create(args)
         return ({ " +", " *","<span foreground='"..beautiful.fg_urgent.."' background='"..beautiful.bg_urgent.."'><b>!!</b></span>" })[pri]
     end
 
-    local function render_orgenda_items(items)
-        local lines = {}
-        for _, item in ipairs(items) do
-            if item.date ~= nil then
-                table.insert(lines, "<b>["..tostring(item.date).."]</b>"..render_priority(item.priority).." "..gstring.xml_escape(item.text))
-            else
-                table.insert(lines, render_priority(item.priority).." "..gstring.xml_escape(item.text))
-            end
-        end
-        return lines
-    end
-
     local todo_item_widget_cache = {}
 
     local function get_todo_item_widget(item, cache_key)
@@ -159,8 +158,8 @@ function orgenda.widget.create(args)
                     widget = wibox.container.place
                 },
                 {
-                    item.date and {
-                        markup = '<b>['..tostring(item.date)..']</b>',
+                    item.timestamp and {
+                        markup = '<b>['..os.date(item.has_time and "%Y-%m-%d %a %H:%M" or "%Y-%m-%d %a", item.timestamp)..']</b>',
                         font = args.font,
                         widget = wibox.widget.textbox
                                   },
@@ -181,13 +180,13 @@ function orgenda.widget.create(args)
         return todo_item_widget_cache[cache_key]
     end
 
-    orgenda.topic:connect_signal(
-        "update",
-        function (_, path, items)
+    orgenda.data:connect_signal(
+        "property::items",
+        function ()
             todo_item_container:reset()
             local cache_keys = {}
-            for index, item in ipairs(items) do
-                local cache_key = tostring(item.date)..':'..tostring(item.priority)..':'..item.text
+            for index, item in ipairs(orgenda.data.items) do
+                local cache_key = tostring(item.timestamp)..':'..tostring(item.priority)..':'..item.text
                 cache_keys[cache_key] = true
                 todo_item_container:add(get_todo_item_widget(item, cache_key))
             end

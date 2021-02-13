@@ -312,13 +312,48 @@ capi.awesome.connect_signal(
     end
 )
 
+-- Next TODO item
+
+local next_todo_widget = wibox.widget {
+    widget = wibox.widget.textbox
+}
+local function update_next_todo()
+    local next_todo = {}
+    local date = os.date("*t")
+    local time = os.time(date)
+    if orgenda.data.items ~= nil then
+        for _, item in ipairs(orgenda.data.items) do
+            if item.timestamp ~= nil and item.has_time then
+                print(time, item.timestamp)
+                if item.timestamp > time and (#next_todo == 0 or next_todo[1].timestamp >= item.timestamp) then
+                    if #next_todo > 0 and next_todo[1].timestamp > item.timestamp then
+                        next_todo = {}
+                    end
+                    next_todo[#next_todo + 1] = item
+                end
+            end
+        end
+    end
+    local ndate = #next_todo > 0 and os.date("*t", next_todo[1].timestamp)
+    if #next_todo == 0 then
+        next_todo_widget.markup = "No schedule today"
+    else
+        if ndate.year == date.year and ndate.month == date.month and ndate.day == date.day then
+            next_todo_widget.markup = "!"..os.date("%H<b>%M</b>", next_todo[1].timestamp)
+        else
+            next_todo_widget.markup = "No schedule today"
+        end
+    end
+end
+
 -- Calendar popup
 
 local today = os.date("*t")
+local last_mid_update_timestamp = nil
 local active_dates = {}
 local cal_widget = wibox.widget {
     date = os.date('*t'),
-    font = beautiful.font,
+    font = beautiful.font_monospace,
     week_numbers = true,
     -- start_sunday = true,
     long_weekdays = true,
@@ -383,33 +418,37 @@ local cal_widget = wibox.widget {
 gtimer {
     timeout = 10,
     autostart = true,
+    call_now = true,
     callback = function()
         local new_today = os.date("*t")
         if today.day ~= new_today.day then
             today = new_today
             cal_widget:emit_signal("widget::layout_changed")
         end
+
+        local timestamp = os.clock()
+        if last_mid_update_timestamp == nil or
+            timestamp - last_mid_update_timestamp > 300 then
+            last_mid_update_timestamp = timestamp
+            update_next_todo()
+        end
     end
 }
-orgenda.topic:connect_signal(
-    "update",
-    function (_, path, items)
+orgenda.data:connect_signal(
+    "property::items",
+    function ()
         active_dates = {}
-        for _, item in ipairs(items) do
-            if item.date then
-                local parsed_array = {string.gmatch(item.date, "(%d+)-(%d+)-(%d+)")()}
-                if #parsed_array == 3 then
-                    parsed_array[1] = tonumber(parsed_array[1])
-                    parsed_array[2] = tonumber(parsed_array[2])
-                    parsed_array[3] = tonumber(parsed_array[3])
-                    local y = active_dates[parsed_array[1]] or {}
-                    local m = y[parsed_array[2]] or {}
-                    m[parsed_array[3]] = true
-                    y[parsed_array[2]] = m
-                    active_dates[parsed_array[1]] = y
-                end
+        for _, item in ipairs(orgenda.data.items) do
+            if item.timestamp then
+                local date = os.date("*t", item.timestamp)
+                local y = active_dates[date.year] or {}
+                local m = y[date.month] or {}
+                m[date.day] = true
+                y[date.month] = m
+                active_dates[date.year] = y
             end
         end
+        update_next_todo()
         cal_widget:emit_signal("widget::layout_changed")
     end
 )
@@ -422,10 +461,14 @@ local cal_popup = awful.popup {
                 cal_widget,
                 {
                     {
-                        orgenda.widget.create {
-                            width = dpi(240),
-                            indent_width = dpi(26),
-                            item_margin = beautiful.sep_small_size,
+                        {
+                            orgenda.widget.create {
+                                width = dpi(240),
+                                indent_width = dpi(26),
+                                item_margin = beautiful.sep_small_size,
+                            },
+                            halign = "left",
+                            widget = wibox.container.place
                         },
                         draw_empty = false,
                         top = beautiful.sep_big_size,
@@ -500,12 +543,12 @@ local orgenda_counter_widget = wibox.widget {
     layout = wibox.layout.fixed.horizontal
 }
 
-orgenda.topic:connect_signal(
-    "update",
+orgenda.data:connect_signal(
+    "property::items",
     function (_, path, items)
-        if #items > 0 then
+        if #orgenda.data.items > 0 then
             orgenda_counter_widget.visible = true
-            orgenda_counter_text_widget.text = tostring(#items)
+            orgenda_counter_text_widget.text = tostring(#orgenda.data.items)
         else
             orgenda_counter_widget.visible = false
         end
@@ -592,7 +635,7 @@ local function setup_screen(scr)
 
    local clock
    if direction_index[shared.var.bar_position] == "horizontal" then
-       clock = wibox.widget.textclock("<span color='" .. beautiful.xborder_focus .. "'>%m<b>%d</b></span> %H<b>%M</b> ")
+       clock = wibox.widget.textclock("<span color='" .. beautiful.xborder_focus .. "'>%m<b>%d</b></span> %H<b>%M</b>")
    else
        clock = wibox.widget.textclock("<span color='" .. beautiful.xborder_focus .. "'>%m\n<b>%d</b></span>\n%H\n<b>%M</b>")
    end
@@ -600,9 +643,12 @@ local function setup_screen(scr)
    clock:set_font(beautiful.font)
 
    clock_and_orgenda = wibox.widget {
-       orgenda_counter_widget,
        clock,
-       spacing = beautiful.sep_median_size,
+       orgenda_counter_widget,
+       next_todo_widget,
+       direction_index[shared.var.bar_position] == "horizontal" and
+           { widget = wibox.container.margin } or nil,
+       spacing = beautiful.sep_small_size,
        layout = wibox.layout.fixed.horizontal
    }
    clock_and_orgenda:connect_signal('mouse::enter', function() cal_show() end)

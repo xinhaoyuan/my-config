@@ -1358,7 +1358,7 @@ local waffle_root_agenda_widget = decorate_panel {
             icon = gcolor.recolor_image(icons.calendar_todo, beautiful.fg_normal),
             label_widget = wibox.widget {
                 align = "center",
-                format = "%m/%d %a %H:%M",
+                format = "%Y-%m-%d %a %H:%M",
                 widget = wibox.widget.textclock,
             },
             indicator = em("t"),
