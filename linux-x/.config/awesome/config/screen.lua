@@ -336,12 +336,12 @@ local function update_next_todo()
     end
     local ndate = #next_todo > 0 and os.date("*t", next_todo[1].timestamp)
     if #next_todo == 0 then
-        next_todo_widget.markup = "No schedule today"
+        next_todo_widget.markup = ""
     else
         if ndate.year == date.year and ndate.month == date.month and ndate.day == date.day then
             next_todo_widget.markup = "!"..os.date("%H<b>%M</b>", next_todo[1].timestamp)
         else
-            next_todo_widget.markup = "No schedule today"
+            next_todo_widget.markup = ""
         end
     end
 end
@@ -643,12 +643,24 @@ local function setup_screen(scr)
    clock:set_font(beautiful.font)
 
    clock_and_orgenda = wibox.widget {
-       clock,
-       orgenda_counter_widget,
-       next_todo_widget,
-       direction_index[shared.var.bar_position] == "horizontal" and
-           { widget = wibox.container.margin } or nil,
-       spacing = beautiful.sep_small_size,
+       {
+           clock,
+           right = beautiful.sep_small_size,
+           draw_empty = false,
+           widget = fixed_margin,
+       },
+       {
+           orgenda_counter_widget,
+           right = beautiful.sep_small_size,
+           draw_empty = false,
+           widget = fixed_margin,
+       },
+       {
+           next_todo_widget,
+           right = beautiful.sep_small_size,
+           draw_empty = false,
+           widget = fixed_margin,
+       },
        layout = wibox.layout.fixed.horizontal
    }
    clock_and_orgenda:connect_signal('mouse::enter', function() cal_show() end)

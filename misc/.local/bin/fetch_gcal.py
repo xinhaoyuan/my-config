@@ -27,7 +27,7 @@ parser.add_argument("-n", dest="num", default=1)
 parser.add_argument("-c", dest="credentials", default=os.environ.get("HOME")+"/.gcal_credentials.json")
 
 TOKEN_FILE=os.environ.get("HOME")+"/.cache/gcal_token.pickle"
-# If modifying these scopes, delete the file token.pickle.
+# If modifying these scopes, delete the token file.
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
 def main(args):
@@ -35,11 +35,11 @@ def main(args):
     Prints the start and name of the next 10 events on the user's calendar.
     """
     creds = None
-    # The file token.pickle stores the user's access and refresh tokens, and is
+    # The file TOKEN_FILE stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
+    if os.path.exists(TOKEN_FILE):
+        with open(TOKEN_FILE, 'rb') as token:
             creds = pickle.load(token)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
@@ -50,7 +50,7 @@ def main(args):
                 args.credentials, SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
-        with open('token.pickle', 'wb') as token:
+        with open(TOKEN_FILE, 'wb') as token:
             pickle.dump(creds, token)
 
     with open(args.output, "w") as output:
