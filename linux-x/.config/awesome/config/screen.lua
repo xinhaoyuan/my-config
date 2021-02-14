@@ -435,7 +435,7 @@ gtimer {
     end
 }
 orgenda.data:connect_signal(
-    "property::items",
+    "update",
     function ()
         active_dates = {}
         for _, item in ipairs(orgenda.data.items) do
@@ -544,7 +544,7 @@ local orgenda_counter_widget = wibox.widget {
 }
 
 orgenda.data:connect_signal(
-    "property::items",
+    "update",
     function (_, path, items)
         if #orgenda.data.items > 0 then
             orgenda_counter_widget.visible = true

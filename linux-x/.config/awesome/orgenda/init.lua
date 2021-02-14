@@ -1,6 +1,6 @@
 -- orgenda: a Awesome WM module of org-mode integration.
 --
--- Author: Xinhao Yuan <xinhaoyuan@gmail.com> 
+-- Author: Xinhao Yuan <xinhaoyuan@gmail.com>
 -- License: MIT license, see LICENSE file.
 
 local awful = require("awful")
@@ -56,6 +56,26 @@ local function parse_attributes(line, todo_item)
         end
     end
 end
+
+-- Merge multiple changes to improve performance.
+orgenda.data:connect_signal(
+    "property::items",
+    function ()
+        if orgenda.update_scheduled then
+            return
+        end
+        orgenda.update_scheduled = true
+        gtimer {
+            timeout = 1,
+            autostart = true,
+            single_shot = true,
+            callback = function ()
+                orgenda.update_scheduled = false
+                orgenda.data:emit_signal("update")
+            end,
+        }
+    end
+)
 
 function orgenda.compare_todo_items(a, b)
     if a.priority > b.priority then
@@ -208,8 +228,9 @@ function orgenda.widget(args)
     end
 
     orgenda.data:connect_signal(
-        "property::items",
+        "update",
         function ()
+            update_scheduled = false
             todo_item_container:reset()
             local cache_keys = {}
             for index, item in ipairs(orgenda.data.items) do
