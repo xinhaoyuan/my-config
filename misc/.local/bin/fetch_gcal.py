@@ -5,7 +5,7 @@
 # incoming calendar event into a org-mode file.
 #
 # You would need to create a Google Cloud Platform project and
-# download its credentials to $HOME/.gcal_credential.json.
+# download its credentials to $HOME/.credentials/fetch_gcal.json.
 #
 # To install dependencies, use
 #   pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
@@ -24,7 +24,7 @@ import os
 parser = argparse.ArgumentParser()
 parser.add_argument("-o", dest="output", required=True)
 parser.add_argument("-n", dest="num", default=1)
-parser.add_argument("-c", dest="credentials", default=os.environ.get("HOME")+"/.gcal_credentials.json")
+parser.add_argument("-c", dest="credentials", default=os.environ.get("HOME")+"/.credentials/fetch_gcal.json")
 parser.add_argument("-a", dest="authorize", action="store_true")
 
 TOKEN_FILE=os.environ.get("HOME")+"/.cache/gcal_token.pickle"
