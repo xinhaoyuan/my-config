@@ -548,7 +548,19 @@ orgenda.data:connect_signal(
     function (_, path, items)
         if #orgenda.data.items > 0 then
             orgenda_counter_widget.visible = true
-            orgenda_counter_text_widget.text = tostring(#orgenda.data.items)
+            local high = 0
+            local mid = 0
+            local low = 0
+            for _, item in ipairs(orgenda.data.items) do
+                if item.priority == 3 then high = high + 1
+                elseif item.priority == 2 then mid = mid + 1
+                else low = low + 1
+                end
+            end
+            if high > 0 then high = "<span foreground='"..beautiful.special_normal.."'><b>"..tostring(high).."</b></span>" else high = "" end
+            if mid > 0 then mid = "<b>"..tostring(mid).."</b>" else mid = "" end
+            if low > 0 then low = tostring(low) else low = "" end
+            orgenda_counter_text_widget.markup = high..((#high > 0 and #mid + #low > 0) and "/" or "")..mid..((#mid > 0 and #low > 0) and "/" or "")..low
         else
             orgenda_counter_widget.visible = false
         end
