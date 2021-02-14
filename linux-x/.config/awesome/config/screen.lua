@@ -645,8 +645,8 @@ local function setup_screen(scr)
    clock_and_orgenda = wibox.widget {
        {
            clock,
+           left = beautiful.sep_small_size,
            right = beautiful.sep_small_size,
-           draw_empty = false,
            widget = fixed_margin,
        },
        {
