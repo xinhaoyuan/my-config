@@ -164,7 +164,8 @@ function orgenda.widget(args)
                 },
                 {
                     item.timestamp and {
-                        markup = '<b>['..os.date(item.has_time and "%Y-%m-%d %a %H:%M" or "%Y-%m-%d %a", item.timestamp)..']</b>',
+                        id = "timestamp",
+                        -- text will be updated by the following function.
                         font = args.font,
                         widget = wibox.widget.textbox
                                   },
@@ -181,8 +182,29 @@ function orgenda.widget(args)
                 },
                 widget = wibox.layout.fixed.horizontal
             }
+            todo_item_widget_cache[cache_key].item = item
         end
         return todo_item_widget_cache[cache_key]
+    end
+
+    local function scan_for_expired_items()
+        local time = os.time()
+        local date = os.date("%Y%m%d", time)
+        for _, widget in pairs(todo_item_widget_cache) do
+            local item = widget.item
+            local expired = false
+            if item.has_time and item.timestamp <= time then
+                expired = true
+            elseif item.timestamp ~= nil then
+                local item_date = os.date("%Y%m%d", item.timestamp)
+                expired = item_date < date
+            end
+            if expired then
+                widget:get_children_by_id("timestamp")[1].markup = '<span strikethrough="true"><b>['..os.date(item.has_time and "%Y-%m-%d %a %H:%M" or "%Y-%m-%d %a", item.timestamp)..']</b></span>'
+            elseif item.timestamp ~= nil then
+                widget:get_children_by_id("timestamp")[1].markup = '<b>['..os.date(item.has_time and "%Y-%m-%d %a %H:%M" or "%Y-%m-%d %a", item.timestamp)..']</b>'
+            end
+        end
     end
 
     orgenda.data:connect_signal(
@@ -200,13 +222,15 @@ function orgenda.widget(args)
                     todo_item_widget_cache[k] = nil
                 end
             end
-            -- local count = 0
-            -- for _, _ in pairs(todo_item_widget_cache) do
-            --     count = count + 1
-            -- end
-            -- print(tostring(count)..' items remaining in the cache')
+            scan_for_expired_items()
         end
     )
+
+    gtimer {
+        timeout = 300,
+        autostart = true,
+        callback = scan_for_expired_items,
+    }
 
     return orgenda_widget
 end
