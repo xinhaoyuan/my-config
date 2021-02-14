@@ -25,6 +25,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-o", dest="output", required=True)
 parser.add_argument("-n", dest="num", default=1)
 parser.add_argument("-c", dest="credentials", default=os.environ.get("HOME")+"/.gcal_credentials.json")
+parser.add_argument("-a", dest="authorize", action="store_true")
 
 TOKEN_FILE=os.environ.get("HOME")+"/.cache/gcal_token.pickle"
 # If modifying these scopes, delete the token file.
@@ -45,10 +46,13 @@ def main(args):
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
-        else:
+        elif args.authorize:
             flow = InstalledAppFlow.from_client_secrets_file(
                 args.credentials, SCOPES)
             creds = flow.run_local_server(port=0)
+        else:
+            print("No tokens available, use -a to authorize.")
+            exit(1)
         # Save the credentials for the next run
         with open(TOKEN_FILE, 'wb') as token:
             pickle.dump(creds, token)
