@@ -101,18 +101,25 @@ local root_buttons = awful.util.table.join(
 capi.root.buttons(root_buttons)
 
 local fortune_widget = wibox.widget {
+    {
+        {
+            widget = wibox.widget.textbox
+        },
+        left = beautiful.sep_median_size,
+        right = beautiful.sep_median_size,
+        widget = fixed_margin,
+    },
     valign = "center",
-    align = "center",
-    forced_height = beautiful.bar_height,
+    halign = "center",
     buttons = awful.util.table.join(awful.button({ }, 3, function () waffle:show(nil, { anchor = "mouse" }) end)),
-    widget = wibox.widget.textbox
+    widget = fixed_place
 }
 fortune_widget.watch = require("watchcommand").create({"fortune", "-s"}, 300)
 fortune_widget.watch:connect_signal(
    "property::output",
    function (watch)
       local raw = watch.output:gsub("\n", " "):gsub("%s+", " "):match("^%s*(.-)%s*$")
-      fortune_widget:set_text(" << " .. raw .. " >> ")
+      fortune_widget.widget.widget:set_text(raw)
       fortune_widget.fortune_raw = raw
    end
 )
