@@ -72,6 +72,7 @@ local machi = require("layout-machi")
 
 beautiful.layout_machi = machi.get_icon()
 machi.default_editor.set_gap(beautiful.useless_gap, beautiful.useless_gap)
+machi.editor.nested_layouts["4"] = require("external.equalarea")
 
 local alayout = require("awful.layout")
 alayout.layouts = {
