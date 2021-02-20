@@ -1091,6 +1091,13 @@ require("awful.rules").rules = {
        },
    },
    {
+       rule = { class = "Firefox", role = "Popup" },
+       properties = {
+           borderless = true,
+           has_xtitlebar = false,
+       },
+   },
+   {
        rule = { type = "dialog" },
        properties = {
            titlebar_style = "full_top",
