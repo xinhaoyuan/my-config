@@ -8,40 +8,38 @@
   "autoCollapseExpandSubtreeOnAttach": false,
   "autoCollapseExpandSubtreeOnSelect": false,
   "baseIndent": 0,
-  "chunkedUserStyleRules0": "OnJvb3QgewogIC0tZmF2aWNvbi1zaXplOiAyMHB4Cn0KCi5mYXZpY29uIHsKICBtYXJnaW4tcmlnaHQ6IDJweDsKfQoKLyogU2hvdyB0aXRsZSBvZiB1bnJlYWQgdGFicyB3aXRoIHJlZCBhbmQgaXRhbGljIGZvbnQgKi8KLyoKOnJvb3Quc2lkZWJhciB0YWItaXRlbS51bnJlYWQgLmxhYmVsLWNvbnRlbnQgewogIGNvbG9yOiByZWQgIWltcG9ydGFudDsKICBmb250LXN0eWxlOiBpdGFsaWMgIWltcG9ydGFudDsKfQoqLwoKLyogQWRkIHByaXZhdGUgYnJvd3NpbmcgaW5kaWNhdG9yIHBlciB0YWIgKi8KLyoKOnJvb3Quc2lkZWJhciB0YWItaXRlbS5wcml2YXRlLWJyb3dzaW5nIHRhYi1sYWJlbDpiZWZvcmUgewogIGNvbnRlbnQ6ICLwn5W2IjsKfQoqLwoKLmNsb3NlYm94IHsKICBkaXNwbGF5OiBub25lOwp9CgovKgo6cm9vdC5zaWRlYmFyIHRhYi1pdGVtIHRhYi1sYWJlbCB7CiAgZGlzcGxheTogbm9uZTsKfQoKOnJvb3Quc2lkZWJhcjpob3ZlciB0YWItaXRlbSB0YWItbGFiZWwgewogIGRpc3BsYXk6IGJsb2NrOwp9CiovCgo6cm9vdC5oYXZlLXBpbm5lZC10YWJzICNhbGwtdGFicyB7CiAgYm9yZGVyLXRvcDogNHB4IHNvbGlkIHZhcigtLXNoYWRvdy1jb2xvcik7Cn0KCnRhYi1pdGVtLnBpbm5lZCB7CiAgYm9yZGVyLXJpZ2h0OiBub25lOwp9Cgp0YWItaXRlbTpob3ZlciAuY2xvc2Vib3ggewogIGRpc3BsYXk6IGJsb2NrOwp9Cgp0YWItaXRlbS5waW5uZWQgLmhpZ2hsaWdodGVyOjpiZWZvcmUgewogIGJhY2tncm91bmQ6ICMyMGEwNDA7Cn0gCgoudHdpc3R5IHsKICBtYXJnaW4tbGVmdDogLTRweDsKICBtaW4td2lkdGg6IDE0cHg7CiAgbWF4LXdpZHRoOiAxNHB4Owp9CgoudHdpc3R5OjpiZWZvcmUgewogIG1pbi13aWR0aDogMTRweCAhaW1wb3J0YW50OwogIG1heC13aWR0aDogMTRweCAhaW1wb3J0YW50Owp9",
+  "chunkedUserStyleRules0": "OnJvb3QgewogIC0tdGFiLWhpZ2hsaWdodGVyOiBIaWdobGlnaHQ7CiAgLS10YWJiYXItYmc6IHZhcigtLWJyb3dzZXItYmctZGFya2VyLCBUaHJlZURTaGFkb3cpOwogIC0tZmF2aWNvbi1zaXplOiAyMHB4Owp9CgouZmF2aWNvbiB7CiAgbWFyZ2luLXJpZ2h0OiAycHg7Cn0KCi8qIFNob3cgdGl0bGUgb2YgdW5yZWFkIHRhYnMgd2l0aCByZWQgYW5kIGl0YWxpYyBmb250ICovCi8qCjpyb290LnNpZGViYXIgdGFiLWl0ZW0udW5yZWFkIC5sYWJlbC1jb250ZW50IHsKICBjb2xvcjogcmVkICFpbXBvcnRhbnQ7CiAgZm9udC1zdHlsZTogaXRhbGljICFpbXBvcnRhbnQ7Cn0KKi8KCi8qIEFkZCBwcml2YXRlIGJyb3dzaW5nIGluZGljYXRvciBwZXIgdGFiICovCi8qCjpyb290LnNpZGViYXIgdGFiLWl0ZW0ucHJpdmF0ZS1icm93c2luZyB0YWItbGFiZWw6YmVmb3JlIHsKICBjb250ZW50OiAi8J+VtiI7Cn0KKi8KCi5jbG9zZWJveCB7CiAgZGlzcGxheTogbm9uZTsKfQoKLyoKOnJvb3Quc2lkZWJhciB0YWItaXRlbSB0YWItbGFiZWwgewogIGRpc3BsYXk6IG5vbmU7Cn0KCjpyb290LnNpZGViYXI6aG92ZXIgdGFiLWl0ZW0gdGFiLWxhYmVsIHsKICBkaXNwbGF5OiBibG9jazsKfQoqLwoKOnJvb3QuaGF2ZS1waW5uZWQtdGFicyAjYWxsLXRhYnMgewogIGJvcmRlci10b3A6IDRweCBzb2xpZCB2YXIoLS1zaGFkb3ctY29sb3IpOwp9Cgp0YWItaXRlbS5waW5uZWQgewogIGJvcmRlci1yaWdodDogbm9uZTsKfQoKdGFiLWl0ZW06aG92ZXIgLmNsb3NlYm94IHsKICBkaXNwbGF5OiBibG9jazsKfQoKdGFiLWl0ZW0ucGlubmVkIC5oaWdobGlnaHRlcjo6YmVmb3JlIHsKICBiYWNrZ3JvdW5kOiAjMjBhMDQwOwp9IAoKLnR3aXN0eSB7CiAgbWFyZ2luLWxlZnQ6IC00cHg7CiAgbWluLXdpZHRoOiAxNHB4OwogIG1heC13aWR0aDogMTRweDsKfQoKLnR3aXN0eTo6YmVmb3JlIHsKICBtaW4td2lkdGg6IDE0cHggIWltcG9ydGFudDsKICBtYXgtd2lkdGg6IDE0cHggIWltcG9ydGFudDsKfQ==",
   "configsVersion": 20,
   "faviconizePinnedTabs": false,
   "inheritContextualIdentityToSameSiteOrphan": true,
   "lastConfirmedToCloseTabs": 1608093750383,
   "lastDraggedTabs": {
     "tabIds": [
-      1
+      53
     ],
-    "urlsDigest": "f1f3bd09de659fc955d2db1e439e3200802c4645"
+    "urlsDigest": "d344645ff15d8a2e8147061ac9550516e5990b5e"
   },
   "notifiedFeaturesVersion": 7,
   "optionsExpandedGroups": [
     "group-allConfigs"
   ],
   "optionsExpandedSections": [
-    "section-addons",
     "section-debug",
     "section-appearance",
-    "section-treeBehavior",
     "section-advanced"
   ],
   "syncDeviceInfo": {
     "id": "device-1605053890253-28131",
     "name": "Firefox on Linux",
     "icon": "device-desktop",
-    "timestamp": 1612237216157
+    "timestamp": 1613796376012
   },
   "syncDevices": {
     "device-1605053890253-28131": {
       "id": "device-1605053890253-28131",
       "name": "Firefox on Linux",
       "icon": "device-desktop",
-      "timestamp": 1612237216157
+      "timestamp": 1613793728571
     }
   },
   "syncDevicesLocalCache": {
@@ -49,8 +47,8 @@
       "id": "device-1605053890253-28131",
       "name": "Firefox on Linux",
       "icon": "device-desktop",
-      "timestamp": 1612237216157
+      "timestamp": 1613796376012
     }
   },
-  "userStyleRules": ""
+  "userStyleRules": "",
 }
