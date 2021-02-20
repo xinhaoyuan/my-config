@@ -595,6 +595,9 @@ local function setup_screen(scr)
        filter = function (t) return true end,
        buttons = my_tag_list_buttons,
        layout = wibox.layout.fixed[direction_index[shared.var.bar_position]],
+       style = {
+           font = "DejaVu Sans 10",
+       },
        widget_template = {
            {
                {
@@ -932,7 +935,8 @@ local global_keys = table_join(
 
 -- tags and layouts
 
-shared.screen.tags = { "壹", "贰", "叁", "肆" }
+-- shared.screen.tags = { "壹", "贰", "叁", "肆" }
+shared.screen.tags = { "☱", "☲", "☳", "☴" }
 
 for i = 1, #shared.screen.tags do
     local key = tostring(i)
