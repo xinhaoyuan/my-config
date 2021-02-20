@@ -41,10 +41,6 @@ require("manage_ticket")
 local table_join = awful.util.table.join
 local delayed = gtimer.delayed_call
 
-local function open_tmux_session(name)
-   shared.action.terminal({"tmux", "new", "-As", name})
-end
-
 local function go_by_direction(dir, with_client)
    if with_client then
       local c = capi.client.focus
@@ -872,11 +868,11 @@ local global_keys = table_join(
    awful.key({ "Mod4" }, "e",               function () shared.action.file_manager() end),
    awful.key({ "Mod4" }, "l",               function () shared.action.screen_locker() end),
    awful.key({ "Mod4" }, "t",               function () shared.action.calendar() end),
-   awful.key({ "Mod4" }, "r",              function () shared.action.launcher() end),
-   awful.key({ "Mod4" }, "F1",              function () open_tmux_session("F1") end),
-   awful.key({ "Mod4" }, "F2",              function () open_tmux_session("F2") end),
-   awful.key({ "Mod4" }, "F3",              function () open_tmux_session("F3") end),
-   awful.key({ "Mod4" }, "F4",              function () open_tmux_session("F4") end),
+   awful.key({ "Mod4" }, "r",               function () shared.action.launcher() end),
+   awful.key({ "Mod4" }, "F1",              function () shared.action.terminal_session{ name = "F1" } end),
+   awful.key({ "Mod4" }, "F2",              function () shared.action.terminal_session{ name = "F2" } end),
+   awful.key({ "Mod4" }, "F3",              function () shared.action.terminal_session{ name = "F3" } end),
+   awful.key({ "Mod4" }, "F4",              function () shared.action.terminal_session{ name = "F4" } end),
    -- keep the both ways of showing the desktop, not sure which one is better for now.
    awful.key({ "Mod4" }, "d",               function ()
          local clients = {}

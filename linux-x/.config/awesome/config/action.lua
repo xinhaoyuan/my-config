@@ -46,7 +46,7 @@ shared.action = {
         args = args or {}
         local name = args.name or "default"
         local cmd = args.command or {}
-        local real_cmd = {"tmux", "new", "-As", name}
+        local real_cmd = {"tmux", "new", "-ADs", name}
         for _, c in ipairs(cmd) do
             real_cmd[#real_cmd + 1] = c
         end
