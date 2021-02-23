@@ -187,8 +187,10 @@ local client_keys = table_join(
 
     awful.key({ "Mod4" }, "Prior", shared.client.enlarge),
     awful.key({ "Mod4" }, "Next", shared.client.shrink),
-    awful.key({ "Mod4" }, "=", function (c) c.ontop = not c.ontop end),
-    awful.key({ "Mod4" }, "-", function (c) c.sticky = not c.sticky end),
+    awful.key({ "Mod4" }, "=", function (c) machi.default_editor.adjust_x_shares(c, 50) end),
+    awful.key({ "Mod4" }, "-", function (c) machi.default_editor.adjust_x_shares(c, -50) end),
+    awful.key({ "Mod4", "Shift" }, "=", function (c) machi.default_editor.adjust_y_shares(c, 50) end),
+    awful.key({ "Mod4", "Shift" }, "-", function (c) machi.default_editor.adjust_y_shares(c, -50) end),
 
     awful.key({ "Mod4" }, "'", function (c)
             shared.client.cycle_titlebar_style(c, 1)
