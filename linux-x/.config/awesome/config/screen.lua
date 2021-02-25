@@ -846,6 +846,13 @@ local global_keys = table_join(
       function ()
           yams_switcher.start{}
    end),
+   awful.key({ "Mod4" }, ".", function ()
+           shared.client.start_switcher(capi.client.focus, false)
+   end),
+
+   awful.key({ "Mod4" }, "Tab", function ()
+           shared.client.start_switcher(capi.client.focus, true)
+   end),
    awful.key({ "Mod4" }, "/",               function () machi.default_editor.start_interactive() end),
    awful.key({ "Mod4" }, "[",               function () alayout.inc(alayout.layouts, -1) end),
    awful.key({ "Mod4" }, "]",               function () alayout.inc(alayout.layouts, 1) end),

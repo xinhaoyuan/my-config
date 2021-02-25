@@ -152,12 +152,14 @@ function shared.client.shrink(c)
 end
 
 function shared.client.start_switcher(c, quick_mode)
-    c.maximized = false
-    c.maximized_vertical = false
-    c.maximized_horizontal = false
-    c.fullscreen = false
-    c.floating = false
-    c:raise()
+    if c then
+        c.maximized = false
+        c.maximized_vertical = false
+        c.maximized_horizontal = false
+        c.fullscreen = false
+        c.floating = false
+        c:raise()
+    end
     if quick_mode then
         delayed(
             function ()
@@ -177,14 +179,6 @@ local client_keys = table_join(
     awful.key({ "Mod4" }, "Escape", function (c)
             shared.waffle.show_client_waffle(c, { anchor = "client" })
     end),
-    awful.key({ "Mod4" }, ".", function (c)
-            shared.client.start_switcher(c, false)
-    end),
-
-    awful.key({ "Mod4" }, "Tab", function (c)
-            shared.client.start_switcher(c, true)
-    end),
-
     awful.key({ "Mod4" }, "Prior", shared.client.enlarge),
     awful.key({ "Mod4" }, "Next", shared.client.shrink),
     awful.key({ "Mod4" }, "=", function (c) machi.default_editor.adjust_x_shares(c, 50) end),
