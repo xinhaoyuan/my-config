@@ -308,7 +308,7 @@ local opposite_dir = {
 --     titlebar_container = wibox.widget {
 --         titlebar_container,
 --         [opposite_dir[shared.var.titlebar_position]] = beautiful.xborder_width,
---         color = capi.client.focus == c and beautiful.xborder_focus or beautiful.xborder_normal,
+--         color = capi.client.focus == c and beautiful.border_focus or beautiful.border_normal,
 --         widget = wibox.container.margin,
 --     }
 --     awful.titlebar(
@@ -325,7 +325,7 @@ local opposite_dir = {
 local border_top = border.directions{ "top", "left", "right" }
 local function draw_tb_border_bgimage_top(context, cr, width, height)
     local c = context["client"]
-    local border_color = gcolor(capi.client.focus == c and beautiful.xborder_focus or beautiful.xborder_normal)
+    local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
     local indicator = beautiful.xborder_radius and beautiful.xborder_radius_cut and capi.client.focus == c
     if beautiful.xborder_radius then
         cr:set_source(gcolor(beautiful.xborder_space))
@@ -358,7 +358,7 @@ end
 local border_bottom = border.directions{ "bottom", "left", "right" }
 local function draw_tb_border_bgimage_bottom(context, cr, width, height)
     local c = context["client"]
-    local border_color = gcolor(capi.client.focus == c and beautiful.xborder_focus or beautiful.xborder_normal)
+    local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
     local indicator = beautiful.xborder_radius and beautiful.xborder_radius_cut and capi.client.focus == c
     if beautiful.xborder_radius then
         cr:set_source(gcolor(beautiful.xborder_space))
@@ -392,14 +392,14 @@ end
 local border_left = border.directions{ "left" }
 local function draw_tb_border_bgimage_left(context, cr, width, height)
     local c = context["client"]
-    local border_color = gcolor(capi.client.focus == c and beautiful.xborder_focus or beautiful.xborder_normal)
+    local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
     border:draw({ theme = beautiful.get_border_theme(), color = border_color }, cr, width, height, border_left)
 end
 
 local border_right = border.directions{ "right" }
 local function draw_tb_border_bgimage_right(context, cr, width, height)
     local c = context["client"]
-    local border_color = gcolor(capi.client.focus == c and beautiful.xborder_focus or beautiful.xborder_normal)
+    local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
     border:draw({ theme = beautiful.get_border_theme(), color = border_color }, cr, width, height, border_right)
 end
 
@@ -673,7 +673,7 @@ local function decorate(c)
                 beautiful.rect_with_corners(cr, width, height, false, beautiful.xborder_radius and c.has_xborder, false, beautiful.xborder_radius and true, beautiful.xborder_radius and beautiful.xborder_radius - beautiful.xborder_outer_space)
             end,
             bg_function = function (context, cr, width, height)
-                return context["client"] == capi.client.focus and beautiful.xborder_focus or beautiful.xborder_normal
+                return context["client"] == capi.client.focus and beautiful.border_focus or beautiful.border_normal
             end,
             fg_function = function (context, cr, width, height)
                 return context["client"] == capi.client.focus and beautiful.fg_focus or beautiful.fg_normal
@@ -727,7 +727,7 @@ local function decorate(c)
                         beautiful.rect_with_corners(cr, width, height, beautiful.xborder_radius and c.has_xborder, beautiful.xborder_radius and c.has_xborder, false, false, beautiful.xborder_radius and beautiful.xborder_radius - beautiful.xborder_outer_space)
                     end,
                     bg_function = function (context, cr, width, height)
-                        return context["client"] == capi.client.focus and beautiful.xborder_focus or beautiful.xborder_normal
+                        return context["client"] == capi.client.focus and beautiful.border_focus or beautiful.border_normal
                     end,
                     fg_function = function (context, cr, width, height)
                         return context["client"] == capi.client.focus and beautiful.fg_focus or beautiful.fg_normal
@@ -774,7 +774,7 @@ local function decorate(c)
                 beautiful.rect_with_corners(cr, width, height, beautiful.xborder_radius and true, false, beautiful.xborder_radius and c.has_xborder, false, beautiful.xborder_radius and beautiful.xborder_radius - beautiful.xborder_outer_space)
             end,
             bg_function = function (context, cr, width, height)
-                return context["client"] == capi.client.focus and beautiful.xborder_focus or beautiful.xborder_normal
+                return context["client"] == capi.client.focus and beautiful.border_focus or beautiful.border_normal
             end,
             fg_function = function (context, cr, width, height)
                 return context["client"] == capi.client.focus and beautiful.fg_focus or beautiful.fg_normal
@@ -830,7 +830,7 @@ local function decorate(c)
                         beautiful.rect_with_corners(cr, width, height, false, false, beautiful.xborder_radius and c.has_xborder, beautiful.xborder_radius and c.has_xborder, beautiful.xborder_radius and beautiful.xborder_radius - beautiful.xborder_outer_space)
                     end,
                     bg_function = function (context, cr, width, height)
-                        return context["client"] == capi.client.focus and beautiful.xborder_focus or beautiful.xborder_normal
+                        return context["client"] == capi.client.focus and beautiful.border_focus or beautiful.border_normal
                     end,
                     fg_function = function (context, cr, width, height)
                         return context["client"] == capi.client.focus and beautiful.fg_focus or beautiful.fg_normal
@@ -878,7 +878,7 @@ local function decorate(c)
                 beautiful.rect_with_corners(cr, width, height, beautiful.xborder_radius and beautiful.xborder_radius - beautiful.xborder_outer_space, false, false, beautiful.xborder_radius and beautiful.xborder_radius - beautiful.xborder_outer_space)
             end,
             bg_function = function (context, cr, width, height)
-                return context["client"] == capi.client.focus and beautiful.xborder_focus or beautiful.xborder_normal
+                return context["client"] == capi.client.focus and beautiful.border_focus or beautiful.border_normal
             end,
             fg_function = function (context, cr, width, height)
                 return context["client"] == capi.client.focus and beautiful.fg_focus or beautiful.fg_normal

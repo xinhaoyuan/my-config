@@ -82,10 +82,10 @@ theme.xborder_radius = dpi(16)
 theme.xborder_radius_cut = true
 theme.xborder_indent = theme.xborder_radius_cut and math.floor((2 - math.sqrt(2)) * (theme.xborder_radius - theme.xborder_outer_space or 0)) or (theme.xborder_radius - theme.xborder_outer_space or 0)
 theme.xborder_space = is_light_color(theme.bg_normal) and c_white[2] or c_black[1]
-theme.xborder_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
-theme.xborder_normal = acolor(theme.bg_normal):blend_with(acolor(theme.xborder_focus), 0.3):to_string()
--- theme.xborder_normal = theme.bg_normal
-theme.xborder_marked = theme.bg_urgent
+theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
+theme.border_normal = acolor(theme.bg_normal):blend_with(acolor(theme.border_focus), 0.3):to_string()
+-- theme.border_normal = theme.bg_normal
+theme.border_marked = theme.bg_urgent
 
 -- There are other variable sets
 -- overriding the default one when
@@ -244,27 +244,27 @@ local function set_titlebar_toggle_button(name, inactive_text, active_text)
 end
 
 local function set_titlebar_onetime_button_shape(name, shape, ratio, color)
-    theme["titlebar_" .. name .. "_button_normal"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * ratio)
-    theme["titlebar_" .. name .. "_button_normal_hover"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * ratio)
-    theme["titlebar_" .. name .. "_button_normal_press"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * ratio)
-    theme["titlebar_" .. name .. "_button_focus"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * ratio)
-    theme["titlebar_" .. name .. "_button_focus_hover"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * ratio)
-    theme["titlebar_" .. name .. "_button_focus_press"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * ratio)
+    theme["titlebar_" .. name .. "_button_normal"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * ratio)
+    theme["titlebar_" .. name .. "_button_normal_hover"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * ratio)
+    theme["titlebar_" .. name .. "_button_normal_press"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * ratio)
+    theme["titlebar_" .. name .. "_button_focus"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * ratio)
+    theme["titlebar_" .. name .. "_button_focus_hover"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * ratio)
+    theme["titlebar_" .. name .. "_button_focus_press"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * ratio)
 end
 
 local function set_titlebar_toggle_button_shape(name, shape, inactive_ratio, active_ratio, color)
-    theme["titlebar_" .. name .. "_button_normal_inactive"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
-    theme["titlebar_" .. name .. "_button_normal_inactive_hover"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
-    theme["titlebar_" .. name .. "_button_normal_inactive_press"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
-    theme["titlebar_" .. name .. "_button_focus_inactive"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
-    theme["titlebar_" .. name .. "_button_focus_inactive_hover"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
-    theme["titlebar_" .. name .. "_button_focus_inactive_press"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
-    theme["titlebar_" .. name .. "_button_normal_active"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * active_ratio)
-    theme["titlebar_" .. name .. "_button_normal_active_hover"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * active_ratio)
-    theme["titlebar_" .. name .. "_button_normal_active_press"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * active_ratio)
-    theme["titlebar_" .. name .. "_button_focus_active"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * active_ratio)
-    theme["titlebar_" .. name .. "_button_focus_active_hover"] = shape_to_surface(shape, color, theme.xborder_normal, theme.titlebar_size, theme.titlebar_size * active_ratio)
-    theme["titlebar_" .. name .. "_button_focus_active_press"] = shape_to_surface(shape, color, theme.xborder_focus, theme.titlebar_size, theme.titlebar_size * active_ratio)
+    theme["titlebar_" .. name .. "_button_normal_inactive"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
+    theme["titlebar_" .. name .. "_button_normal_inactive_hover"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
+    theme["titlebar_" .. name .. "_button_normal_inactive_press"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
+    theme["titlebar_" .. name .. "_button_focus_inactive"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
+    theme["titlebar_" .. name .. "_button_focus_inactive_hover"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
+    theme["titlebar_" .. name .. "_button_focus_inactive_press"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * inactive_ratio)
+    theme["titlebar_" .. name .. "_button_normal_active"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * active_ratio)
+    theme["titlebar_" .. name .. "_button_normal_active_hover"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * active_ratio)
+    theme["titlebar_" .. name .. "_button_normal_active_press"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * active_ratio)
+    theme["titlebar_" .. name .. "_button_focus_active"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * active_ratio)
+    theme["titlebar_" .. name .. "_button_focus_active_hover"] = shape_to_surface(shape, color, theme.border_normal, theme.titlebar_size, theme.titlebar_size * active_ratio)
+    theme["titlebar_" .. name .. "_button_focus_active_press"] = shape_to_surface(shape, color, theme.border_focus, theme.titlebar_size, theme.titlebar_size * active_ratio)
 end
 
 -- set_titlebar_toggle_button("floating", "f", "F")
@@ -586,7 +586,7 @@ theme.apply_border_to_widget = function(args)
                 end
             end
             border:draw({ theme = beautiful.get_border_theme(),
-                          color = beautiful.xborder_focus }, cr, width, height,
+                          color = beautiful.border_focus }, cr, width, height,
                 border.directions{
                     widget.widget.top > 0 and "top",
                     widget.widget.left > 0 and "left",
