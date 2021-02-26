@@ -135,9 +135,9 @@ end
 
 -- Screen bar
 
-local function switch_to_or_go_last(tag)
+local function switch_or_restore(tag)
     local screen = tag.screen
-    if #screen.selected_tags == 1 and screen.selected_tags[1] == tag then
+    if #screen.selected_tags == 1 and screen.selected_tag == tag then
         awful.tag.history.restore(screen)
     else
         tag:view_only()
@@ -165,7 +165,7 @@ function shared.screen.attach_tray_widget()
 end
 
 local my_tag_list_buttons = awful.util.table.join(
-   awful.button({ }, 1, switch_to_or_go_last),
+   awful.button({ }, 1, switch_or_restore),
    awful.button({ "Mod4" }, 1, awful.client.movetotag),
    awful.button({ }, 3, awful.tag.viewtoggle),
    awful.button({ "Mod4" }, 3, awful.client.toggletag),
@@ -847,7 +847,7 @@ local global_keys = table_join(
           yams_switcher.start{}
    end),
    awful.key({ "Mod4" }, ".", function ()
-           shared.client.start_switcher(capi.client.focus, false)
+           shared.client.start_switcher(nil, false)
    end),
 
    awful.key({ "Mod4" }, "Tab", function ()
@@ -944,7 +944,7 @@ for i = 1, #shared.screen.tags do
     local key = tostring(i)
     global_keys =
         table_join(
-            awful.key({ "Mod4" }, tostring(i), function () switch_to_or_go_last(awful.screen.focused().tags[i]) end),
+            awful.key({ "Mod4" }, tostring(i), function () switch_or_restore(awful.screen.focused().tags[i]) end),
             awful.key({ "Mod4", "Control" }, tostring(i), function () awful.tag.viewtoggle(awful.screen.focused().tags[i]) end),
             awful.key({ "Mod4", "Shift" }, tostring(i), function ()
                     local c = capi.client.focus
