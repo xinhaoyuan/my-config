@@ -4,6 +4,8 @@ if [[ -z "$SHELL" ]]; then
     export SHELL=`command -v zsh`
 fi
 
+export EDITOR=nano
+
 alias my-path="source my-path"
 alias e="my-emacs -nw"
 alias e-reset="emacsclient --alternate-editor=true -e '(kill-emacs)'"
