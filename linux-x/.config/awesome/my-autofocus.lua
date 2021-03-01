@@ -24,9 +24,11 @@ local fts = require("hotpot").focus_timestamp
 
 local find_alternative_focus = function (prev, s)
    local clients = {}
-   for c in awful_client.iterate(function (c)
-         return c:isvisible() and awful_client.focus.filter(c)
-   end) do
+   for c in awful_client.iterate(
+       function (c)
+           return c:isvisible() and (c.type == "desktop" or awful_client.focus.filter(c))
+       end
+   ) do
       clients[#clients + 1] = c
    end
    table.sort(
@@ -55,10 +57,11 @@ local autofocus = {
 -- @param prev the previous focus client, may not be valid now
 -- @param s the screen of prev, in case prev.screen is not accessible now
 local function check_focus(prev, s)
-    if not s or not s.valid then return end
     if managed_counter > 0 then return end
-   -- When no visible client has the focus...
-   if not capi.client.focus or not capi.client.focus:isvisible() or not awful_client.focus.filter(capi.client.focus) then
+    if not s or not s.valid then return end
+    -- When no visible client has the focus...
+    if not capi.client.focus or not capi.client.focus:isvisible() or
+        (capi.client.focus.type ~= "desktop" and not awful_client.focus.filter(capi.client.focus)) then
       local c = autofocus.find_alternative_focus(prev, s)
       if c then
          awful_client.focus.history.disable_tracking()
@@ -80,22 +83,8 @@ end
 --
 -- @param tag A tag object
 local function check_focus_tag(t)
-   local s = t.screen
-   if (not s) or (not s.valid) then return end
-   if managed_counter > 0 then return end
-   s = capi.screen[s]
-   check_focus(nil, s)
-   if not capi.client.focus or not awful_client.focus.filter(capi.client.focus) or capi.screen[capi.client.focus.screen] ~= s then
-      -- local c = awful_client.focus.history.get(s, 0, awful_client.focus.filter)
-      local c = autofocus.find_alternative_focus(nil, s)
-      if c then
-         awful_client.focus.history.disable_tracking()
-         c:emit_signal("request::activate", "autofocus.check_focus_tag",
-                       {raise=false})
-         c:raise()
-         awful_client.focus.history.enable_tracking()
-      end
-   end
+    if managed_counter > 0 then return end
+    check_focus(nil, t.screen)
 end
 
 function autofocus.manage_focus(s)

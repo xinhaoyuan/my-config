@@ -152,6 +152,7 @@ function shared.client.shrink(c)
 end
 
 function shared.client.start_switcher(c, quick_mode)
+    if c and c.type == "desktop" then c = nil end
     if c then
         c.maximized = false
         c.maximized_vertical = false
@@ -990,7 +991,7 @@ local function reset_decoration(c)
     else
         c.has_xborder = true
     end
-    if c.type == "dock" then
+    if c.type == "dock" or c.type == "desktop" then
         c.has_xtitlebar = false
     elseif c.has_xtitlebar == nil then
         if c.requests_no_titlebar and c.respect_titlebar_request then
@@ -1023,7 +1024,11 @@ capi.client.connect_signal("property::maximized", reset_decoration)
 
 -- rules
 
-function placement_skip_existing(placement)
+function awful.placement.fullscreen(c, args)
+    c:geometry(c.screen.geometry)
+end
+
+local function placement_skip_existing(placement)
     return function(c, args)
         if c.focus_timestamp ~= nil then return nil end
         return placement(c, args)
@@ -1130,6 +1135,7 @@ require("awful.rules").rules = {
            borderless = true,
            sticky = true,
            fullscreen = false,
+           placement = awful.placement.fullscreen,
        },
    },
    {
@@ -1152,7 +1158,7 @@ require("awful.rules").rules = {
                -- c:deny("geometry", "ewmh")
            end,
        },
-   }
+   },
 }
 
 return nil
