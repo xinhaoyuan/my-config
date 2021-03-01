@@ -34,7 +34,13 @@ local find_alternative_focus = function (prev, s)
    table.sort(
       clients,
       function (a, b)
-         return fts.get(a) > fts.get(b)
+          if a.type == "desktop" then
+              return false
+          elseif b.type == "desktop" then
+              return true
+          else
+              return fts.get(a) > fts.get(b)
+          end
       end
    )
    if #clients == 0 then
@@ -60,8 +66,7 @@ local function check_focus(prev, s)
     if managed_counter > 0 then return end
     if not s or not s.valid then return end
     -- When no visible client has the focus...
-    if not capi.client.focus or not capi.client.focus:isvisible() or
-        (capi.client.focus.type ~= "desktop" and not awful_client.focus.filter(capi.client.focus)) then
+    if not capi.client.focus or not capi.client.focus:isvisible() or not awful_client.focus.filter(capi.client.focus) then
       local c = autofocus.find_alternative_focus(prev, s)
       if c then
          awful_client.focus.history.disable_tracking()

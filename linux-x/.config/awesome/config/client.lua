@@ -1129,8 +1129,7 @@ require("awful.rules").rules = {
       }
    },
    {
-       rule = { class = "Xfdesktop" },
-       except = { type = "dialog" },
+       rule = { type = "desktop" },
        properties = {
            borderless = true,
            sticky = true,
