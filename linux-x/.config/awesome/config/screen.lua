@@ -72,7 +72,6 @@ machi.editor.nested_layouts["4"] = require("external.equalarea")
 local alayout = require("awful.layout")
 alayout.layouts = {
    machi.layout.create {
-       new_placement_cb = machi.layout.placement.empty
    },
    alayout.suit.tile,
    alayout.suit.tile.left,
