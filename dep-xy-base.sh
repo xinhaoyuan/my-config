@@ -14,6 +14,9 @@ DEP_ARRAY=(
     nano
     bc
     unzip
+    socat
+    wget
+    curl
 )
 
 install_dep xy-base "${DEP_ARRAY[@]}"
