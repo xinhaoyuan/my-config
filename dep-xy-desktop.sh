@@ -21,6 +21,7 @@ DEP_ARRAY=(
     fortune
     # util
     cbatticon
+    pasystray
 )
 
 install_dep xy-desktop "${DEP_ARRAY[@]}"
