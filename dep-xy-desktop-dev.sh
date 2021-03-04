@@ -11,6 +11,7 @@ DEP_ARRAY=(
     libfontconfig-dev
     libx11-dev
     libxft-dev
+    libharfbuzz-dev
     # awesome dev
     cmake
     liblua5.3-dev
@@ -35,6 +36,10 @@ DEP_ARRAY=(
     libxkbcommon-x11-dev
     libstartup-notification0-dev
     libxdg-basedir-dev
+    # oomox
+    libgtk-3-dev
+    python3-pil
+    inkscape
 )
     
 install_dep xy-desktop-dev "${DEP_ARRAY[@]}"
