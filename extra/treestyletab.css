@@ -1,0 +1,65 @@
+:root {
+  --tab-highlighter: Highlight;
+  --tabbar-bg: var(--browser-bg-darker, ThreeDShadow);
+  --favicon-size: 20px;
+}
+
+.favicon {
+  margin-right: 2px;
+}
+
+/* Show title of unread tabs with red and italic font */
+/*
+:root.sidebar tab-item.unread .label-content {
+  color: red !important;
+  font-style: italic !important;
+}
+*/
+
+/* Add private browsing indicator per tab */
+/*
+:root.sidebar tab-item.private-browsing tab-label:before {
+  content: "🕶";
+}
+*/
+
+.closebox {
+  display: none;
+}
+
+/*
+:root.sidebar tab-item tab-label {
+  display: none;
+}
+
+:root.sidebar:hover tab-item tab-label {
+  display: block;
+}
+*/
+
+:root.have-pinned-tabs #all-tabs {
+  border-top: 4px solid var(--shadow-color);
+}
+
+tab-item.pinned {
+  border-right: none;
+}
+
+tab-item:hover .closebox {
+  display: block;
+}
+
+tab-item.pinned .highlighter::before {
+  background: #20a040;
+} 
+
+.twisty {
+  margin-left: -4px;
+  min-width: 14px;
+  max-width: 14px;
+}
+
+.twisty::before {
+  min-width: 14px !important;
+  max-width: 14px !important;
+}
