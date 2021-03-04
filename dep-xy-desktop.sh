@@ -22,6 +22,10 @@ DEP_ARRAY=(
     # util
     cbatticon
     pasystray
+    pcmanfm
+    mousepad
+    evtest
+    xinput
 )
 
 install_dep xy-desktop "${DEP_ARRAY[@]}"

@@ -58,7 +58,7 @@ shared.action = {
         awful.spawn(cmd)
     end,
     file_manager = function (path)
-        local cmd = {"thunar"}
+        local cmd = {"pcmanfm"}
         if path then table.insert(cmd, path) end
         awful.spawn(cmd)
     end,
