@@ -94,10 +94,14 @@ fi
 
 autoload -Uz add-zsh-hook
 
-local DATE_FORMAT="%y%m%d%H%M%S"
-local DATE_FORMAT_WITH_STYLE="$fg_bold[green]%y$fg_no_bold[green]%m$fg_bold[green]%d$fg_no_bold[cyan]%H$fg_bold[cyan]%M$fg_no_bold[cyan]%S"
-local DATE_PLACEHOLDER="000000000000"
-local DATE_FORMAT_LEN=12
+# local DATE_FORMAT="%y%m%d%H%M%S"
+# local DATE_FORMAT_WITH_STYLE="$fg_bold[green]%y$fg_no_bold[green]%m$fg_bold[green]%d$fg_no_bold[cyan]%H$fg_bold[cyan]%M$fg_no_bold[cyan]%S"
+# local DATE_PLACEHOLDER="000000000000"
+# local DATE_FORMAT_LEN=12
+local DATE_FORMAT="%Y-%m-%d %H:%M:%S"
+local DATE_FORMAT_WITH_STYLE="$fg_no_bold[green]%Y-%m-%d $fg_no_bold[cyan]%H:%M:%S"
+local DATE_PLACEHOLDER="0000-00-00 00:00:00"
+local DATE_FORMAT_LEN=19
 local DATE_HFORMAT="%y-%m-%d %H:%M:%S"
 export LAST_CMD_TS=""
 
@@ -173,7 +177,7 @@ set_prompt() {
     PROMPT='%{$fg_bold[default]%}→%{$DATE_PRECMD%'$DATE_FORMAT_LEN'G%} %{$fg_bold[cyan]%}%c%{$reset_color%} '
     RPROMPT=' %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[default]%} ↑${LAST_CMD_STATUS}%{$fg_bold[green]%}%p:${SSH_TTY:+%n@%m:}%j%{$reset_color%}'
   else
-    PROMPT='╭%{$DATE_PRECMD%'$DATE_FORMAT_LEN'G%}%{$fg_bold[green]%}:${SSH_TTY:+%n@%m:}%j%{$fg_bold[blue]%} %{$fg_bold[cyan]%}%~%{$fg_bold[blue]%}$(LSPACE $(git_prompt_info))%{$reset_color%}
+    PROMPT='╭%{$DATE_PRECMD%'$DATE_FORMAT_LEN'G%}%{$fg_bold[green]%} λ${SSH_TTY:+%n@%m:}%j%{$fg_bold[blue]%} %{$fg_bold[cyan]%}%~%{$fg_bold[blue]%}$(LSPACE $(git_prompt_info))%{$reset_color%}
 ╰» '
     RPROMPT=''
   fi
