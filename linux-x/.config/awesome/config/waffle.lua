@@ -428,21 +428,20 @@ do
    }
 end
 
+local units = {" ", "k", "m", "g", "t", "p"}
 local function format_size(s)
-   local unit = ""
-   if s >= 1000 * 1000 * 1000 then
-      s = math.floor(s / 1000 / 1000 / 1000 * 100) / 100
-      unit = "g"
-   elseif s >= 1000 * 1000 then
-      s = math.floor(s / 1000 / 1000 * 100) / 100
-      unit = "m"
-   elseif s >= 1000 then
-      s = math.floor(s / 1000 * 100) / 100
-      unit = "k"
-   else
-      s = math.floor(s * 100) / 100
-   end
-   return tostring(s) .. unit
+    local ui = 1
+    while s >= 1000 and ui < #units do
+        ui = ui + 1
+        s = s / 1000
+    end
+    if s >= 1000 then return "2BIG";
+    else
+        -- Alternative styles
+        -- return string.format("%.2f%s", s, units[ui])
+        local si = math.floor(s)
+        return string.format("%3d.%02d%s", si, math.floor((s - si)  * 100), units[ui])
+    end
 end
 
 local ram_widget_width = (waffle_width - button_padding) / 2 - button_height - button_padding * 2
