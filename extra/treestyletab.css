@@ -4,6 +4,9 @@
   --favicon-size: 20px;
 }
 
+/* Make scroll bar on the right. */
+:root.left #tabbar { direction: ltr; }
+
 .favicon {
   margin-right: 2px;
 }
