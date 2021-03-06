@@ -1102,6 +1102,11 @@ require("awful.rules").rules = {
        rule = { type = "dialog" },
        properties = {
            titlebar_style = "full_top",
+           callback = function (c)
+               if c.transient_for and c.transient_for.type == "desktop" then
+                   c.above = true
+               end
+           end,
        },
    },
    {
