@@ -1271,7 +1271,6 @@ local orgenda_widget = orgenda.widget {
     font = font_info,
     item_margin = button_padding,
     width = waffle_width,
-    indent_width = dpi(20),
 }
 
 local waffle_root_status_widget = decorate_panel {

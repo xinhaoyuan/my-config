@@ -168,6 +168,7 @@ theme.waffle_background = "#00000000"
 theme.waffle_panel_width = dpi(200)
 -- custom_property number
 theme.waffle_item_height = dpi(20)
+theme.orgenda_indent_width = dpi(25)
 
 theme.titlebar_bg_focus = theme.bg_normal
 theme.titlebar_fg_focus = theme.fg_normal

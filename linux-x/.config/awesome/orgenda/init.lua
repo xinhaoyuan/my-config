@@ -145,6 +145,8 @@ function orgenda.widget(args)
     local fixed_margin = require("fixed_margin")
     local beautiful = require("beautiful")
 
+    args.indent_width = args.indent_width or beautiful.orgenda_indent_width
+
     local todo_item_container = wibox.widget {
         widget = wibox.layout.fixed.vertical
     }
