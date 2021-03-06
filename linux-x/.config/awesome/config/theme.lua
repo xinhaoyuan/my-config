@@ -80,7 +80,11 @@ theme.xborder_outer_space = 3
 theme.xborder_inner_space = 3
 theme.xborder_radius = dpi(16)
 theme.xborder_radius_cut = true
-theme.xborder_indent = theme.xborder_radius_cut and math.floor((2 - math.sqrt(2)) * (theme.xborder_radius - theme.xborder_outer_space or 0)) or (theme.xborder_radius - theme.xborder_outer_space or 0)
+if theme.xborder_radius and theme.xborder_radius > 0 then
+    theme.xborder_indent = theme.xborder_radius_cut and math.floor((2 - math.sqrt(2)) * (theme.xborder_radius - theme.xborder_outer_space or 0)) or (theme.xborder_radius - theme.xborder_outer_space or 0)
+else
+    theme.xborder_indent = dpi(4)
+end
 theme.xborder_space = is_light_color(theme.bg_normal) and c_white[2] or c_black[1]
 theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
 theme.border_normal = acolor(theme.bg_normal):blend_with(acolor(theme.border_focus), 0.3):to_string()
@@ -511,9 +515,7 @@ end
 local border_theme
 function theme.get_border_theme()
     if border_theme == nil then
-        if beautiful.xborder_radius == nil then
-            border_theme = border.default_theme
-        else
+        if beautiful.xborder_radius and beautiful.xborder_radius > 0 then
             if beautiful.xborder_radius_cut then
                 border_theme = setmetatable({}, {__index = border.cut_theme})
             else
@@ -523,6 +525,8 @@ function theme.get_border_theme()
             border_theme.outer_space = beautiful.xborder_outer_space
             border_theme.inner_space = beautiful.xborder_radius - beautiful.xborder_width + beautiful.xborder_inner_space
             border_theme:init()
+        else
+            border_theme = border.default_theme
         end
     end
     return border_theme
@@ -567,7 +571,7 @@ theme.apply_border_to_widget = function(args)
             local tr = args.tr ~= false and widget.widget.top > 0 and widget.widget.right > 0
             local br = args.br ~= false and widget.widget.bottom > 0 and widget.widget.right > 0
             local bl = args.bl ~= false and widget.widget.bottom > 0 and widget.widget.left > 0
-            local indicator = args.indicator ~= false and beautiful.xborder_radius and beautiful.xborder_radius_cut
+            local indicator = args.indicator ~= false and beautiful.xborder_radius and beautiful.xborder_radius > 0 and beautiful.xborder_radius_cut
             if beautiful.xborder_radius then
                 cr:set_source(gcolor(beautiful.xborder_space))
                 if indicator then

@@ -327,8 +327,8 @@ local border_top = border.directions{ "top", "left", "right" }
 local function draw_tb_border_bgimage_top(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    local indicator = beautiful.xborder_radius and beautiful.xborder_radius_cut and capi.client.focus == c
-    if beautiful.xborder_radius then
+    local indicator = beautiful.xborder_radius and beautiful.xborder_radius > 0 and beautiful.xborder_radius_cut and capi.client.focus == c
+    if beautiful.xborder_radius and beautiful.xborder_radius > 0 then
         cr:set_source(gcolor(beautiful.xborder_space))
         if indicator then
             gshape.rectangle(cr, width, height)
@@ -360,8 +360,8 @@ local border_bottom = border.directions{ "bottom", "left", "right" }
 local function draw_tb_border_bgimage_bottom(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    local indicator = beautiful.xborder_radius and beautiful.xborder_radius_cut and capi.client.focus == c
-    if beautiful.xborder_radius then
+    local indicator = beautiful.xborder_radius and beautiful.xborder_radius > 0 and beautiful.xborder_radius_cut and capi.client.focus == c
+    if beautiful.xborder_radius and beautiful.xborder_radius > 0 then
         cr:set_source(gcolor(beautiful.xborder_space))
         if indicator then
             gshape.rectangle(cr, width, height)
@@ -448,6 +448,7 @@ local function update_shape(c)
     end
     local mini_titlebar_shape
     local padding = (c.has_xborder and beautiful.xborder_outer_space + beautiful.xborder_inner_space or beautiful.xborder_inner_space)
+    local radius = beautiful.xborder_radius or 0
     if not c.has_xtitlebar then
         mini_titlebar_shape = nil
     elseif c.titlebar_style == "mini_top" then
@@ -457,7 +458,7 @@ local function update_shape(c)
             beautiful.rect_with_corners(cr,
                                         beautiful.mini_titlebar_width + padding + beautiful.xborder_indent * 2,
                                         beautiful.mini_titlebar_size + padding,
-                                        false, false, false, beautiful.xborder_radius - beautiful.xborder_outer_space + beautiful.xborder_inner_space)
+                                        false, false, false, radius - beautiful.xborder_outer_space + beautiful.xborder_inner_space)
             cr:restore()
         end
     elseif c.titlebar_style == "mini_mid" then
@@ -468,10 +469,10 @@ local function update_shape(c)
             beautiful.rect_with_corners(cr,
                                         beautiful.mini_titlebar_size + padding,
                                         bar_overall_height,
-                                        beautiful.xborder_radius - beautiful.xborder_outer_space + beautiful.xborder_inner_space,
+                                        radius - beautiful.xborder_outer_space + beautiful.xborder_inner_space,
                                         false,
                                         false,
-                                        beautiful.xborder_radius - beautiful.xborder_outer_space + beautiful.xborder_inner_space)
+                                        radius - beautiful.xborder_outer_space + beautiful.xborder_inner_space)
             cr:restore()
         end
     elseif c.titlebar_style == "mini_bottom" then
@@ -481,20 +482,20 @@ local function update_shape(c)
             beautiful.rect_with_corners(cr,
                                         beautiful.mini_titlebar_width + padding + beautiful.xborder_indent * 2,
                                         beautiful.mini_titlebar_size + padding,
-                                        beautiful.xborder_radius - beautiful.xborder_outer_space + beautiful.xborder_inner_space, false, false, false)
+                                        radius - beautiful.xborder_outer_space + beautiful.xborder_inner_space, false, false, false)
             cr:restore()
         end
     end
     apply_container_shape(
         c,
-        beautiful.xborder_radius and c.has_xborder and function (cr, width, height)
+        radius > 0 and c.has_xborder and function (cr, width, height)
             cr:save()
             cr:translate(beautiful.xborder_width, beautiful.xborder_width)
             beautiful.rect_with_corners(cr,
                                         width - beautiful.xborder_width * 2,
                                         height - beautiful.xborder_width * 2,
                                         true, true, true, true,
-                                        beautiful.xborder_radius and beautiful.xborder_radius - beautiful.xborder_width)
+                                        radius - beautiful.xborder_width)
             cr:restore()
         end,
         mini_titlebar_shape
@@ -648,12 +649,12 @@ local function decorate(c)
 
     local tw
     local to
-    if beautiful.xborder_radius == nil then
-        tw = beautiful.xborder_width
-        to = 0
-    else
+    if beautiful.xborder_radius and beautiful.xborder_radius > 0 then
         tw = beautiful.xborder_radius
         to = tw - beautiful.xborder_width
+    else
+        tw = beautiful.xborder_width
+        to = 0
     end
 
     if c.has_xtitlebar and c.titlebar_style == "mini_top" then
