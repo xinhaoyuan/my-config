@@ -271,7 +271,7 @@ local function set_splitted_no_min(bar)
     bar.right_margin_container.widget.left = beautiful.xborder_width
     bar.right_margin_container.widget.widget.widget.left =
         bar.screen == capi.screen.primary and
-        beautiful.xborder_radius and beautiful.xborder_radius > beautiful.xborder_width and
+        beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width and
         math.floor((beautiful.xborder_radius_cut and 2 - math.sqrt(2) or 1) * (beautiful.xborder_radius - beautiful.xborder_width)) or 0
 end
 
@@ -287,7 +287,7 @@ local function set_splitted(bar)
     bar.right_margin_container.widget.left = beautiful.xborder_width
     bar.right_margin_container.widget.widget.widget.left =
         bar.screen == capi.screen.primary and
-        beautiful.xborder_radius and beautiful.xborder_radius > beautiful.xborder_width and
+        beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width and
         math.floor((beautiful.xborder_radius_cut and 2 - math.sqrt(2) or 1) * (beautiful.xborder_radius - beautiful.xborder_width)) or 0
 end
 
