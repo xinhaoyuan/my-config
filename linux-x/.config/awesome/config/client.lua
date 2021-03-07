@@ -327,8 +327,8 @@ local border_top = border.directions{ "top", "left", "right" }
 local function draw_tb_border_bgimage_top(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    local indicator = beautiful.xborder_radius and beautiful.xborder_radius > 0 and beautiful.xborder_radius_cut and capi.client.focus == c
-    if beautiful.xborder_radius and beautiful.xborder_radius > 0 then
+    local indicator = beautiful.xborder_radius and beautiful.xborder_radius > beautiful.xborder_width and beautiful.xborder_radius_cut and capi.client.focus == c
+    if beautiful.xborder_radius and beautiful.xborder_radius > beautiful.xborder_width then
         cr:set_source(gcolor(beautiful.xborder_space))
         if indicator then
             gshape.rectangle(cr, width, height)
@@ -360,8 +360,8 @@ local border_bottom = border.directions{ "bottom", "left", "right" }
 local function draw_tb_border_bgimage_bottom(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    local indicator = beautiful.xborder_radius and beautiful.xborder_radius > 0 and beautiful.xborder_radius_cut and capi.client.focus == c
-    if beautiful.xborder_radius and beautiful.xborder_radius > 0 then
+    local indicator = beautiful.xborder_radius and beautiful.xborder_radius > beautiful.xborder_width and beautiful.xborder_radius_cut and capi.client.focus == c
+    if beautiful.xborder_radius and beautiful.xborder_radius > beautiful.xborder_width then
         cr:set_source(gcolor(beautiful.xborder_space))
         if indicator then
             gshape.rectangle(cr, width, height)
@@ -649,7 +649,7 @@ local function decorate(c)
 
     local tw
     local to
-    if beautiful.xborder_radius and beautiful.xborder_radius > 0 then
+    if beautiful.xborder_radius and beautiful.xborder_radius > beautiful.xborder_width then
         tw = beautiful.xborder_radius
         to = tw - beautiful.xborder_width
     else

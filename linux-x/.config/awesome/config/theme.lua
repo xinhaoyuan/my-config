@@ -516,7 +516,7 @@ end
 local border_theme
 function theme.get_border_theme()
     if border_theme == nil then
-        if beautiful.xborder_radius and beautiful.xborder_radius > 0 then
+        if beautiful.xborder_radius and beautiful.xborder_radius > beautiful.xborder_width then
             if beautiful.xborder_radius_cut then
                 border_theme = setmetatable({}, {__index = border.cut_theme})
             else
@@ -572,7 +572,7 @@ theme.apply_border_to_widget = function(args)
             local tr = args.tr ~= false and widget.widget.top > 0 and widget.widget.right > 0
             local br = args.br ~= false and widget.widget.bottom > 0 and widget.widget.right > 0
             local bl = args.bl ~= false and widget.widget.bottom > 0 and widget.widget.left > 0
-            local indicator = args.indicator ~= false and beautiful.xborder_radius and beautiful.xborder_radius > 0 and beautiful.xborder_radius_cut
+            local indicator = args.indicator ~= false and beautiful.xborder_radius and beautiful.xborder_radius > beautiful.xborder_width and beautiful.xborder_radius_cut
             if beautiful.xborder_radius then
                 cr:set_source(gcolor(beautiful.xborder_space))
                 if indicator then
