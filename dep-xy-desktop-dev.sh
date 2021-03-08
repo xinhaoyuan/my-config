@@ -36,6 +36,7 @@ DEP_ARRAY=(
     libxkbcommon-x11-dev
     libstartup-notification0-dev
     libxdg-basedir-dev
+    libdbus-1-dev
     # oomox
     libgtk-3-dev
     python3-pil
