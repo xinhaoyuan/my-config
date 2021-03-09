@@ -33,11 +33,16 @@ local HOME_DIR = os.getenv("HOME")
 os.execute(HOME_DIR .. "/.xdesktoprc")
 
 local config = require("config")
+local beautiful = require("beautiful")
+local gstring = require("gears.string")
 require("my-autofocus")
 local gcal_org_path = os.getenv("HOME").."/.cache/gcal.org"
 os.execute("touch "..gcal_org_path)
 require("orgenda").config.files = {
-    os.getenv("HOME").."/org/TODO.org",
+    {
+        path = os.getenv("HOME").."/org/TODO.org",
+        rank = 0,
+    },
     gcal_org_path,
 }
 local hotpot = require("hotpot")

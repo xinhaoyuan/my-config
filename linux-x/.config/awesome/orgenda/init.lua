@@ -7,6 +7,7 @@ local awful = require("awful")
 local gobject = require("gears.object")
 local gtimer = require("gears.timer")
 local gdebug = require("gears.debug")
+local gstring = require("gears.string")
 
 local orgenda = {
     config = {
@@ -31,17 +32,16 @@ local function parse_timestamp(timestamp)
     }, hour ~= nil
 end
 
-local function parse_todo_match(todo_match)
+local function parse_todo_match(todo_match, decorator)
     local _, priority_end, priority  = todo_match:find("^%[#([A-C])%]%s+")
     priority = priority == nil and 2 or 3 + string.byte("A") - string.byte(priority)
     local text_begin = priority_end == nil and 1 or priority_end + 1
     local tag_begin, tag_end = todo_match:find("%s+[A-Z]*:.*")
     local tag_length = tag_begin == nil and 0 or tag_end - tag_begin + 1
-    if tag_begin == nil then
-        return { priority = priority, text = todo_match:sub(text_begin) }
-    else
-        return { priority = priority, text = todo_match:sub(text_begin, -tag_length) }
-    end
+    local text = tag_begin == nil and
+        todo_match:sub(text_begin) or
+        todo_match:sub(text_begin, -tag_length)
+    return { priority = priority, text = decorator(text) }
 end
 
 local function parse_attributes(line, todo_item)
@@ -83,8 +83,9 @@ function orgenda.compare_todo_items(a, b)
     elseif a.priority < b.priority then
         return false
     end
-
-    if a.timestamp == nil then
+    if a.timestamp == b.timestamp then
+        return a.rank < b.rank
+    elseif a.timestamp == nil then
         return false
     elseif b.timestamp == nil then
         return true
@@ -93,7 +94,14 @@ function orgenda.compare_todo_items(a, b)
     end
 end
 
-local function parse_file(path, items)
+local function parse_file(file_info, items)
+    local path, decorator, rank
+    if type(file_info) ~= "table" then
+        file_info = { path = file_info }
+    end
+    path = file_info.path
+    decorator = file_info.decorator or gstring.xml_escape
+    rank = file_info.rank or 0
     local fd = io.open(path, "r")
     if not fd then
         gdebug.print_error("cannot open file at "..tostring(path))
@@ -114,8 +122,9 @@ local function parse_file(path, items)
                 end
                 local todo_type, todo_text = header_text:match("^(%u+)%s+(.*)$")
                 if todo_type == "TODO" then
-                    todo_item = parse_todo_match(todo_text)
+                    todo_item = parse_todo_match(todo_text, decorator)
                     todo_item.source = path
+                    todo_item.rank = rank
                 else
                     todo_item = nil
                 end
@@ -129,8 +138,8 @@ end
 
 function orgenda.reset()
     local items = {}
-    for _, path in pairs(orgenda.config.files) do
-        parse_file(path, items)
+    for _, file_info in pairs(orgenda.config.files) do
+        parse_file(file_info, items)
     end
     table.sort(items, orgenda.compare_todo_items)
     orgenda.data.items = items
@@ -192,7 +201,7 @@ function orgenda.widget(args)
                         widget = wibox.widget.textbox
                                   },
                     {
-                        text = item.text,
+                        markup = item.text,
                         font = args.font,
                         ellipsize = "none",
                         align = "left",

@@ -26,6 +26,8 @@ DEP_ARRAY=(
     mousepad
     evtest
     xinput
+    # awesome needs this
+    librsvg2-dev
 )
 
 install_dep xy-desktop "${DEP_ARRAY[@]}"
