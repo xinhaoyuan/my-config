@@ -274,8 +274,9 @@ gtimer.delayed_call(
             return
         end
         local cmd = {"fswatch", "-x", "--event=Updated"}
-        for _, file in ipairs(orgenda.config.files) do
-            table.insert(cmd, file)
+        for _, file_info in ipairs(orgenda.config.files) do
+            local path = type(file_info) == "table" and file_info.path or file_info
+            table.insert(cmd, path)
         end
         awful.spawn.with_line_callback(
             cmd,

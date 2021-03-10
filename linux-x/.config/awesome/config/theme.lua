@@ -87,7 +87,7 @@ else
 end
 theme.xborder_space = is_light_color(theme.bg_normal) and c_white[2] or c_black[1]
 theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
-theme.border_normal = acolor(theme.bg_normal):blend_with(acolor(theme.border_focus), 0.3):to_string()
+theme.border_normal = acolor(theme.bg_normal):blend_with(acolor(theme.bg_focus), 0.3):to_string()
 -- theme.border_normal = theme.bg_normal
 theme.border_marked = theme.bg_urgent
 
