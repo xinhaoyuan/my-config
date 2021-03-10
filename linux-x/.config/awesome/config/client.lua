@@ -188,7 +188,7 @@ local client_keys = table_join(
     awful.key({ "Mod4", "Shift" }, "=", function (c) machi.default_editor.adjust_y_shares(c, 50) end),
     awful.key({ "Mod4", "Shift" }, "-", function (c) machi.default_editor.adjust_y_shares(c, -50) end),
 
-    awful.key({ "Mod4" }, "x", function (c)
+    awful.key({ "Mod4" }, "q", function (c)
             local other_clients = {}
             for _, oc in ipairs(c.screen.tiled_clients) do
                 if oc ~= c then
