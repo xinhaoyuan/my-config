@@ -35,7 +35,7 @@ local function find_max_rects(w, cb)
             if w[j][i] < 0 then
                 acc_row_h[i] = 0
             elseif acc_row_h[i] then
-                acc_row_h[i] = acc_row_h[i] + 1                
+                acc_row_h[i] = acc_row_h[i] + 1
             else
                 acc_row_h[i] = 1
             end
