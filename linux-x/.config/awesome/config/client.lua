@@ -195,7 +195,7 @@ local client_keys = table_join(
                     table.insert(other_clients, oc)
                 end
             end
-            local geo = extender.fit_area(
+            local geo = extender.fit(
                 c.screen.workarea, other_clients,
                 {
                     min_size = beautiful.useless_gap * 4,

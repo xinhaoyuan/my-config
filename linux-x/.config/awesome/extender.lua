@@ -95,7 +95,7 @@ if not ... then
     )
 end
 
-function m.fit_area(workarea, other_areas, options)
+function m.fit(workarea, orig_areas, options)
     options = options or {}
     -- 1. Discretize the points
     local sx, sy, ex, ey =
@@ -105,7 +105,7 @@ function m.fit_area(workarea, other_areas, options)
     local areas = {{ sx = sx, ex = ex, sy = sy, ey = ey }}
     local x_values = {{sx, 0, #areas}, {ex, 0, #areas}}
     local y_values = {{sy, 0, #areas}, {ey, 0, #areas}}
-    for i, a in ipairs(other_areas) do
+    for i, a in ipairs(orig_areas) do
         local area = crop_area(a, sx, sy, ex, ey)
         if area then
             areas[#areas + 1] = area
