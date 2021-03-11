@@ -1689,6 +1689,12 @@ local min_label = wibox.widget {
     align = "center",
 }
 
+local waffle_client_icon_container = wibox.widget {
+    forced_width = dpi(40),
+    forced_height = dpi(40),
+    widget = wibox.container.constraint,
+}
+
 local update_client_waffle_labels
 local client_waffle = view {
     root = decorate_waffle {
@@ -1771,8 +1777,11 @@ local client_waffle = view {
                             end
                     }),
                     {
+                        waffle_client_icon_container,
                         forced_width = dpi(64),
                         forced_height = dpi(64),
+                        halign = "center",
+                        valign = "center",
                         widget = wibox.container.place,
                     },
                     button({
@@ -1881,6 +1890,15 @@ function shared.waffle.show_client_waffle(c, args)
     end
     waffle:show(client_waffle, args)
     shared.waffle_selected_client = c
+    waffle_client_icon_container.widget = wibox.widget {
+        awful.widget.clienticon(c),
+        {
+            id = "default_icon",
+            image = beautiful.client_default_icon,
+            widget = masked_imagebox,
+        },
+        widget = fallback,
+    }
     update_client_waffle_labels()
     capi.client.emit_signal("list")
 end
