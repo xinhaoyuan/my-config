@@ -93,7 +93,7 @@ theme.border_normal = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5)
 -- theme.border_normal = theme.bg_normal
 theme.border_marked = theme.bg_urgent
 
-theme.titlebar_bg_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
+theme.titlebar_bg_focus  = theme.bg_focus
 theme.titlebar_fg_focus  = theme.fg_focus
 theme.titlebar_bg_normal = acolor(theme.bg_normal):blend_with(acolor(theme.bg_focus), 0.3):to_string()
 theme.titlebar_bg_normal = theme.bg_normal
