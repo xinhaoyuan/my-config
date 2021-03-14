@@ -345,6 +345,22 @@ local function show_tray_view()
                 { push = true })
 end
 
+local units = {" ", "k", "m", "g", "t", "p"}
+local function format_size(s)
+    local ui = 1
+    while s >= 1000 and ui < #units do
+        ui = ui + 1
+        s = s / 1000
+    end
+    if s >= 1000 then return "2BIG";
+    else
+        -- Alternative styles
+        -- return string.format("%.2f%s", s, units[ui])
+        local si = math.floor(s)
+        return string.format("%3d.%02d%s", si, math.floor((s - si)  * 100), units[ui])
+    end
+end
+
 local cpu_widget_width = (waffle_width - button_padding) / 2 - button_height - button_padding * 2
 local cpu_widget
 do
@@ -396,52 +412,84 @@ do
       widget = wibox.container.constraint,
    }
 
-   local total_prev = 0
-   local idle_prev = 0
+   local cpu_total_prev = 0
+   local cpu_idle_prev = 0
+   local cpu_showing = 0 
    local function on_output (stdout)
-       local user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice =
-           stdout:match('(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s')
+       local cpu_usage, cpu_temp, cpu_freq_list
+       cpu_freq_list = {}
 
-       local total = user + nice + system + idle + iowait + irq + softirq + steal
+       for line in stdout:gmatch("[^\r\n]*") do
+           if line:find("^usage:") then
+               local user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice =
+                   line:match('(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)')
+               local total = user + nice + system + idle + iowait + irq + softirq + steal
+               local diff_idle = idle - cpu_idle_prev
+               local diff_total = total - cpu_total_prev
 
-       local diff_idle = idle - idle_prev
-       local diff_total = total - total_prev
-       local diff_usage = (1000 * (diff_total - diff_idle) / diff_total + 5) / 10
+               cpu_usage = (1000 * (diff_total - diff_idle) / diff_total + 5) / 10
+               
+               total_prev = total
+               idle_prev = idle
+           elseif line:find("^temp:") then
+               local temp_str = line:match("%d+")
+               cpu_temp = math.floor(tonumber(temp_str) / 1000 + 0.5)
+           elseif line:find("^freq:") then
+               local freq_str = line:match("[0-9.]+")
+               table.insert(cpu_freq_list, tonumber(freq_str) * 1000 * 1000)
+           -- else
+           --     print("unknown cpu status line", line)
+           end
+       end
 
-       local markup = "<span font_desc='" .. font_info .. "'>" .. tostring(math.floor(diff_usage)) .. "%</span>"
-       -- widget:get_children_by_id("text")[1]:set_markup(markup)
-       -- widget:get_children_by_id("graph")[1]:add_value(diff_usage)
+       local cpu_freq_min, cpu_freq_max
+       for i = 1, #cpu_freq_list do
+           if cpu_freq_min == nil or cpu_freq_min > cpu_freq_list[i] then
+               cpu_freq_min = cpu_freq_list[i]
+           end
+           if cpu_freq_max == nil or cpu_freq_max < cpu_freq_list[i] then
+               cpu_freq_max = cpu_freq_list[i]
+           end
+       end
+
+       local markup
+       if cpu_showing == 0 then
+           markup = "<span font_desc='" .. font_info .. "'>"..tostring(math.floor(cpu_usage)).. "% "..tostring(cpu_temp).."℃</span>"
+       elseif cpu_showing == 1 then
+           markup = "<span font_desc='" .. font_info .. "'>m"..format_size(cpu_freq_min).."Hz</span>"
+       elseif cpu_showing == 2 then
+           markup = "<span font_desc='" .. font_info .. "'>M"..format_size(cpu_freq_max).."Hz</span>"
+       end
+       cpu_showing = (cpu_showing + 1) % 3
        cpu_text_widget:set_markup(markup)
-       cpu_graph_widget:add_value(diff_usage)
-
-       total_prev = total
-       idle_prev = idle
+       cpu_graph_widget:add_value(cpu_usage)
    end
+
+   local cpu_temp_cmd = ""
+   local h = io.popen("find_coretemp_input.sh")
+   if h then
+       local temp_input = h:read("*a")
+       if temp_input then
+           cpu_temp_cmd =
+               string.format("echo -n 'temp:'; cat %s", temp_input)
+       else
+           cpu_temp_cmd = ""
+       end
+   end
+   print("!", cpu_temp_cmd)
 
    gtimer {
        timeout = update_interval_s,
        call_now = true,
        autostart = true,
        callback = function ()
-           awful.spawn.easy_async({"grep", "-e", "^cpu ", "/proc/stat"}, on_output)
+           awful.spawn.easy_async_with_shell(string.format([[
+echo -n "usage:"; grep -e "^cpu " /proc/stat
+grep -e "cpu MHz" /proc/cpuinfo | sed -e 's/^/freq:/g'
+%s
+]], cpu_temp_cmd), on_output)
        end,
    }
-end
-
-local units = {" ", "k", "m", "g", "t", "p"}
-local function format_size(s)
-    local ui = 1
-    while s >= 1000 and ui < #units do
-        ui = ui + 1
-        s = s / 1000
-    end
-    if s >= 1000 then return "2BIG";
-    else
-        -- Alternative styles
-        -- return string.format("%.2f%s", s, units[ui])
-        local si = math.floor(s)
-        return string.format("%3d.%02d%s", si, math.floor((s - si)  * 100), units[ui])
-    end
 end
 
 local ram_widget_width = (waffle_width - button_padding) / 2 - button_height - button_padding * 2
