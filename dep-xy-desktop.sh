@@ -26,6 +26,7 @@ DEP_ARRAY=(
     mousepad
     evtest
     xinput
+    xdotool
     # awesome needs these
     librsvg2-dev
     fswatch
