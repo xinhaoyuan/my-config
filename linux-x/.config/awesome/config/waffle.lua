@@ -346,7 +346,8 @@ local function show_tray_view()
 end
 
 local units = {" ", "k", "m", "g", "t", "p"}
-local function format_size(s)
+local function format_size(s, fill)
+    if fill == nil then fill = true end
     local ui = 1
     while s >= 1000 and ui < #units do
         ui = ui + 1
@@ -357,17 +358,25 @@ local function format_size(s)
         -- Alternative styles
         -- return string.format("%.2f%s", s, units[ui])
         local si = math.floor(s)
-        return string.format("%3d.%02d%s", si, math.floor((s - si)  * 100), units[ui])
+        return string.format(fill and "%3d.%02d%s" or "%d.%02d%s", si, math.floor((s - si)  * 100), units[ui])
     end
 end
 
-local cpu_widget_width = (waffle_width - button_padding) / 2 - button_height - button_padding * 2
+local function format_time_sec(s)
+    if s > 3600 then
+        return string.format("%dh%dm", math.floor(s / 3600), math.floor(s % 3600 / 60))
+    elseif s > 60 then
+        return string.format("%dm", math.floor(s / 60))
+    else
+        return string.format("%ds", math.floor(s))
+    end
+end
+
 local cpu_widget
 do
    local cpu_graph_widget = wibox.widget {
       max_value = 100,
       background_color = graph_background,
-      forced_width = cpu_widget_width,
       forced_height = button_height / 2,
       step_width = dpi(2),
       step_spacing = dpi(1),
@@ -376,9 +385,8 @@ do
    }
 
    local cpu_text_widget = wibox.widget {
-       forced_width = cpu_widget_width,
        forced_height = button_height,
-       align = "center",
+       align = "right",
        point = {x = 0, y = 0},
        outline_color = beautiful.bg_normal,
        outline_size = dpi(2),
@@ -406,7 +414,7 @@ do
               id = "text",
               widget = cpu_text_widget
           },
-         layout = wibox.layout.manual
+          layout = wibox.layout.stack
       },
       height = button_height,
       widget = wibox.container.constraint,
@@ -414,7 +422,6 @@ do
 
    local cpu_total_prev = 0
    local cpu_idle_prev = 0
-   local cpu_showing = 0 
    local function on_output (stdout)
        local cpu_usage, cpu_temp, cpu_freq_list
        cpu_freq_list = {}
@@ -428,9 +435,9 @@ do
                local diff_total = total - cpu_total_prev
 
                cpu_usage = (1000 * (diff_total - diff_idle) / diff_total + 5) / 10
-               
-               total_prev = total
-               idle_prev = idle
+
+               cpu_total_prev = total
+               cpu_idle_prev = idle
            elseif line:find("^temp:") then
                local temp_str = line:match("%d+")
                cpu_temp = math.floor(tonumber(temp_str) / 1000 + 0.5)
@@ -452,15 +459,7 @@ do
            end
        end
 
-       local markup
-       if cpu_showing == 0 then
-           markup = "<span font_desc='" .. font_info .. "'>"..tostring(math.floor(cpu_usage)).. "% "..tostring(cpu_temp).."℃</span>"
-       elseif cpu_showing == 1 then
-           markup = "<span font_desc='" .. font_info .. "'>m"..format_size(cpu_freq_min).."Hz</span>"
-       elseif cpu_showing == 2 then
-           markup = "<span font_desc='" .. font_info .. "'>M"..format_size(cpu_freq_max).."Hz</span>"
-       end
-       cpu_showing = (cpu_showing + 1) % 3
+       local markup = "<span font_desc='"..font_info.."'>"..tostring(math.floor(cpu_usage)).. "% "..tostring(cpu_temp).."℃ "..format_size(cpu_freq_min, false).."-"..format_size(cpu_freq_max, false).."Hz</span>"
        cpu_text_widget:set_markup(markup)
        cpu_graph_widget:add_value(cpu_usage)
    end
@@ -476,7 +475,6 @@ do
            cpu_temp_cmd = ""
        end
    end
-   print("!", cpu_temp_cmd)
 
    gtimer {
        timeout = update_interval_s,
@@ -492,13 +490,11 @@ grep -e "cpu MHz" /proc/cpuinfo | sed -e 's/^/freq:/g'
    }
 end
 
-local ram_widget_width = (waffle_width - button_padding) / 2 - button_height - button_padding * 2
 local ram_widget
 do
    local ram_graph_widget = wibox.widget {
       max_value = 100,
       background_color = graph_background,
-      forced_width = ram_widget_width,
       forced_height = button_height / 2,
       step_width = dpi(2),
       step_spacing = dpi(1),
@@ -507,9 +503,8 @@ do
    }
 
    local ram_text_widget = wibox.widget {
-       forced_width = ram_widget_width,
        forced_height = button_height,
-       align = "center",
+       align = "right",
        point = {x = 0, y = 0},
        outline_color = beautiful.bg_normal,
        outline_size = dpi(2),
@@ -537,7 +532,7 @@ do
                id = "text",
                widget = ram_text_widget
            },
-           layout = wibox.layout.manual
+           layout = wibox.layout.stack
        },
        height = button_height,
        widget = wibox.container.constraint,
@@ -545,17 +540,25 @@ do
 
    local function on_output(stdout)
        local mem = {}
-       for line in string.gmatch(stdout,"[^\r\n]+") do
-           local key, value = line:match("(.*):%s+([0-9]+) .*")
-           mem[key] = value
+       local uptime
+
+       for line in stdout:gmatch("[^\r\n]*") do
+           if line:find("^mem:") then
+               local key, value = line:match("mem:(.*):%s+([0-9]+) .*")
+               mem[key] = value
+           elseif line:find("^uptime:") then
+               local uptime_str, _ = line:match("([0-9.]+) ([0-9.]+)")
+               uptime = tonumber(uptime_str)
+           end
        end
+
        -- Match the calculation in htop.
        local total = mem["MemTotal"]
        local cached = mem["Cached"] + mem["SReclaimable"] - mem["Shmem"]
        local used = total - mem["MemFree"] - mem["Buffers"] - cached
        local usage = math.floor(used / total * 100 + 0.5)
 
-       local markup = "<span font_desc='" .. font_info .. "'>" .. format_size(used * 1024) .. "B</span>"
+       local markup = "<span font_desc='" .. font_info .. "'>"..format_size(used * 1024).."B UpTime "..format_time_sec(uptime).."</span>"
        -- widget:get_children_by_id("text")[1]:set_markup(markup)
        -- widget:get_children_by_id("graph")[1]:add_value(usage)
        ram_text_widget:set_markup(markup)
@@ -567,7 +570,10 @@ do
        call_now = true,
        autostart = true,
        callback = function ()
-           awful.spawn.easy_async({"egrep", "-e", "MemTotal:|MemFree:|Buffers:|Cached:|Shmem:|SReclaimable", "/proc/meminfo"}, on_output)
+           awful.spawn.easy_async_with_shell([[
+egrep -e "MemTotal:|MemFree:|Buffers:|Cached:|Shmem:|SReclaimable" /proc/meminfo | sed -e 's/^/mem:/g'
+echo -n "uptime:"; cat /proc/uptime
+]], on_output)
        end,
    }
 end
@@ -1358,7 +1364,7 @@ local waffle_root_status_widget = decorate_panel {
                         layout = wibox.layout.align.horizontal
                     },
                     spacing = button_padding,
-                    layout = wibox.layout.flex.horizontal,
+                    layout = wibox.layout.fixed.vertical,
                 },
                 key = "x",
                 indicator = em("x"),
@@ -1748,7 +1754,7 @@ local client_waffle = view {
     root = decorate_waffle {
         decorate_panel {
             widget = {
-                { 
+                {
                     button({
                             width = dpi(64),
                             height = dpi(64),
