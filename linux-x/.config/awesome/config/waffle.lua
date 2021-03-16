@@ -362,8 +362,10 @@ local function format_size(s, fill)
     end
 end
 
-local function format_time_sec(s)
-    if s > 3600 then
+local function format_duration_sec(s)
+    if s > 86400 then
+        return string.format("%dd%dh%dm", math.floor(s / 86400), math.floor(s % 86400 / 3600), math.floor(s % 3600 / 60))
+    elseif s > 3600 then
         return string.format("%dh%dm", math.floor(s / 3600), math.floor(s % 3600 / 60))
     elseif s > 60 then
         return string.format("%dm", math.floor(s / 60))
@@ -558,7 +560,7 @@ do
        local used = total - mem["MemFree"] - mem["Buffers"] - cached
        local usage = math.floor(used / total * 100 + 0.5)
 
-       local markup = "<span font_desc='" .. font_info .. "'>"..format_size(used * 1024).."B UpTime "..format_time_sec(uptime).."</span>"
+       local markup = "<span font_desc='" .. font_info .. "'>"..format_size(used * 1024).."B "..format_duration_sec(uptime).."</span>"
        -- widget:get_children_by_id("text")[1]:set_markup(markup)
        -- widget:get_children_by_id("graph")[1]:add_value(usage)
        ram_text_widget:set_markup(markup)
