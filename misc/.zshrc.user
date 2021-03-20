@@ -106,7 +106,7 @@ local DATE_HFORMAT="%y-%m-%d %H:%M:%S"
 export LAST_CMD_TS=""
 
 local ML_PROMPT_L1='%{$fg_bold[default]%}↓'
-local ML_PROMPT_L2="» "
+local ML_PROMPT_L2="›"
 
 timestamp_ms() {
     print -nP '%D{%s%3.}'
