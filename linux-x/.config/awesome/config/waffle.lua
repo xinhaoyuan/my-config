@@ -404,10 +404,7 @@ do
    cpu_widget = wibox.widget {
       {
           {
-              {
-                  id = "graph",
-                  widget = cpu_graph_widget
-              },
+              cpu_graph_widget,
               {
                   cpu_graph_widget,
                   reflection = {
@@ -522,10 +519,7 @@ do
    ram_widget = wibox.widget {
        {
            {
-               {
-                   id = "graph",
-                   widget = ram_graph_widget
-               },
+               ram_graph_widget,
                {
                    ram_graph_widget,
                    reflection = {
@@ -568,8 +562,6 @@ do
        local usage = math.floor(used / total * 100 + 0.5)
 
        local markup = "<span font_desc='" .. font_info .. "'>"..format_size(used * 1024, false).."B "..format_size(cached_or_buffered * 1024, false).."B "..format_duration_sec(uptime).."</span>"
-       -- widget:get_children_by_id("text")[1]:set_markup(markup)
-       -- widget:get_children_by_id("graph")[1]:add_value(usage)
        ram_text_widget:set_markup(markup)
        ram_graph_widget:add_value(usage)
    end
