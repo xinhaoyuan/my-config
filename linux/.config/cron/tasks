@@ -1,0 +1,1 @@
+*/10 * * * * cd /home/xinhaoyuan/org && git fetch origin && git rebase origin/master --autostash && git commit -a -m "Cron update" && git push #TASK:UpdateOrg
