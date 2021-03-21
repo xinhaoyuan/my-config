@@ -467,7 +467,7 @@ do
            end
        end
 
-       local markup = "<span font_desc='"..font_info.."'>"..tostring(math.floor(cpu_usage)).. "% "..tostring(cpu_temp).."℃ "..format_size(cpu_freq_min, false).."-"..format_size(cpu_freq_max, false).."Hz</span>"
+       local markup = "<span font_desc='"..font_info.."'>"..tostring(math.floor(cpu_usage)).. "% "..tostring(cpu_temp).."℃ "..format_size(cpu_freq_min).."-"..format_size(cpu_freq_max).."Hz</span>"
        cpu_text_widget:set_markup(markup)
        cpu_graph_widget:add_value(cpu_usage)
    end
