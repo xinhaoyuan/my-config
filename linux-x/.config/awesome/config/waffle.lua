@@ -470,7 +470,7 @@ do
    local h = io.popen("find_coretemp_input.sh")
    if h then
        local temp_input = h:read("*a")
-       if temp_input then
+       if temp_input and #temp_input > 0 then
            cpu_temp_cmd =
                string.format("echo -n 'temp:'; cat %s", temp_input)
        else
