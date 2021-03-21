@@ -1201,12 +1201,6 @@ require("awful.rules").rules = {
        },
    },
    {
-       rule = { class = "Firefox" },
-       properties = {
-           titlebar_style = "mini_mid",
-       },
-   },
-   {
        rule = { class = "Firefox", role = "Popup" },
        properties = {
            borderless = true,
