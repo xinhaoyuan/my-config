@@ -353,12 +353,18 @@ local function format_size(s, fill)
         ui = ui + 1
         s = s / 1000
     end
-    if s >= 1000 then return "2BIG";
+    local si = math.floor(s)
+    if s >= 1000 then return "2BIG"
+    elseif s >= 100 then
+        return string.format(fill and " %3d%s" or "%d%s", si, units[ui])
+    elseif s >= 10 then
+        return string.format(fill and "%2d.%01d%s" or "%d.%01d%s", si, math.floor((s - si) * 10), units[ui])
+    elseif s >= 1 then
+        return string.format("%d.%02d%s", si, math.floor((s - si) * 100), units[ui])
+    elseif s > 0.001 then
+        return string.format(".%03d%s", math.floor((s - si) * 1000), units[ui])
     else
-        -- Alternative styles
-        -- return string.format("%.2f%s", s, units[ui])
-        local si = math.floor(s)
-        return string.format(fill and "%3d.%02d%s" or "%d.%02d%s", si, math.floor((s - si)  * 100), units[ui])
+        return fill and "   0 " or "0 "
     end
 end
 
