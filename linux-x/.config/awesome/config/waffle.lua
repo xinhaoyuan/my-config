@@ -33,6 +33,7 @@ local button_padding = beautiful.sep_small_size or dpi(4)
 local panel_padding = beautiful.sep_big_size or dpi(10)
 local font_normal = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_normal)
 local font_info = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small)
+local font_info_mono = beautiful.fontname_mono.." "..tostring(beautiful.fontsize_small)
 local graph_background = "#00000000"
 local graph_normal_color = acolor.from_string(beautiful.bg_focus):blend_with(beautiful.bg_normal, 0.25):to_string()
 local graph_color = graph_normal_color -- "linear:0,0:0,22:0,#FF0000:0.5," .. graph_normal_color
@@ -464,7 +465,7 @@ do
            end
        end
 
-       local markup = "<span font_desc='"..font_info.."'>"..string.format("% 2d", math.floor(cpu_usage)).. "% "..string.format("% 3d", math.floor(cpu_temp)).."℃ "..format_size(cpu_freq_min).."-"..format_size(cpu_freq_max).."Hz</span>"
+       local markup = "<span font_desc='"..font_info_mono.."'>"..string.format("% 2d", math.floor(cpu_usage)).. "% "..string.format("% 3d", math.floor(cpu_temp)).."℃ "..format_size(cpu_freq_min).."-"..format_size(cpu_freq_max).."Hz</span>"
        cpu_text_widget:set_markup(markup)
        cpu_graph_widget:add_value(cpu_usage)
    end
@@ -561,7 +562,7 @@ do
        local used = total - mem["MemFree"] - cached_or_buffered
        local usage = math.floor(used / total * 100 + 0.5)
 
-       local markup = "<span font_desc='" .. font_info .. "'>"..format_size(used * 1024, false).."B "..format_size(cached_or_buffered * 1024, false).."B "..format_duration_sec(uptime).."</span>"
+       local markup = "<span font_desc='" .. font_info_mono .. "'>"..format_size(used * 1024, false).."B "..format_size(cached_or_buffered * 1024, false).."B "..format_duration_sec(uptime).."</span>"
        ram_text_widget:set_markup(markup)
        ram_graph_widget:add_value(usage)
    end
@@ -716,7 +717,7 @@ do
 
         if prev_recv ~= nil then
             local rx = (recv - prev_recv) / update_interval_s
-            local markup = "<span font_desc='" .. font_info .. "'>R " .. format_size(rx) .. "B/s</span>"
+            local markup = "<span font_desc='" .. font_info_mono .. "'>R " .. format_size(rx) .. "B/s</span>"
             rx_text_widget:set_markup(markup)
             netgraph_rx_widget.max_value = 256 * 1024
             netgraph_rx_widget:add_value(rx)
@@ -724,7 +725,7 @@ do
         prev_recv = recv
         if prev_send ~= nil then
             local tx = (send - prev_send) / update_interval_s
-            local markup = "<span font_desc='" .. font_info .. "'>T " .. format_size(tx) .. "B/s</span>"
+            local markup = "<span font_desc='" .. font_info_mono .. "'>T " .. format_size(tx) .. "B/s</span>"
             tx_text_widget:set_markup(markup)
             netgraph_tx_widget.max_value = 256 * 1024
             netgraph_tx_widget:add_value(tx)
@@ -881,7 +882,7 @@ do
 
         if prev_rd ~= nil then
             local rd = (rd - prev_rd) / update_interval_s
-            local markup = "<span font_desc='" .. font_info .. "'>R " .. format_size(rd) .. "B/s</span>"
+            local markup = "<span font_desc='" .. font_info_mono .. "'>R " .. format_size(rd) .. "B/s</span>"
             rd_text_widget:set_markup(markup)
             diskgraph_rd_widget.max_value = 1024 * 1024
             diskgraph_rd_widget:add_value(rd)
@@ -889,7 +890,7 @@ do
         prev_rd = rd
         if prev_wr ~= nil then
             local wr = (wr - prev_wr) / update_interval_s
-            local markup = "<span font_desc='" .. font_info .. "'>W " .. format_size(wr) .. "B/s</span>"
+            local markup = "<span font_desc='" .. font_info_mono .. "'>W " .. format_size(wr) .. "B/s</span>"
             wr_text_widget:set_markup(markup)
             diskgraph_wr_widget.max_value = 1024 * 1024
             diskgraph_wr_widget:add_value(wr)
@@ -921,7 +922,7 @@ do
         align = "center",
         forced_width = battery_widget_width,
         forced_height = button_height - dpi(2),
-        font = font_info,
+        font = font_info_mono,
         widget = wibox.widget.textbox
     }
 
