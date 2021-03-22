@@ -394,7 +394,7 @@ do
 
    local cpu_text_widget = wibox.widget {
        forced_height = button_height,
-       align = "right",
+       align = "center",
        point = {x = 0, y = 0},
        outline_color = beautiful.bg_normal,
        outline_size = dpi(2),
@@ -464,7 +464,7 @@ do
            end
        end
 
-       local markup = "<span font_desc='"..font_info.."'>"..tostring(math.floor(cpu_usage)).. "% "..tostring(cpu_temp).."℃ "..format_size(cpu_freq_min).."-"..format_size(cpu_freq_max).."Hz</span>"
+       local markup = "<span font_desc='"..font_info.."'>"..string.format("% 2d", math.floor(cpu_usage)).. "% "..string.format("% 3d", math.floor(cpu_temp)).."℃ "..format_size(cpu_freq_min).."-"..format_size(cpu_freq_max).."Hz</span>"
        cpu_text_widget:set_markup(markup)
        cpu_graph_widget:add_value(cpu_usage)
    end
@@ -509,7 +509,7 @@ do
 
    local ram_text_widget = wibox.widget {
        forced_height = button_height,
-       align = "right",
+       align = "center",
        point = {x = 0, y = 0},
        outline_color = beautiful.bg_normal,
        outline_size = dpi(2),
