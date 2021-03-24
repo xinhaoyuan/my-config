@@ -51,7 +51,7 @@ local function view(args)
     local checked = {[root] = true}
     local traverse_pool = {root}
     local view = {}
-    view.keys = {}
+    view.keys = args.keys or {}
 
     -- traverse the hierachy in depth-first order
     while #traverse_pool > 0 do
@@ -79,7 +79,7 @@ local function view(args)
         margins = beautiful.useless_gap,
         widget = wibox.container.margin,
     }
-    view.key_handler = function (mod, key, event)
+    view.key_handler = args.key_handler or function (mod, key, event)
         if event == "press" and view.keys[key] then
             view.keys[key](mod, key, event)
             return true
@@ -1576,6 +1576,16 @@ local waffle_root_view = view {
         waffle_root_action_widget,
         waffle_root_admin_widget,
         layout = wibox.layout.fixed.vertical,
+    },
+    keys = {
+        ["XF86Launch1"] = function ()
+            waffle:hide()
+            gtimer.delayed_call(function ()
+                    if capi.client.focus then
+                        shared.waffle.show_client_waffle(capi.client.focus, { anchor = "client" })
+                    end
+            end)
+        end,
     }
 }
 
@@ -1927,7 +1937,12 @@ local client_waffle = view {
     },
     on_close = function()
         shared.waffle_selected_client = nil
-    end
+    end,
+    keys = {
+        ["XF86Launch1"] = function ()
+            waffle:hide()
+        end,
+    },
 }
 
 function shared.waffle.show_client_waffle(c, args)

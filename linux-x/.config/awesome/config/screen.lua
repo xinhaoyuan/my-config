@@ -811,7 +811,7 @@ capi.screen.connect_signal("primary_changed", schedule_reset_widgets)
 capi.root.keys(
    awful.util.table.join(
       capi.root.keys(),
-      awful.key({ "Mod4" }, "F12", function () waffle:show(nil, { anchor = "screen" }) end),
+      awful.key({ }, "XF86Launch1", function () waffle:show(nil, { anchor = "screen" }) end),
       awful.key({ "Mod4" }, ";",
          function ()
             awful.prompt.run {

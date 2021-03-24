@@ -267,7 +267,7 @@ function waffle:show(view, args)
             end
             if self.view_.key_handler and self.view_.key_handler(mod, key, event) then
                 -- pass
-            elseif key == "Escape" or key == "F12" then
+            elseif key == "Escape" then
                 if event == "press" then
                     self:hide()
                 end
