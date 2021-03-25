@@ -80,6 +80,7 @@ theme.xborder_outer_space = 3
 theme.xborder_inner_space = 3
 theme.xborder_radius = dpi(16)
 theme.xborder_radius_cut = true
+theme.xborder_radius_indicator = false
 if theme.xborder_radius and theme.xborder_radius >= theme.xborder_width then
     theme.xborder_indent = theme.xborder_radius_cut and math.floor((2 - math.sqrt(2)) * (theme.xborder_radius - theme.xborder_outer_space or 0)) or (theme.xborder_radius - theme.xborder_outer_space or 0)
 else
@@ -578,7 +579,7 @@ theme.apply_border_to_widget = function(args)
             local tr = args.tr ~= false and widget.widget.top > 0 and widget.widget.right > 0
             local br = args.br ~= false and widget.widget.bottom > 0 and widget.widget.right > 0
             local bl = args.bl ~= false and widget.widget.bottom > 0 and widget.widget.left > 0
-            local indicator = args.indicator ~= false and beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width and beautiful.xborder_radius_cut
+            local indicator = args.indicator ~= false and beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width and beautiful.xborder_radius_cut and beautiful.xborder_indicator
             if beautiful.xborder_radius then
                 cr:set_source(gcolor(beautiful.xborder_space))
                 if indicator then

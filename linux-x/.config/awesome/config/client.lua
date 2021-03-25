@@ -351,7 +351,7 @@ local border_top = border.directions{ "top", "left", "right" }
 local function draw_tb_border_bgimage_top(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    local indicator = beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width and beautiful.xborder_radius_cut and capi.client.focus == c
+    local indicator = beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width and beautiful.xborder_radius_cut and beautiful.xborder_indicator and capi.client.focus == c
     if beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width then
         cr:set_source(gcolor(beautiful.xborder_space))
         if indicator then
@@ -384,7 +384,7 @@ local border_bottom = border.directions{ "bottom", "left", "right" }
 local function draw_tb_border_bgimage_bottom(context, cr, width, height)
     local c = context["client"]
     local border_color = gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal)
-    local indicator = beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width and beautiful.xborder_radius_cut and capi.client.focus == c
+    local indicator = beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width and beautiful.xborder_radius_cut and beautiful.xborder_indicator and capi.client.focus == c
     if beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width then
         cr:set_source(gcolor(beautiful.xborder_space))
         if indicator then
