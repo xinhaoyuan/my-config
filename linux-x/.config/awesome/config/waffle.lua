@@ -180,11 +180,16 @@ local function button(args)
        args.icon_widget or (
            args.icon and
                wibox.widget {
-                   image = args.icon,
-                   resize = true,
-                   forced_width = args.icon_size or button_height,
-                   forced_height = args.icon_size or button_height,
-                   widget = masked_imagebox,
+                   {
+                       image = args.icon,
+                       resize = true,
+                       forced_width = args.icon_size or button_height,
+                       forced_height = args.icon_size or button_height,
+                       widget = masked_imagebox,
+                   },
+                   halign = "center",
+                   valign = "center",
+                   widget = wibox.container.place,
                }
                            ),
        label,
