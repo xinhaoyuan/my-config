@@ -572,8 +572,8 @@ echo -n "uptime:"; cat /proc/uptime
    }
 end
 
-local net_widget_width = (waffle_width - button_height - button_padding * 4) / 2
 local net_widget
+local net_has_vpn
 do
     local netgraph_rx_widget = wibox.widget {
         background_color = graph_background,
@@ -666,13 +666,18 @@ do
         widget = wibox.container.constraint,
     }
 
-    net_widget = wibox.widget {
+    local net_widget_icon_container = wibox.widget {
         {
             image = gcolor.recolor_image(icons.ethernet, beautiful.fg_normal),
             forced_height = button_height,
             forced_width = button_height,
             widget = masked_imagebox,
         },
+        widget = cbg,
+    }
+
+    net_widget = wibox.widget {
+        net_widget_icon_container,
         {
             {
                 net_rx_layout,
@@ -693,17 +698,25 @@ do
     local function on_output(stdout)
         local recv = 0
         local send = 0
+        local has_vpn = false
         for line in stdout:gmatch("[^\r\n]+") do
-            local items = {}
-            for item in line:gmatch("[^ \t:]+") do
-                if #item > 0 then
-                    table.insert(items, item)
+            if line:find("^ifdev:") then
+                local items = {}
+                local iter = line:gmatch("[^ \t:]+"); iter() -- skip the header
+                for item in iter do
+                    if #item > 0 then
+                        table.insert(items, item)
+                    end
                 end
-            end
-            if items[1] ~= "lo" and items[1]:match("^tun[0-9]*$") == nil then
-                -- Skips VPN for avoiding double-counting
-                recv = recv + tonumber(items[2])
-                send = send + tonumber(items[10])
+                if items[1] == "lo" then
+                    --skip
+                elseif items[1]:match("^tun[0-9]*$") then
+                    has_vpn = true
+                else
+                    -- Skips VPN for avoiding double-counting
+                    recv = recv + tonumber(items[2])
+                    send = send + tonumber(items[10])
+                end
             end
         end
 
@@ -723,6 +736,16 @@ do
             netgraph_tx_widget:add_value(tx)
         end
         prev_send = send
+
+        if has_vpn ~= net_has_vpn then
+            net_has_vpn = has_vpn
+            if has_vpn then
+                net_widget_icon_container.fg_function = {"special_"}
+            else
+                -- Need to investigate why nil does not work.
+                net_widget_icon_container.fg_function = {"fg_"}
+            end
+        end
     end
 
     gtimer {
@@ -730,7 +753,9 @@ do
         call_now = true,
         autostart = true,
         callback = function ()
-            awful.spawn.easy_async({"egrep", "-e", "[[:alnum:]]+:", "/proc/net/dev"}, on_output)
+            awful.spawn.easy_async_with_shell([=[
+egrep -e "[[:alnum:]]+:" /proc/net/dev | sed -e "s/^/ifdev:/g"
+]=], on_output)
         end,
     }
 end
@@ -1372,7 +1397,12 @@ local waffle_root_status_widget = decorate_panel {
                 indicator = em("n"),
                 key = "n",
                 action = function (alt)
-                    shared.action.terminal({"sudo", "iftop"})
+                    if alt then
+                        -- TODO make this an action.
+                        awful.spawn({"expressvpn", net_has_vpn and "disconnect" or "connect"}, false)
+                    else
+                        shared.action.terminal({"sudo", "iftop"})
+                    end
                     waffle:hide()
                 end,
             },
