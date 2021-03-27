@@ -51,6 +51,8 @@ local function tasklist_item_button(w, c, b)
             capi.client.focus = c
             c:raise()
         end
+    elseif b == 2 then
+        c:kill()
     elseif b == 3 then
         local wb = capi.mouse.current_wibox
         local geos = capi.mouse.current_widget_geometries

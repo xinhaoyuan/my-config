@@ -568,7 +568,9 @@ end
 
 local function mini_titlebar_button(c, w, button)
     if button == 1 then
-        -- FOCUS
+        if capi.client.focus == c then
+            c.maximized = not c.maximized
+        end
     elseif button == 2 then
         c:kill()
     elseif button == 3 then
