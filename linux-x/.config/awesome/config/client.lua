@@ -239,14 +239,14 @@ local client_keys = table_join(
 )
 
 local client_buttons = table_join(
-   awful.button({ }, 1, function (c) capi.client.focus = c; c:raise() end),
-   awful.button({ "Mod4" }, 1, function (c) awful.mouse.client.move(c) end),
-   awful.button({ "Mod4" }, 3, function (c)
-         local _, cc = awful.placement.closest_corner(capi.mouse, {parent = c})
-         awful.mouse.client.resize(c, cc)
-   end),
-   awful.button({ "Mod4" }, 4, shared.client.enlarge),
-   awful.button({ "Mod4" }, 5, shared.client.shrink)
+    awful.button({ }, 1, function (c) capi.client.focus = c; c:raise() end),
+    awful.button({ "Mod4" }, 1, function (c) awful.mouse.client.move(c) end),
+    awful.button({ "Mod4" }, 3, function (c)
+            local _, cc = awful.placement.closest_corner(capi.mouse, {parent = c})
+            awful.mouse.client.resize(c, cc)
+    end),
+    awful.button({ "Mod4" }, 4, shared.client.enlarge),
+    awful.button({ "Mod4" }, 5, shared.client.shrink)
 )
 
 -- gain focus and raise before moving
@@ -568,7 +568,7 @@ end
 
 local function mini_titlebar_button(c, w, button)
     if button == 1 then
-        if capi.client.focus == c then
+        if w.client_was_focused_when_pressed then
             c.maximized = not c.maximized
         end
     elseif button == 2 then
@@ -586,6 +586,7 @@ local function set_up_mini_titlebar_buttons(c, w)
     w.button_pressed = {}
     w:connect_signal('button::press', function (w, x, y, button)
                          w.button_pressed[button] = true
+                         w.client_was_focused_when_pressed = capi.client.focus == c
     end)
     w:connect_signal('button::release', function (w, x, y, button)
                          if w.button_pressed[button] then
