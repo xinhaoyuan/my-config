@@ -1612,16 +1612,11 @@ local waffle_root_view = view {
         waffle_root_admin_widget,
         layout = wibox.layout.fixed.vertical,
     },
-    keys = {
-        ["XF86Launch1"] = function ()
+    default_key_handler = function (mode, key, event)
+        if event == "press" and key:find("^XF86Launch.*") then
             waffle:hide()
-            gtimer.delayed_call(function ()
-                    if capi.client.focus then
-                        shared.waffle.show_client_waffle(capi.client.focus, { anchor = "client" })
-                    end
-            end)
-        end,
-    }
+        end
+    end,
 }
 
 waffle:set_root_view(waffle_root_view)
@@ -1973,11 +1968,11 @@ local client_waffle = view {
     on_close = function()
         shared.waffle_selected_client = nil
     end,
-    keys = {
-        ["XF86Launch1"] = function ()
+    default_key_handler = function (mode, key, event)
+        if event == "press" and key:find("^XF86Launch.*") then
             waffle:hide()
-        end,
-    },
+        end
+    end,
 }
 
 function shared.waffle.show_client_waffle(c, args)

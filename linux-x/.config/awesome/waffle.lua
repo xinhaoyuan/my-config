@@ -148,9 +148,28 @@ function waffle:set_gravity(gravity)
     end
 end
 
-function waffle:set_view(view)
+function waffle:set_view(view, call_open)
+    if self.view_ and self.view_.on_close then
+        self.view_:on_close()
+    end
     self.view_ = view
-    self.widget_container.widget = view.widget
+    if view then
+        self.widget_container.widget = view.widget
+        if call_open and view.on_open then
+            view:on_open()
+        end
+    end
+end
+
+function waffle:clear_stack()
+    if self.stack_ then
+        for _, v in ipairs(self.stack_) do
+            if v.on_close then
+                v:on_close()
+            end
+        end
+    end
+    self.stack_ = nil
 end
 
 function waffle:is_in_view(view)
@@ -218,10 +237,13 @@ function waffle:disconnect_button_signals()
     capi.drawable.disconnect_signal("button::press", on_drawable_button_press)
 end
 
+-- args.mode in {"push", "set", "set_top"}
 function waffle:show(view, args)
     args = args or {}
-    view = view or self.root_view_
+    local mode = args.mode or "set"
     local screen = args.screen or awful.screen.focused()
+
+    view = view or self.root_view_
     if self.wibox_ ~= nil and self.wibox_.screen ~= screen then
         self:hide()
     end
@@ -233,24 +255,16 @@ function waffle:show(view, args)
     end
     self.wibox_.widget = self.widget_container
 
-    if args.push then
+    if mode == "push" then
         self.stack_ = self.stack_ or {}
         table.insert(self.stack_, self.view_)
-    else
-        if self.view_ and self.view_.on_close then
-            self.view_:on_close()
-        end
-        if self.stack_ then
-            for _, v in ipairs(self.stack_) do
-                if v.on_close then
-                    v:on_close()
-                end
-            end
-        end
-        self.stack_ = nil
     end
 
-    waffle:set_view(view)
+    self:set_view(view, mode ~= "set_top")
+
+    if mode == "set" then
+        self:clear_stack()
+    end
 
     if self.wibox_.input_passthrough then
         self:connect_button_signals()
@@ -298,12 +312,9 @@ end
 function waffle:go_back()
     local headpos = self.stack_ and #self.stack_ or 0
     if headpos >= 1 then
-        if self.view_ and self.view_.on_close then
-            self.view_:on_close()
-        end
         local last = self.stack_[headpos]
         table.remove(self.stack_, headpos)
-        self:show(last, nil, false)
+        self:show(last, { mode = "set_top" })
     else
         self:hide()
     end
@@ -321,18 +332,9 @@ function waffle:hide()
         self.wibox_.widget = nil
         self.wibox_ = nil
     end
-    if self.view_ and self.view_.on_close then
-        self.view_:on_close()
-    end
-    if self.stack_ then
-        for _, v in ipairs(self.stack_) do
-            if v.on_close then
-                v:on_close()
-            end
-        end
-    end
-    self.view_ = nil
-    self.stack_ = nil
+
+    self:set_view(nil)
+    self:clear_stack()
     self:disconnect_button_signals()
 end
 

@@ -34,6 +34,7 @@ local fts = require("hotpot").focus_timestamp
 local aux = require("aux")
 local icons = require("icons")
 local orgenda = require("orgenda")
+local tapdancer = require("tapdancer")
 require("manage_ticket")
 
 -- helper functions
@@ -808,10 +809,23 @@ table.insert(shared.on_start_functions, schedule_reset_widgets)
 capi.screen.connect_signal("list", schedule_reset_widgets)
 capi.screen.connect_signal("primary_changed", schedule_reset_widgets)
 
+local waffle_dancer = tapdancer.create{
+    timeout = 0.2,
+    max = 2,
+    callback = function (counter)
+        if counter > 1 and capi.client.focus then
+            shared.waffle.show_client_waffle(capi.client.focus, { anchor = "client" })
+        else
+            waffle:show(nil, { anchor = "screen" })
+        end
+    end,
+}
+
 capi.root.keys(
    awful.util.table.join(
       capi.root.keys(),
-      awful.key({ }, "XF86Launch1", function () waffle:show(nil, { anchor = "screen" }) end),
+      awful.key({ }, "XF86Launch1", function () waffle_dancer:trigger() end),
+      awful.key({ }, "XF86Launch3", function () waffle_dancer:trigger() end),
       awful.key({ "Mod4" }, ";",
          function ()
             awful.prompt.run {
