@@ -236,9 +236,20 @@ function waffle:show(view, args)
     if args.push then
         self.stack_ = self.stack_ or {}
         table.insert(self.stack_, self.view_)
-    elseif self.view_ and self.view_.on_close then
-        self.view_:on_close()
+    else
+        if self.view_ and self.view_.on_close then
+            self.view_:on_close()
+        end
+        if self.stack_ then
+            for _, v in ipairs(self.stack_) do
+                if v.on_close then
+                    v:on_close()
+                end
+            end
+        end
+        self.stack_ = nil
     end
+
     waffle:set_view(view)
 
     if self.wibox_.input_passthrough then
@@ -287,6 +298,9 @@ end
 function waffle:go_back()
     local headpos = self.stack_ and #self.stack_ or 0
     if headpos >= 1 then
+        if self.view_ and self.view_.on_close then
+            self.view_:on_close()
+        end
         local last = self.stack_[headpos]
         table.remove(self.stack_, headpos)
         self:show(last, nil, false)
