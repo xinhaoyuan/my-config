@@ -66,9 +66,63 @@ local gravity_index = shared.gravity_index
 -- add machi layout
 
 local machi = require("layout-machi")
-
+local tabber = require("tabber")
 beautiful.layout_machi = machi.get_icon()
-machi.editor.nested_layouts["4"] = require("external.equalarea")
+local xlayout = tabber{
+    layout = require("external.equalarea"),
+    bar_size = beautiful.bar_height + 2 * beautiful.xborder_width,
+    bar_bg = "#00000000",
+    bar_min_clients = 2,
+    set_bar_clients = function (bar, clients)
+        if not bar.widget then
+            bar.container = wibox.widget{
+                spacing = beautiful.sep_median_size,
+                layout = wibox.layout.flex.horizontal,
+            }
+            bar.widget = wibox.widget{
+                nil,
+                beautiful.apply_border_to_widget{
+                    widget = wibox.widget{
+                        bar.container,
+                        left = beautiful.xborder_indent,
+                        right = beautiful.xborder_indent,
+                        widget = wibox.container.margin,
+                    },
+                    top = true,
+                    left = true,
+                    right = true,
+                    bottom = true,
+                },
+                nil,
+                expand = "outside",
+                layout = wibox.layout.align.horizontal,
+            }
+        end
+
+        if #clients == 0 then
+            bar.visible = false
+        else
+            bar.visible = true
+            bar.container:reset()
+            table.sort(clients, function (a, b) return a.window < b.window end)
+            for _, c in ipairs(clients) do
+                bar.container:add(
+                    wibox.widget {
+                        {
+                            widget = awful.widget.clienticon(c),
+                        },
+                        {
+                            image = beautiful.client_default_icon,
+                            widget = masked_imagebox,
+                        },
+                        widget = fallback,
+                    }
+                )
+            end
+        end
+    end,
+}
+machi.editor.nested_layouts["4"] = xlayout
 
 local alayout = require("awful.layout")
 alayout.layouts = {

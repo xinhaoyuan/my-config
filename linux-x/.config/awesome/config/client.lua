@@ -1275,6 +1275,18 @@ require("awful.rules").rules = {
            end,
        },
    },
+   {
+       rule = { class = "discord" },
+       properties = {
+           size_hints_honor = false,
+       },
+   },
+   {
+       rule = { class = "TelegramDesktop" },
+       properties = {
+           size_hints_honor = false,
+       },
+   },
 }
 
 return nil
