@@ -1,3 +1,9 @@
+/* Leave space for minititlebar, with symmetry space on the left. */
+#nav-bar {
+    padding-left: 42px !important;
+    padding-right: 42px !important;
+}
+
 #main-window[tabsintitlebar="true"]:not([extradragspace="true"]) #TabsToolbar > .toolbar-items {
   opacity: 0;
   pointer-events: none;
