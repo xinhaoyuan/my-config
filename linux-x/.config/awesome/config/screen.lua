@@ -35,6 +35,7 @@ local aux = require("aux")
 local icons = require("icons")
 local orgenda = require("orgenda")
 local tapdancer = require("tapdancer")
+local notix = require("notix")
 require("manage_ticket")
 
 -- helper functions
@@ -512,7 +513,7 @@ orgenda.data:connect_signal(
     end
 )
 
-
+local cal_popup_width = dpi(240)
 local cal_popup = awful.popup {
     widget = wibox.widget {
         with_border {
@@ -522,12 +523,29 @@ local cal_popup = awful.popup {
                     {
                         {
                             orgenda.widget {
-                                width = dpi(240),
+                                width = cal_popup_width,
                                 indent_width = dpi(26),
                                 item_margin = beautiful.sep_small_size,
                             },
                             halign = "left",
                             widget = wibox.container.place
+                        },
+                        draw_empty = false,
+                        top = beautiful.sep_big_size,
+                        widget = fixed_margin,
+                    },
+                    bgimage = function(context, cr, width, height)
+                        height = beautiful.sep_big_size
+                        beautiful.draw_separator(cr, width, height)
+                    end,
+                    widget = wibox.container.background
+                },
+                {
+                    {
+                        {
+                            notix.widget,
+                            width = cal_popup_width,
+                            widget = wibox.container.constraint,
                         },
                         draw_empty = false,
                         top = beautiful.sep_big_size,
@@ -549,11 +567,6 @@ local cal_popup = awful.popup {
         margins = beautiful.useless_gap,
         widget = wibox.container.margin
     },
-    -- TODO: find out how to do this properly
-    placement = function (d)
-            local _, corner = awful.placement.closest_corner(mouse, {pretend=true})
-            awful.placement[corner](d, {bounding_rect=mouse.screen.workarea})
-    end,
     bg = "#00000000",
     ontop = true,
     visible = false,
@@ -564,14 +577,21 @@ local function cal_reset()
     cal_widget:set_date(os.date('*t'))
 end
 
-local function cal_show()
+local cal_popup_pinned = false
+
+local function cal_popup_show()
     local _, corner = awful.placement.closest_corner(mouse, {pretend=true})
-    awful.placement[corner](cal_popup, {bounding_rect=mouse.screen.workarea})
+    local screen = mouse.screen
     cal_reset()
+    cal_popup.placement = function (d)
+        if screen.valid then
+            awful.placement[corner](cal_popup, {bounding_rect=screen.workarea})
+        end
+    end
     cal_popup.visible = true
 end
 
-local function cal_hide()
+local function cal_popup_hide()
     cal_popup.visible = false
 end
 
@@ -737,19 +757,27 @@ local function setup_screen(scr)
        },
        layout = wibox.layout.fixed.horizontal
    }
-   clock_and_orgenda:connect_signal('mouse::enter', function() cal_show() end)
-   clock_and_orgenda:connect_signal('mouse::leave', function() cal_hide() end)
-   clock_and_orgenda:buttons(awful.util.table.join(
-                     awful.button({         }, 1, function() cal_switch({ month = -1 }) end),
-                     awful.button({         }, 2, function() cal_reset() end),
-                     awful.button({         }, 3, function() cal_switch({ month =  1 }) end),
-                     awful.button({         }, 4, function() cal_switch({ month =  -1 }) end),
-                     awful.button({         }, 5, function() cal_switch({ month =   1 }) end),
-                     awful.button({ 'Shift' }, 1, function() cal_switch({ year = -1 }) end),
-                     awful.button({ 'Shift' }, 3, function() cal_switch({ year =  1 }) end),
-                     awful.button({ 'Shift' }, 4, function() cal_switch({ year = -1 }) end),
-                     awful.button({ 'Shift' }, 5, function() cal_switch({ year =  1 }) end)
-   ))
+   clock_and_orgenda:connect_signal(
+       'mouse::enter', function() if not cal_popup_pinned then cal_popup_show() end end)
+   clock_and_orgenda:connect_signal(
+       'mouse::leave', function() if not cal_popup_pinned then cal_popup_hide() end end)
+   clock_and_orgenda:buttons(
+       awful.util.table.join(
+           awful.button({         }, 1, function()
+                   if cal_popup_pinned then
+                       cal_popup_pinned = false
+                   else
+                       cal_popup_show();
+                       cal_popup_pinned = true
+                   end
+           end),
+           awful.button({         }, 2, function() cal_reset() end),
+           awful.button({         }, 4, function() cal_switch({ month =  -1 }) end),
+           awful.button({         }, 5, function() cal_switch({ month =   1 }) end),
+           awful.button({ 'Shift' }, 4, function() cal_switch({ year = -1 }) end),
+           awful.button({ 'Shift' }, 5, function() cal_switch({ year =  1 }) end)
+       )
+   )
    right_layout:add(clock_and_orgenda)
 
    local layout
