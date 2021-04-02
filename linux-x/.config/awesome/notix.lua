@@ -4,15 +4,30 @@ local capi = {
 local gtimer = require("gears.timer")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
+local fixed_margin = require("fixed_margin")
 
 local config = {
     initialize_naughty = true,
 }
 
 local notif_id_counter = 0
+local notif_counter = 0
 local notif_widgets = {}
 local notif_objects = {}
 
+local notix_counter_textbox = wibox.widget.textbox()
+local notix_header_bar = wibox.widget{
+    {
+        notix_counter_textbox,
+        nil,
+        nil,
+        layout = wibox.layout.align.horizontal,
+    },
+    left = beautiful.sep_small_size,
+    right = beautiful.sep_small_size,
+    widget = wibox.container.margin,
+    visible = false,
+}
 local notix_pinned_container = wibox.widget{
     layout = wibox.layout.fixed.vertical,
 }
@@ -20,10 +35,21 @@ local notix_reg_container = wibox.widget{
     layout = wibox.layout.fixed.vertical,
 }
 local notix_widget = wibox.widget{
+    notix_header_bar,
     notix_pinned_container,
     notix_reg_container,
     layout = wibox.layout.fixed.vertical,
 }
+
+local function update_notif_counter(delta)
+    notif_counter = notif_counter + delta
+    if notif_counter <= 0 then
+        notix_header_bar.visible = false
+    elseif notif_counter <= delta then
+        notix_header_bar.visible = true
+    end
+    notix_counter_textbox.text = tostring(notif_counter).." notifications:"
+end
 
 local function add_widget_to_container(widget, container)
     if widget.notif_container then
@@ -46,6 +72,7 @@ capi.awesome.connect_signal(
         notif_widgets[notif_id] = notif_widget
         notif_objects[notif_id] = notif
 
+        update_notif_counter(1)
         add_widget_to_container(notif_widget, notix_reg_container)
     end
 )
@@ -60,14 +87,17 @@ function config.create_notif_widget(notif)
             notif_widgets[notif.notif_id].notif_container:remove_widgets(
                 notif_widgets[notif.notif_id])
         end
-        action_container:add(config.create_notif_button(action.name, callback))
+        action_container:add(config.create_button(action.name, callback))
     end
     action_container:add(
-        config.create_notif_button(
+        config.create_button(
             "Ignore",
             function ()
                 notif_widgets[notif.notif_id].notif_container:remove_widgets(
                     notif_widgets[notif.notif_id])
+                notif_widgets[notif.notif_id] = nil
+                notif_objects[notif.notif_id] = nil
+                update_notif_counter(-1)
             end
     ))
     return wibox.widget{
@@ -94,7 +124,7 @@ function config.create_notif_widget(notif)
     }
 end
 
-function config.create_notif_button(name, callback)
+function config.create_button(name, callback)
     local widget = wibox.widget{
         {
             {
@@ -129,6 +159,16 @@ end
 
 gtimer.delayed_call(
     function ()
+        notix_header_bar.widget.third = config.create_button(
+            "Ignore all", function ()
+                notix_pinned_container:reset()
+                notix_reg_container:reset()
+                notif_widgets = {}
+                notif_objects = {}
+                update_notif_counter(-notif_counter)
+            end
+        )
+
         if not config.initialize_naughty then
             return
         end
