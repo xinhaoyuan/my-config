@@ -170,9 +170,9 @@ theme.special_normal = is_light_color(theme.bg_normal) and c_red[1] or c_yellow[
 -- custom property color
 theme.special_focus = is_light_color(theme.bg_focus) and c_red[1] or c_yellow[2]
 -- custom property color
-theme.minor_normal = gcolor(acolor(theme.fg_normal):blend_with(acolor(theme.bg_normal), 0.4):to_string())
+theme.minor_normal = gcolor(acolor(theme.fg_normal):blend_with(acolor(theme.bg_normal), 0.3):to_string())
 -- custom property color
-theme.minor_focus = gcolor(acolor(theme.fg_focus):blend_with(acolor(theme.bg_focus), 0.4):to_string())
+theme.minor_focus = gcolor(acolor(theme.fg_focus):blend_with(acolor(theme.bg_focus), 0.3):to_string())
 -- custom property boolean
 theme.waffle_use_entire_screen = true
 -- custom property color
