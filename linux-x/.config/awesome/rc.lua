@@ -38,13 +38,20 @@ local gstring = require("gears.string")
 require("my-autofocus")
 local gcal_org_path = os.getenv("HOME").."/.cache/gcal.org"
 os.execute("touch "..gcal_org_path)
+local notix_org_path = os.getenv("HOME").."/org/notix.org"
+os.execute("touch "..notix_org_path)
+require("notix").config.org_file_for_pin = notix_org_path
 require("orgenda").config.files = {
     {
         path = os.getenv("HOME").."/org/TODO.org",
         rank = 0,
     },
+    {
+        path = notix_org_path,
+        rank = 1,
+    },
     gcal_org_path,
-}
+                                  }
 local hotpot = require("hotpot")
 local fts = hotpot.focus_timestamp
 local gtimer = require("gears.timer")

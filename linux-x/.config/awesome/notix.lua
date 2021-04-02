@@ -105,6 +105,14 @@ capi.awesome.connect_signal(
     end
 )
 
+local function remove_notification(notif)
+    notif_widgets[notif.notif_id].notif_container:remove_widgets(
+        notif_widgets[notif.notif_id])
+    notif_widgets[notif.notif_id] = nil
+    notif_objects[notif.notif_id] = nil
+    update_notif_counter(-1)
+end
+
 function config.create_notif_widget(notif)
     local action_container = wibox.widget{
         layout = wibox.layout.flex.horizontal,
@@ -119,10 +127,23 @@ function config.create_notif_widget(notif)
     end
     local pin_button, unpin_button
     pin_button = config.create_button(
-        "Pin",
+        config.org_file_for_pin and "Save" or "Pin",
         function ()
-            add_widget_to_container(notif_widgets[notif.notif_id], notix_pinned_container)
-            action_container:replace_widget(pin_button, unpin_button)
+            if config.org_file_for_pin then
+                f = io.open(config.org_file_for_pin, "a")
+                if f then
+                    f:write(string.format(
+                                "\n* TODO %s%s%s\n",
+                                notif.app_name and notif.app_name..": " or "",
+                                notif.title and notif.title.." - " or "",
+                                notif.message))
+                    f:close()
+                end
+                remove_notification(notif)
+            else
+                add_widget_to_container(notif_widgets[notif.notif_id], notix_pinned_container)
+                action_container:replace_widget(pin_button, unpin_button)
+            end
         end
     )
     unpin_button = config.create_button(
@@ -137,11 +158,7 @@ function config.create_notif_widget(notif)
         config.create_button(
             "Ignore",
             function ()
-                notif_widgets[notif.notif_id].notif_container:remove_widgets(
-                    notif_widgets[notif.notif_id])
-                notif_widgets[notif.notif_id] = nil
-                notif_objects[notif.notif_id] = nil
-                update_notif_counter(-1)
+                remove(notif)
             end
     ))
     return wibox.widget{
@@ -246,7 +263,7 @@ end
 gtimer.delayed_call(
     function ()
         notix_header_bar.widget.third = config.create_button(
-            "Ignore unpinned", remove_unpinned)
+            config.org_file_for_pin and "Ignore all" or "Ignore unpinned", remove_unpinned)
 
         naughty.connect_signal(
             "new",
@@ -262,6 +279,7 @@ gtimer.delayed_call(
 return {
     config = config,
     add_notification = add_notification,
+    remove_notification = remove_notification,
     remove_unpinned = remove_unpinned,
     widget = notix_widget,
     counter_widget = notix_counter_widget,
