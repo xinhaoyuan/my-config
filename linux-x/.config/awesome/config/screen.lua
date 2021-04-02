@@ -38,6 +38,10 @@ local tapdancer = require("tapdancer")
 local notix = require("notix")
 require("manage_ticket")
 
+notix.config.filter = function (notif)
+    return notif.app_name ~= "pasystray"
+end
+
 -- helper functions
 
 local table_join = awful.util.table.join

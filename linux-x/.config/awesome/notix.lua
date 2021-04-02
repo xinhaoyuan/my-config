@@ -4,7 +4,9 @@ local capi = {
 local gtimer = require("gears.timer")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
+local dpi = beautiful.xresources.apply_dpi
 local fixed_margin = require("fixed_margin")
+local naughty = require("naughty")
 
 local config = {
     initialize_naughty = true,
@@ -103,8 +105,35 @@ function config.create_notif_widget(notif)
     return wibox.widget{
         {
             {
-                text = notif.appname,
-                widget = wibox.widget.textbox,
+                {
+                    {
+                        {
+                            image = notif.icon,
+                            widget = wibox.widget.imagebox,
+                        },
+                        height = dpi(32),
+                        width = dpi(32),
+                        strategy = "max",
+                        widget = wibox.container.constraint,
+                    },
+                    right = beautiful.sep_small_size,
+                    draw_empty = false,
+                    widget = wibox.container.margin,
+                },
+                {
+                    text = notif.app_name,
+                    widget = wibox.widget.textbox,
+                },
+                {
+                    {
+                        text = notif.title,
+                        widget = wibox.widget.textbox,
+                    },
+                    left = beautiful.sep_small_size,
+                    draw_empty = false,
+                    widget = wibox.container.margin,
+                },
+                layout = wibox.layout.align.horizontal,
             },
             margins = beautiful.sep_small_size,
             widget = wibox.container.margin,
@@ -169,16 +198,17 @@ gtimer.delayed_call(
             end
         )
 
-        if not config.initialize_naughty then
-            return
-        end
-
-        require("naughty").config.notify_callback = function (notif)
-            add_notification(notif)
-            return notif
-        end
+        naughty.connect_signal(
+            "new",
+            function (notif)
+                if config.filter == nil or config.filter(notif) then
+                    add_notification(notif)
+                end
+            end
+        )
     end
 )
+
 return {
     config = config,
     add_notification = add_notification,
