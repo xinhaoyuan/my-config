@@ -123,8 +123,7 @@ function config.create_notif_widget(notif)
     for _, action in pairs(notif.actions) do
         local callback = function ()
             action:invoke()
-            notif_widgets[notif.notif_id].notif_container:remove_widgets(
-                notif_widgets[notif.notif_id])
+            remove_notification(notif)
         end
         action_container:add(config.create_button(action.name, callback))
     end
