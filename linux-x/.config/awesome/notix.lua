@@ -8,6 +8,7 @@ local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local fixed_margin = require("fixed_margin")
 local masked_imagebox = require("masked_imagebox")
+local cbg = require("contextual_background")
 local naughty = require("naughty")
 local icons = require("icons")
 
@@ -115,6 +116,8 @@ end
 
 function config.create_notif_widget(notif)
     local action_container = wibox.widget{
+        spacing = beautiful.sep_small_size,
+        spacing_widget = beautiful.sep_widget,
         layout = wibox.layout.flex.horizontal,
     }
     for _, action in pairs(notif.actions) do
@@ -158,7 +161,7 @@ function config.create_notif_widget(notif)
         config.create_button(
             "Ignore",
             function ()
-                remove(notif)
+                remove_notification(notif)
             end
     ))
     return wibox.widget{
@@ -221,21 +224,30 @@ function config.create_button(name, callback)
     local widget = wibox.widget{
         {
             {
-                {
-                    text = name,
-                    align = "center",
-                    widget = wibox.widget.textbox,
-                },
-                margins = beautiful.sep_small_size,
-                widget = wibox.container.margin,
+                text = name,
+                align = "center",
+                widget = wibox.widget.textbox,
             },
-            fg = beautiful.fg_focus,
-            bg = beautiful.bg_focus,
-            widget = wibox.container.background,
+            margins = beautiful.sep_small_size,
+            widget = wibox.container.margin,
         },
-        margins = beautiful.sep_small_size,
-        widget = wibox.container.margin,
+        fg_function = {"fg_"},
+        bg_function = {"bg_"},
+        context_transform_function = {focus = false},
+        widget = cbg,
     }
+    widget:connect_signal(
+        "mouse::enter",
+        function ()
+            widget:set_context_transform_function({focus = true})
+        end
+    )
+    widget:connect_signal(
+        "mouse::leave",
+        function ()
+            widget:set_context_transform_function({focus = false})
+        end
+    )
     widget:connect_signal(
         "button::release",
         callback

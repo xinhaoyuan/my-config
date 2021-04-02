@@ -582,6 +582,8 @@ local function cal_reset()
 end
 
 local cal_popup_pinned = false
+local cal_popup_auto_hide = true
+local cal_popup_auto_hide_timer
 
 local function cal_popup_show()
     local _, corner = awful.placement.closest_corner(mouse, {pretend=true})
@@ -593,6 +595,7 @@ local function cal_popup_show()
         end
     end
     cal_popup.visible = true
+    cal_popup_auto_hide_timer:again()
 end
 
 local function cal_popup_hide()
@@ -607,6 +610,23 @@ local function cal_switch(delta)
     cal_widget:set_date(nil)
     cal_widget:set_date(date)
 end
+
+local cal_popup_mouse_present_last = false
+cal_popup_auto_hide_timer = gtimer{
+    timeout = 0.5,
+    callback = function()
+        if not cal_popup_auto_hide or cal_popup_pinned then
+            cal_popup_mouse_present_last = true
+            return
+        end
+        local mouse_present_now = mouse.current_wibox == cal_popup
+        if not mouse_present_now and not cal_popup_mouse_present_last then
+            cal_popup_hide()
+            cal_popup_auto_hide_timer:stop()
+        end
+        cal_popup_mouse_present_last = mouse_present_now
+    end
+}
 
 -- Orgenda
 
@@ -800,9 +820,10 @@ local function setup_screen(scr)
        widget = cbg,
    }
    clock_area:connect_signal(
-       'mouse::enter', function() if not cal_popup_pinned then cal_popup_show() end end)
+       'mouse::enter', function() cal_popup_auto_hide = false
+           if not cal_popup_pinned then cal_popup_show() end end)
    clock_area:connect_signal(
-       'mouse::leave', function() if not cal_popup_pinned then cal_popup_hide() end end)
+       'mouse::leave', function() cal_popup_auto_hide = true end)
    clock_area:buttons(
        awful.util.table.join(
            awful.button({         }, 1, function()
