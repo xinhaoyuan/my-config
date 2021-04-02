@@ -186,17 +186,18 @@ local function add_notification(notif)
     capi.awesome.emit_signal("notix::on_notification", notif)
 end
 
+local function remove_all()
+    notix_pinned_container:reset()
+    notix_reg_container:reset()
+    notif_widgets = {}
+    notif_objects = {}
+    update_notif_counter(-notif_counter)
+end
+
 gtimer.delayed_call(
     function ()
         notix_header_bar.widget.third = config.create_button(
-            "Ignore all", function ()
-                notix_pinned_container:reset()
-                notix_reg_container:reset()
-                notif_widgets = {}
-                notif_objects = {}
-                update_notif_counter(-notif_counter)
-            end
-        )
+            "Ignore all", remove_all)
 
         naughty.connect_signal(
             "new",
@@ -212,5 +213,6 @@ gtimer.delayed_call(
 return {
     config = config,
     add_notification = add_notification,
+    remove_all = remove_all,
     widget = notix_widget,
 }

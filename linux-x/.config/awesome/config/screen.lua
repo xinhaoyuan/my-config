@@ -776,6 +776,7 @@ local function setup_screen(scr)
                    end
            end),
            awful.button({         }, 2, function() cal_reset() end),
+           awful.button({         }, 3, function() notix.remove_all() end),
            awful.button({         }, 4, function() cal_switch({ month =  -1 }) end),
            awful.button({         }, 5, function() cal_switch({ month =   1 }) end),
            awful.button({ 'Shift' }, 4, function() cal_switch({ year = -1 }) end),
