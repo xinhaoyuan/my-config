@@ -169,15 +169,8 @@ function config.create_notif_widget(notif)
                 {
                     {
                         {
-                            {
-                                image = notif.icon,
-                                resize = false,
-                                widget = wibox.widget.imagebox,
-                            },
-                            height = dpi(32),
-                            width = dpi(32),
-                            strategy = "max",
-                            widget = wibox.container.constraint,
+                            notification = notif,
+                            widget = naughty.widget.icon,
                         },
                         valign = "center",
                         widget = wibox.container.place,
