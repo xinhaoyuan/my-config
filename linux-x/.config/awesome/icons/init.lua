@@ -24,5 +24,6 @@ icons.dots = local_path .. "dots.svg"
 icons.lock = local_path .. "lock.svg"
 icons.sleep = local_path .. "sleep.svg"
 icons.poweroff = local_path .. "poweroff.svg"
+icons.notification = local_path .. "notification.svg"
 
 return icons

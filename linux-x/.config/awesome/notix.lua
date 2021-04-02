@@ -2,11 +2,14 @@ local capi = {
     awesome = awesome,
 }
 local gtimer = require("gears.timer")
+local gcolor = require("gears.color")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local fixed_margin = require("fixed_margin")
+local masked_imagebox = require("masked_imagebox")
 local naughty = require("naughty")
+local icons = require("icons")
 
 local config = {
     initialize_naughty = true,
@@ -17,10 +20,10 @@ local notif_counter = 0
 local notif_widgets = {}
 local notif_objects = {}
 
-local notix_counter_textbox = wibox.widget.textbox()
+local notix_counter_header = wibox.widget.textbox()
 local notix_header_bar = wibox.widget{
     {
-        notix_counter_textbox,
+        notix_counter_header,
         nil,
         nil,
         layout = wibox.layout.align.horizontal,
@@ -43,14 +46,37 @@ local notix_widget = wibox.widget{
     layout = wibox.layout.fixed.vertical,
 }
 
+local notix_counter_number = wibox.widget{
+    text = "0",
+    widget = wibox.widget.textbox
+}
+local notix_counter_widget = wibox.widget{
+    {
+        {
+            image = gcolor.recolor_image(icons.notification, beautiful.fg_normal),
+            forced_height = beautiful.bar_icon_size,
+            forced_width = beautiful.bar_icon_size,
+            widget = masked_imagebox,
+        },
+        valign = "center",
+        widget = wibox.container.place,
+    },
+    notix_counter_number,
+    visible = false,
+    layout = wibox.layout.fixed.horizontal,
+}
+
 local function update_notif_counter(delta)
     notif_counter = notif_counter + delta
     if notif_counter <= 0 then
         notix_header_bar.visible = false
+        notix_counter_widget.visible = false
     elseif notif_counter <= delta then
         notix_header_bar.visible = true
+        notix_counter_widget.visible = true
     end
-    notix_counter_textbox.text = tostring(notif_counter).." notifications:"
+    notix_counter_header.text = tostring(notif_counter).." notifications:"
+    notix_counter_number.text = tostring(notif_counter)
 end
 
 local function add_widget_to_container(widget, container)
@@ -91,6 +117,22 @@ function config.create_notif_widget(notif)
         end
         action_container:add(config.create_button(action.name, callback))
     end
+    local pin_button, unpin_button
+    pin_button = config.create_button(
+        "Pin",
+        function ()
+            add_widget_to_container(notif_widgets[notif.notif_id], notix_pinned_container)
+            action_container:replace_widget(pin_button, unpin_button)
+        end
+    )
+    unpin_button = config.create_button(
+        "Unpin",
+        function ()
+            add_widget_to_container(notif_widgets[notif.notif_id], notix_pinned_container)
+            action_container:replace_widget(unpin_button, pin_button)
+        end
+    )
+    action_container:add(pin_button)
     action_container:add(
         config.create_button(
             "Ignore",
@@ -108,13 +150,18 @@ function config.create_notif_widget(notif)
                 {
                     {
                         {
-                            image = notif.icon,
-                            widget = wibox.widget.imagebox,
+                            {
+                                image = notif.icon,
+                                resize = false,
+                                widget = wibox.widget.imagebox,
+                            },
+                            height = dpi(32),
+                            width = dpi(32),
+                            strategy = "max",
+                            widget = wibox.container.constraint,
                         },
-                        height = dpi(32),
-                        width = dpi(32),
-                        strategy = "max",
-                        widget = wibox.container.constraint,
+                        valign = "center",
+                        widget = wibox.container.place,
                     },
                     right = beautiful.sep_small_size,
                     draw_empty = false,
@@ -174,10 +221,7 @@ function config.create_button(name, callback)
     }
     widget:connect_signal(
         "button::release",
-        function()
-            print("action ", name)
-            callback()
-        end
+        callback
     )
     return widget
 end
@@ -186,18 +230,23 @@ local function add_notification(notif)
     capi.awesome.emit_signal("notix::on_notification", notif)
 end
 
-local function remove_all()
-    notix_pinned_container:reset()
+local function remove_unpinned()
+    local removed_counter = 0
+    for id, widget in pairs(notif_widgets) do
+        if widget.notif_container == notix_reg_container then
+            removed_counter = removed_counter + 1
+            notif_widgets[id] = nil
+            notif_objects[id] = nil
+        end
+    end
     notix_reg_container:reset()
-    notif_widgets = {}
-    notif_objects = {}
-    update_notif_counter(-notif_counter)
+    update_notif_counter(-removed_counter)
 end
 
 gtimer.delayed_call(
     function ()
         notix_header_bar.widget.third = config.create_button(
-            "Ignore all", remove_all)
+            "Ignore unpinned", remove_unpinned)
 
         naughty.connect_signal(
             "new",
@@ -213,6 +262,7 @@ gtimer.delayed_call(
 return {
     config = config,
     add_notification = add_notification,
-    remove_all = remove_all,
+    remove_unpinned = remove_unpinned,
     widget = notix_widget,
+    counter_widget = notix_counter_widget,
 }

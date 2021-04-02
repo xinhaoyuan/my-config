@@ -759,6 +759,12 @@ local function setup_screen(scr)
            draw_empty = false,
            widget = fixed_margin,
        },
+       {
+           notix.counter_widget,
+           right = beautiful.sep_small_size,
+           draw_empty = false,
+           widget = fixed_margin,
+       },
        layout = wibox.layout.fixed.horizontal
    }
    clock_and_orgenda:connect_signal(
@@ -776,7 +782,7 @@ local function setup_screen(scr)
                    end
            end),
            awful.button({         }, 2, function() cal_reset() end),
-           awful.button({         }, 3, function() notix.remove_all() end),
+           awful.button({         }, 3, function() notix.remove_unpinned() end),
            awful.button({         }, 4, function() cal_switch({ month =  -1 }) end),
            awful.button({         }, 5, function() cal_switch({ month =   1 }) end),
            awful.button({ 'Shift' }, 4, function() cal_switch({ year = -1 }) end),
