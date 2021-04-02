@@ -1,3 +1,6 @@
+-- Notification center.
+-- Only works with awesome-git.
+
 local capi = {
     awesome = awesome,
 }
@@ -11,6 +14,7 @@ local masked_imagebox = require("masked_imagebox")
 local cbg = require("contextual_background")
 local naughty = require("naughty")
 local icons = require("icons")
+local scroller = require("scroller")
 
 local config = {
     initialize_naughty = true,
@@ -43,7 +47,15 @@ local notix_reg_container = wibox.widget{
 local notix_widget = wibox.widget{
     notix_header_bar,
     notix_pinned_container,
-    notix_reg_container,
+    {
+        {
+            notix_reg_container,
+            gravity = "bottom",
+            widget = scroller,
+        },
+        height = dpi(300),
+        widget = wibox.container.constraint,
+    },
     layout = wibox.layout.fixed.vertical,
 }
 
@@ -106,15 +118,18 @@ capi.awesome.connect_signal(
     end
 )
 
-local function remove_notification(notif)
-    notif_widgets[notif.notif_id].notif_container:remove_widgets(
-        notif_widgets[notif.notif_id])
-    notif_widgets[notif.notif_id] = nil
-    notif_objects[notif.notif_id] = nil
-    update_notif_counter(-1)
-end
+local remove_notification
 
 function config.create_notif_widget(notif)
+    notif:connect_signal("destroyed",
+                         function (notif, reason)
+                             -- Expired
+                             if reason ~= 1 then
+                                 notif._private.destroy_reason =
+                                     notif._private.destroy_reason or reason
+                                 remove_notification(notif)
+                             end
+    end)
     local action_container = wibox.widget{
         spacing = beautiful.sep_small_size,
         spacing_widget = beautiful.sep_widget,
@@ -123,47 +138,13 @@ function config.create_notif_widget(notif)
     for _, action in pairs(notif.actions) do
         local callback = function ()
             action:invoke()
-            remove_notification(notif)
+            if not notif.resident then
+                remove_notification(notif)
+            end
         end
         action_container:add(config.create_button(action.name, callback))
     end
-    local pin_button, unpin_button
-    pin_button = config.create_button(
-        config.org_file_for_pin and "Save" or "Pin",
-        function ()
-            if config.org_file_for_pin then
-                f = io.open(config.org_file_for_pin, "a")
-                if f then
-                    f:write(string.format(
-                                "\n* TODO %s%s%s\n",
-                                notif.app_name and notif.app_name..": " or "",
-                                notif.title and notif.title.." - " or "",
-                                notif.message))
-                    f:close()
-                end
-                remove_notification(notif)
-            else
-                add_widget_to_container(notif_widgets[notif.notif_id], notix_pinned_container)
-                action_container:replace_widget(pin_button, unpin_button)
-            end
-        end
-    )
-    unpin_button = config.create_button(
-        "Unpin",
-        function ()
-            add_widget_to_container(notif_widgets[notif.notif_id], notix_pinned_container)
-            action_container:replace_widget(unpin_button, pin_button)
-        end
-    )
-    action_container:add(pin_button)
-    action_container:add(
-        config.create_button(
-            "Ignore",
-            function ()
-                remove_notification(notif)
-            end
-    ))
-    return wibox.widget{
+    local content_widget = wibox.widget{
         {
             {
                 {
@@ -207,6 +188,38 @@ function config.create_notif_widget(notif)
             right = beautiful.sep_small_size,
             widget = wibox.container.margin,
         },
+        layout = wibox.layout.fixed.vertical,
+    }
+    content_widget:connect_signal(
+        "button::release",
+        function (_, _x, _y, button)
+            if button == 1 then
+                remove_notification(notif, 2)
+            elseif button == 2 then
+                remove_notification(notif, 1)
+            elseif button == 3 then
+                if config.org_file_for_pin then
+                    f = io.open(config.org_file_for_pin, "a")
+                    if f then
+                        f:write(string.format(
+                                    "\n* TODO %s%s%s\n",
+                                    notif.app_name and #notif.app_name > 0 and notif.app_name..": " or "",
+                                    notif.title and #notif.title > 0 and notif.title.." - " or "",
+                                    notif.message))
+                        f:close()
+                    end
+                    remove_notification(notif, 1)
+                elseif notif_widgets[notif.notif_id] == notix_reg_container then
+                    add_widget_to_container(notif_widgets[notif.notif_id], notix_pinned_container)
+                else
+                    add_widget_to_container(notif_widgets[notif.notif_id], notix_reg_container)
+                end
+            end
+        end
+    )
+
+    return wibox.widget{
+        content_widget,
         action_container,
         layout = wibox.layout.fixed.vertical,
     }
@@ -251,17 +264,35 @@ local function add_notification(notif)
     capi.awesome.emit_signal("notix::on_notification", notif)
 end
 
+remove_notification = function (notif, reason)
+    if notif_widgets[notif.notif_id] == nil then
+        return
+    end
+    notif_widgets[notif.notif_id].notif_container:remove_widgets(
+        notif_widgets[notif.notif_id])
+    notif_widgets[notif.notif_id] = nil
+
+    -- This is a hack depending on that :destroy does not really call _private.destroy.
+    -- Note that we won't call _private.destory twice thanks to the guard above.
+    if notif._private.destroy_reason then
+        notif._private.destroy(reason or notif._private.destroy_reason)
+    else
+        reason = reason or 2
+        notif:destroy(reason)
+        notif._private.destroy(reason)
+    end
+    notif_objects[notif.notif_id] = nil
+
+    update_notif_counter(-1)
+end
+
 local function remove_unpinned()
     local removed_counter = 0
     for id, widget in pairs(notif_widgets) do
         if widget.notif_container == notix_reg_container then
-            removed_counter = removed_counter + 1
-            notif_widgets[id] = nil
-            notif_objects[id] = nil
+            remove_notification(notif_objects[id], 1)
         end
     end
-    notix_reg_container:reset()
-    update_notif_counter(-removed_counter)
 end
 
 gtimer.delayed_call(
