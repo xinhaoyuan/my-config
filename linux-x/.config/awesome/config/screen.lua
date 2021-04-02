@@ -766,7 +766,7 @@ local function setup_screen(scr)
            layout = wibox.layout.fixed.vertical,
        }
    end
-   clock_and_orgenda = wibox.widget{
+   local clock_area = wibox.widget{
        {
            {
                clock,
@@ -799,20 +799,27 @@ local function setup_screen(scr)
        context_transform_function = {focus = false},
        widget = cbg,
    }
-   clock_and_orgenda:connect_signal(
+   clock_area:connect_signal(
        'mouse::enter', function() if not cal_popup_pinned then cal_popup_show() end end)
-   clock_and_orgenda:connect_signal(
+   clock_area:connect_signal(
        'mouse::leave', function() if not cal_popup_pinned then cal_popup_hide() end end)
-   clock_and_orgenda:buttons(
+   clock_area:buttons(
        awful.util.table.join(
            awful.button({         }, 1, function()
                    if cal_popup_pinned then
-                       cal_popup_pinned = false
-                       clock_and_orgenda:set_context_transform_function({focus = false})
+                       if cal_popup.screen == scr then
+                           cal_popup_pinned = false
+                           clock_area:set_context_transform_function({focus = false})
+                       else
+                           cal_popup.screen.widgets.
+                               clock_area:set_context_transform_function({focus = false})
+                           cal_popup_show()
+                           clock_area:set_context_transform_function({focus = true})
+                       end
                    else
                        cal_popup_show();
                        cal_popup_pinned = true
-                       clock_and_orgenda:set_context_transform_function({focus = true})
+                       clock_area:set_context_transform_function({focus = true})
                    end
            end),
            awful.button({         }, 2, function() cal_reset() end),
@@ -823,7 +830,8 @@ local function setup_screen(scr)
            awful.button({ 'Shift' }, 5, function() cal_switch({ year =  1 }) end)
        )
    )
-   right_layout:add(clock_and_orgenda)
+   right_layout:add(clock_area)
+   scr.widgets.clock_area = clock_area
 
    local layout
    local left_margin_container, middle_margin_container, right_margin_container
