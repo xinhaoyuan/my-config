@@ -617,7 +617,7 @@ local orgenda_counter_widget = wibox.widget {
             image = gcolor.recolor_image(icons.calendar_todo, beautiful.fg_normal),
             forced_height = beautiful.bar_icon_size,
             forced_width = beautiful.bar_icon_size,
-            widget = wibox.widget.imagebox,
+            widget = masked_imagebox,
         },
         valign = "center",
         widget = wibox.container.place
@@ -733,39 +733,71 @@ local function setup_screen(scr)
 
    local clock
    if direction_index[shared.var.bar_position] == "horizontal" then
-       clock = wibox.widget.textclock("<span color='" .. beautiful.border_focus .. "'>%m<b>%d</b></span> %H<b>%M</b>")
+       clock = wibox.widget{
+           {
+               {
+                   format = "%m<b>%d</b>",
+                   widget = wibox.widget.textclock,
+               },
+               fg_function = {"minor_"},
+               widget = cbg,
+           },
+           {
+               format = "%H<b>%M</b>",
+               widget = wibox.widget.textclock,
+           },
+           spacing = beautiful.sep_small_size,
+           layout = wibox.layout.fixed.horizontal,
+       }
    else
-       clock = wibox.widget.textclock("<span color='" .. beautiful.border_focus .. "'>%m\n<b>%d</b></span>\n%H\n<b>%M</b>")
+       clock = wibox.widget{
+           {
+               {
+                   format = "%m<b>%d</b>",
+                   widget = wibox.widget.textclock,
+               },
+               fg_function = {"minor_"},
+               widget = cbg,
+           },
+           {
+               format = "%H<b>%M</b>",
+               widget = wibox.widget.textclock,
+           },
+           layout = wibox.layout.fixed.vertical,
+       }
    end
-   clock.align = "center"
-   clock:set_font(beautiful.font)
-
-   clock_and_orgenda = wibox.widget {
+   clock_and_orgenda = wibox.widget{
        {
-           clock,
-           left = beautiful.sep_small_size,
-           right = beautiful.sep_small_size,
-           widget = fixed_margin,
+           {
+               clock,
+               left = beautiful.sep_small_size,
+               right = beautiful.sep_small_size,
+               widget = fixed_margin,
+           },
+           {
+               orgenda_counter_widget,
+               right = beautiful.sep_small_size,
+               draw_empty = false,
+               widget = fixed_margin,
+           },
+           {
+               next_todo_widget,
+               right = beautiful.sep_small_size,
+               draw_empty = false,
+               widget = fixed_margin,
+           },
+           {
+               notix.counter_widget,
+               right = beautiful.sep_small_size,
+               draw_empty = false,
+               widget = fixed_margin,
+           },
+           layout = wibox.layout.fixed.horizontal
        },
-       {
-           orgenda_counter_widget,
-           right = beautiful.sep_small_size,
-           draw_empty = false,
-           widget = fixed_margin,
-       },
-       {
-           next_todo_widget,
-           right = beautiful.sep_small_size,
-           draw_empty = false,
-           widget = fixed_margin,
-       },
-       {
-           notix.counter_widget,
-           right = beautiful.sep_small_size,
-           draw_empty = false,
-           widget = fixed_margin,
-       },
-       layout = wibox.layout.fixed.horizontal
+       fg_function = {"fg_"},
+       bg_function = {"bg_"},
+       context_transform_function = {focus = false},
+       widget = cbg,
    }
    clock_and_orgenda:connect_signal(
        'mouse::enter', function() if not cal_popup_pinned then cal_popup_show() end end)
@@ -776,9 +808,11 @@ local function setup_screen(scr)
            awful.button({         }, 1, function()
                    if cal_popup_pinned then
                        cal_popup_pinned = false
+                       clock_and_orgenda:set_context_transform_function({focus = false})
                    else
                        cal_popup_show();
                        cal_popup_pinned = true
+                       clock_and_orgenda:set_context_transform_function({focus = true})
                    end
            end),
            awful.button({         }, 2, function() cal_reset() end),
