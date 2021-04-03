@@ -50,7 +50,7 @@ local notix_widget = wibox.widget{
     {
         {
             notix_reg_container,
-            gravity = "bottom",
+            gravity = "top",
             widget = scroller,
         },
         height = dpi(300),
@@ -149,46 +149,39 @@ function config.create_notif_widget(notif)
             {
                 {
                     {
-                        {
-                            notification = notif,
-                            widget = naughty.widget.icon,
-                        },
-                        valign = "center",
-                        widget = wibox.container.place,
+                        notification = notif,
+                        widget = naughty.widget.icon,
                     },
-                    right = beautiful.sep_small_size,
-                    draw_empty = false,
-                    widget = wibox.container.margin,
+                    valign = "center",
+                    widget = wibox.container.place,
                 },
-                {
-                    text = notif.app_name,
-                    widget = wibox.widget.textbox,
-                },
+                right = beautiful.sep_small_size,
+                draw_empty = false,
+                widget = wibox.container.margin,
+            },
+            {
                 {
                     {
-                        text = notif.title,
+                        text = (notif.app_name and #notif.app_name > 0 and notif.app_name..":" or "")
+                            ..notif.title,
                         widget = wibox.widget.textbox,
                     },
-                    left = beautiful.sep_small_size,
+                    bottom = beautiful.sep_small_size,
                     draw_empty = false,
                     widget = wibox.container.margin,
                 },
-                layout = wibox.layout.align.horizontal,
+                {
+                    text = notif.message,
+                    font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
+                    widget = wibox.widget.textbox,
+                },
+                layout = wibox.layout.fixed.vertical,
             },
-            margins = beautiful.sep_small_size,
-            widget = wibox.container.margin,
+            layout = wibox.layout.align.horizontal,
         },
-        {
-            {
-                text = notif.message,
-                font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
-                widget = wibox.widget.textbox,
-            },
-            left = beautiful.sep_small_size,
-            right = beautiful.sep_small_size,
-            widget = wibox.container.margin,
-        },
-        layout = wibox.layout.fixed.vertical,
+        left = beautiful.sep_small_size,
+        right = beautiful.sep_small_size,
+        widget = wibox.container.margin,
     }
     content_widget:connect_signal(
         "button::release",
@@ -233,7 +226,7 @@ function config.create_button(name, callback)
                 align = "center",
                 widget = wibox.widget.textbox,
             },
-            margins = beautiful.sep_small_size,
+            margins = beautiful.sep_small_size / 2,
             widget = wibox.container.margin,
         },
         fg_function = {"fg_"},

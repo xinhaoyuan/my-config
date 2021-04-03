@@ -209,7 +209,7 @@ local my_wibars = {}
 local my_tray
 my_tray = wibox.widget.systray()
 my_tray.horizontal = direction_index[shared.var.bar_position] == "horizontal"
-my_tray.base_size = beautiful.bar_icon_size
+my_tray.base_size = beautiful.systray_icon_size
 local bar_tray_wrapper = wibox.widget {
     my_tray,
     valign = "center",

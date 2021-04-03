@@ -1,5 +1,8 @@
 local base = require("wibox.widget.base")
 local gtable = require("gears.table")
+local gcolor = require("gears.color")
+local lgi = require("lgi")
+local beautiful = require("beautiful")
 local dpi = require("beautiful").xresources.apply_dpi
 
 local scroller = { mt = {} }
@@ -32,6 +35,11 @@ function scroller:fit(context, width, height)
     return w, h
 end
 
+local inactive_color
+do
+    local _, r, g, b, _ = gcolor(beautiful.bg_focus):get_rgba()
+    inactive_color = lgi.cairo.SolidPattern.create_rgba(r, g, b, 0.5)
+end
 function scroller:draw(context, cr, width, height)
     local w, h
     if not self._private.widget then
@@ -42,13 +50,15 @@ function scroller:draw(context, cr, width, height)
     w, h = base.fit_widget(self, context, self._private.widget, content_width, math.huge)
 
     if h <= height then
+        cr:set_source(inactive_color)
+        cr:rectangle(content_width, 0, self._private.scrollbar_width, height)
+        cr:fill()
     else
         local offset = self._private.offset
-        local y_start = self._private.gravity == "top" and offset or h - height - offset
-        local y_end = y_start + height
-        cr:rectangle(content_width, 0, self._private.scrollbar_width, y_start / h * height)
-        cr:fill()
-        cr:rectangle(content_width, y_end / h * height, self._private.scrollbar_width, height - y_end / h * height)
+        local y_start = (self._private.gravity == "top" and offset or h - height - offset) / h * height
+        local y_end = y_start + height * height / h
+        cr:set_source(gcolor(beautiful.bg_focus))
+        cr:rectangle(content_width, y_start, self._private.scrollbar_width, y_end - y_start)
         cr:fill()
     end
 end
@@ -91,6 +101,10 @@ function scroller:set_gravity(value)
     end
 end
 
+function scroller:set_reverse_scrolling(value)
+    self._private.reverse_scrolling = value
+end
+
 local function new(widget)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
@@ -99,15 +113,24 @@ local function new(widget)
     ret._private.offset = 0
     ret._private.gravity = "top"
     ret._private.scrollbar_width = dpi(4)
+    ret._private.reverse_scrolling = false
     ret:set_widget(widget)
 
     ret:connect_signal(
         "button::press",
         function(w, _x, _y, button)
-            if button == 4 then
-                w.offset = w.offset + dpi(50)
-            elseif button == 5 then
-                w.offset = w.offset - dpi(50)
+            if w._private.reverse_scrolling then
+                if button == 4 then
+                    w.offset = w.offset + dpi(50)
+                elseif button == 5 then
+                    w.offset = w.offset - dpi(50)
+                end
+            else
+                if button == 4 then
+                    w.offset = w.offset - dpi(50)
+                elseif button == 5 then
+                    w.offset = w.offset + dpi(50)
+                end
             end
         end
     )
