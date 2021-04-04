@@ -586,12 +586,11 @@ local cal_popup_auto_hide = true
 local cal_popup_auto_hide_timer
 
 local function cal_popup_show()
-    local _, corner = awful.placement.closest_corner(mouse, {pretend=true})
     local screen = mouse.screen
     cal_reset()
     cal_popup.placement = function (d)
         if screen.valid then
-            awful.placement[corner](cal_popup, {bounding_rect=screen.workarea})
+            awful.placement["bottom_right"](cal_popup, {bounding_rect=screen.workarea})
         end
     end
     cal_popup.visible = true
@@ -674,6 +673,7 @@ local function setup_screen(scr)
    scr.mypromptbox = awful.widget.prompt()
 
    scr.widgets = {}
+   scr.actions = {}
    local tasklist = tasklist.create(scr)
    local tasklist_with_fallback = {
        tasklist,
@@ -824,25 +824,27 @@ local function setup_screen(scr)
            if not cal_popup_pinned then cal_popup_show() end end)
    clock_area:connect_signal(
        'mouse::leave', function() cal_popup_auto_hide = true end)
+   function scr.actions.activate_clock_area()
+       if cal_popup_pinned then
+           if cal_popup.screen == scr then
+               cal_popup_pinned = false
+               cal_popup_hide()
+               clock_area:set_context_transform_function({focus = false})
+           else
+               cal_popup.screen.widgets.
+                   clock_area:set_context_transform_function({focus = false})
+               cal_popup_show()
+               clock_area:set_context_transform_function({focus = true})
+           end
+       else
+           cal_popup_show()
+           cal_popup_pinned = true
+           clock_area:set_context_transform_function({focus = true})
+       end
+   end
    clock_area:buttons(
        awful.util.table.join(
-           awful.button({         }, 1, function()
-                   if cal_popup_pinned then
-                       if cal_popup.screen == scr then
-                           cal_popup_pinned = false
-                           clock_area:set_context_transform_function({focus = false})
-                       else
-                           cal_popup.screen.widgets.
-                               clock_area:set_context_transform_function({focus = false})
-                           cal_popup_show()
-                           clock_area:set_context_transform_function({focus = true})
-                       end
-                   else
-                       cal_popup_show();
-                       cal_popup_pinned = true
-                       clock_area:set_context_transform_function({focus = true})
-                   end
-           end),
+           awful.button({         }, 1, scr.actions.activate_clock_area),
            awful.button({         }, 2, function() cal_reset() end),
            awful.button({         }, 3, function() notix.remove_unpinned() end),
            awful.button({         }, 4, function() cal_switch({ month =  -1 }) end),
@@ -965,35 +967,15 @@ table.insert(shared.on_start_functions, schedule_reset_widgets)
 capi.screen.connect_signal("list", schedule_reset_widgets)
 capi.screen.connect_signal("primary_changed", schedule_reset_widgets)
 
-local waffle_dancer_1 = tapdancer.create{
-    timeout = 0.2,
-    max = 2,
-    callback = function (counter)
-        if counter > 1 and capi.client.focus then
-            shared.waffle.show_client_waffle(capi.client.focus, { anchor = "client" })
-        else
-            waffle:show(nil, { anchor = "screen" })
-        end
-    end,
-}
-
-local waffle_dancer_2 = tapdancer.create{
-    timeout = 0.2,
-    max = 2,
-    callback = function (counter)
-        if counter == 1 and capi.client.focus then
-            shared.waffle.show_client_waffle(capi.client.focus, { anchor = "client" })
-        else
-            waffle:show(nil, { anchor = "screen" })
-        end
-    end,
-}
-
 capi.root.keys(
    awful.util.table.join(
       capi.root.keys(),
-      awful.key({ }, "XF86Launch1", function () waffle_dancer_1:trigger() end),
-      awful.key({ }, "XF86Launch3", function () waffle_dancer_2:trigger() end),
+      awful.key({ }, "XF86Launch1", function () waffle:show(nil, { anchor = "screen" }) end),
+      awful.key({ }, "XF86Launch3", function ()
+              if capi.client.focus then
+                  shared.waffle.show_client_waffle(capi.client.focus, { anchor = "client" })
+              end
+      end),
       awful.key({ "Mod4" }, ";",
          function ()
             awful.prompt.run {
@@ -1057,6 +1039,7 @@ local global_keys = table_join(
    awful.key({ "Mod4" }, "e",               function () shared.action.file_manager() end),
    awful.key({ "Mod4" }, "l",               function () shared.action.screen_locker() end),
    awful.key({ "Mod4" }, "t",               function () shared.action.calendar() end),
+   awful.key({ "Mod4" }, "a",               function () awful.screen.focused().actions.activate_clock_area() end),
    awful.key({ "Mod4" }, "r",               function () shared.action.launcher() end),
    awful.key({ "Mod4" }, "F1",              function () shared.action.terminal_session{ name = "F1" } end),
    awful.key({ "Mod4" }, "F2",              function () shared.action.terminal_session{ name = "F2" } end),

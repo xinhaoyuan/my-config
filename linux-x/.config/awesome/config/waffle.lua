@@ -1345,12 +1345,6 @@ do
     end
 end
 
-local orgenda_widget = orgenda.widget {
-    font = font_info,
-    item_margin = button_padding,
-    width = waffle_width,
-}
-
 local waffle_root_status_widget = decorate_panel {
     widget = {
         {
@@ -1432,7 +1426,7 @@ local waffle_root_status_widget = decorate_panel {
     }
 }
 
-local waffle_root_agenda_widget = decorate_panel {
+local waffle_root_action_widget = decorate_panel {
     top_sep = true,
     widget = {
         button {
@@ -1442,25 +1436,17 @@ local waffle_root_agenda_widget = decorate_panel {
                 format = "%Y-%m-%d %a %H:%M",
                 widget = wibox.widget.textclock,
             },
-            indicator = em("t"),
-            key = "t",
+            indicator = em("a"),
+            key = "a",
             action = function (alt)
                 if alt then
-                    shared.action.web_browser("https://calendar.google.com")
-                else
                     shared.action.calendar()
+                    waffle:hide()
+                else
+                    awful.screen.focused().actions.activate_clock_area()
                 end
-                waffle:hide()
             end,
         },
-        orgenda_widget,
-        layout = wibox.layout.fixed.vertical
-    }
-}
-
-local waffle_root_action_widget = decorate_panel {
-    top_sep = true,
-    widget = {
         button {
             icon = gcolor.recolor_image(icons.launcher, beautiful.fg_normal),
             markup = "Launcher",
@@ -1557,8 +1543,8 @@ local waffle_root_audio_widget = decorate_panel {
             widget = wibox.container.place
         },
         buttons = volumebar_buttons,
-        indicator = em("a"),
-        key = "a",
+        indicator = em("v"),
+        key = "v",
         action = function (alt)
             local cmd = {"pavucontrol"}
             awful.spawn(cmd)
@@ -1607,7 +1593,6 @@ local waffle_root_view = view {
         waffle_root_status_widget,
         waffle_root_audio_widget,
         waffle_root_mpd_widget,
-        waffle_root_agenda_widget,
         waffle_root_action_widget,
         waffle_root_admin_widget,
         layout = wibox.layout.fixed.vertical,
