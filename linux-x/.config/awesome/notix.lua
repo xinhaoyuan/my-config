@@ -12,6 +12,7 @@ local dpi = beautiful.xresources.apply_dpi
 local fixed_margin = require("fixed_margin")
 local masked_imagebox = require("masked_imagebox")
 local cbg = require("contextual_background")
+local fallback = require("fallback")
 local naughty = require("naughty")
 local icons = require("icons")
 local scroller = require("scroller")
@@ -149,14 +150,26 @@ function config.create_notif_widget(notif)
             {
                 {
                     {
-                        notification = notif,
-                        widget = naughty.widget.icon,
+                        {
+                            {
+                                notification = notif,
+                                widget = naughty.widget.icon,
+                            },
+                            {
+                                image = gcolor.recolor_image(icons.notification, beautiful.fg_normal),
+                                widget = masked_imagebox,
+                            },
+                            widget = fallback,
+                        },
+                        valign = "center",
+                        halign = "center",
+                        widget = wibox.container.place,
                     },
-                    valign = "center",
-                    widget = wibox.container.place,
+                    width = dpi(24),
+                    strategy = "exact",
+                    widget = wibox.container.constraint,
                 },
                 right = beautiful.sep_small_size,
-                draw_empty = false,
                 widget = wibox.container.margin,
             },
             {
