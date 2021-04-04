@@ -57,41 +57,30 @@ local function parse_attributes(line, todo_item)
     end
 end
 
--- Merge multiple changes to improve performance.
-orgenda.data:connect_signal(
-    "property::items",
-    function ()
-        if orgenda.update_scheduled then
-            return
-        end
-        orgenda.update_scheduled = true
-        gtimer {
-            timeout = 1,
-            autostart = true,
-            single_shot = true,
-            callback = function ()
-                orgenda.update_scheduled = false
-                orgenda.data:emit_signal("update")
-            end,
-        }
-    end
-)
-
 function orgenda.compare_todo_items(a, b)
-    if a.priority > b.priority then
-        return true
-    elseif a.priority < b.priority then
-        return false
+    if a.priority ~= b.priority then
+        return a.priority > b.priority
     end
-    if a.timestamp == b.timestamp then
+
+    if a.timestamp ~= b.timestamp then
+        if a.timestamp == nil then
+            return false
+        elseif b.timestamp == nil then
+            return true
+        else
+            return a.timestamp < b.timestamp
+        end
+    end
+
+    if a.rank ~= b.rank then
         return a.rank < b.rank
-    elseif a.timestamp == nil then
-        return false
-    elseif b.timestamp == nil then
-        return true
-    else
-        return a.timestamp < b.timestamp
     end
+
+    if a.source ~= b.source then
+        return a.source < b.source
+    end
+
+    return a.line_number < b.line_number
 end
 
 local function parse_file(file_info, items)
@@ -109,7 +98,9 @@ local function parse_file(file_info, items)
     end
 
     local todo_item = nil
+    local line_number = 0
     for line in fd:lines() do
+        line_number = line_number + 1
         if line:find("^%s*#") == nil then
             local header_text = line:match("^%s*[*]+%s*(.+)$")
             if header_text == nil then
@@ -121,9 +112,11 @@ local function parse_file(file_info, items)
                     table.insert(items, todo_item)
                 end
                 local todo_type, todo_text = header_text:match("^(%u+)%s+(.*)$")
-                if todo_type == "TODO" then
+                if todo_type == "TODO" or todo_type == "DONE" then
                     todo_item = parse_todo_match(todo_text, decorator)
+                    todo_item.done = todo_type == "DONE"
                     todo_item.source = path
+                    todo_item.line_number = line_number
                     todo_item.rank = rank
                 else
                     todo_item = nil
@@ -136,6 +129,23 @@ local function parse_file(file_info, items)
     end
 end
 
+-- Merge multiple reset requests to improve performance.
+orgenda._reset_timer = gtimer {
+    timeout = 0.1,
+    single_shot = true,
+    callback = function ()
+        orgenda._reset_scheduled = false
+        orgenda.reset()
+    end,
+}
+function orgenda.schedule_reset()
+    if orgenda._reset_scheduled then
+        return
+    end
+    orgenda._reset_timer:again()
+    orgenda._reset_scheduled = true
+end
+
 function orgenda.reset()
     local items = {}
     for _, file_info in pairs(orgenda.config.files) do
@@ -143,6 +153,23 @@ function orgenda.reset()
     end
     table.sort(items, orgenda.compare_todo_items)
     orgenda.data.items = items
+end
+
+function orgenda.toggle_done(item)
+    local cmd = { "sed", "-e", tostring(item.line_number)..(item.done and "s/DONE/TODO/" or "s/TODO/DONE/"), "-i", item.source }
+    awful.spawn.easy_async(cmd, orgenda.reset)
+end
+
+function orgenda.hide(item)
+    local cmd = { "sed", "-e", tostring(item.line_number).."s/ TODO\\| DONE//", "-i", item.source }
+    awful.spawn.easy_async(cmd, orgenda.reset)
+end
+
+function orgenda.promote(item)
+    local next_pri_char = ({"B", "A", "C"})[item.priority]
+    local cmd = { "sed", "-e", tostring(item.line_number).."s/ \\(TODO\\|DONE\\) *\\(\\[#[A-C]\\]\\|\\) / \\1 [#"..
+                      next_pri_char.."] /", "-i", item.source }
+    awful.spawn.easy_async(cmd, orgenda.reset)
 end
 
 function orgenda.widget(args)
@@ -174,18 +201,18 @@ function orgenda.widget(args)
     local item_width = args.width and args.item_margin and args.indent_width and
         args.width - args.item_margin * 2 - args.indent_width
 
-    local function render_priority(pri)
-        return ({ " +", " *","<span foreground='"..beautiful.fg_urgent.."' background='"..beautiful.bg_urgent.."'><b>!!</b></span>" })[pri]
+    local function render_mark(item)
+        return ({ "(", "[", "<span foreground='"..beautiful.fg_urgent.."' background='"..beautiful.bg_urgent.."'>{" })[item.priority]..(item.done and "X" or " ")..({ ")", "]", "}</span>" })[item.priority]
     end
 
     local todo_item_widget_cache = {}
 
     local function get_todo_item_widget(item, cache_key)
         if todo_item_widget_cache[cache_key] == nil then
-            todo_item_widget_cache[cache_key] = wibox.widget {
+            local widget = wibox.widget {
                 {
                     {
-                        markup = render_priority(item.priority)..' ',
+                        markup = render_mark(item)..' ',
                         font = args.font,
                         widget = wibox.widget.textbox,
                         forced_width = args.indent_width,
@@ -213,7 +240,20 @@ function orgenda.widget(args)
                 },
                 widget = wibox.layout.fixed.horizontal
             }
-            todo_item_widget_cache[cache_key].item = item
+            widget.item = item
+            widget:connect_signal(
+                "button::release",
+                function (w, _x, _y, button)
+                    if button == 1 then
+                        orgenda.toggle_done(w.item)
+                    elseif button == 2 then
+                        orgenda.hide(w.item)
+                    elseif button == 3 then
+                        orgenda.promote(w.item)
+                    end
+                end
+            )
+            todo_item_widget_cache[cache_key] = widget
         end
         return todo_item_widget_cache[cache_key]
     end
@@ -238,14 +278,17 @@ function orgenda.widget(args)
         end
     end
 
+    local function get_cache_key(item)
+        return tostring(item.timestamp)..':'..(item.done and "!" or "?")..tostring(item.priority)..':'..item.text
+    end
+
     orgenda.data:connect_signal(
-        "update",
+        "property::items",
         function ()
-            update_scheduled = false
             todo_item_container:reset()
             local cache_keys = {}
             for index, item in ipairs(orgenda.data.items) do
-                local cache_key = tostring(item.timestamp)..':'..tostring(item.priority)..':'..item.text
+                local cache_key = get_cache_key(item)
                 cache_keys[cache_key] = true
                 todo_item_container:add(get_todo_item_widget(item, cache_key))
             end
@@ -273,7 +316,7 @@ gtimer.delayed_call(
             gdebug.print_warning("orgenda: no files to watch - will do nothing.")
             return
         end
-        local cmd = {"fswatch", "-x", "--event=Updated"}
+        local cmd = {"fswatch", "-x", "--event=Updated", "--event=AttributeModified"}
         for _, file_info in ipairs(orgenda.config.files) do
             local path = type(file_info) == "table" and file_info.path or file_info
             table.insert(cmd, path)
@@ -283,7 +326,7 @@ gtimer.delayed_call(
             {
                 stdout = function(line)
                     -- gdebug.print_warning("Got fswatch line: "..line)
-                    orgenda.reset()
+                    orgenda.schedule_reset()
                 end
             }
         )

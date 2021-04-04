@@ -499,7 +499,7 @@ gtimer {
     end
 }
 orgenda.data:connect_signal(
-    "update",
+    "property::items",
     function ()
         active_dates = {}
         for _, item in ipairs(orgenda.data.items) do
@@ -528,7 +528,7 @@ local cal_popup = awful.popup {
                         {
                             orgenda.widget {
                                 width = cal_popup_width,
-                                indent_width = dpi(26),
+                                indent_width = dpi(30),
                                 item_margin = beautiful.sep_small_size,
                             },
                             halign = "left",
@@ -646,7 +646,7 @@ local orgenda_counter_widget = wibox.widget {
 }
 
 orgenda.data:connect_signal(
-    "update",
+    "property::items",
     function (_, path, items)
         if #orgenda.data.items > 0 then
             orgenda_counter_widget.visible = true

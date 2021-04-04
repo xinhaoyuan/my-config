@@ -326,7 +326,7 @@ local function get_tray_item_key(index)
 end
 local function show_tray_view()
     -- waffle_tray_wrapper.widget = shared.screen.detach_tray_widget()
-    -- waffle:show(waffle_tray_view, { push = true })
+    -- waffle:show(waffle_tray_view, { mode = "push" })
 
     local widget = { layout = wibox.layout.fixed.vertical }
     for index, info in ipairs(awesome.systray_list()) do
@@ -348,7 +348,7 @@ local function show_tray_view()
                         }
                     )
                      },
-                { push = true })
+                { mode = "push" })
 end
 
 local units = {" ", "k", "m", "g", "t", "p"}
@@ -1527,7 +1527,7 @@ local waffle_root_action_widget = decorate_panel {
                 indicator = em("s"),
                 key = "s",
                 action = function (alt)
-                    waffle:show(waffle_settings_view, { push = true })
+                    waffle:show(waffle_settings_view, { mode = "push" })
                 end,
         }),
         layout = wibox.layout.fixed.vertical,
@@ -1581,7 +1581,7 @@ local waffle_root_admin_widget = decorate_panel {
             indicator = em("u"),
             key = "u",
             action = function (alt)
-                waffle:show(waffle_shutdown_view, { push = true })
+                waffle:show(waffle_shutdown_view, { mode = "push" })
             end
         },
         layout = wibox.layout.fixed.vertical,
