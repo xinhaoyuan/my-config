@@ -37,8 +37,8 @@ end
 
 local inactive_color
 do
-    local _, r, g, b, _ = gcolor(beautiful.bg_focus):get_rgba()
-    inactive_color = lgi.cairo.SolidPattern.create_rgba(r, g, b, 0.5)
+    local _, r, g, b, _ = gcolor(beautiful.fg_normal):get_rgba()
+    inactive_color = lgi.cairo.SolidPattern.create_rgba(r, g, b, 0.25)
 end
 function scroller:draw(context, cr, width, height)
     local w, h
@@ -57,7 +57,7 @@ function scroller:draw(context, cr, width, height)
         local offset = self._private.offset
         local y_start = (self._private.gravity == "top" and offset or h - height - offset) / h * height
         local y_end = y_start + height * height / h
-        cr:set_source(gcolor(beautiful.bg_focus))
+        cr:set_source(gcolor(beautiful.fg_normal))
         cr:rectangle(content_width, y_start, self._private.scrollbar_width, y_end - y_start)
         cr:fill()
     end
