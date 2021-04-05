@@ -155,20 +155,26 @@ function orgenda.reset()
     orgenda.data.items = items
 end
 
-function orgenda.toggle_done(item)
-    local cmd = { "sed", "-e", tostring(item.line_number)..(item.done and "s/DONE/TODO/" or "s/TODO/DONE/"), "-i", item.source }
-    awful.spawn.easy_async(cmd, orgenda.reset)
-end
-
 function orgenda.hide(item)
     local cmd = { "sed", "-e", tostring(item.line_number).."s/ TODO\\| DONE//", "-i", item.source }
     awful.spawn.easy_async(cmd, orgenda.reset)
 end
 
+function orgenda.toggle_done(item)
+    item.done = not item.done
+    orgenda.set_priority_status(item)
+end
+
 function orgenda.promote(item)
-    local next_pri_char = ({"B", "A", "C"})[item.priority]
-    local cmd = { "sed", "-e", tostring(item.line_number).."s/ \\(TODO\\|DONE\\) *\\(\\[#[A-C]\\]\\|\\) / \\1 [#"..
-                      next_pri_char.."] /", "-i", item.source }
+    item.priority = item.priority % 3 + 1
+    orgenda.set_priority_status(item)
+end
+
+function orgenda.set_priority_status(item)
+    local pri_char = ({"C", "B", "A"})[item.priority]
+    local cmd = { "sed", "-e", tostring(item.line_number).."s/ \\(TODO\\|DONE\\) *\\(\\[#[A-C]\\]\\|\\) / "..
+                      (item.done and "DONE" or "TODO").." [#"..
+                      pri_char.."] /", "-i", item.source }
     awful.spawn.easy_async(cmd, orgenda.reset)
 end
 
