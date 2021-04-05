@@ -8,7 +8,7 @@ local gobject = require("gears.object")
 local gtimer = require("gears.timer")
 local gdebug = require("gears.debug")
 local gstring = require("gears.string")
-
+local cbg = require("contextual_background")
 local orgenda = {
     config = {
         files = {}
@@ -209,38 +209,56 @@ function orgenda.widget(args)
 
     local function get_todo_item_widget(item, cache_key)
         if todo_item_widget_cache[cache_key] == nil then
-            local widget = wibox.widget {
+            local widget = wibox.widget{
                 {
                     {
-                        markup = render_mark(item)..' ',
-                        font = args.font,
-                        widget = wibox.widget.textbox,
-                        forced_width = args.indent_width,
+                        {
+                            markup = render_mark(item)..' ',
+                            font = args.font,
+                            widget = wibox.widget.textbox,
+                            forced_width = args.indent_width,
+                        },
+                        valign = "top",
+                        widget = wibox.container.place
                     },
-                    valign = "top",
-                    widget = wibox.container.place
-                },
-                {
-                    item.timestamp and {
-                        id = "timestamp",
-                        -- text will be updated by the following function.
-                        font = args.font,
-                        widget = wibox.widget.textbox
-                                  },
                     {
-                        markup = item.text,
-                        font = args.font,
-                        ellipsize = "none",
-                        align = "left",
-                        wrap = "word_char",
-                        forced_width = item_width, -- Needed to calculate the extents properly.
-                        widget = wibox.widget.textbox
+                        item.timestamp and {
+                            id = "timestamp",
+                            -- text will be updated by the following function.
+                            font = args.font,
+                            widget = wibox.widget.textbox
+                                           },
+                        {
+                            markup = item.text,
+                            font = args.font,
+                            ellipsize = "none",
+                            align = "left",
+                            wrap = "word_char",
+                            forced_width = item_width, -- Needed to calculate the extents properly.
+                            widget = wibox.widget.textbox
+                        },
+                        widget = wibox.layout.fixed.vertical
                     },
-                    widget = wibox.layout.fixed.vertical
+                    widget = wibox.layout.fixed.horizontal
                 },
-                widget = wibox.layout.fixed.horizontal
+                fg_function = {"fg_"},
+                bg_function = {"bg_"},
+                context_transform_function = {focus = false},
+                widget = cbg,
             }
             widget.item = item
+            widget:connect_signal(
+                "mouse::enter",
+                function (w)
+                    w:set_context_transform_function{ focus = true }
+                end
+            )
+            widget:connect_signal(
+                "mouse::leave",
+                function (w)
+                    w:set_context_transform_function{ focus = false }
+                end
+            )
             widget:connect_signal(
                 "button::release",
                 function (w, _x, _y, button)
