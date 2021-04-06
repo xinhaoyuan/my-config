@@ -285,7 +285,7 @@ remove_notification = function (notif, reason)
     else
         reason = reason or 2
         notif:destroy(reason)
-        notif._private.destroy(reason)
+        notif.real_destroy(reason)
     end
     notif_objects[notif.notif_id] = nil
 
@@ -308,7 +308,9 @@ gtimer.delayed_call(
 
         naughty.connect_signal(
             "new",
-            function (notif)
+            function (notif, args)
+                notif.real_destroy = args.destroy
+                args.destroy = function () end
                 if config.filter == nil or config.filter(notif) then
                     add_notification(notif)
                 end
