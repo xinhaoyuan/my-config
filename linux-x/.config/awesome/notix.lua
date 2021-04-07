@@ -153,50 +153,45 @@ function config.create_notif_widget(notif)
                     {
                         {
                             {
-                                {
-                                    notification = notif,
-                                    widget = naughty.widget.icon,
-                                },
-                                {
-                                    image = gcolor.recolor_image(icons.notification, beautiful.fg_normal),
-                                    widget = masked_imagebox,
-                                },
-                                widget = fallback,
+                                notification = notif,
+                                widget = naughty.widget.icon,
                             },
-                            valign = "top",
-                            halign = "center",
-                            widget = wibox.container.place,
+                            {
+                                image = gcolor.recolor_image(icons.notification, beautiful.fg_normal),
+                                widget = masked_imagebox,
+                            },
+                            widget = fallback,
                         },
-                        width = beautiful.icon_size,
-                        strategy = "exact",
-                        widget = wibox.container.constraint,
+                        valign = "top",
+                        halign = "center",
+                        widget = wibox.container.place,
                     },
-                    right = beautiful.sep_small_size,
+                    width = beautiful.icon_size,
+                    strategy = "exact",
+                    widget = wibox.container.constraint,
+                },
+                right = beautiful.sep_small_size,
+                widget = wibox.container.margin,
+            },
+            {
+                {
+                    {
+                        text = (notif.app_name and #notif.app_name > 0 and notif.app_name..":" or "")
+                            ..notif.title,
+                        widget = wibox.widget.textbox,
+                    },
+                    bottom = beautiful.sep_small_size,
+                    draw_empty = false,
                     widget = wibox.container.margin,
                 },
                 {
-                    {
-                        {
-                            text = (notif.app_name and #notif.app_name > 0 and notif.app_name..":" or "")
-                                ..notif.title,
-                            widget = wibox.widget.textbox,
-                        },
-                        bottom = beautiful.sep_small_size,
-                        draw_empty = false,
-                        widget = wibox.container.margin,
-                    },
-                    {
-                        text = notif.message,
-                        font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
-                        widget = wibox.widget.textbox,
-                    },
-                    layout = wibox.layout.fixed.vertical,
+                    text = notif.message,
+                    font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
+                    widget = wibox.widget.textbox,
                 },
-                layout = wibox.layout.fixed.horizontal,
+                layout = wibox.layout.fixed.vertical,
             },
-            left = beautiful.sep_small_size,
-            right = beautiful.sep_small_size,
-            widget = wibox.container.margin,
+            layout = wibox.layout.fixed.horizontal,
         },
         fg_function = {"fg_"},
         bg_function = {"bg_"},

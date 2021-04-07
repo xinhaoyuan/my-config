@@ -195,12 +195,7 @@ function orgenda.widget(args)
     local todo_item_container = wibox.widget {
         widget = wibox.layout.fixed.vertical
     }
-    orgenda_widget = wibox.widget {
-        todo_item_container,
-        margins = args.item_margin,
-        draw_empty = false,
-        widget = fixed_margin,
-    }
+    orgenda_widget = todo_item_container
 
     local function get_mark(item)
         return beautiful["orgenda_mark_p"..tostring(item.priority).."_"..(item.done and "done" or "todo")]
