@@ -8,7 +8,6 @@ local gobject = require("gears.object")
 local gtimer = require("gears.timer")
 local gdebug = require("gears.debug")
 local gstring = require("gears.string")
-local cbg = require("contextual_background")
 local orgenda = {
     config = {
         files = {}
@@ -191,29 +190,20 @@ function orgenda.widget(args)
     local wibox = require("wibox")
     local fixed_margin = require("fixed_margin")
     local beautiful = require("beautiful")
-
-    args.indent_width = args.indent_width or beautiful.orgenda_indent_width
+    local cbg = require("contextual_background")
 
     local todo_item_container = wibox.widget {
         widget = wibox.layout.fixed.vertical
     }
     orgenda_widget = wibox.widget {
-        {
-            todo_item_container,
-            margins = args.item_margin,
-            draw_empty = false,
-            widget = fixed_margin,
-        },
-        width = args.width,
-        widget = wibox.container.constraint
+        todo_item_container,
+        margins = args.item_margin,
+        draw_empty = false,
+        widget = fixed_margin,
     }
 
-    -- TODO: This does not include the indent width.
-    local item_width = args.width and args.item_margin and args.indent_width and
-        args.width - args.item_margin * 2 - args.indent_width
-
-    local function render_mark(item)
-        return ({ "(", "[", "<span foreground='"..beautiful.fg_urgent.."' background='"..beautiful.bg_urgent.."'>{" })[item.priority]..(item.done and "X" or " ")..({ ")", "]", "}</span>" })[item.priority]
+    local function get_mark(item)
+        return beautiful["orgenda_mark_p"..tostring(item.priority).."_"..(item.done and "done" or "todo")]
     end
 
     local todo_item_widget_cache = {}
@@ -224,33 +214,46 @@ function orgenda.widget(args)
                 {
                     {
                         {
-                            markup = render_mark(item)..' ',
-                            font = args.font,
-                            widget = wibox.widget.textbox,
-                            forced_width = args.indent_width,
+                            {
+                                image = get_mark(item),
+                                forced_width = beautiful.icon_size,
+                                forced_height = beautiful.icon_size,
+                                widget = wibox.widget.imagebox,
+                            },
+                            valign = "top",
+                            widget = wibox.container.place
                         },
-                        valign = "top",
-                        widget = wibox.container.place
+                        right = beautiful.sep_small_size,
+                        widget = wibox.container.margin,
                     },
                     {
-                        item.timestamp and {
-                            id = "timestamp",
-                            -- text will be updated by the following function.
-                            font = args.font,
-                            widget = wibox.widget.textbox
-                                           },
                         {
-                            markup = item.text,
-                            font = args.font,
-                            ellipsize = "none",
-                            align = "left",
-                            wrap = "word_char",
-                            forced_width = item_width, -- Needed to calculate the extents properly.
-                            widget = wibox.widget.textbox
+                            item.timestamp and {
+                                id = "timestamp",
+                                -- text will be updated by the following function.
+                                font = args.font,
+                                widget = wibox.widget.textbox
+                                               },
+                            {
+                                {
+                                    markup = item.text,
+                                    font = args.font,
+                                    ellipsize = "none",
+                                    align = "left",
+                                    valign = "center",
+                                    wrap = "word_char",
+                                    widget = wibox.widget.textbox
+                                },
+                                fill_horizontal = true,
+                                content_fill_horizontal = true,
+                                widget = wibox.container.place,
+                            },
+                            layout = wibox.layout.fixed.vertical
                         },
-                        widget = wibox.layout.fixed.vertical
+                        valign = "center",
+                        widget = wibox.container.place,
                     },
-                    widget = wibox.layout.fixed.horizontal
+                    layout = wibox.layout.fixed.horizontal
                 },
                 fg_function = {"fg_"},
                 bg_function = {"bg_"},

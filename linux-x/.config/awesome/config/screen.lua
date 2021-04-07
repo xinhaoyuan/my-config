@@ -528,12 +528,10 @@ local cal_popup = awful.popup {
                     {
                         {
                             orgenda.widget {
-                                width = cal_popup_width,
-                                indent_width = dpi(30),
                                 item_margin = beautiful.sep_small_size,
                             },
-                            halign = "left",
-                            widget = wibox.container.place
+                            width = cal_popup_width,
+                            widget = wibox.container.constraint,
                         },
                         draw_empty = false,
                         top = beautiful.sep_big_size,
@@ -655,9 +653,11 @@ orgenda.data:connect_signal(
             local mid = 0
             local low = 0
             for _, item in ipairs(orgenda.data.items) do
-                if item.priority == 3 then high = high + 1
-                elseif item.priority == 2 then mid = mid + 1
-                else low = low + 1
+                if not item.done then
+                    if item.priority == 3 then high = high + 1
+                    elseif item.priority == 2 then mid = mid + 1
+                    else low = low + 1
+                    end
                 end
             end
             if high > 0 then high = "<span foreground='"..beautiful.special_normal.."'><b>"..tostring(high).."</b></span>" else high = "" end

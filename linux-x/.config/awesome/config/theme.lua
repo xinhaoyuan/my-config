@@ -164,6 +164,7 @@ theme.useless_gap = dpi(8)
 -- custom property number
 theme.bar_height = dpi(24)
 theme.menu_width = dpi(150)
+theme.icon_size = dpi(24)
 theme.bar_icon_size = dpi(20)
 theme.systray_icon_size = dpi(20)
 -- custom property color
@@ -647,5 +648,41 @@ theme.apply_border_to_widget = function(args)
     return widget
 end
 
+do
+    local function orgenda_icon(outer_color, inner_color)
+        local shape = function(cr, size)
+            gshape.circle(cr, size, size)
+        end
+        local surf_size = theme.icon_size
+        local outer_size = surf_size / 2
+        local inner_size = surf_size / 3
+        local surf = lgi.cairo.ImageSurface.create(cairo.Format.ARGB32, surf_size, surf_size)
+        local cr = cairo.Context(surf)
+        cr:save()
+        cr:translate((surf_size - outer_size) / 2, (surf_size - outer_size) / 2)
+        shape(cr, outer_size)
+        cr:set_source(gcolor(outer_color))
+        cr:fill()
+        cr:restore()
+        if inner_color == "clear" then
+            cr:translate((surf_size - inner_size) / 2, (surf_size - inner_size) / 2)
+            shape(cr, inner_size)
+            cr:set_operator("CLEAR")
+            cr:fill()
+        elseif inner_color then
+            cr:translate((surf_size - inner_size) / 2, (surf_size - inner_size) / 2)
+            shape(cr, inner_size)
+            cr:set_source(gcolor(inner_color))
+            cr:fill()
+        end
+        return surf
+    end
+    theme.orgenda_mark_p1_todo = orgenda_icon(c_green[1], "clear")
+    theme.orgenda_mark_p1_done = orgenda_icon(c_green[1])
+    theme.orgenda_mark_p2_todo = orgenda_icon(c_yellow[1], "clear")
+    theme.orgenda_mark_p2_done = orgenda_icon(c_yellow[1])
+    theme.orgenda_mark_p3_todo = orgenda_icon(c_red[1], "clear")
+    theme.orgenda_mark_p3_done = orgenda_icon(c_red[1])
+end
 
 return theme
