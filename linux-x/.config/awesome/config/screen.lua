@@ -387,8 +387,7 @@ local function update_next_todo()
     local time = os.time(date)
     if orgenda.data.items ~= nil then
         for _, item in ipairs(orgenda.data.items) do
-            if item.timestamp ~= nil and item.has_time then
-                print(time, item.timestamp)
+            if item.timestamp ~= nil and item.has_time and not item.done then
                 if item.timestamp > time and (#next_todo == 0 or next_todo[1].timestamp >= item.timestamp) then
                     if #next_todo > 0 and next_todo[1].timestamp > item.timestamp then
                         next_todo = {}
@@ -498,12 +497,14 @@ gtimer {
         end
     end
 }
+
+local cal_switch
 orgenda.data:connect_signal(
     "property::items",
     function ()
         active_dates = {}
         for _, item in ipairs(orgenda.data.items) do
-            if item.timestamp then
+            if item.timestamp and not item.done then
                 local date = os.date("*t", item.timestamp)
                 local y = active_dates[date.year] or {}
                 local m = y[date.month] or {}
@@ -513,7 +514,7 @@ orgenda.data:connect_signal(
             end
         end
         update_next_todo()
-        cal_widget:emit_signal("widget::layout_changed")
+        if cal_switch then cal_switch{} end
     end
 )
 
@@ -601,7 +602,7 @@ local function cal_popup_hide()
     cal_popup.visible = false
 end
 
-local function cal_switch(delta)
+function cal_switch(delta)
     local date = cal_widget:get_date()
     if delta.day ~= nil then date.day = date.day + delta.day end
     if delta.month ~= nil then date.month = date.month + delta.month end

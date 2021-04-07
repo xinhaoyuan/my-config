@@ -281,7 +281,7 @@ remove_notification = function (notif, reason)
     -- This is a hack depending on that :destroy does not really call _private.destroy.
     -- Note that we won't call _private.destory twice thanks to the guard above.
     if notif._private.destroy_reason then
-        notif._private.destroy(reason or notif._private.destroy_reason)
+        notif.real_destroy(reason or notif._private.destroy_reason)
     else
         reason = reason or 2
         notif:destroy(reason)
