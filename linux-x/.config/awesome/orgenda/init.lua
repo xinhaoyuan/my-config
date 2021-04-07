@@ -33,15 +33,18 @@ local function parse_timestamp(timestamp)
 end
 
 local function parse_todo_match(todo_match, decorator)
+    local ret = {}
     local _, priority_end, priority  = todo_match:find("^%[#([A-C])%]%s+")
-    priority = priority == nil and 2 or 3 + string.byte("A") - string.byte(priority)
+    ret.implicit_priority = priority == nil
+    ret.priority = ret.implicit_priority and 2 or 3 + string.byte("A") - string.byte(priority)
     local text_begin = priority_end == nil and 1 or priority_end + 1
     local tag_begin, tag_end = todo_match:find("%s+[A-Z]*:.*")
     local tag_length = tag_begin == nil and 0 or tag_end - tag_begin + 1
     local text = tag_begin == nil and
         todo_match:sub(text_begin) or
         todo_match:sub(text_begin, -tag_length)
-    return { priority = priority, text = decorator(text) }
+    ret.text = decorator(text)
+    return ret
 end
 
 local function parse_attributes(line, todo_item)
@@ -173,8 +176,10 @@ end
 function orgenda.set_priority_status(item)
     local pri_char = ({"C", "B", "A"})[item.priority]
     local cmd = { "sed", "-e", tostring(item.line_number).."s/ \\(TODO\\|DONE\\) *\\(\\[#[A-C]\\]\\|\\) / "..
-                      (item.done and "DONE" or "TODO").." [#"..
-                      pri_char.."] /", "-i", item.source }
+                      (item.done and "DONE" or "TODO")..
+                      (item.priority == 2 and item.implicit_priority and "" or
+                       " [#"..pri_char.."]")..
+                      " /", "-i", item.source }
     awful.spawn.easy_async(cmd, orgenda.reset)
 end
 
