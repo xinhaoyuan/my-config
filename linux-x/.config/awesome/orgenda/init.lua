@@ -3,6 +3,9 @@
 -- Author: Xinhao Yuan <xinhaoyuan@gmail.com>
 -- License: MIT license, see LICENSE file.
 
+local capi = {
+    awesome = awesome,
+}
 local awful = require("awful")
 local gobject = require("gears.object")
 local gtimer = require("gears.timer")
@@ -153,33 +156,34 @@ function orgenda.reset()
     for _, file_info in pairs(orgenda.config.files) do
         parse_file(file_info, items)
     end
-    table.sort(items, orgenda.compare_todo_items)
     orgenda.data.items = items
 end
 
 function orgenda.hide(item)
     local cmd = { "sed", "-e", tostring(item.line_number).."s/ TODO\\| DONE//", "-i", item.source }
-    awful.spawn.easy_async(cmd, orgenda.reset)
+    awful.spawn.easy_async(cmd, orgenda.schedule_reset)
 end
 
 function orgenda.toggle_done(item)
     item.done = not item.done
-    orgenda.set_priority_status(item)
+    orgenda.data:emit_signal("property::items")
+    orgenda.save_priority_status(item)
 end
 
 function orgenda.promote(item)
     item.priority = item.priority % 3 + 1
-    orgenda.set_priority_status(item)
+    orgenda.data:emit_signal("property::items")
+    orgenda.save_priority_status(item)
 end
 
-function orgenda.set_priority_status(item)
+function orgenda.save_priority_status(item)
     local pri_char = ({"C", "B", "A"})[item.priority]
     local cmd = { "sed", "-e", tostring(item.line_number).."s/ \\(TODO\\|DONE\\) *\\(\\[#[A-C]\\]\\|\\) / "..
                       (item.done and "DONE" or "TODO")..
                       (item.priority == 2 and item.implicit_priority and "" or
                        " [#"..pri_char.."]")..
                       " /", "-i", item.source }
-    awful.spawn.easy_async(cmd, orgenda.reset)
+    awful.spawn.easy_async(cmd, function () end)
 end
 
 function orgenda.widget(args)
@@ -255,7 +259,6 @@ function orgenda.widget(args)
                 context_transform_function = {focus = false},
                 widget = cbg,
             }
-            widget.item = item
             widget:connect_signal(
                 "mouse::enter",
                 function (w)
@@ -282,6 +285,7 @@ function orgenda.widget(args)
             )
             todo_item_widget_cache[cache_key] = widget
         end
+        todo_item_widget_cache[cache_key].item = item
         return todo_item_widget_cache[cache_key]
     end
 
@@ -312,6 +316,7 @@ function orgenda.widget(args)
     orgenda.data:connect_signal(
         "property::items",
         function ()
+            table.sort(orgenda.data.items, orgenda.compare_todo_items)
             todo_item_container:reset()
             local cache_keys = {}
             for index, item in ipairs(orgenda.data.items) do
@@ -336,6 +341,8 @@ function orgenda.widget(args)
 
     return orgenda_widget
 end
+
+capi.awesome.connect_signal("orgenda::request_reset", orgenda.schedule_reset)
 
 gtimer.delayed_call(
     function ()

@@ -215,6 +215,7 @@ function config.create_notif_widget(notif)
                                     notif.title and #notif.title > 0 and notif.title.." - " or "",
                                     notif.message))
                         f:close()
+                        capi.awesome.emit_signal("orgenda::request_reset")
                     end
                     remove_notification(notif, 1)
                 elseif notif_widgets[notif.notif_id] == notix_reg_container then
