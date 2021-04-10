@@ -1616,20 +1616,20 @@ waffle_settings_view = view {
                 --       key = "t",
                 --       action = function (alt)
                 --          if not alt then
-                --             if shared.var.enable_titlebar then
+                --             if shared.vars.enable_titlebar then
                 --                for _, c in ipairs(capi.client.get()) do
                 --                   shared.client.titlebar_disable(c)
                 --                end
-                --                shared.var.enable_titlebar = false
+                --                shared.vars.enable_titlebar = false
                 --             else
                 --                for _, c in ipairs(capi.client.get()) do
                 --                   shared.client.titlebar_enable(c)
                 --                end
-                --                shared.var.enable_titlebar = true
+                --                shared.vars.enable_titlebar = true
                 --             end
                 --          else
-                --              shared.var.hide_clients_with_titlebars =
-                --                  not shared.var.hide_clients_with_titlebars
+                --              shared.vars.hide_clients_with_titlebars =
+                --                  not shared.vars.hide_clients_with_titlebars
                 --              capi.client.emit_signal("list")
                 --          end
                 --          waffle:hide()
@@ -1652,6 +1652,17 @@ waffle_settings_view = view {
                             shared.screen.toggle_fortune()
                         end
                 }),
+                button{
+                    markup = "Toggle notes",
+                    indicator = em("n"),
+                    key = "n",
+                    action = function (alt)
+                        shared.vars.show_notes = not shared.vars.show_notes
+                        if not alt then
+                            waffle:hide()
+                        end
+                    end,
+                },
                 (
                     function()
                         local b

@@ -205,9 +205,9 @@ local tasklist_template = {
                             },
                             widget = fallback,
                         },
-                        [top_index[shared.var.bar_position]] = (beautiful.bar_height - beautiful.bar_icon_size) / 2,
-                        [bottom_index[shared.var.bar_position]] = (beautiful.bar_height - beautiful.bar_icon_size) / 2,
-                        [right_index[shared.var.bar_position]] = beautiful.sep_small_size,
+                        [top_index[shared.vars.bar_position]] = (beautiful.bar_height - beautiful.bar_icon_size) / 2,
+                        [bottom_index[shared.vars.bar_position]] = (beautiful.bar_height - beautiful.bar_icon_size) / 2,
+                        [right_index[shared.vars.bar_position]] = beautiful.sep_small_size,
                         widget = wibox.container.margin,
                     },
                     {
@@ -223,7 +223,7 @@ local tasklist_template = {
                                     align = "center",
                                     widget = wibox.widget.textbox,
                                 },
-                                direction = direction_index[shared.var.bar_position] == "horizontal" and "north" or "west",
+                                direction = direction_index[shared.vars.bar_position] == "horizontal" and "north" or "west",
                                 widget = wibox.container.rotate
                             },
                             fg_function = function (context)
@@ -238,13 +238,13 @@ local tasklist_template = {
                         left = beautiful.sep_small_size,
                         widget = wibox.container.margin,
                     },
-                    layout = wibox.layout.align[direction_index[shared.var.bar_position]],
+                    layout = wibox.layout.align[direction_index[shared.vars.bar_position]],
                 },
-                direction = direction_index[shared.var.bar_position] == "horizontal" and "north" or "west",
+                direction = direction_index[shared.vars.bar_position] == "horizontal" and "north" or "west",
                 widget = wibox.container.rotate
             },
-            [left_index[shared.var.bar_position]]  = beautiful.sep_small_size,
-            [right_index[shared.var.bar_position]] = beautiful.sep_small_size,
+            [left_index[shared.vars.bar_position]]  = beautiful.sep_small_size,
+            [right_index[shared.vars.bar_position]] = beautiful.sep_small_size,
             widget = wibox.container.margin
         },
         layout = wibox.layout.stack,
@@ -294,13 +294,13 @@ function module.create(scr)
                 return false
             end
             -- WIP - disable the hiding for now
-            -- return not (c:isvisible() and shared.var.hide_clients_with_titlebars and c.has_titlebar)
+            -- return not (c:isvisible() and shared.vars.hide_clients_with_titlebars and c.has_titlebar)
             return true
         end,
         -- Handled in create_callback
         -- buttons = my_tasklist_buttons,
         style = { font = beautiful.font },
-        layout = beautiful.tasklist_layout[direction_index[shared.var.bar_position]][beautiful.bar_style],
+        layout = beautiful.tasklist_layout[direction_index[shared.vars.bar_position]][beautiful.bar_style],
         source = function ()
             -- Sort clients with their constant ids to make the order stable.
             local cls = awful.widget.tasklist.source.all_clients()

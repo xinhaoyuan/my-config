@@ -326,20 +326,20 @@ local opposite_dir = {
 --         layout = wibox.layout.align.horizontal,
 --     }
 
---     if shared.var.titlebar_position == "left" or shared.var.titlebar_position == "right" then
+--     if shared.vars.titlebar_position == "left" or shared.vars.titlebar_position == "right" then
 --         titlebar_container = wibox.container.rotate(titlebar_container, "west")
 --     end
 
 --     titlebar_container = wibox.widget {
 --         titlebar_container,
---         [opposite_dir[shared.var.titlebar_position]] = beautiful.xborder_width,
+--         [opposite_dir[shared.vars.titlebar_position]] = beautiful.xborder_width,
 --         color = capi.client.focus == c and beautiful.border_focus or beautiful.border_normal,
 --         widget = wibox.container.margin,
 --     }
 --     awful.titlebar(
 --         c,
 --         {
---             position = shared.var.titlebar_position,
+--             position = shared.vars.titlebar_position,
 --             size = beautiful.titlebar_size + beautiful.xborder_width,
 --             font = beautiful.font,
 --         }
@@ -1082,7 +1082,7 @@ capi.client.connect_signal("property::has_xborder",
 capi.client.connect_signal("property::has_xtitlebar",
                            function (c)
                                if c.previous_has_xtitlebar ~= c.has_xtitlebar then
-                                   if shared.var.hide_clients_with_titlebars then
+                                   if shared.vars.hide_clients_with_titlebars then
                                        capi.client.emit_signal("list")
                                    end
                                    if c.previous_has_xtitlebar ~= nil then
@@ -1122,7 +1122,7 @@ end
 
 local function manage_cb(c)
     local geo = c:geometry()
-    c.has_xtitlebar_enabled = shared.var.enable_titlebar
+    c.has_xtitlebar_enabled = shared.vars.enable_titlebar
     reset_decoration(c)
     decorate(c)
 
@@ -1181,7 +1181,7 @@ require("awful.rules").rules = {
          buttons = client_buttons,
          border_width = 0,
          screen = function(c) return capi.awesome.startup and c.screen or awful.screen.focused() end,
-         floating = shared.var.floating_by_default,
+         floating = shared.vars.floating_by_default,
          placement = awful.placement.centered_on_new,
          titlebar_style = "mini_top",
       }

@@ -208,7 +208,7 @@ end
 local my_wibars = {}
 local my_tray
 my_tray = wibox.widget.systray()
-my_tray.horizontal = direction_index[shared.var.bar_position] == "horizontal"
+my_tray.horizontal = direction_index[shared.vars.bar_position] == "horizontal"
 my_tray.base_size = beautiful.systray_icon_size
 local bar_tray_wrapper = wibox.widget {
     my_tray,
@@ -518,6 +518,18 @@ orgenda.data:connect_signal(
     end
 )
 
+local orgenda_widget = orgenda.widget{
+    item_margin = beautiful.sep_small_size,
+}
+
+orgenda_widget.visible = shared.vars.show_notes
+shared.vars:connect_signal(
+    "property::show_notes",
+    function(_, value)
+        orgenda_widget.visible = value
+    end
+)
+
 local cal_popup_width = dpi(240)
 local cal_popup = awful.popup {
     widget = wibox.widget {
@@ -527,9 +539,7 @@ local cal_popup = awful.popup {
                 {
                     {
                         {
-                            orgenda.widget {
-                                item_margin = beautiful.sep_small_size,
-                            },
+                            orgenda_widget,
                             width = cal_popup_width,
                             widget = wibox.container.constraint,
                         },
@@ -680,7 +690,7 @@ local function setup_screen(scr)
        tasklist,
        {
            fortune_widget,
-           direction = direction_index[shared.var.bar_position] == "horizontal" and "north" or "west",
+           direction = direction_index[shared.vars.bar_position] == "horizontal" and "north" or "west",
            widget = wibox.container.rotate
        },
        widget = fallback,
@@ -690,7 +700,7 @@ local function setup_screen(scr)
        screen = scr,
        filter = function (t) return true end,
        buttons = my_tag_list_buttons,
-       layout = wibox.layout.fixed[direction_index[shared.var.bar_position]],
+       layout = wibox.layout.fixed[direction_index[shared.vars.bar_position]],
        style = {
            font = "DejaVu Sans 10",
        },
@@ -715,16 +725,16 @@ local function setup_screen(scr)
          fg = beautiful.fg_normal,
          ontop = false,
          bg = "#00000000",
-         [size_index[shared.var.bar_position]] =
+         [size_index[shared.vars.bar_position]] =
              beautiful.bar_height +
              beautiful.xborder_width,
-         position = shared.var.bar_position,
+         position = shared.vars.bar_position,
          border_width = 0,
          cursor = "cross",
    })
    my_wibars[#my_wibars + 1] = scr.widgets.wibar
 
-   local left_layout = wibox.layout.fixed[direction_index[shared.var.bar_position]]()
+   local left_layout = wibox.layout.fixed[direction_index[shared.vars.bar_position]]()
    local layoutbox = awful.widget.layoutbox{screen = scr}
    masked_imagebox.convert(layoutbox.imagebox)
    scr.widgets.indicator = wibox.widget {
@@ -745,7 +755,7 @@ local function setup_screen(scr)
    local right_layout = wibox.widget {
       spacing        = beautiful.sep_median_size,
       spacing_widget = beautiful.sep_widget,
-      layout         = wibox.layout.fixed[direction_index[shared.var.bar_position]]
+      layout         = wibox.layout.fixed[direction_index[shared.vars.bar_position]]
    }
 
    if scr == primary_screen then
@@ -753,7 +763,7 @@ local function setup_screen(scr)
    end
 
    local clock
-   if direction_index[shared.var.bar_position] == "horizontal" then
+   if direction_index[shared.vars.bar_position] == "horizontal" then
        clock = wibox.widget{
            {
                {
@@ -865,15 +875,15 @@ local function setup_screen(scr)
                left_layout,
                {
                    tasklist_with_fallback,
-                   ["content_fill_"..direction_index[shared.var.bar_position]] = true,
+                   ["content_fill_"..direction_index[shared.vars.bar_position]] = true,
                    widget = wibox.container.place,
                },
                {
                    right_layout,
-                   [direction_index[shared.var.bar_position] == "horizontal" and "left" or "top"] = beautiful.sep_median_size,
+                   [direction_index[shared.vars.bar_position] == "horizontal" and "left" or "top"] = beautiful.sep_median_size,
                    widget = wibox.container.margin,
                },
-               layout = wibox.layout.align[direction_index[shared.var.bar_position]],
+               layout = wibox.layout.align[direction_index[shared.vars.bar_position]],
            },
            top = true
        }
@@ -912,7 +922,7 @@ local function setup_screen(scr)
                },
                nil,
                expand = "inside",
-               layout = fixed_align[direction_index[shared.var.bar_position]]
+               layout = fixed_align[direction_index[shared.vars.bar_position]]
            },
            middle_margin_container,
            {
@@ -926,10 +936,10 @@ local function setup_screen(scr)
                },
                right_margin_container,
                expand = "inside",
-               layout = fixed_align[direction_index[shared.var.bar_position]]
+               layout = fixed_align[direction_index[shared.vars.bar_position]]
            },
            expand = "outside_with_minimum",
-           layout = fixed_align[direction_index[shared.var.bar_position]],
+           layout = fixed_align[direction_index[shared.vars.bar_position]],
        }
    end
    scr.widgets.wibar:set_widget(layout)
