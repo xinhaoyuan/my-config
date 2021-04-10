@@ -461,6 +461,10 @@ local cal_widget = wibox.widget {
                     margins = dpi(2),
                     widget = wibox.container.margin
                 },
+                shape = function (cr, width, height)
+                    beautiful.rect_with_corners(cr, width, height, true, true, true, true,
+                                                beautiful.xborder_radius / 2)
+                end,
                 fg = beautiful.fg_focus,
                 bg = beautiful.bg_focus,
                 context_transform_function = function (context)
@@ -535,42 +539,39 @@ local cal_popup = awful.popup {
     widget = wibox.widget {
         with_border {
             widget = {
-                cal_widget,
                 {
+                    cal_widget,
                     {
                         {
                             orgenda_widget,
-                            width = cal_popup_width,
-                            widget = wibox.container.constraint,
+                            draw_empty = false,
+                            top = beautiful.sep_big_size,
+                            widget = fixed_margin,
                         },
-                        draw_empty = false,
-                        top = beautiful.sep_big_size,
-                        widget = fixed_margin,
+                        bgimage = function(context, cr, width, height)
+                            height = beautiful.sep_big_size
+                            beautiful.draw_separator(cr, width, height)
+                        end,
+                        widget = wibox.container.background
                     },
-                    bgimage = function(context, cr, width, height)
-                        height = beautiful.sep_big_size
-                        beautiful.draw_separator(cr, width, height)
-                    end,
-                    widget = wibox.container.background
-                },
-                {
                     {
                         {
                             notix.widget,
-                            width = cal_popup_width,
-                            widget = wibox.container.constraint,
+                            draw_empty = false,
+                            top = beautiful.sep_big_size,
+                            widget = fixed_margin,
                         },
-                        draw_empty = false,
-                        top = beautiful.sep_big_size,
-                        widget = fixed_margin,
+                        bgimage = function(context, cr, width, height)
+                            height = beautiful.sep_big_size
+                            beautiful.draw_separator(cr, width, height)
+                        end,
+                        widget = wibox.container.background
                     },
-                    bgimage = function(context, cr, width, height)
-                        height = beautiful.sep_big_size
-                        beautiful.draw_separator(cr, width, height)
-                    end,
-                    widget = wibox.container.background
+                    layout = wibox.layout.fixed.vertical,
                 },
-                layout = wibox.layout.fixed.vertical,
+                width = cal_popup_width,
+                strategy = "exact",
+                widget = wibox.container.constraint,
             },
             top = true,
             bottom = true,
