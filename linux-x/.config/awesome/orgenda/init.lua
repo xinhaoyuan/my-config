@@ -11,6 +11,7 @@ local gobject = require("gears.object")
 local gtimer = require("gears.timer")
 local gdebug = require("gears.debug")
 local gstring = require("gears.string")
+local naughty = require("naughty")
 local orgenda = {
     config = {
         files = {}
@@ -157,6 +158,10 @@ function orgenda.reset()
         parse_file(file_info, items)
     end
     orgenda.data.items = items
+    naughty.notify{
+        skip_notix = true,
+        title = "Orgenda reloaded."
+    }
 end
 
 function orgenda.hide(item)

@@ -422,10 +422,20 @@ local cal_widget = wibox.widget {
     long_weekdays = true,
     spacing = 0,
     fn_embed = function (widget, flag, date)
-        local inverted = false
-        if flag == 'header' then
+        if flag == "header" then
             widget.font = beautiful.fontname_normal..' 12'
+            widget = wibox.widget{
+                widget,
+                fg = beautiful.fg_focus,
+                bg = beautiful.bg_focus,
+                widget = wibox.container.background,
+            }
+            return widget
+        elseif flag == "month" then
+            return widget
         end
+
+        local inverted = false
 
         if flag == "normal" or flag == "focus" then
             if today.year == date.year and today.month == date.month and today.day == date.day then
@@ -434,25 +444,19 @@ local cal_widget = wibox.widget {
 
             if active_dates[date.year] and active_dates[date.year][date.month] and active_dates[date.year][date.month][date.day] then
                 widget = wibox.widget {
-                    {
-                        {
-                            {
-                                text = '•',
-                                widget = wibox.widget.textbox,
-                            },
-                            fg_function = function(context)
-                                if context.inverted then return beautiful.special_focus else return beautiful.special_normal end
-                            end,
-                            widget = cbg,
-                        },
-                        halign = 'left',
-                        widget = wibox.container.place
-                    },
                     widget,
-                    layout = wibox.layout.stack,
+                    fg_function = function(context)
+                        return beautiful[context.inverted and "special_focus" or "special_normal"]
+                    end,
+                    widget = cbg,
                 }
             end
         end
+        widget = wibox.widget{
+            widget,
+            halign = "center",
+            widget = wibox.container.place,
+        }
 
         if inverted then
             return wibox.widget {
@@ -502,6 +506,56 @@ gtimer {
     end
 }
 
+local orgenda_header
+do
+    local refresh_button = wibox.widget{
+        {
+            {
+                text = "Reload",
+                font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
+                widget = wibox.widget.textbox,
+            },
+            margins = beautiful.sep_small_size,
+            widget = wibox.container.margin,
+        },
+        fg_function = {"fg_"},
+        bg_function = {"bg_"},
+        context_transform_function = {focus = false},
+        widget = cbg,
+    }
+    refresh_button:connect_signal(
+        "mouse::enter",
+        function ()
+            refresh_button.context_transform_function = {focus = true}
+        end
+    )
+    refresh_button:connect_signal(
+        "mouse::leave",
+        function ()
+            refresh_button.context_transform_function = {focus = false}
+        end
+    )
+    refresh_button:connect_signal(
+        "button::release",
+        function ()
+            capi.awesome.emit_signal("orgenda::request_reset")
+        end
+    )
+    orgenda_header = wibox.widget{
+        {
+            {
+                text = "TODOs:",
+                widget = wibox.widget.textbox,
+            },
+            left = beautiful.sep_small_size,
+            widget = wibox.container.margin,
+        },
+        nil,
+        refresh_button,
+        layout = wibox.layout.align.horizontal,
+    }
+end
+
 local cal_switch
 orgenda.data:connect_signal(
     "property::items",
@@ -522,8 +576,12 @@ orgenda.data:connect_signal(
     end
 )
 
-local orgenda_widget = orgenda.widget{
-    item_margin = beautiful.sep_small_size,
+local orgenda_widget = wibox.widget{
+    orgenda_header,
+    orgenda.widget{
+        item_margin = beautiful.sep_small_size,
+    },
+    layout = wibox.layout.fixed.vertical,
 }
 
 orgenda_widget.visible = shared.vars.show_notes

@@ -14,7 +14,7 @@ function scroller:layout(context, width, height)
 
     self:emit_signal("widget::redraw_needed")
 
-    local content_width = width - self._private.scrollbar_width
+    local content_width = math.max(width - self._private.scrollbar_width, 0)
     local w, h = base.fit_widget(self, context, self._private.widget, content_width, math.huge)
     local offset = math.max(math.min(self._private.offset, h - height), 0)
     -- Send signal?

@@ -26,7 +26,7 @@ local notif_counter = 0
 local notif_widgets = {}
 local notif_objects = {}
 
-local notix_counter_header = wibox.widget.textbox()
+local notix_counter_header = wibox.widget.textbox("Notifications:")
 local notix_header_bar = wibox.widget{
     {
         notix_counter_header,
@@ -35,8 +35,6 @@ local notix_header_bar = wibox.widget{
         layout = wibox.layout.align.horizontal,
     },
     left = beautiful.sep_small_size,
-    right = beautiful.sep_small_size,
-    bottom = beautiful.sep_small_size,
     widget = wibox.container.margin,
     visible = false,
 }
@@ -47,18 +45,20 @@ local notix_reg_container = wibox.widget{
     layout = wibox.layout.fixed.vertical,
 }
 local notix_widget = wibox.widget{
-    notix_header_bar,
-    notix_pinned_container,
+    {
+        notix_header_bar,
+        notix_pinned_container,
+        layout = wibox.layout.fixed.vertical,
+    },
     {
         {
             notix_reg_container,
             gravity = "top",
             widget = scroller,
         },
-        height = dpi(300),
         widget = wibox.container.constraint,
     },
-    layout = wibox.layout.fixed.vertical,
+    layout = wibox.layout.align.vertical,
 }
 
 local notix_counter_number = wibox.widget{
@@ -90,7 +90,6 @@ local function update_notif_counter(delta)
         notix_header_bar.visible = true
         notix_counter_widget.visible = true
     end
-    notix_counter_header.text = tostring(notif_counter).." notifications:"
     notix_counter_number.text = tostring(notif_counter)
 end
 
@@ -255,7 +254,7 @@ function config.create_button(name, callback)
                 align = "center",
                 widget = wibox.widget.textbox,
             },
-            margins = beautiful.sep_small_size / 2,
+            margins = beautiful.sep_small_size,
             widget = wibox.container.margin,
         },
         fg_function = {"fg_"},
@@ -325,9 +324,9 @@ gtimer.delayed_call(
         naughty.connect_signal(
             "new",
             function (notif, args)
-                notif.real_destroy = args.destroy
+                notif.real_destroy = args.destroy or function () end
                 args.destroy = function () end
-                if config.filter == nil or config.filter(notif) then
+                if not args.skip_notix and (config.filter == nil or config.filter(notif)) then
                     add_notification(notif)
                 end
             end

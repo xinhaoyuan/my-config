@@ -154,10 +154,10 @@ function waffle:set_view(view, call_open)
     end
     self.view_ = view
     if view then
-        self.widget_container.widget = view.widget
         if call_open and view.on_open then
             view:on_open()
         end
+        self.widget_container.widget = view.widget
     end
 end
 

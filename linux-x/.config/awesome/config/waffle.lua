@@ -4,6 +4,7 @@ shared.waffle = {}
 local capi = {
    client = client,
    screen = screen,
+   awesome = awesome,
 }
 
 local awful = require("awful")
@@ -18,6 +19,7 @@ local icons = require("icons")
 local fallback = require("fallback")
 local fixed_margin = require("fixed_margin")
 local fixed_align = require("fixed_align")
+local fixed_place = require("fixed_place")
 local outlined_textbox = require("outlined_textbox")
 local cbg = require("contextual_background")
 local debug_container = require("debug_container")
@@ -25,6 +27,9 @@ local masked_imagebox = require("masked_imagebox")
 local acolor = require("aux").color
 local mpc_gobject = require("mpc-gobject")
 local orgenda = require("orgenda")
+local mycalendar = require("my-calendar")
+local scroller = require("scroller")
+local notix = require("notix")
 local dpi = require("beautiful.xresources").apply_dpi
 
 local waffle_width = beautiful.waffle_panel_width or dpi(240)
@@ -309,6 +314,7 @@ local waffle_shutdown_view = view {
     })
 }
 
+local waffle_calendar_view
 local waffle_settings_view
 local waffle_tray_view
 local waffle_tray_wrapper = wibox.widget {
@@ -1443,7 +1449,7 @@ local waffle_root_action_widget = decorate_panel {
                     shared.action.calendar()
                     waffle:hide()
                 else
-                    awful.screen.focused().actions.activate_clock_area()
+                    waffle:show(waffle_calendar_view, { mode = "push" })
                 end
             end,
         },
@@ -1605,6 +1611,241 @@ local waffle_root_view = view {
 }
 
 waffle:set_root_view(waffle_root_view)
+
+-- Calendar
+
+local today = os.date("*t")
+local last_mid_update_timestamp = nil
+local active_dates = {}
+local cal_widget = wibox.widget {
+    date = os.date('*t'),
+    font = beautiful.font_mono,
+    week_numbers = true,
+    -- start_sunday = true,
+    long_weekdays = true,
+    spacing = 0,
+    fn_embed = function (widget, flag, date)
+        if flag == "header" then
+            widget.font = beautiful.fontname_normal..' 12'
+            widget = wibox.widget{
+                widget,
+                fg = beautiful.fg_focus,
+                bg = beautiful.bg_focus,
+                widget = wibox.container.background,
+            }
+            return widget
+        elseif flag == "month" then
+            return widget
+        end
+
+        local inverted = false
+
+        if flag == "normal" or flag == "focus" then
+            if today.year == date.year and today.month == date.month and today.day == date.day then
+                inverted = true
+            end
+
+            if active_dates[date.year] and active_dates[date.year][date.month] and active_dates[date.year][date.month][date.day] then
+                widget = wibox.widget {
+                    widget,
+                    fg_function = function(context)
+                        return beautiful[context.inverted and "special_focus" or "special_normal"]
+                    end,
+                    widget = cbg,
+                }
+            end
+        end
+        widget = wibox.widget{
+            widget,
+            halign = "center",
+            widget = wibox.container.place,
+        }
+
+        if inverted then
+            return wibox.widget {
+                {
+                    widget,
+                    margins = dpi(2),
+                    widget = wibox.container.margin
+                },
+                shape = function (cr, width, height)
+                    beautiful.rect_with_corners(cr, width, height, true, true, true, true,
+                                                beautiful.xborder_radius / 2)
+                end,
+                fg = beautiful.fg_focus,
+                bg = beautiful.bg_focus,
+                context_transform_function = function (context)
+                    context.inverted = true
+                end,
+                widget = cbg,
+            }
+        else
+            return wibox.widget {
+                widget,
+                margins = dpi(2),
+                widget = wibox.container.margin
+            }
+        end
+    end,
+    widget = mycalendar.month
+}
+gtimer {
+    timeout = 10,
+    autostart = true,
+    call_now = true,
+    callback = function()
+        local new_today = os.date("*t")
+        if today.day ~= new_today.day then
+            today = new_today
+            cal_widget:emit_signal("widget::layout_changed")
+        end
+    end
+}
+
+local orgenda_header
+do
+    local refresh_button = wibox.widget{
+        {
+            {
+                text = "Reload",
+                font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
+                widget = wibox.widget.textbox,
+            },
+            margins = beautiful.sep_small_size,
+            widget = wibox.container.margin,
+        },
+        fg_function = {"fg_"},
+        bg_function = {"bg_"},
+        context_transform_function = {focus = false},
+        widget = cbg,
+    }
+    refresh_button:connect_signal(
+        "mouse::enter",
+        function ()
+            refresh_button.context_transform_function = {focus = true}
+        end
+    )
+    refresh_button:connect_signal(
+        "mouse::leave",
+        function ()
+            refresh_button.context_transform_function = {focus = false}
+        end
+    )
+    refresh_button:connect_signal(
+        "button::release",
+        function ()
+            capi.awesome.emit_signal("orgenda::request_reset")
+        end
+    )
+    orgenda_header = wibox.widget{
+        {
+            {
+                text = "TODOs:",
+                widget = wibox.widget.textbox,
+            },
+            left = beautiful.sep_small_size,
+            widget = wibox.container.margin,
+        },
+        nil,
+        refresh_button,
+        layout = wibox.layout.align.horizontal,
+    }
+end
+
+orgenda.data:connect_signal(
+    "property::items",
+    function ()
+        active_dates = {}
+        for _, item in ipairs(orgenda.data.items) do
+            if item.timestamp and not item.done then
+                local date = os.date("*t", item.timestamp)
+                local y = active_dates[date.year] or {}
+                local m = y[date.month] or {}
+                m[date.day] = true
+                y[date.month] = m
+                active_dates[date.year] = y
+            end
+        end
+    end
+)
+
+local orgenda_widget = wibox.widget{
+    orgenda_header,
+    {
+        orgenda.widget{
+            item_margin = beautiful.sep_small_size,
+        },
+        widget = scroller,
+    },
+    layout = wibox.layout.align.vertical,
+}
+
+orgenda_widget.visible = shared.vars.show_notes
+shared.vars:connect_signal(
+    "property::show_notes",
+    function(_, value)
+        orgenda_widget.visible = value
+    end
+)
+
+waffle_calendar_view = view {
+    root = decorate_waffle{
+        {
+            {
+                {
+                    cal_widget,
+                    {
+                        {
+                            {
+                                orgenda_widget,
+                                top = beautiful.sep_big_size,
+                                draw_empty = false,
+                                widget = fixed_margin,
+                            },
+                            bgimage = function(context, cr, width, height)
+                                height = beautiful.sep_big_size
+                                beautiful.draw_separator(cr, width, height)
+                            end,
+                            widget = wibox.container.background,
+                        },
+                        fill_vertical = false,
+                        content_fill_horizontal = true,
+                        content_fill_vertical = true,
+                        widget = fixed_place,
+                    },
+                    layout = wibox.layout.align.vertical,
+                },
+                width = waffle_width,
+                strategy = "exact",
+                widget = wibox.container.constraint,
+            },
+            {
+                {
+                    {
+                        notix.widget,
+                        width = waffle_width,
+                        strategy = "exact",
+                        widget = wibox.container.constraint,
+                    },
+                    left = beautiful.sep_big_size,
+                    draw_empty = false,
+                    widget = fixed_margin,
+                },
+                bgimage = function(context, cr, width, height)
+                    width = beautiful.sep_big_size
+                    beautiful.draw_separator(cr, width, height)
+                end,
+                widget = wibox.container.background,
+            },
+            layout = wibox.layout.fixed.horizontal,
+        },
+        height = waffle_width * 5 / 2,
+        strategy = "max",
+        widget = wibox.container.constraint,
+    },
+}
+
+-- Settings
 
 waffle_settings_view = view {
     root = decorate_waffle(
