@@ -155,7 +155,7 @@ function waffle:set_view(view, call_open)
     self.view_ = view
     if view then
         if call_open and view.on_open then
-            view:on_open()
+            view:on_open(self.wibox_.screen)
         end
         self.widget_container.widget = view.widget
     end

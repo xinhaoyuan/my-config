@@ -151,7 +151,7 @@ alayout.layouts = {
 -- Define the tag list upfront for keybindings
 
 local root_buttons = awful.util.table.join(
-    awful.button({ }, 3, function () waffle:show(nil, { anchor = "mouse" }) end),
+    awful.button({ }, 3, function () capi.awesome.emit_signal("show_main_waffle", "mouse") end),
     capi.root.buttons()
 )
 
@@ -168,7 +168,7 @@ local fortune_widget = wibox.widget {
     },
     valign = "center",
     halign = "center",
-    buttons = awful.util.table.join(awful.button({ }, 3, function () waffle:show(nil, { anchor = "mouse" }) end)),
+    buttons = awful.util.table.join(awful.button({ }, 3, function () capi.awesome.emit_signal("show_main_waffle", "mouse") end)),
     widget = fixed_place
 }
 fortune_widget.watch = require("watchcommand").create({"fortune", "-s"}, 300)
@@ -804,8 +804,12 @@ local function setup_screen(scr)
    }
    scr.widgets.indicator:buttons(
       awful.util.table.join(
-          awful.button({ }, 1, function () waffle:show(nil, { anchor = "mouse" }) end),
-          awful.button({ }, 3, function () if client.focus ~= nil then shared.waffle.show_client_waffle(client.focus, { anchor = "mouse" }) end end),
+          awful.button({ }, 1, function () capi.awesome.emit_signal("show_main_waffle", "mouse") end),
+          awful.button({ }, 3, function ()
+                  if capi.client.focus ~= nil then
+                      capi.awesome.emit_signal("show_client_waffle", capi.client.focus, "mouse")
+                  end
+          end),
           awful.button({ }, 4, function () awful.layout.inc( 1) end),
           awful.button({ }, 5, function () awful.layout.inc(-1) end)))
    left_layout:add(scr.widgets.indicator)
@@ -889,32 +893,35 @@ local function setup_screen(scr)
        context_transform_function = {focus = false},
        widget = cbg,
    }
-   clock_area:connect_signal(
-       'mouse::enter', function() cal_popup_auto_hide = false
-           if not cal_popup_pinned then cal_popup_show() end end)
-   clock_area:connect_signal(
-       'mouse::leave', function() cal_popup_auto_hide = true end)
-   function scr.actions.activate_clock_area()
-       if cal_popup_pinned then
-           if cal_popup.screen == scr then
-               cal_popup_pinned = false
-               cal_popup_hide()
-               clock_area:set_context_transform_function({focus = false})
-           else
-               cal_popup.screen.widgets.
-                   clock_area:set_context_transform_function({focus = false})
-               cal_popup_show()
-               clock_area:set_context_transform_function({focus = true})
-           end
-       else
-           cal_popup_show()
-           cal_popup_pinned = true
-           clock_area:set_context_transform_function({focus = true})
-       end
+   -- clock_area:connect_signal(
+   --     'mouse::enter', function() cal_popup_auto_hide = false
+   --         if not cal_popup_pinned then cal_popup_show() end end)
+   -- clock_area:connect_signal(
+   --     'mouse::leave', function() cal_popup_auto_hide = true end)
+   function scr.actions.set_clock_area_focus(f)
+       clock_area:set_context_transform_function({focus = f})
    end
+   -- function scr.actions.activate_clock_area()
+   --     if cal_popup_pinned then
+   --         if cal_popup.screen == scr then
+   --             cal_popup_pinned = false
+   --             cal_popup_hide()
+   --             clock_area:set_context_transform_function({focus = false})
+   --         else
+   --             cal_popup.screen.widgets.
+   --                 clock_area:set_context_transform_function({focus = false})
+   --             cal_popup_show()
+   --             clock_area:set_context_transform_function({focus = true})
+   --         end
+   --     else
+   --         cal_popup_show()
+   --         cal_popup_pinned = true
+   --         clock_area:set_context_transform_function({focus = true})
+   --     end
+   -- end
    clock_area:buttons(
        awful.util.table.join(
-           awful.button({         }, 1, scr.actions.activate_clock_area),
+           awful.button({         }, 1, function() capi.awesome.emit_signal("show_calendar_waffle", "mouse") end),
            awful.button({         }, 2, function() cal_reset() end),
            awful.button({         }, 3, function() notix.remove_unpinned() end),
            awful.button({         }, 4, function() cal_switch({ month =  -1 }) end),
@@ -1040,10 +1047,10 @@ capi.screen.connect_signal("primary_changed", schedule_reset_widgets)
 capi.root.keys(
    awful.util.table.join(
       capi.root.keys(),
-      awful.key({ }, "XF86Launch1", function () waffle:show(nil, { anchor = "screen" }) end),
+      awful.key({ }, "XF86Launch1", function () capi.awesome.emit_signal("show_main_waffle", "screen") end),
       awful.key({ }, "XF86Launch3", function ()
               if capi.client.focus then
-                  shared.waffle.show_client_waffle(capi.client.focus, { anchor = "client" })
+                  capi.awesome.emit_signal("show_client_waffle", capi.client.focus, "client")
               end
       end),
       awful.key({ "Mod4" }, ";",
@@ -1109,7 +1116,7 @@ local global_keys = table_join(
    awful.key({ "Mod4" }, "e",               function () shared.action.file_manager() end),
    awful.key({ "Mod4" }, "l",               function () shared.action.screen_locker() end),
    awful.key({ "Mod4" }, "t",               function () shared.action.calendar() end),
-   awful.key({ "Mod4" }, "a",               function () awful.screen.focused().actions.activate_clock_area() end),
+   awful.key({ "Mod4" }, "a",               function () capi.awesome.emit_signal("show_calendar_waffle", "screen") end),
    awful.key({ "Mod4" }, "r",               function () shared.action.launcher() end),
    awful.key({ "Mod4" }, "F1",              function () shared.action.terminal_session{ name = "F1" } end),
    awful.key({ "Mod4" }, "F2",              function () shared.action.terminal_session{ name = "F2" } end),

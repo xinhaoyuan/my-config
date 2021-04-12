@@ -99,6 +99,7 @@ local function view(args)
         -- Options here.
     }
 
+    view.on_open = args.on_open
     view.on_close = args.on_close
 
     return view
@@ -1612,6 +1613,20 @@ local waffle_root_view = view {
 
 waffle:set_root_view(waffle_root_view)
 
+capi.awesome.connect_signal(
+    "show_main_waffle",
+    function (anchor)
+        waffle:show(nil, {anchor = anchor})
+    end
+)
+
+capi.awesome.connect_signal(
+    "show_calendar_waffle",
+    function (anchor)
+        waffle:show(waffle_calendar_view, {anchor = anchor})
+    end
+)
+
 -- Calendar
 
 local today = os.date("*t")
@@ -1627,12 +1642,12 @@ local cal_widget = wibox.widget {
     fn_embed = function (widget, flag, date)
         if flag == "header" then
             widget.font = beautiful.fontname_normal..' 12'
-            widget = wibox.widget{
-                widget,
-                fg = beautiful.fg_focus,
-                bg = beautiful.bg_focus,
-                widget = wibox.container.background,
-            }
+            -- widget = wibox.widget{
+            --     widget,
+            --     fg = beautiful.fg_focus,
+            --     bg = beautiful.bg_focus,
+            --     widget = wibox.container.background,
+            -- }
             return widget
         elseif flag == "month" then
             return widget
@@ -1843,6 +1858,14 @@ waffle_calendar_view = view {
         strategy = "max",
         widget = wibox.container.constraint,
     },
+    on_open = function (_, s)
+        s.actions.set_clock_area_focus(true)
+    end,
+    on_close = function (_)
+        for s in screen do
+            s.actions.set_clock_area_focus(false)
+        end
+    end,
 }
 
 -- Settings
@@ -2232,6 +2255,13 @@ function shared.waffle.show_client_waffle(c, args)
     update_client_waffle_labels()
     capi.client.emit_signal("list")
 end
+
+capi.awesome.connect_signal(
+    "show_client_waffle",
+    function (client, anchor)
+        shared.waffle.show_client_waffle(client, {anchor = anchor})
+    end
+)
 
 update_client_waffle_labels = function ()
     if not waffle:is_in_view(client_waffle) then

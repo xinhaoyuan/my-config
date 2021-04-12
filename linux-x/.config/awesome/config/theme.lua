@@ -336,7 +336,7 @@ function theme.draw_separator(cr, width, height)
     else
         cr:move_to(height / 2, height / 2)
         cr:line_to(width - height / 2, height / 2)
-        cr:set_dash({width <= dpi(12) and dpi(2) or 0, height / 2})
+        cr:set_dash({height <= dpi(12) and dpi(2) or 0, height / 2})
         cr:set_line_width(height / 6)
     end
     cr:stroke()
