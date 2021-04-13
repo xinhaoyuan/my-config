@@ -1627,6 +1627,17 @@ capi.awesome.connect_signal(
     end
 )
 
+capi.awesome.connect_signal(
+    "toggle_calendar_waffle",
+    function (anchor)
+        if waffle:is_in_view(waffle_calendar_view) then
+            waffle:hide()
+        else
+            waffle:show(waffle_calendar_view, {anchor = anchor})
+        end
+    end
+)
+
 -- Calendar
 
 local today = os.date("*t")
@@ -1787,10 +1798,21 @@ orgenda.data:connect_signal(
 local orgenda_widget = wibox.widget{
     orgenda_header,
     {
-        orgenda.widget{
-            item_margin = beautiful.sep_small_size,
+        {
+            orgenda.widget{
+                item_margin = beautiful.sep_small_size,
+            },
+            widget = scroller,
         },
-        widget = scroller,
+        {
+            {
+                markup = "<span size='large' foreground='"..beautiful.minor_normal.."'>Wow!\nNo TODOs!\nSo clean!</span>",
+                align = "center",
+                widget = wibox.widget.textbox,
+            },
+            widget = wibox.container.place,
+        },
+        widget = fallback,
     },
     layout = wibox.layout.align.vertical,
 }
@@ -1823,7 +1845,7 @@ waffle_calendar_view = view {
                             end,
                             widget = wibox.container.background,
                         },
-                        fill_vertical = false,
+                        fill_vertical = true,
                         content_fill_horizontal = true,
                         content_fill_vertical = true,
                         widget = fixed_place,
@@ -1854,7 +1876,7 @@ waffle_calendar_view = view {
             },
             layout = wibox.layout.fixed.horizontal,
         },
-        height = waffle_width * 5 / 2,
+        height = waffle_width * 2,
         strategy = "max",
         widget = wibox.container.constraint,
     },

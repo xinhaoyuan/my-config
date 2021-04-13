@@ -921,7 +921,7 @@ local function setup_screen(scr)
    -- end
    clock_area:buttons(
        awful.util.table.join(
-           awful.button({         }, 1, function() capi.awesome.emit_signal("show_calendar_waffle", "mouse") end),
+           awful.button({         }, 1, function() capi.awesome.emit_signal("toggle_calendar_waffle", "mouse") end),
            awful.button({         }, 2, function() cal_reset() end),
            awful.button({         }, 3, function() notix.remove_unpinned() end),
            awful.button({         }, 4, function() cal_switch({ month =  -1 }) end),
