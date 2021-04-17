@@ -1696,7 +1696,7 @@ local cal_widget = wibox.widget {
                 },
                 shape = function (cr, width, height)
                     beautiful.rect_with_corners(cr, width, height, true, true, true, true,
-                                                beautiful.xborder_radius / 2)
+                                                beautiful.xborder_radius - beautiful.xborder_width)
                 end,
                 fg = beautiful.fg_focus,
                 bg = beautiful.bg_focus,
