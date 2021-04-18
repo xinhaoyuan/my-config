@@ -644,49 +644,19 @@
 ;; }}}
 
 ;; Lua mode {{{
-(if (require 'lua-mode nil 'noerror)
-    (progn
-      (add-hook 'lua-mode-hook (lambda ()
-			       (setq lua-indent-level 4)
-			       (setq indent-tabs-mode nil)))
-      ;; Fixing the indentation when a line begins with a closer.
-      ;; Original: Follow the opener for the LAST consecutive closer from beginning.
-      ;; New: Follow the opener for the FIRST closer.
-      (defun lua--goto-line-beginning-leftmost-closer (&optional parse-start)
-        (let (case-fold-search pos line-end-pos return-val)
-          (save-excursion
-            (if parse-start (goto-char parse-start))
-            (setq line-end-pos (line-end-position))
-            (back-to-indentation)
-            (unless (lua-comment-or-string-p)
-              (cl-loop while (and (<= (point) line-end-pos)
-                                  (looking-at lua-indentation-modifier-regexp))
-                       for token-info = (lua-get-block-token-info (match-string 0))
-                       for token-type = (lua-get-token-type token-info)
-                       while (not (eq token-type 'open))
-                       do (progn
-                            (setq pos (match-beginning 0)
-                                  return-val token-info)
-                            (goto-char (match-end 0))
-                            (message "column %d" pos)
-                            (return)
-                            (forward-comment (line-end-position))))))
-          (when pos
-            (progn
-              (goto-char pos)
-              return-val))))
-      (eval-after-load "lua-mode"
-        '(lexical-let ((origin (symbol-function 'lua-calculate-indentation-override)))
-           (defun lua-calculate-indentation-override (&optional parse-start)
-             (letf (((symbol-function 'lua--goto-line-beginning-rightmost-closer)
-                     (symbol-function 'lua--goto-line-beginning-leftmost-closer))
-                    ((symbol-function 'current-indentation)
-                     (symbol-function 'current-column))
-                    )
-               (funcall origin parse-start)
-               )
-           )))
-      ))
+(defun --set-up-lua-mode ()
+  (add-hook 'lua-mode-hook (lambda ()
+			      (setq lua-indent-level 4)
+			      (setq indent-tabs-mode nil))))
+
+(eval-after-load "lua-mode" '(--set-up-lua-mode))
+
+(if (string-equal (getenv "LUA_MODE") "ORIGINAL")
+    (require 'lua-mode nil 'noerror)
+  (add-to-list 'load-path "/home/xinhaoyuan/src/lua-mode")
+  (autoload 'lua-mode "lua-mode" "Lua editing mode." t)
+  (add-to-list 'auto-mode-alist '("\\.lua$" . lua-mode))
+  (add-to-list 'interpreter-mode-alist '("lua" . lua-mode)))
 ;; }}}
 
 ;; imaxima {{{
