@@ -1715,6 +1715,33 @@ local cal_widget = wibox.widget {
     end,
     widget = mycalendar.month
 }
+
+local function cal_switch(delta)
+    local date = cal_widget:get_date()
+    if delta.day ~= nil then date.day = date.day + delta.day end
+    if delta.month ~= nil then date.month = date.month + delta.month end
+    if delta.year ~= nil then date.year = date.year + delta.year end
+    cal_widget:set_date(nil)
+    cal_widget:set_date(date)
+end
+
+local function cal_reset()
+    cal_widget:set_date(nil)
+    cal_widget:set_date(os.date('*t'))
+end
+
+cal_widget:connect_signal(
+    "button::press",
+    function (_, x, y, button)
+        if button == 2 then
+            cal_reset()
+        elseif button == 4 then
+            cal_switch{month = -1}
+        elseif button == 5 then
+            cal_switch{month = 1}
+        end
+    end)
+
 gtimer {
     timeout = 10,
     autostart = true,
