@@ -65,10 +65,9 @@ function PlacementLayout:default_place_func(context, parent_w, parent_h, child_w
         end
     }
     local dgeo = drawable:geometry()
-    awful.placement.no_offscreen(obj,
-                                 {
-                                     screen = drawable.screen,
-                                 }
+    awful.placement.no_offscreen(
+        obj,
+        {screen = drawable.screen}
     )
     return geo.x - dgeo.x, geo.y - dgeo.y
 end
@@ -176,37 +175,59 @@ function waffle:is_in_view(view)
     return self.view_ == view
 end
 
-local function get_waffle_wibox(screen)
-    if screen.waffle_wibox == nil or
-        screen.waffle_wibox.x ~= screen.geometry.x or
-        screen.waffle_wibox.y ~= screen.geometry.y or
-        screen.waffle_wibox.width ~= screen.geometry.width or
-        screen.waffle_wibox.height ~= screen.geometry.height
-    then
-        screen.waffle_wibox = wibox({
-                screen = screen,
-                x = screen.geometry.x,
-                y = screen.geometry.y,
-                width = screen.geometry.width,
-                height = screen.geometry.height,
-                bg = "#00000000",
-                opacity = 1,
-                ontop = true,
-                type = "dock",
-                visible = true,
-                input_passthrough = true,
-        })
+function waffle:get_waffle_wibox(screen)
+    if self.screen_wibox_ == nil then
+        self.screen_wibox_ = {}
     end
-    return screen.waffle_wibox
+    local screen_wibox = self.screen_wibox_[screen]
+    if screen_wibox == nil or
+        screen_wibox.x ~= screen.geometry.x or
+        screen_wibox.y ~= screen.geometry.y or
+        screen_wibox.width ~= screen.geometry.width or
+        screen_wibox.height ~= screen.geometry.height
+    then
+        screen_wibox = wibox{
+            screen = screen,
+            x = screen.geometry.x,
+            y = screen.geometry.y,
+            width = screen.geometry.width,
+            height = screen.geometry.height,
+            bg = "#00000000",
+            opacity = 1,
+            ontop = true,
+            type = "dock",
+            visible = true,
+            input_passthrough = true,
+        }
+
+        local this = self
+        screen_wibox:connect_signal(
+            "mouse::enter",
+            function ()
+                if this.autohide_ and this.autohide_timer_.started then
+                    this.autohide_timer_:stop()
+                end
+            end)
+        screen_wibox:connect_signal(
+            "mouse::leave",
+            function ()
+                if this.autohide_ and not this.autohide_timer_.started then
+                    this.autohide_timer_:start()
+                end
+            end)
+        self.screen_wibox_[screen] = screen_wibox
+    end
+    return screen_wibox
 end
 
 capi.screen.connect_signal(
     "removed",
     function (s)
-        if s.waffle_wibox ~= nil then
+        local screen_wibox = waffle.screen_wibox_[s]
+        if screen_wibox ~= nil then
             print("Screen "..tostring(s).." is removed. Removing its waffle wibox.")
-            s.waffle_wibox:remove()
-            s.waffle_wibox = nil
+            screen_wibox:remove()
+            waffle.screen_wibox_[s] = nil
         end
     end
 )
@@ -248,10 +269,10 @@ function waffle:show(view, args)
         self:hide()
     end
     if self.wibox_ == nil then
-        af.manage_focus(screen)
+        if not self.autohide_ then af.manage_focus(screen) end
         self.focused_client = capi.client.focus
         capi.client.focus = nil
-        self.wibox_ = get_waffle_wibox(screen)
+        self.wibox_ = self:get_waffle_wibox(screen)
     end
     self.wibox_.widget = self.widget_container
 
@@ -285,24 +306,28 @@ function waffle:show(view, args)
         awful.keygrabber.stop(self.keygrabber_)
         self.keygrabber_ = nil
     end
-    self.keygrabber_ = awful.keygrabber.run(
-        function (mod, key, event)
-            if #key == 1 then
-                key = key:lower()
-            end
-            if self.view_.key_handler and self.view_.key_handler(mod, key, event) then
-                -- pass
-            elseif key == "Escape" then
-                if event == "press" then
-                    self:hide()
+    if self.autohide_ then
+        self.autohide_timer_:again()
+    else
+        self.keygrabber_ = awful.keygrabber.run(
+            function (mod, key, event)
+                if #key == 1 then
+                    key = key:lower()
                 end
-            elseif key == "BackSpace" then
-                if event == "press" then
-                    self:go_back()
+                if self.view_.key_handler and self.view_.key_handler(mod, key, event) then
+                    -- pass
+                elseif key == "Escape" then
+                    if event == "press" then
+                        self:hide()
+                    end
+                elseif key == "BackSpace" then
+                    if event == "press" then
+                        self:go_back()
+                    end
                 end
             end
-        end
-    )
+        )
+    end
 
     self.to_be_activated = true
     local self_ = self
@@ -327,7 +352,9 @@ function waffle:hide()
     end
     if self.wibox_ ~= nil then
         self.focused_client = nil
-        af.unmanage_focus(self.wibox_.screen)
+        if not self.autohide_ then
+            af.unmanage_focus(self.wibox_.screen)
+        end
         self.wibox_.input_passthrough = true
         self.wibox_.widget = nil
         self.wibox_ = nil
@@ -335,7 +362,52 @@ function waffle:hide()
 
     self:set_view(nil)
     self:clear_stack()
+    self.autohide_ = false
     self:disconnect_button_signals()
+end
+
+waffle.autohide_lock_ = 0
+waffle.autohide_ = false
+
+function waffle:autohide(enabled, timeout_sec)
+    if enabled == nil then
+        return self.autohide_
+    elseif self.view_ == nil then
+        self.autohide_ = enabled
+        if enabled then
+            self.autohide_timer_ = gtimer{
+                timeout = timeout_sec or 1,
+                single_shot = true,
+                callback = function ()
+                    if waffle.autohide_lock_ <= 0 and waffle.autohide_ and
+                        waffle.wibox_ and mouse.current_wibox ~= waffle.wibox_
+                    then
+                        waffle:hide()
+                    end
+                end,
+            }
+        end
+    end
+end
+
+function waffle:autohide_lock_acquire()
+    self.autohide_lock_ = self.autohide_lock_ + 1
+    if not self.autohide_ then
+        return
+    end
+    if self.autohide_lock_ > 0 and self.autohide_timer_.started then
+        self.autohide_timer_:stop()
+    end
+end
+
+function waffle:autohide_lock_release()
+    self.autohide_lock_ = self.autohide_lock_ - 1
+    if not self.autohide_ then
+        return
+    end
+    if self.autohide_lock_ <= 0 and not self.autohide_timer_.started then
+        self.autohide_timer_:start()
+    end
 end
 
 function waffle:set_root_view(v)

@@ -1907,9 +1907,6 @@ waffle_calendar_view = view {
         strategy = "max",
         widget = wibox.container.constraint,
     },
-    on_open = function (_, s)
-        s.actions.set_clock_area_focus(true)
-    end,
     on_close = function (_)
         for s in screen do
             s.actions.set_clock_area_focus(false)

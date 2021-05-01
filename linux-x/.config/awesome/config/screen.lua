@@ -893,13 +893,10 @@ local function setup_screen(scr)
        context_transform_function = {focus = false},
        widget = cbg,
    }
-   -- clock_area:connect_signal(
-   --     'mouse::enter', function() cal_popup_auto_hide = false
-   --         if not cal_popup_pinned then cal_popup_show() end end)
-   -- clock_area:connect_signal(
-   --     'mouse::leave', function() cal_popup_auto_hide = true end)
+   local clock_area_focused
    function scr.actions.set_clock_area_focus(f)
        clock_area:set_context_transform_function({focus = f})
+       clock_area_focused = f
    end
    -- function scr.actions.activate_clock_area()
    --     if cal_popup_pinned then
@@ -921,7 +918,18 @@ local function setup_screen(scr)
    -- end
    clock_area:buttons(
        awful.util.table.join(
-           awful.button({         }, 1, function() capi.awesome.emit_signal("toggle_calendar_waffle", "mouse") end),
+           awful.button({         }, 1, function()
+                            if not clock_area_focused then
+                                gtimer.delayed_call(
+                                    function()
+                                        capi.awesome.emit_signal("toggle_calendar_waffle", "mouse")
+                                        if not waffle:is_in_view(nil) then
+                                            scr.actions.set_clock_area_focus(true)
+                                        end
+                                    end
+                                )
+                            end
+                        end),
            awful.button({         }, 2, function() cal_reset() end),
            awful.button({         }, 3, function() notix.remove_unpinned() end),
            awful.button({         }, 4, function() cal_switch({ month =  -1 }) end),
@@ -930,6 +938,18 @@ local function setup_screen(scr)
            awful.button({ 'Shift' }, 5, function() cal_switch({ year =  1 }) end)
        )
    )
+   clock_area:connect_signal(
+       'mouse::enter', function()
+           waffle:autohide_lock_acquire()
+           if waffle:is_in_view(nil) then
+               waffle:autohide(true, 1)
+               capi.awesome.emit_signal("toggle_calendar_waffle", "mouse")
+           end
+       end)
+   clock_area:connect_signal(
+       'mouse::leave', function()
+           waffle:autohide_lock_release()
+       end)
    right_layout:add(clock_area)
    scr.widgets.clock_area = clock_area
 
