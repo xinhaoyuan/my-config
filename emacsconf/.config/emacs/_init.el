@@ -115,10 +115,28 @@
 (setq undo-limit 1000000)
 (setq enable-recursive-minibuffers t)
 (setq default-tab-width 8)
-(global-set-key (kbd "C-x C-b") 'electric-buffer-list)
-(add-hook 'electric-buffer-menu-mode-hook
+
+(global-set-key (kbd "C-x C-b") (lambda () (interactive) (ibuffer t)))
+(add-hook 'ibuffer-hook
           '(lambda ()
+	     (hl-line-mode 1)
              (setq truncate-lines nil)))
+(eval-after-load "ibuffer"
+  '(progn
+     (define-key ibuffer-mode-map (kbd "<up>") (lambda () (interactive) (forward-line -1)))
+     (define-key ibuffer-mode-map (kbd "<down>") 'forward-line)
+     (define-key ibuffer-mode-map (kbd "C-g") 'quit-window)
+     (define-key ibuffer-mode-map (kbd "RET")
+       (lambda () (interactive)
+         (let ((ibuffer-expert t)
+               (deletion-mark-count
+                (let ((count 0))
+                  (ibuffer-map-deletion-lines
+                   (lambda (_buf _mark) (setq count (+ count 1)))))))
+           (message "%d buffer marked to delete." deletion-mark-count)
+           (if (> deletion-mark-count 0) (ibuffer-do-kill-on-deletion-marks))
+           (ibuffer-visit-buffer t))))
+     ))
 
 ;; Reverse colors for the border to have nicer line
 (set-face-inverse-video-p 'vertical-border nil)
