@@ -414,4 +414,12 @@ function waffle:set_root_view(v)
     self.root_view_ = v
 end
 
+function waffle:get_screen()
+    if self.view_ == nil then
+        return nil
+    else
+        return self.wibox_.screen
+    end
+end
+
 return waffle
