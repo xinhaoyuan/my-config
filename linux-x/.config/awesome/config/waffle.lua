@@ -33,6 +33,7 @@ local notix = require("notix")
 local dpi = require("beautiful.xresources").apply_dpi
 
 local waffle_width = beautiful.waffle_panel_width or dpi(240)
+local calendar_waffle_width = dpi(220)
 local button_height = beautiful.waffle_item_height or dpi(20)
 local button_padding = beautiful.sep_small_size or dpi(4)
 local panel_padding = beautiful.sep_big_size or dpi(10)
@@ -1662,6 +1663,10 @@ local cal_widget = wibox.widget {
             return widget
         elseif flag == "month" then
             return widget
+        -- elseif flag == "weekday" then
+        --     widget.font = beautiful.fontname_normal..' 9'
+        -- elseif flag == "weeknumber" then
+        --     widget.font = beautiful.fontname_normal..' 9'
         end
 
         local inverted = false
@@ -1879,7 +1884,7 @@ waffle_calendar_view = view {
                     },
                     layout = wibox.layout.align.vertical,
                 },
-                width = waffle_width,
+                width = calendar_waffle_width,
                 strategy = "exact",
                 widget = wibox.container.constraint,
             },
@@ -1903,7 +1908,7 @@ waffle_calendar_view = view {
             },
             layout = wibox.layout.fixed.horizontal,
         },
-        height = waffle_width * 2,
+        height = calendar_waffle_width * 2,
         strategy = "max",
         widget = wibox.container.constraint,
     },
