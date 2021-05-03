@@ -679,7 +679,6 @@ local function decorate(c)
     local to
 
     local has_radius = beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width
-    local border_color = gcolor(capi.client.focus and beautiful.border_focus or beautiful.border_normal)
 
     if has_radius  then
         tw = beautiful.xborder_radius
@@ -752,7 +751,7 @@ local function decorate(c)
                                                 false,
                                                 true,
                                                 has_radius and beautiful.xborder_radius - beautiful.xborder_width + beautiful.xborder_inner_space)
-                    cr:set_source(border_color)
+                    cr:set_source(gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal))
                     cr:fill()
                 end,
                 widget = wibox.container.background,
@@ -809,7 +808,7 @@ local function decorate(c)
                                                 false,
                                                 false,
                                                 beautiful.xborder_radius - beautiful.xborder_width + beautiful.xborder_inner_space)
-                    cr:set_source(border_color)
+                    cr:set_source(gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal))
                     cr:fill()
                 end,
                 widget = wibox.container.background,
@@ -894,7 +893,7 @@ local function decorate(c)
                                                     true,
                                                     false,
                                                     beautiful.xborder_radius - beautiful.xborder_width + beautiful.xborder_inner_space)
-                        cr:set_source(border_color)
+                        cr:set_source(gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal))
                         cr:fill()
                     end,
                     widget = wibox.container.background,
@@ -952,7 +951,7 @@ local function decorate(c)
                                                 true,
                                                 true,
                                                 beautiful.xborder_radius - beautiful.xborder_width + beautiful.xborder_inner_space)
-                    cr:set_source(border_color)
+                    cr:set_source(gcolor(capi.client.focus == c and beautiful.border_focus or beautiful.border_normal))
                     cr:fill()
                 end,
                 widget = wibox.container.background,
