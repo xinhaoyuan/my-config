@@ -264,6 +264,26 @@ function waffle:show(view, args)
     local mode = args.mode or "set"
     local screen = args.screen or awful.screen.focused()
 
+    if mode == "set" then
+        if args.autohide == nil then
+            self.autohide_ = false
+        else
+            local this = self
+            self.autohide_ = true
+            self.autohide_timer_ = gtimer{
+                timeout = args.autohide,
+                single_shot = true,
+                callback = function ()
+                    if this.autohide_lock_ <= 0 and this.autohide_ and
+                        this.wibox_ and mouse.current_wibox ~= this.wibox_
+                    then
+                        this:hide()
+                    end
+                end,
+            }
+        end
+    end
+
     view = view or self.root_view_
     if self.wibox_ ~= nil and self.wibox_.screen ~= screen then
         self:hide()
@@ -367,28 +387,6 @@ function waffle:hide()
 end
 
 waffle.autohide_lock_ = 0
-waffle.autohide_ = false
-
-function waffle:autohide(enabled, timeout_sec)
-    if enabled == nil then
-        return self.autohide_
-    elseif self.view_ == nil then
-        self.autohide_ = enabled
-        if enabled then
-            self.autohide_timer_ = gtimer{
-                timeout = timeout_sec or 1,
-                single_shot = true,
-                callback = function ()
-                    if waffle.autohide_lock_ <= 0 and waffle.autohide_ and
-                        waffle.wibox_ and mouse.current_wibox ~= waffle.wibox_
-                    then
-                        waffle:hide()
-                    end
-                end,
-            }
-        end
-    end
-end
 
 function waffle:autohide_lock_acquire()
     self.autohide_lock_ = self.autohide_lock_ + 1

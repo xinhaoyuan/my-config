@@ -1630,11 +1630,11 @@ capi.awesome.connect_signal(
 
 capi.awesome.connect_signal(
     "toggle_calendar_waffle",
-    function (anchor)
+    function (args)
         if waffle:is_in_view(waffle_calendar_view) then
             waffle:hide()
         else
-            waffle:show(waffle_calendar_view, {anchor = anchor})
+            waffle:show(waffle_calendar_view, args)
         end
     end
 )

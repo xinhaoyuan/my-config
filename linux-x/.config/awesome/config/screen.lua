@@ -922,7 +922,7 @@ local function setup_screen(scr)
                             if not clock_area_focused then
                                 gtimer.delayed_call(
                                     function()
-                                        capi.awesome.emit_signal("toggle_calendar_waffle", "mouse")
+                                        capi.awesome.emit_signal("toggle_calendar_waffle", {anchor = "mouse"})
                                         if not waffle:is_in_view(nil) then
                                             scr.actions.set_clock_area_focus(true)
                                         end
@@ -947,8 +947,7 @@ local function setup_screen(scr)
                waffle_scr = nil
            end
            if waffle_scr == nil then
-               waffle:autohide(true, 1)
-               capi.awesome.emit_signal("toggle_calendar_waffle", "mouse")
+               capi.awesome.emit_signal("toggle_calendar_waffle", {anchor = "mouse", autohide = 1})
            end
        end)
    clock_area:connect_signal(
@@ -1064,9 +1063,52 @@ function schedule_reset_widgets()
     delayed(reset_widgets)
 end
 
+local function bound_client_geometry(c, bound)
+    local cgeo = c:geometry()
+    local nx = math.max(bound.x, math.min(cgeo.x, bound.x + bound.width - cgeo.width))
+    local ny = math.max(bound.y, math.min(cgeo.y, bound.y + bound.height - cgeo.height))
+    local nw = math.min(cgeo.width, bound.x + bound.width - nx)
+    local nh = math.min(cgeo.height, bound.y + bound.height - ny)
+    if nx ~= cgeo.x or ny ~= cgeo.y or nw ~= cgeo.width or nh ~= cgeo.height then
+        print("bound client geometry", c, nx, ny, nw, nh)
+        c:geometry{x = nx, y = ny, width = nw, height = nh}
+    end
+end
+
+local function fix_client_geometries()
+    local clients = {}
+    for _, c in ipairs(capi.client.get()) do
+        if not c.minimized and c.maximized then
+            c.maximized = false
+            table.insert(clients, c)
+        end
+
+        bound_client_geometry(c, c.screen.geometry)
+    end
+
+    delayed(function ()
+                for _, c in ipairs(clients) do
+                    c.maximized = true
+                end
+            end)
+end
+
+local is_fixing_client_geometries = false
+local function schedule_fix_client_geometries()
+    if is_fixing_client_geometries then return end
+    is_fixing_client_geometries = true
+    delayed(function ()
+                is_fixing_client_geometries = false
+                fix_client_geometries()
+            end)
+end
+
+
+
 table.insert(shared.on_start_functions, schedule_reset_widgets)
 
 capi.screen.connect_signal("list", schedule_reset_widgets)
+capi.screen.connect_signal("list", schedule_fix_client_geometries)
 capi.screen.connect_signal("primary_changed", schedule_reset_widgets)
 
 capi.root.keys(
@@ -1233,25 +1275,6 @@ awful.screen.connect_for_each_screen(
       end
 
       s.tags[1]:view_only()
-
-      -- fix window geometry
-      s:connect_signal(
-         "property::geometry",
-         function (s)
-            local clients = {}
-            for _, c in ipairs(s.all_clients) do
-               if not c.minimized and c.maximized then
-                  c.maximized = false
-                  table.insert(clients, c)
-               end
-            end
-
-            delayed(function ()
-                  for _, c in ipairs(clients) do
-                     c.maximized = true
-                  end
-            end)
-      end)
    end
 )
 
