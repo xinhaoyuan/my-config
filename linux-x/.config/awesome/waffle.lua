@@ -382,7 +382,6 @@ function waffle:hide()
 
     self:set_view(nil)
     self:clear_stack()
-    self.autohide_ = false
     self:disconnect_button_signals()
 end
 
