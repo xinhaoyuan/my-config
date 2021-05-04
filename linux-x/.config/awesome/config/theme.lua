@@ -90,8 +90,8 @@ else
 end
 theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
 theme.border_normal = theme.bg_normal
-theme.xborder_space = is_light_color(theme.bg_normal) and c_white[2] or c_black[1]
-theme.xborder_shade = acolor(is_light_color(theme.bg_normal) and c_black[1] or c_white[2]):blend_with(theme.bg_normal, 0.5):to_string()
+theme.xborder_space = acolor("#ffffff"):blend_with(acolor(theme.bg_normal), 0.5):to_string()
+theme.xborder_shade = "#00000040"
 -- theme.xborder_space = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
 -- theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
 -- theme.border_normal = theme.bg_normal
