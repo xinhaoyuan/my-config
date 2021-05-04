@@ -940,7 +940,6 @@ local function setup_screen(scr)
    )
    clock_area:connect_signal(
        'mouse::enter', function()
-           waffle:autohide_lock_acquire()
            local waffle_scr = waffle:get_screen()
            if waffle_scr ~= scr and waffle_scr ~= nil then
                waffle:hide()
@@ -949,6 +948,7 @@ local function setup_screen(scr)
            if waffle_scr == nil then
                capi.awesome.emit_signal("toggle_calendar_waffle", {anchor = "mouse", autohide = 1})
            end
+           waffle:autohide_lock_acquire()
        end)
    clock_area:connect_signal(
        'mouse::leave', function()

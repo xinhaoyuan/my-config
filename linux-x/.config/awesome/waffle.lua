@@ -270,6 +270,7 @@ function waffle:show(view, args)
         else
             local this = self
             self.autohide_ = true
+            self.autohide_lock_ = 0
             self.autohide_timer_ = gtimer{
                 timeout = args.autohide,
                 single_shot = true,
@@ -388,21 +389,23 @@ end
 waffle.autohide_lock_ = 0
 
 function waffle:autohide_lock_acquire()
-    self.autohide_lock_ = self.autohide_lock_ + 1
     if not self.autohide_ then
         return
     end
+    self.autohide_lock_ = self.autohide_lock_ + 1
     if self.autohide_lock_ > 0 and self.autohide_timer_.started then
         self.autohide_timer_:stop()
     end
 end
 
 function waffle:autohide_lock_release()
-    self.autohide_lock_ = self.autohide_lock_ - 1
     if not self.autohide_ then
         return
     end
-    if self.autohide_lock_ <= 0 and not self.autohide_timer_.started then
+    if self.autohide_lock_ > 0 then
+        self.autohide_lock_ = self.autohide_lock_ - 1
+    end
+    if self.autohide_lock_ == 0 and not self.autohide_timer_.started then
         self.autohide_timer_:start()
     end
 end
