@@ -78,8 +78,8 @@ theme.border_width = 0
 theme.xborder_width  = 8
 theme.xborder_outer_space = 0
 theme.xborder_inner_space = 6
-theme.titlebar_right_margin = 6
-theme.titlebar_bottom_margin = 6
+theme.titlebar_right_margin = theme.xborder_inner_space
+theme.titlebar_bottom_margin = theme.xborder_inner_space
 -- theme.xborder_radius = dpi(12)
 theme.xborder_radius_cut = false
 theme.xborder_radius_indicator = false
@@ -90,7 +90,7 @@ else
 end
 theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
 theme.border_normal = theme.bg_normal
-theme.xborder_space = acolor("#ffffff"):blend_with(acolor(theme.bg_normal), 0.5):to_string()
+theme.xborder_space = acolor("#ffffff"):blend_with(acolor(theme.bg_normal), 0.2):to_string()
 theme.xborder_shade = "#00000040"
 -- theme.xborder_space = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
 -- theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
