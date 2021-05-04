@@ -76,10 +76,8 @@ theme.useless_gap   = dpi(6)
 theme.border_width = 0
 
 theme.xborder_width  = 8
-theme.xborder_outer_space = 0
-theme.xborder_inner_space = 6
-theme.titlebar_right_margin = theme.xborder_inner_space
-theme.titlebar_bottom_margin = theme.xborder_inner_space
+theme.xborder_outer_space = 6
+theme.xborder_inner_space = 0
 -- theme.xborder_radius = dpi(12)
 theme.xborder_radius_cut = false
 theme.xborder_radius_indicator = false
@@ -549,7 +547,11 @@ function theme.get_border_theme()
     return border_theme
 end
 
-theme.rect_with_corners = theme.xborder_radius_cut and gshape.partially_cut_rect or gshape.partially_rounded_rect
+if theme.xborder_radius and theme.xborder_radius > 0 then
+    theme.rect_with_corners = theme.xborder_radius_cut and gshape.partially_cut_rect or gshape.partially_rounded_rect
+else
+    theme.rect_with_corners = gshape.rectangle
+end
 theme.apply_border_to_widget = function(args)
     args = args or {}
     local widget
