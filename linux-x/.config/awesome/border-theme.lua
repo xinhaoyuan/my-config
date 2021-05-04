@@ -337,6 +337,125 @@ mod.cut_theme = cut_theme
 
 ------
 
+-- Default theme as a template
+
+local sketch_theme = {}
+
+function sketch_theme:init()
+    if self.inited == nil then
+        local inner_space = beautiful.xborder_inner_space or 0
+        local outer_space = beautiful.xborder_outer_space or 0
+        self.line_width = beautiful.xborder_width - inner_space - outer_space
+        self.padding = outer_space + inner_space + self.line_width / 2
+        self.size = beautiful.xborder_width
+        self.inited = true
+    end
+end
+
+function sketch_theme:before_draw(context, cr)
+    self:init()
+    cr:save()
+    cr:set_source(gcolor(beautiful.xborder_space))
+    cr:paint()
+    cr:set_line_width(self.line_width)
+    cr:set_source(gcolor(context.color))
+end
+
+function sketch_theme:top_left(context, cr)
+    cr:move_to(self.line_width / 2, self.size)
+    cr:line_to(self.line_width / 2, self.line_width / 2)
+    cr:line_to(self.size, self.line_width / 2)
+    cr:stroke()
+end
+
+function sketch_theme:top_right(context, cr)
+    cr:save()
+    cr:rectangle(0, 0, self.size, self.size)
+    cr:set_operator('CLEAR')
+    cr:fill()
+    cr:restore()
+    cr:move_to(self.line_width / 2, 0)
+    cr:line_to(self.line_width / 2, self.size)
+    cr:stroke()
+end
+
+function sketch_theme:bottom_left(context, cr)
+    cr:save()
+    cr:rectangle(0, 0, self.size, self.size)
+    cr:set_operator('CLEAR')
+    cr:fill()
+    cr:restore()
+    cr:move_to(0, self.line_width / 2)
+    cr:line_to(self.size, self.line_width / 2)
+    cr:stroke()
+end
+
+function sketch_theme:bottom_right(context, cr)
+    cr:save()
+    cr:rectangle(0, 0, self.size, self.size)
+    cr:set_source(gcolor(beautiful.xborder_shade))
+    cr:fill()
+    cr:restore()
+    cr:move_to(0, self.line_width / 2)
+    cr:line_to(self.line_width  / 2, self.line_width / 2)
+    cr:line_to(self.line_width  / 2, 0)
+    cr:stroke()
+end
+
+function sketch_theme:top(context, cr, length)
+    if length <= 0 then
+        return
+    end
+    cr:move_to(0, self.line_width / 2)
+    cr:line_to(length, self.line_width / 2)
+    cr:stroke()
+end
+
+function sketch_theme:bottom(context, cr, length)
+    if length <= 0 then
+        return
+    end
+    cr:save()
+    cr:rectangle(0, 0, length, self.size)
+    cr:set_source(gcolor(beautiful.xborder_shade))
+    cr:fill()
+    cr:restore()
+    cr:move_to(0, self.size - self.padding)
+    cr:line_to(length, self.size - self.padding)
+    cr:stroke()
+end
+
+function sketch_theme:left(context, cr, length)
+    if length <= 0 then
+        return
+    end
+    cr:move_to(self.line_width / 2, 0)
+    cr:line_to(self.line_width / 2, length)
+    cr:stroke()
+end
+
+function sketch_theme:right(context, cr, length)
+    if length <= 0 then
+        return
+    end
+    cr:save()
+    cr:rectangle(0, 0, self.size, length)
+    cr:set_source(gcolor(beautiful.xborder_shade))
+    cr:fill()
+    cr:restore()
+    cr:move_to(self.size - self.padding, 0)
+    cr:line_to(self.size - self.padding, length)
+    cr:stroke()
+end
+
+function sketch_theme:after_draw(context, cr)
+    cr:restore()
+end
+
+mod.sketch_theme = sketch_theme
+
+------
+
 function mod:draw(context, cr, width, height, directions)
     local theme = context.theme or self.default_theme
     theme:before_draw(context, cr)

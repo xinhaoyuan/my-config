@@ -1700,8 +1700,12 @@ local cal_widget = wibox.widget {
                     widget = wibox.container.margin
                 },
                 shape = function (cr, width, height)
-                    beautiful.rect_with_corners(cr, width, height, true, true, true, true,
-                                                beautiful.xborder_radius - beautiful.xborder_width)
+                    if beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width then
+                        beautiful.rect_with_corners(cr, width, height, true, true, true, true,
+                                                    beautiful.xborder_radius - beautiful.xborder_width)
+                    else
+                        beautiful.rect_with_corners(cr, width, height)
+                    end
                 end,
                 fg = beautiful.fg_focus,
                 bg = beautiful.bg_focus,

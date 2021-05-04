@@ -1075,6 +1075,8 @@ local function bound_client_geometry(c, bound)
     end
 end
 
+capi.client.connect_signal("manage", function (c) bound_client_geometry(c, c.screen.geometry) end)
+
 local function fix_client_geometries()
     local clients = {}
     for _, c in ipairs(capi.client.get()) do

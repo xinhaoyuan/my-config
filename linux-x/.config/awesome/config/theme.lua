@@ -75,20 +75,23 @@ theme.useless_gap   = dpi(6)
 -- Disabling the native border.
 theme.border_width = 0
 
-theme.xborder_width  = 9
-theme.xborder_outer_space = 3
-theme.xborder_inner_space = 3
-theme.xborder_radius = dpi(16)
-theme.xborder_radius_cut = true
+theme.xborder_width  = 8
+theme.xborder_outer_space = 0
+theme.xborder_inner_space = 6
+theme.titlebar_right_margin = 6
+theme.titlebar_bottom_margin = 6
+-- theme.xborder_radius = dpi(12)
+theme.xborder_radius_cut = false
 theme.xborder_radius_indicator = false
 if theme.xborder_radius and theme.xborder_radius >= theme.xborder_width then
     theme.xborder_indent = theme.xborder_radius_cut and math.floor((2 - math.sqrt(2)) * (theme.xborder_radius - theme.xborder_outer_space or 0)) or (theme.xborder_radius - theme.xborder_outer_space or 0)
 else
     theme.xborder_indent = dpi(4)
 end
-theme.xborder_space = is_light_color(theme.bg_normal) and c_white[2] or c_black[1]
 theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
 theme.border_normal = theme.bg_normal
+theme.xborder_space = is_light_color(theme.bg_normal) and c_white[2] or c_black[1]
+theme.xborder_shade = acolor(is_light_color(theme.bg_normal) and c_black[1] or c_white[2]):blend_with(theme.bg_normal, 0.5):to_string()
 -- theme.xborder_space = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
 -- theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
 -- theme.border_normal = theme.bg_normal
@@ -540,7 +543,7 @@ function theme.get_border_theme()
             border_theme.inner_space = beautiful.xborder_radius - beautiful.xborder_width + beautiful.xborder_inner_space
             border_theme:init()
         else
-            border_theme = border.default_theme
+            border_theme = border.sketch_theme
         end
     end
     return border_theme

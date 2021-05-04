@@ -119,7 +119,8 @@
 (global-set-key (kbd "C-x C-b") (lambda () (interactive) (ibuffer t)))
 (add-hook 'ibuffer-hook
           '(lambda ()
-	     (hl-line-mode 1)
+             (bury-buffer (current-buffer))
+             (hl-line-mode 1)
              (setq truncate-lines nil)))
 (eval-after-load "ibuffer"
   '(progn
@@ -128,6 +129,7 @@
      (define-key ibuffer-mode-map (kbd "C-g") 'quit-window)
      (define-key ibuffer-mode-map (kbd "RET")
        (lambda () (interactive)
+         (save-excursion (call-interactively 'ibuffer-unmark-forward))
          (let ((ibuffer-expert t)
                (deletion-mark-count
                 (let ((count 0))
