@@ -1341,4 +1341,87 @@ function shared.screen.xkcd(num)
     end)
 end
 
+function shared.screen.silhouette(filename)
+    local lgi = require("lgi")
+    local gdebug = require("gears.debug")
+    -- Safe load for optional Rsvg module
+    local Rsvg = nil
+    do
+        local success, err = pcall(function() Rsvg = lgi.Rsvg end)
+        if not success then
+            gdebug.print_warning(debug.traceback("Could not load Rsvg: " .. tostring(err)))
+        end
+    end
+
+    local handle, err = Rsvg.Handle.new_from_file(filename)
+    if err then
+        print("Error loading "..filename..": "..tostring(err))
+        return
+    end
+
+    local dim = handle:get_dimensions()
+    local w, h = dim.width, dim.height
+    local ratio = 0.6
+
+    for s in screen do
+        local geom, cr = gears.wallpaper.prepare_context(s)
+        local scale, target_w, target_h
+        if geom.width / w < geom.height / h then
+            scale = ratio * geom.width / w
+        else
+            scale = ratio * geom.height / h
+        end
+        if scale > 1 then scale = math.floor(scale + 0.5) end
+        target_w = scale * w
+        target_h = scale * h
+
+        local offset = beautiful.xborder_width
+        local surf = cairo.ImageSurface(cairo.Format.ARGB32, target_w + offset, target_h + offset)
+        do
+            local cr = cairo.Context(surf)
+
+            cr:save()
+            cr:scale(scale, scale)
+            handle:set_stylesheet(string.format("*{stroke:none;fill:%s;}", beautiful.xborder_space));
+            handle:render_cairo(cr)
+            cr:restore()
+
+            cr:save()
+            cr:translate(offset, offset)
+            cr:scale(scale, scale)
+            cr:set_operator("ATOP")
+            handle:set_stylesheet(string.format("*{stroke:none;fill:%s;}", beautiful.bg_normal));
+            handle:render_cairo(cr)
+            cr:restore()
+
+            cr:save()
+            cr:scale(scale, scale)
+            cr:set_operator("OVER")
+            handle:set_stylesheet(string.format("*{stroke:%s;fill:none;}", beautiful.border_focus));
+            handle:render_cairo(cr)
+            cr:restore()
+        end
+
+        cr:set_operator("SOURCE")
+        cr:set_source(gcolor(beautiful.bg_normal))
+        cr:paint()
+
+        cr:translate(geom.width / 2 - target_w / 2 - offset / 2, geom.height / 2 - target_h / 2 - offset / 2)
+
+        cr:save()
+        cr:translate(offset, offset)
+        cr:scale(scale, scale)
+        cr:set_operator("OVER")
+        handle:set_stylesheet(string.format("*{stroke:none;fill:%s;}", beautiful.xborder_shade));
+        handle:render_cairo(cr)
+        cr:restore()
+
+        cr:set_operator("OVER")
+        cr:set_source_surface(surf)
+        cr:paint()
+
+        surf:finish()
+    end
+end
+
 return nil
