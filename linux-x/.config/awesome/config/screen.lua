@@ -1375,30 +1375,39 @@ function shared.screen.silhouette(filename)
         target_w = scale * w
         target_h = scale * h
 
-        local offset = beautiful.xborder_width
-        local surf = cairo.ImageSurface(cairo.Format.ARGB32, target_w + offset, target_h + offset)
+        local stroke_width = (beautiful.xborder_width - beautiful.xborder_outer_space - beautiful.xborder_inner_space)
+        local offset = beautiful.xborder_width + stroke_width
+        local surf = cairo.ImageSurface(cairo.Format.ARGB32,
+                                        target_w + offset + stroke_width,
+                                        target_h + offset + stroke_width)
+        local viewport = Rsvg.Rectangle{x = 0, y = 0, width = target_w, height = target_h}
         do
             local cr = cairo.Context(surf)
 
+            cr:translate(stroke_width / 2, stroke_width / 2)
+
             cr:save()
-            cr:scale(scale, scale)
             handle:set_stylesheet(string.format("*{stroke:none;fill:%s;}", beautiful.xborder_space));
-            handle:render_cairo(cr)
+            handle:render_document(cr, viewport)
             cr:restore()
 
             cr:save()
             cr:translate(offset, offset)
-            cr:scale(scale, scale)
             cr:set_operator("ATOP")
             handle:set_stylesheet(string.format("*{stroke:none;fill:%s;}", beautiful.bg_normal));
-            handle:render_cairo(cr)
+            handle:render_document(cr, viewport)
             cr:restore()
 
             cr:save()
-            cr:scale(scale, scale)
             cr:set_operator("OVER")
-            handle:set_stylesheet(string.format("*{stroke:%s;fill:none;}", beautiful.border_focus));
-            handle:render_cairo(cr)
+            local stroke_css = string.format([[
+* {
+  stroke:%s;
+  stroke-width:%fpx;
+  fill:none;
+}]], beautiful.border_focus, stroke_width / scale)
+            handle:set_stylesheet(stroke_css);
+            handle:render_document(cr, viewport)
             cr:restore()
         end
 
@@ -1410,10 +1419,9 @@ function shared.screen.silhouette(filename)
 
         cr:save()
         cr:translate(offset, offset)
-        cr:scale(scale, scale)
         cr:set_operator("OVER")
         handle:set_stylesheet(string.format("*{stroke:none;fill:%s;}", beautiful.xborder_shade));
-        handle:render_cairo(cr)
+        handle:render_document(cr, viewport)
         cr:restore()
 
         cr:set_operator("OVER")
