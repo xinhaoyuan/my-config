@@ -587,6 +587,7 @@ end
 
 local net_widget
 local net_has_vpn
+local net_has_wifi
 do
     local netgraph_rx_widget = wibox.widget {
         background_color = graph_background,
@@ -681,7 +682,6 @@ do
 
     local net_widget_icon_container = wibox.widget {
         {
-            image = gcolor.recolor_image(icons.ethernet, beautiful.fg_normal),
             forced_height = button_height,
             forced_width = button_height,
             widget = masked_imagebox,
@@ -712,6 +712,7 @@ do
         local recv = 0
         local send = 0
         local has_vpn = false
+        local has_wifi = false
         for line in stdout:gmatch("[^\r\n]+") do
             if line:find("^ifdev:") then
                 local items = {}
@@ -730,6 +731,8 @@ do
                     recv = recv + tonumber(items[2])
                     send = send + tonumber(items[10])
                 end
+            elseif line:find("^wifi:") then
+                has_wifi = line:find("enabled") ~= nil
             end
         end
 
@@ -759,6 +762,15 @@ do
                 net_widget_icon_container.fg_function = {"fg_"}
             end
         end
+
+        if has_wifi ~= net_has_wifi then
+            net_has_wifi = has_wifi
+            if has_wifi then
+                net_widget_icon_container.widget.image = gcolor.recolor_image(icons.wifi, beautiful.fg_normal)
+            else
+                net_widget_icon_container.widget.image = gcolor.recolor_image(icons.ethernet, beautiful.fg_normal)
+            end
+        end
     end
 
     gtimer {
@@ -768,6 +780,7 @@ do
         callback = function ()
             awful.spawn.easy_async_with_shell([=[
 egrep -e "[[:alnum:]]+:" /proc/net/dev | sed -e "s/^/ifdev:/g"
+nmcli radio wifi | sed -e "s/^/wifi:/g"
 ]=], on_output)
         end,
     }
