@@ -547,7 +547,7 @@ local function get_mini_titlebar(c)
                         awful.widget.clienticon(c),
                         {
                             image = beautiful.client_default_icon,
-                            widget = masked_imagebox,
+                            widget = wibox.widget.imagebox,
                         },
                         widget = fallback,
                     },
@@ -619,7 +619,7 @@ local function get_full_titlebar(c)
                             awful.widget.clienticon(c),
                             {
                                 image = beautiful.client_default_icon,
-                                widget = masked_imagebox,
+                                widget = wibox.widget.imagebox,
                             },
                             widget = fallback,
                         },
