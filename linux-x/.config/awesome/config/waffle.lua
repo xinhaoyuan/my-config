@@ -1938,7 +1938,7 @@ waffle_calendar_view = view {
 
 -- Settings
 
-waffle_settings_view = view {
+waffle_settings_view = view{
     root = decorate_waffle(
         decorate_panel {
             widget = {
@@ -1976,14 +1976,14 @@ waffle_settings_view = view {
                 --           waffle:go_back()
                 --       end
                 -- }),
-                button({
-                        markup = "Toggle fortune",
-                        indicator = em("f"),
-                        key = "f",
-                        action = function (alt)
-                            shared.screen.toggle_fortune()
-                        end
-                }),
+                button{
+                    markup = "Toggle fortune",
+                    indicator = em("f"),
+                    key = "f",
+                    action = function (alt)
+                        shared.screen.toggle_fortune()
+                    end
+                },
                 button{
                     markup = "Toggle notes",
                     indicator = em("n"),
@@ -2018,33 +2018,33 @@ waffle_settings_view = view {
                         return b
                     end
                 )(),
-                button({
-                        markup = "Wallpaper",
-                        indicator = em("w"),
-                        key = "w",
-                        action = function (alt)
-                            shared.action.wallpaper_setup()
-                            waffle:hide()
+                button{
+                    markup = "Wallpaper",
+                    indicator = em("w"),
+                    key = "w",
+                    action = function (alt)
+                        shared.action.wallpaper_setup()
+                        waffle:hide()
+                    end
+                },
+                button{
+                    markup = "Screen layout",
+                    indicator = em("s"),
+                    key = "s",
+                    action = function (alt)
+                        if alt then
+                            local cmd = {"arandr"}
+                            awful.spawn(cmd)
+                        else
+                            local cmd = {"rofi-screen-layout",
+                                         "-normal-window",
+                                         "-font", beautiful.font
+                                        }
+                            awful.spawn(cmd)
                         end
-                }),
-                button({
-                        markup = "Screen layout",
-                        indicator = em("s"),
-                        key = "s",
-                        action = function (alt)
-                            if alt then
-                                local cmd = {"arandr"}
-                                awful.spawn(cmd)
-                            else
-                                local cmd = {"rofi-screen-layout",
-                                             "-normal-window",
-                                             "-font", beautiful.font
-                                }
-                                awful.spawn(cmd)
-                            end
-                            waffle:hide()
-                        end
-                }),
+                        waffle:hide()
+                    end
+                },
                 layout = wibox.layout.fixed.vertical,
             }
     }),
