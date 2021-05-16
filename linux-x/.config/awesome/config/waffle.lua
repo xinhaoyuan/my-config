@@ -1998,22 +1998,22 @@ waffle_settings_view = view {
                 (
                     function()
                         local b
-                        b = button({
-                                indicator = em("b"),
-                                key = "b",
-                                action = function (alt)
-                                    for i, v in ipairs(beautiful.bar_styles) do
-                                        if v == beautiful.bar_style then
-                                            beautiful.bar_style = beautiful.bar_styles[i % #beautiful.bar_styles + 1]
-                                            b.label.text = "Cycle bar style: "..beautiful.bar_style
-                                            capi.screen.emit_signal("list")
-                                            return
-                                        end
+                        b = button{
+                            indicator = em("b"),
+                            key = "b",
+                            action = function (alt)
+                                for i, v in ipairs(beautiful.bar_styles) do
+                                    if v == beautiful.bar_style then
+                                        beautiful.bar_style = beautiful.bar_styles[i % #beautiful.bar_styles + 1]
+                                        b.label.text = "Cycle bar style: "..beautiful.bar_style
+                                        capi.screen.emit_signal("list")
+                                        return
                                     end
-                                    beautiful.bar_style = "auto"
-                                    capi.screen.emit_signal("list")
                                 end
-                        })
+                                beautiful.bar_style = "auto"
+                                capi.screen.emit_signal("list")
+                            end
+                        }
                         b.label.text = "Cycle bar style: "..beautiful.bar_style
                         return b
                     end
