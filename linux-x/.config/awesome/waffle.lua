@@ -412,6 +412,12 @@ function waffle:autohide_lock_release()
     end
 end
 
+capi.screen.connect_signal(
+    "list", function()
+        waffle.autohide_lock_ = 0
+        waffle:hide()
+    end)
+
 function waffle:set_root_view(v)
     self.root_view_ = v
 end
