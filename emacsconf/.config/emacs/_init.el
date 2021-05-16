@@ -121,9 +121,11 @@
           '(lambda ()
              (bury-buffer (current-buffer))
              (hl-line-mode 1)
-             (setq truncate-lines nil)))
+             (setq truncate-lines nil)
+             (ibuffer-jump-to-buffer (buffer-name (cadr (buffer-list))))))
 (eval-after-load "ibuffer"
   '(progn
+     (setq ibuffer-always-show-last-buffer t)
      (define-key ibuffer-mode-map (kbd "<up>") (lambda () (interactive) (forward-line -1)))
      (define-key ibuffer-mode-map (kbd "<down>") 'forward-line)
      (define-key ibuffer-mode-map (kbd "C-g") 'quit-window)
