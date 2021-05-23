@@ -1097,7 +1097,7 @@ capi.client.connect_signal("property::titlebar_style",
 local function reset_decoration(c)
     if c.borderless then
         c.has_xborder = false
-    elseif c.maximized then
+    elseif c.maximized or c.fullscreen then
         c.has_xborder = false
     else
         c.has_xborder = true
@@ -1132,6 +1132,7 @@ end
 
 capi.client.connect_signal("manage", manage_cb)
 capi.client.connect_signal("property::maximized", reset_decoration)
+capi.client.connect_signal("property::fullscreen", reset_decoration)
 
 -- rules
 
