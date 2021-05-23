@@ -73,10 +73,9 @@
           (old (current-indentation))
           (col (current-column)))
       (cond
-       ((not (eq col old))
+       ((and (not (eq old col)) (not (eq levels 0)))
         (back-to-indentation)
-        (setq this-command nil)
-        )
+        (setq this-command nil))
        ((and (> levels 0) (>= old new))
         (si-indent-line levels))
        ((and (< levels 0) (<= old new))

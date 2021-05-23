@@ -116,13 +116,13 @@
 (setq enable-recursive-minibuffers t)
 (setq default-tab-width 8)
 
-(global-set-key (kbd "C-x C-b") (lambda () (interactive) (ibuffer t)))
+(global-set-key (kbd "C-x C-b") 'ibuffer)
 (add-hook 'ibuffer-hook
           '(lambda ()
              (bury-buffer (current-buffer))
              (hl-line-mode 1)
              (setq truncate-lines nil)
-             (ibuffer-jump-to-buffer (buffer-name (cadr (buffer-list))))))
+             (ibuffer-jump-to-buffer (buffer-name (car (buffer-list))))))
 (eval-after-load "ibuffer"
   '(progn
      (setq ibuffer-always-show-last-buffer t)
@@ -139,7 +139,7 @@
                    (lambda (_buf _mark) (setq count (+ count 1)))))))
            (message "%d buffer marked to delete." deletion-mark-count)
            (if (> deletion-mark-count 0) (ibuffer-do-kill-on-deletion-marks))
-           (ibuffer-visit-buffer t))))
+           (ibuffer-visit-buffer))))
      ))
 
 ;; Reverse colors for the border to have nicer line
@@ -668,8 +668,8 @@
 ;; Lua mode {{{
 (defun --set-up-lua-mode ()
   (add-hook 'lua-mode-hook (lambda ()
-			      (setq lua-indent-level 4)
-			      (setq indent-tabs-mode nil))))
+			      (setq-local lua-indent-level 4)
+			      (setq-local indent-tabs-mode nil))))
 
 (eval-after-load "lua-mode" '(--set-up-lua-mode))
 
