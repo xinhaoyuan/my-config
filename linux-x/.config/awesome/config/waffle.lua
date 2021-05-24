@@ -1042,10 +1042,11 @@ do
        call_now = true,
        autostart = true,
        callback = function ()
-           awful.spawn.easy_async(battery_status_command,
-                                  function (stdout)
-                                      update_graphic(battery_widget, stdout)
-                                  end
+           awful.spawn.easy_async(
+               battery_status_command,
+               function (stdout)
+                   update_graphic(battery_widget, stdout)
+               end
            )
        end,
    }
