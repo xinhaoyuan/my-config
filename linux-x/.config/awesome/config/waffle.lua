@@ -1738,6 +1738,19 @@ local cal_widget = wibox.widget {
     end,
     widget = mycalendar.month
 }
+gtimer {
+    timeout = 10,
+    autostart = true,
+    call_now = true,
+    callback = function()
+        local new_today = os.date("*t")
+        if today.day ~= new_today.day then
+            today = new_today
+            cal_widget:emit_signal("widget::layout_changed")
+        end
+    end
+}
+
 
 local function cal_switch(delta)
     local date = cal_widget:get_date()

@@ -491,12 +491,6 @@ gtimer {
     autostart = true,
     call_now = true,
     callback = function()
-        local new_today = os.date("*t")
-        if today.day ~= new_today.day then
-            today = new_today
-            cal_widget:emit_signal("widget::layout_changed")
-        end
-
         local timestamp = os.clock()
         if last_mid_update_timestamp == nil or
             timestamp - last_mid_update_timestamp > 300 then
