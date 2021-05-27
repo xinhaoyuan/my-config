@@ -940,7 +940,7 @@ local function setup_screen(scr)
                waffle_scr = nil
            end
            if waffle_scr == nil then
-               capi.awesome.emit_signal("toggle_calendar_waffle", {anchor = "mouse", autohide = 1})
+               capi.awesome.emit_signal("toggle_calendar_waffle", {anchor = "mouse", autohide = 0.5})
            end
            waffle:autohide_lock_acquire()
        end)

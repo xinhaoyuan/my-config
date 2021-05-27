@@ -1667,20 +1667,43 @@ local cal_widget = wibox.widget {
     spacing = 0,
     fn_embed = function (widget, flag, date)
         if flag == "header" then
+            local sign
+            if date.year == today.year then
+                if date.month == today.month then
+                    sign = 0
+                else
+                    sign = date.month < today.month and -1 or 1
+                end
+            else
+                sign = date.year < today.year and -1 or 1
+            end
             widget.font = beautiful.fontname_normal..' 12'
-            -- widget = wibox.widget{
-            --     widget,
-            --     fg = beautiful.fg_focus,
-            --     bg = beautiful.bg_focus,
-            --     widget = wibox.container.background,
-            -- }
+            widget = wibox.widget{
+                sign > 0 and {
+                    text = " <<",
+                    align = "left",
+                    font = widget.font,
+                    widget = wibox.widget.textbox,
+                },
+                widget,
+                sign < 0 and {
+                    text =  ">> ",
+                    align = "right",
+                    font = widget.font,
+                    widget = wibox.widget.textbox,
+                },
+                expand = "outside",
+                layout = wibox.layout.align.horizontal,
+            }
             return widget
         elseif flag == "month" then
             return widget
-        -- elseif flag == "weekday" then
-        --     widget.font = beautiful.fontname_normal..' 9'
-        -- elseif flag == "weeknumber" then
-        --     widget.font = beautiful.fontname_normal..' 9'
+        elseif flag == "weekday" or flag == "weeknumber" then
+            widget = wibox.widget{
+                widget,
+                fg = beautiful.minor_normal,
+                widget = wibox.container.background,
+            }
         end
 
         local inverted = false
