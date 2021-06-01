@@ -10,10 +10,12 @@
 	"Vera Sans YuanTi Mono"
         "SimHei"
 	"SimSun"
+        "Noto Sans CJK"
 	"UniSun")
   "The list of possible fonts to display CJK characters")
 
-(font-family-list)
+(set-display-table-slot standard-display-table 'wrap ?↲)
+
 ;; toggle small/big fonts
 (defcustom my-font-name "Iosevka XY Sans" "undocumented")
 (defcustom my-font-toggle-flag 0 "undocumented")

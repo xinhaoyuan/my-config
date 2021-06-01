@@ -3,7 +3,7 @@
 # This script is intended to run AFTER the window manager has initialized.
 
 if [ ! -e $HOME/.xsession-init-guard ]; then
-    xcape -e 'Super_L=XF86Launch1;Super_R=XF86Launch1;Alt_R=XF86Launch2;Control_R=XF86Launch3'
+    xcape -e 'Super_L=XF86Launch1;Super_R=XF86Launch1;Alt_L=XF86Launch2;Alt_R=XF86Launch2;Control_L=XF86Launch3;Control_R=XF86Launch3'
     nitrogen --restore
     update-rofi-config
     # fcitx5 -d

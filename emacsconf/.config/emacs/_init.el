@@ -173,7 +173,7 @@
       ;;             (setq str (concat (make-string (- width (length str)) ?\ ) str)))
       ;;           (put-text-property 0 width 'face 'linum str)
       ;;           str)))
-      (setq nlinum-format "%d ")
+      (setq nlinum-format "%d┊")
       (defun turn-on-linum-mode () ""
              (nlinum-mode 1))
       ))

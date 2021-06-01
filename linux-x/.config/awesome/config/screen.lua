@@ -1111,11 +1111,6 @@ capi.root.keys(
    awful.util.table.join(
       capi.root.keys(),
       awful.key({ }, "XF86Launch1", function () capi.awesome.emit_signal("show_main_waffle", "screen") end),
-      awful.key({ }, "XF86Launch3", function ()
-              if capi.client.focus then
-                  capi.awesome.emit_signal("show_client_waffle", capi.client.focus, "client")
-              end
-      end),
       awful.key({ "Mod4" }, ";",
          function ()
             awful.prompt.run {

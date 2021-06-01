@@ -35,7 +35,7 @@ local function get_cgroup_client(anchor_client)
     return r
 end
 local cgroup_switcher = require("yams").create {
-    keys = { ["Alt_L"] = "release_to_exit", ["Alt_R"] = "release_to_exit", ["Escape"] = "switch" },
+    keys = { ["Alt_L"] = "release_to_exit", ["Alt_R"] = "release_to_exit", ["XF86Launch3"] = "switch" },
     opacity_other = 1,
     panel = false
 }
@@ -178,9 +178,16 @@ function shared.client.start_switcher(c, quick_mode)
 end
 
 local client_keys = table_join(
-    awful.key({ "Mod4" }, "Escape", function (c)
-            shared.waffle.show_client_waffle(c, { anchor = "client" })
-    end),
+    awful.key({ "Mod4" }, "Escape",
+              function (c)
+                  shared.waffle.show_client_waffle(c, { anchor = "client" })
+              end),
+    awful.key({ }, "XF86Launch3",
+              function (c)
+                  if capi.client.focus then
+                      capi.awesome.emit_signal("show_client_waffle", c, "client")
+                  end
+              end),
     awful.key({ "Mod4" }, "Prior", shared.client.enlarge),
     awful.key({ "Mod4" }, "Next", shared.client.shrink),
     awful.key({ "Mod4" }, "=", function (c) machi.default_editor.adjust_x_shares(c, 50) end),
@@ -219,7 +226,7 @@ local client_keys = table_join(
             shared.client.toggle_grouping(c)
     end),
 
-    awful.key({ "Mod1" }, "Escape", function (c)
+    awful.key({ "Mod1" }, "XF86Launch3", function (c)
             if c.cgroup then cgroup_switcher.start{clients = get_cgroup_client(c)} end
     end),
 
