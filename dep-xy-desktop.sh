@@ -27,6 +27,7 @@ DEP_ARRAY=(
     evtest
     xinput
     xdotool
+    network-manager-gnome
     # awesome needs these
     librsvg2-dev
     fswatch
