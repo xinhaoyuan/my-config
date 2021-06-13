@@ -15,6 +15,7 @@ if [ ! -e $HOME/.xsession-init-guard ]; then
     nm-applet &
     # synapse -s &
     # plank &
+    xset b off
 fi
 
 touch $HOME/.xsession-init-guard

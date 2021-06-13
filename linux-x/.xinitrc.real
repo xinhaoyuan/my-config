@@ -5,6 +5,7 @@
 xrdb -merge ~/.Xresources
 xset fp+ ~/.fonts
 xset m 1 10
+xset b off
 
 # start WM
 export PATH="$HOME/xbin:$PATH"
