@@ -38,16 +38,24 @@
 
 (if (require 'highlight-indent-guides nil 'noerror)
     (progn
-      (setq highlight-indent-guides-method 'character)
-      (setq highlight-indent-guides-character ?┊)
+      (setq highlight-indent-guides-method 'column)
+      (setq highlight-indent-guides-character ?⸽)
       (setq highlight-indent-guides-auto-enabled nil)
       (set-face-background 'highlight-indent-guides-odd-face "darkgray")
       (set-face-background 'highlight-indent-guides-even-face "dimgray")
       (set-face-foreground 'highlight-indent-guides-character-face "dimgray")
+      ;; (setq highlight-indent-guides-auto-odd-face-perc 10)
+      ;; (setq highlight-indent-guides-auto-even-face-perc 15)
+      ))
+
+(if (require 'indent-guide nil 'noerror)
+    (progn
+      (setq indent-guide-char " ")
+      (setq indent-guide-recursive t)
+      (set-face-background 'indent-guide-face "darkgray")
       ))
 
 ;; misc {{{
-
 (add-hook 'buffer-list-update-hook
           (lambda ()
             (if (not window-system)
