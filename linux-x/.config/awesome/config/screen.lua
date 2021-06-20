@@ -129,9 +129,14 @@ local xlayout = tabber{
 }
 machi.editor.nested_layouts["4"] = xlayout
 
+local yggdrasil = require("yggdrasil")
+yggdrasil.set_icon()
+
 local alayout = require("awful.layout")
 alayout.layouts = {
    machi.layout.create {
+   },
+   yggdrasil.create{
    },
    alayout.suit.tile,
    alayout.suit.tile.left,
@@ -1146,13 +1151,48 @@ local global_keys = table_join(
       function ()
           yams_switcher.start{}
    end),
-   awful.key({ "Mod4" }, ".", function ()
-           shared.client.start_switcher(nil, false)
-   end),
 
+   awful.key({ "Mod4" }, ",", function ()
+                 local c = capi.client.focus
+                 if c == nil then return end
+                 if c.floating then
+                     return
+                 end
+
+                 local layout = c.screen.selected_tag.layout
+                 if layout.signature == yggdrasil.signature then
+                     yggdrasil.unsplit{client = c}
+                 end
+             end),
+   awful.key({ "Mod4" }, ".", function ()
+                 local c = capi.client.focus
+                 if c == nil then return end
+                 if c.floating then
+                     return
+                 end
+
+                 local layout = c.screen.selected_tag.layout
+                 if layout.machi_set_cmd ~= nil then
+                     shared.client.start_switcher(nil, false)
+                 elseif layout.signature == yggdrasil.signature then
+                     yggdrasil.split{client = c}
+                 end
+             end),
    awful.key({ "Mod4" }, "Tab", function ()
-           shared.client.start_switcher(capi.client.focus, true)
-   end),
+                 local c = capi.client.focus
+                 if c == nil then return end
+                 if c.floating then
+                     c.floating = false
+                     return
+                 end
+
+                 local layout = c.screen.selected_tag.layout
+                 if layout.machi_set_cmd ~= nil then
+                     shared.client.start_switcher(c, true)
+                 elseif layout.signature == yggdrasil.signature then
+                     yggdrasil.set_inner_layout{client = c}
+                 end
+             end),
    awful.key({ "Mod4" }, "/",               function () machi.default_editor.start_interactive() end),
    awful.key({ "Mod4" }, "[",               function () alayout.inc(alayout.layouts, -1) end),
    awful.key({ "Mod4" }, "]",               function () alayout.inc(alayout.layouts, 1) end),
