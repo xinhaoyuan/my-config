@@ -1196,6 +1196,7 @@ require("awful.rules").rules = {
    {
        rule = { class = "Rofi" },
        properties = {
+           floating = true,
            placement = awful.placement.centered_on_new,
            skip_taskbar = true,
            respect_titlebar_request = true,
@@ -1214,6 +1215,7 @@ require("awful.rules").rules = {
    {
        rule = { type = "dialog" },
        properties = {
+           floating = true,
            titlebar_style = "full_top",
            callback = function (c)
                if c.transient_for and c.transient_for.type == "desktop" then
@@ -1286,6 +1288,13 @@ require("awful.rules").rules = {
        rule = { class = "TelegramDesktop" },
        properties = {
            size_hints_honor = false,
+       },
+   },
+   {
+       rule = { class = "Xephyr" },
+       properties = {
+           floating = true,
+           titlebar_style = "full_top",
        },
    },
 }

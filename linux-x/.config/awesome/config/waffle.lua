@@ -2142,6 +2142,7 @@ local waffle_client_icon_container = wibox.widget {
 }
 
 local update_client_waffle_labels
+local client_waffle_focus = false
 local client_waffle = view {
     root = decorate_waffle {
         decorate_panel {
@@ -2324,11 +2325,40 @@ local client_waffle = view {
         layout = wibox.layout.fixed.vertical,
     },
     on_close = function()
+        if client_waffle_focus then
+            local c = shared.waffle_selected_client
+            client_waffle_focus = false
+            gtimer.delayed_call(function () c:emit_signal("request::activate", "switch", {raise=true}) end)
+        end
         shared.waffle_selected_client = nil
     end,
-    default_key_handler = function (mode, key, event)
-        if event == "press" and key:find("^XF86Launch.*") then
+    default_key_handler = function (mod, key, event)
+        if event ~= "press" then return end
+        if key == "Return" then
+            client_waffle_focus = true
             waffle:hide()
+            return
+        end
+        if key:find("^XF86Launch.*") then
+            waffle:hide()
+            return
+        end
+        for i = 1, #mod do mod[mod[i]] = true end
+        if key == "Left" or key == "Right" or key == "Up" or key == "Down" then
+            if not client_waffle_focus then return end
+            if not mod.Mod1 then
+                awful.client.focus.global_bydirection(key:lower(), shared.waffle_selected_client)
+                local c = capi.client.focus
+                if c then
+                    client_waffle_focus = false
+                    waffle:hide()
+
+                    client_waffle_focus = true
+                    c:raise()
+                    capi.awesome.emit_signal("show_client_waffle", c, "client")
+                end
+            end
+            return
         end
     end,
 }
@@ -2338,6 +2368,7 @@ function shared.waffle.show_client_waffle(c, args)
     if args.anchor == "client" then
         local geo = c:geometry()
         args.anchor = { x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 }
+        client_waffle_focus = true
     end
     waffle:show(client_waffle, args)
     shared.waffle_selected_client = c
