@@ -195,28 +195,35 @@ local client_keys = table_join(
     awful.key({ "Mod4", "Shift" }, "=", function (c) machi.default_editor.adjust_y_shares(c, 50) end),
     awful.key({ "Mod4", "Shift" }, "-", function (c) machi.default_editor.adjust_y_shares(c, -50) end),
 
-    awful.key({ "Mod4" }, "q", function (c)
-            local other_clients = {}
-            for _, oc in ipairs(c.screen.tiled_clients) do
-                if oc ~= c then
-                    table.insert(other_clients, oc)
-                end
-            end
-            local geo = extender.fit(
-                c.screen.workarea, other_clients,
-                {
-                    min_size = beautiful.useless_gap * 4,
-                }
-            )
-            if geo then
-                c.maximized = false
-                c.maximized_vertical = false
-                c.maximized_horizontal = false
-                c.fullscreen = false
-                c.floating = false
-                c:geometry(geo)
-            end
-    end),
+    -- awful.key(
+    --     { "Mod4" }, "q",
+    --     function (c)
+    --         local other_clients = {}
+    --         for _, oc in ipairs(c.screen.tiled_clients) do
+    --             if oc ~= c then
+    --                 table.insert(other_clients, oc)
+    --             end
+    --         end
+    --         local geo = extender.fit(
+    --             c.screen.workarea, other_clients,
+    --             {
+    --                 min_size = beautiful.useless_gap * 4,
+    --             }
+    --         )
+    --         if geo then
+    --             c.maximized = false
+    --             c.maximized_vertical = false
+    --             c.maximized_horizontal = false
+    --             c.fullscreen = false
+    --             c.floating = false
+    --             c:geometry(geo)
+    --         end
+    --     end),
+    awful.key(
+        { "Mod4" }, "q",
+        function (c)
+            c:swap(awful.client.focus.history.get(c.screen, 1))
+        end),
 
     awful.key({ "Mod4" }, "'", function (c)
             shared.client.cycle_titlebar_style(c, 1)
