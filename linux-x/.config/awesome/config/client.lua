@@ -222,7 +222,8 @@ local client_keys = table_join(
     awful.key(
         { "Mod4" }, "q",
         function (c)
-            c:swap(awful.client.focus.history.get(c.screen, 1))
+            local cs = client.get(c.screen)
+            if c == cs[1] then c:swap(cs[#cs]) else c:swap(cs[1]) end
         end),
 
     awful.key({ "Mod4" }, "'", function (c)
