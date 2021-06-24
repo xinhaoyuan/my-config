@@ -86,7 +86,9 @@ local function view(args)
         widget = wibox.container.margin,
     }
     view.key_handler = args.key_handler or function (mod, key, event)
-        if event == "press" and view.keys[key] then
+        if args.key_filter and not args.key_filter(mod, key, event) then
+            return
+        elseif event == "press" and view.keys[key] then
             view.keys[key](mod, key, event)
             return true
         elseif args.default_key_handler then
@@ -2331,6 +2333,12 @@ local client_waffle = view {
             gtimer.delayed_call(function () c:emit_signal("request::activate", "switch", {raise=true}) end)
         end
         shared.waffle_selected_client = nil
+    end,
+    key_filter = function (mod, key, event)
+        for i = 1, #mod do
+            if mod[i] == "Control" then return false end
+        end
+        return true
     end,
     default_key_handler = function (mod, key, event)
         if event ~= "press" then return end
