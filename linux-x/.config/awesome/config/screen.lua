@@ -136,7 +136,7 @@ local alayout = require("awful.layout")
 alayout.layouts = {
    machi.layout.create {
    },
-   yggdrasil.create{
+   yggdrasil.create_root{
    },
    alayout.suit.tile,
    alayout.suit.tile.left,
