@@ -16,6 +16,7 @@ local gshape = require("gears.shape")
 local gcolor = require("gears.color")
 local gdebug = require("gears.debug")
 local machi = require("layout-machi")
+local yggdrasil = require("yggdrasil")
 local border = require("border-theme")
 local cbg = require("contextual_background")
 local masked_imagebox = require("masked_imagebox")
@@ -177,6 +178,19 @@ function shared.client.start_switcher(c, quick_mode)
     end
 end
 
+local function expand_child(c, method, amount)
+    local screen = c.screen
+    local tag = screen.selected_tag
+    local layout = tag.layout
+    if not layout.expand then return end
+    local clients = awful.client.tiled(screen)
+    for i = 1, #clients do
+        if clients[i] == c then
+            return layout.expand(tag, i, method, amount)
+        end
+    end
+end
+
 local client_keys = table_join(
     awful.key({ "Mod4" }, "Escape",
               function (c)
@@ -194,6 +208,11 @@ local client_keys = table_join(
     awful.key({ "Mod4" }, "-", function (c) machi.default_editor.adjust_x_shares(c, -50) end),
     awful.key({ "Mod4", "Shift" }, "=", function (c) machi.default_editor.adjust_y_shares(c, 50) end),
     awful.key({ "Mod4", "Shift" }, "-", function (c) machi.default_editor.adjust_y_shares(c, -50) end),
+
+    awful.key({ "Mod4", "Shift" }, "Left", function (c) expand_child(c, "l", 50) end),
+    awful.key({ "Mod4", "Shift" }, "Right", function (c) expand_child(c, "r", 50) end),
+    awful.key({ "Mod4", "Shift" }, "Up", function (c) expand_child(c, "u", 50) end),
+    awful.key({ "Mod4", "Shift" }, "Down", function (c) expand_child(c, "d", 50) end),
 
     -- awful.key(
     --     { "Mod4" }, "q",
