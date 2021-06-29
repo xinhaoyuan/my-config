@@ -3,6 +3,10 @@
 set -e
 
 cd $HOME/.config/autorandr
-choice=$(ls | rofi -dmenu -p "Screen layout" "$@")
-autorandr "$choice"
+choice="$({ echo "[auto]"; ls; } | rofi -dmenu -p "Screen layout" "$@")"
+if [[ "$choice" == "[auto]" ]]; then
+    autorandr -c
+else
+    autorandr "$choice"
+fi
 nitrogen --restore
