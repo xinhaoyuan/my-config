@@ -18,6 +18,29 @@ local shared = {
             show_notes = true,
         }
     ),
+    tasklist_order_function = function (clients)
+        local ticket = {}
+        for _, c in ipairs(clients) do
+            if c.cgroup then
+                local old_ticket = ticket[c.cgroup]
+                ticket[c.cgroup] = (old_ticket == nil) and c.manage_ticket or math.min(old_ticket, c.manage_ticket)
+            end
+        end
+        table.sort(clients,
+                   function (a, b)
+                       -- -- Minimized windows appear at last
+                       -- if a.minimized ~= b.minimized then return b.minimized else return a.window < b.window end
+                       local a_ticket = a.cgroup and ticket[a.cgroup] or a.manage_ticket
+                       local b_ticket = b.cgroup and ticket[b.cgroup] or b.manage_ticket
+                       if a_ticket == b_ticket then
+                           return a.manage_ticket < b.manage_ticket
+                       else
+                           return a_ticket < b_ticket
+                       end
+                   end
+                  )
+        return clients
+    end,
     on_start_functions = {},
     size_index = {
         ["top"] = "height",

@@ -302,29 +302,7 @@ function module.create(scr)
         style = { font = beautiful.font },
         layout = beautiful.tasklist_layout[direction_index[shared.vars.bar_position]][beautiful.bar_style],
         source = function ()
-            -- Sort clients with their constant ids to make the order stable.
-            local cls = awful.widget.tasklist.source.all_clients()
-            local ticket = {}
-            for _, c in ipairs(cls) do
-                if c.cgroup then
-                    local old_ticket = ticket[c.cgroup]
-                    ticket[c.cgroup] = (old_ticket == nil) and c.manage_ticket or math.min(old_ticket, c.manage_ticket)
-                end
-            end
-            table.sort(cls,
-                       function (a, b)
-                           -- this makes minimized windows appear at last
-                           -- if a.minimized ~= b.minimized then return b.minimized else return a.window < b.window end
-                           local a_ticket = a.cgroup and ticket[a.cgroup] or a.manage_ticket
-                           local b_ticket = b.cgroup and ticket[b.cgroup] or b.manage_ticket
-                           if a_ticket == b_ticket then
-                               return a.manage_ticket < b.manage_ticket
-                           else
-                               return a_ticket < b_ticket
-                           end
-                       end
-            )
-            return cls
+            return shared.tasklist_order_function(awful.widget.tasklist.source.all_clients())
         end,
         update_function = function (w, b, l, d, clients, args)
             capi.awesome.emit_signal("tasklist::update::before", scr)

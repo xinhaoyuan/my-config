@@ -2397,19 +2397,26 @@ local client_waffle = view {
                 capi.awesome.emit_signal("show_client_waffle", c, "client")
             end
             return
-        elseif key == "Prior" or key == "Next" then
+        elseif key == "Prior" or key == "Next" or key == "," or key == "." then
             if not client_waffle_attached then return end
 
             local c = shared.waffle_selected_client
-            local clients = capi.client.get(c.screen)
-            table.sort(clients, function (a, b)
-                           return fts.get(a) > fts.get(b)
-                       end)
+            local clients
+            if key == "Prior" or key == "Next" then
+                clients = capi.client.get(c.screen)
+                table.sort(clients, function (a, b)
+                               return fts.get(a) > fts.get(b)
+                           end)
+            else
+                clients = shared.tasklist_order_function(capi.client.get(c.screen))
+            end
+
+            local forward = key == "Prior" or key == ","
             for i = 1, #clients do
                 if clients[i] == c then
-                    if key == "Prior" and i > 1 then
+                    if forward and i > 1 then
                         c = clients[i - 1]
-                    elseif key == "Next" and i < #clients then
+                    elseif not forward and i < #clients then
                         c = clients[i + 1]
                     else
                         c = nil
@@ -2428,7 +2435,6 @@ local client_waffle = view {
             end
             return
         end
-
     end,
 }
 
