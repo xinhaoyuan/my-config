@@ -54,6 +54,20 @@ local function tasklist_item_button(w, c, b)
     elseif b == 2 then
         c:kill()
     elseif b == 3 then
+        local wb = capi.mouse.current_wibox
+        local geos = capi.mouse.current_widget_geometries
+        local wgeo
+        for _, geo in ipairs(geos) do
+            if geo.widget == w then
+                wgeo = geo
+                break
+            end
+        end
+        if wgeo ~= nil then
+            shared.waffle.show_client_waffle(c, { anchor = { x = wb.x + wgeo.x + wgeo.width / 2, y = wb.y + wgeo.y + wgeo.height / 2 } })
+        else
+            shared.waffle.show_client_waffle(c)
+        end
     elseif b == 4 then
         if not c.maximized then
             shared.client.enlarge(c)
