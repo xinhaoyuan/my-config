@@ -176,7 +176,7 @@ local function tasklist_update_function(widget, c, index, objects)
     end
     bgb:set_context_transform_function({
             focus = client.focus == c,
-            selected = shared.waffle_selected_client == c,
+            selected = client.focus == nil and shared.waffle_selected_client == c,
             minimized = c.minimized,
             is_odd = index % 2 == 1})
 end
