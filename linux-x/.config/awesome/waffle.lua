@@ -430,4 +430,8 @@ function waffle:get_screen()
     end
 end
 
+function waffle:autohide()
+    return self.autohide_
+end
+
 return waffle

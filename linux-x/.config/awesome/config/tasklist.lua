@@ -54,21 +54,6 @@ local function tasklist_item_button(w, c, b)
     elseif b == 2 then
         c:kill()
     elseif b == 3 then
-        local wb = capi.mouse.current_wibox
-        local geos = capi.mouse.current_widget_geometries
-        local wgeo
-        for _, geo in ipairs(geos) do
-            if geo.widget == w then
-                wgeo = geo
-                break
-            end
-        end
-        if wgeo ~= nil then
-            local m = wgeo.hierarchy:get_matrix_from_device()
-            shared.waffle.show_client_waffle(c, { anchor = { x = wb.x + wgeo.x + wgeo.width / 2, y = wb.y + wgeo.y + wgeo.height / 2 } })
-        else
-            shared.waffle.show_client_waffle(c)
-        end
     elseif b == 4 then
         if not c.maximized then
             shared.client.enlarge(c)
@@ -82,32 +67,63 @@ end
 
 local function attach_tasklist_item_buttons(w, c)
     w.button_pressed = {}
-    w:connect_signal('button::press', function (w, x, y, button)
-                         waffle_was_there = waffle.view_ ~= nil
-                         w.button_pressed[button] = true
-    end)
-    w:connect_signal('button::release', function (w, x, y, button)
-                         if w.button_pressed[button] then
-                             w.button_pressed[button] = false
-                             tasklist_item_button(w, c, button)
-                         end
-    end)
-    w:connect_signal('mouse::leave', function (w, x, y, button)
-                         if w.button_pressed[1] then
-                             c:raise()
-                             c.maximized = false
-                             c.minimized = false
-                             local geo = c:geometry()
-                             mouse.coords({ x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 })
-                             awful.mouse.client.move(c)
-                         elseif w.button_pressed[3] then
-                             c:raise()
-                             c.maximized = false
-                             c.minimized = false
-                             awful.mouse.client.resize(c, "bottom_right")
-                         end
-                         w.button_pressed = {}
-    end)
+    w:connect_signal(
+        'button::press', function (w, x, y, button)
+            waffle_was_there =
+                shared.waffle_selected_client == c and not waffle:autohide()
+            w.button_pressed[button] = true
+        end)
+    w:connect_signal(
+        'button::release', function (w, x, y, button)
+            if w.button_pressed[button] then
+                w.button_pressed[button] = false
+                tasklist_item_button(w, c, button)
+            end
+        end)
+    w:connect_signal(
+        'mouse::enter', function (w, x, y, button)
+            local wb = capi.mouse.current_wibox
+            local geos = capi.mouse.current_widget_geometries
+            local wgeo
+            for _, geo in ipairs(geos or {}) do
+                if geo.widget == w then
+                    wgeo = geo
+                    break
+                end
+            end
+            if wgeo ~= nil then
+                local waffle_scr = waffle:get_screen()
+                if waffle:autohide() or waffle_scr == nil or waffle_scr ~= wb.screen then
+                    shared.waffle.show_client_waffle(
+                        c, {
+                            anchor = {
+                                x = wb.x + wgeo.x + wgeo.width / 2,
+                                y = wb.y + wgeo.y + wgeo.height / 2
+                            },
+                            autohide= 0.5
+                        })
+                end
+            end
+            waffle:autohide_lock_acquire()
+        end)
+    w:connect_signal(
+        'mouse::leave', function (w, x, y, button)
+            if w.button_pressed[1] then
+                c:raise()
+                c.maximized = false
+                c.minimized = false
+                local geo = c:geometry()
+                mouse.coords({ x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 })
+                awful.mouse.client.move(c)
+            elseif w.button_pressed[3] then
+                c:raise()
+                c.maximized = false
+                c.minimized = false
+                awful.mouse.client.resize(c, "bottom_right")
+            end
+            w.button_pressed = {}
+            waffle:autohide_lock_release()
+        end)
 end
 
 local property_to_text = {

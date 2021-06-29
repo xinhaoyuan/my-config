@@ -2342,6 +2342,7 @@ local client_waffle = view {
             gtimer.delayed_call(function () c:emit_signal("request::activate", "switch", {raise=true}) end)
         end
         client_waffle_transient = false
+        shared.waffle_selected_client:emit_signal("property::name")
         shared.waffle_selected_client = nil
     end,
     key_filter = function (mod, key, event)
@@ -2440,6 +2441,9 @@ local client_waffle = view {
 
 function shared.waffle.show_client_waffle(c, args)
     args = args or {}
+    if shared.waffle_selected_client ~= nil then
+        waffle:hide()
+    end
     if args.anchor == "client" then
         local geo = c:geometry()
         args.anchor = { x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 }
