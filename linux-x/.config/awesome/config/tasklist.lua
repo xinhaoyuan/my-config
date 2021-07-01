@@ -84,7 +84,7 @@ local function attach_tasklist_item_buttons(w, c)
     w:connect_signal(
         'button::press', function (w, x, y, button)
             waffle_was_there =
-                shared.waffle_selected_client == c and not waffle:autohide()
+                shared.waffle_selected_client ~= nil and not waffle:autohide()
             w.button_pressed[button] = true
         end)
     w:connect_signal(
