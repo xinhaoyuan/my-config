@@ -237,7 +237,7 @@ function orgenda.widget(args)
                                 -- text will be updated by the following function.
                                 font = args.font,
                                 widget = wibox.widget.textbox
-                                               },
+                            },
                             {
                                 {
                                     markup = item.text,

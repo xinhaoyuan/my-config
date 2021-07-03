@@ -7,6 +7,8 @@ local dpi = require("beautiful").xresources.apply_dpi
 
 local scroller = { mt = {} }
 
+local huge_height = 1000000
+
 function scroller:layout(context, width, height)
     if not self._private.widget then
         return
@@ -15,7 +17,7 @@ function scroller:layout(context, width, height)
     self:emit_signal("widget::redraw_needed")
 
     local content_width = math.max(width - self._private.scrollbar_width, 0)
-    local w, h = base.fit_widget(self, context, self._private.widget, content_width, math.huge)
+    local w, h = base.fit_widget(self, context, self._private.widget, content_width, huge_height)
     local offset = math.max(math.min(self._private.offset, h - height), 0)
     -- Send signal?
     self._private.offset = offset
@@ -47,7 +49,7 @@ function scroller:draw(context, cr, width, height)
     end
 
     local content_width = width - self._private.scrollbar_width
-    w, h = base.fit_widget(self, context, self._private.widget, content_width, math.huge)
+    w, h = base.fit_widget(self, context, self._private.widget, content_width, huge_height)
 
     if h <= height then
         cr:set_source(inactive_color)
