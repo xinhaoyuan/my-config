@@ -1211,7 +1211,7 @@ require("awful.rules").rules = {
          screen = function(c) return capi.awesome.startup and c.screen or awful.screen.focused() end,
          floating = shared.vars.floating_by_default,
          placement = awful.placement.centered_on_new,
-         titlebar_style = "mini_top",
+         titlebar_style = "none",
       }
    },
    {

@@ -134,8 +134,7 @@ yggdrasil.set_icon()
 
 local alayout = require("awful.layout")
 alayout.layouts = {
-   machi.layout.create {
-   },
+   machi.default_layout,
    yggdrasil.create_root{
    },
    alayout.suit.tile,
@@ -210,7 +209,7 @@ local function switch_or_restore(tag)
     end
 end
 
-local my_wibars = {}
+local my_bars = {}
 local my_tray
 my_tray = wibox.widget.systray()
 my_tray.horizontal = direction_index[shared.vars.bar_position] == "horizontal"
@@ -317,27 +316,19 @@ local function set_expanded(bar)
     space_filler_left:set_children({space_filler_left_with_top_border})
     space_filler_right:set_children({space_filler_right_with_top_border})
 
-    bar.left_margin_container.widget.right = 0
-    bar.middle_margin_container.widget.left = 0
-    bar.middle_margin_container.widget.right = 0
-    bar.right_margin_container.widget.left = 0
-    bar.right_margin_container.widget.widget.widget.left = 0
-end
-
-local function set_splitted_no_min(bar)
-    local space_filler_left = bar.widget:get_children_by_id("space_filler_left")[1]
-    local space_filler_right = bar.widget:get_children_by_id("space_filler_right")[1]
-    space_filler_left:set_children({space_filler_no_min})
-    space_filler_right:set_children({space_filler_no_min})
-
-    bar.left_margin_container.widget.right = beautiful.xborder_width
-    bar.middle_margin_container.widget.left = beautiful.xborder_width
-    bar.middle_margin_container.widget.right = beautiful.xborder_width
-    bar.right_margin_container.widget.left = beautiful.xborder_width
-    bar.right_margin_container.widget.widget.widget.left =
-        bar.screen == capi.screen.primary and
-        beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width and
-        math.floor((beautiful.xborder_radius_cut and 2 - math.sqrt(2) or 1) * (beautiful.xborder_radius - beautiful.xborder_width)) or 0
+    local container
+    container = bar:get_children_by_id("left_margin_holder")
+    if container and #container > 0 then
+        container[1]:set_widget(bar.left_margin_expanded)
+    end
+    container = bar:get_children_by_id("middle_margin_holder")
+    if container and #container > 0 then
+        container[1]:set_widget(bar.middle_margin_expanded)
+    end
+    container = bar:get_children_by_id("right_margin_holder")
+    if container and #container > 0 then
+        container[1]:set_widget(bar.right_margin_expanded)
+    end
 end
 
 local function set_splitted(bar)
@@ -346,24 +337,29 @@ local function set_splitted(bar)
     space_filler_left:set_children({space_filler})
     space_filler_right:set_children({space_filler})
 
-    bar.left_margin_container.widget.right = beautiful.xborder_width
-    bar.middle_margin_container.widget.left = beautiful.xborder_width
-    bar.middle_margin_container.widget.right = beautiful.xborder_width
-    bar.right_margin_container.widget.left = beautiful.xborder_width
-    bar.right_margin_container.widget.widget.widget.left =
-        bar.screen == capi.screen.primary and
-        beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width and
-        math.floor((beautiful.xborder_radius_cut and 2 - math.sqrt(2) or 1) * (beautiful.xborder_radius - beautiful.xborder_width)) or 0
+    local container
+    container = bar:get_children_by_id("left_margin_holder")
+    if container and #container > 0 then
+        container[1]:set_widget(bar.left_margin_splitted)
+    end
+    container = bar:get_children_by_id("middle_margin_holder")
+    if container and #container > 0 then
+        container[1]:set_widget(bar.middle_margin_splitted)
+    end
+    container = bar:get_children_by_id("right_margin_holder")
+    if container and #container > 0 then
+        container[1]:set_widget(bar.right_margin_splitted)
+    end
 end
 
 capi.awesome.connect_signal(
     "tasklist::update::before",
     function (s)
         if beautiful.bar_style == "split" then
-            set_splitted(s.widgets.wibar)
+            set_splitted(s.widgets.bar)
             return
         elseif beautiful.bar_style == "simple" then
-            set_expanded(s.widgets.wibar)
+            set_expanded(s.widgets.bar)
             return
         elseif beautiful.bar_style ~= "auto" then
             print("Expecting auto bar_style but got", beautiful.bar_style)
@@ -374,9 +370,9 @@ capi.awesome.connect_signal(
             has_maximized = has_maximized or c.maximized
         end
         if has_maximized then
-            set_expanded(s.widgets.wibar)
+            set_expanded(s.widgets.bar)
         else
-            set_splitted(s.widgets.wibar)
+            set_splitted(s.widgets.bar)
         end
     end
 )
@@ -778,19 +774,33 @@ local function setup_screen(scr)
        }
    }
 
-   scr.widgets.wibar = awful.wibar({
+   scr.widgets.bar_placeholder = awful.wibar({
          screen = scr,
-         fg = beautiful.fg_normal,
          ontop = false,
          bg = "#00000000",
          [size_index[shared.vars.bar_position]] =
-             beautiful.bar_height +
-             beautiful.xborder_width,
+             beautiful.bar_height + 2,
          position = shared.vars.bar_position,
          border_width = 0,
-         cursor = "cross",
+         input_passthrough = true,
    })
-   my_wibars[#my_wibars + 1] = scr.widgets.wibar
+   my_bars[#my_bars + 1] = scr.widgets.bar_placeholder
+   scr.widgets.bar = wibox{
+       screen = scr,
+       ontop = false,
+       fg = beautiful.fg_normal,
+       bg = "#00000000",
+       border_width = 0,
+       opacity = 1,
+       x = scr.geometry.x,
+       y = scr.geometry.y + scr.geometry.height - beautiful.bar_height - dpi(10),
+       width = scr.geometry.width,
+       height = beautiful.bar_height + dpi(10),
+       cursor = "cross",
+       visible = true,
+       type = "dock",
+   }
+   my_bars[#my_bars + 1] = scr.widgets.bar
 
    local left_layout = wibox.layout.fixed[direction_index[shared.vars.bar_position]]()
    local layoutbox = awful.widget.layoutbox{screen = scr}
@@ -973,7 +983,7 @@ local function setup_screen(scr)
            top = true
        }
    else
-       middle_margin_container = with_border {
+       scr.widgets.bar.middle_margin_expanded = with_border {
            widget = {
                tasklist_with_fallback,
                bg = beautiful.bg_normal,
@@ -982,12 +992,11 @@ local function setup_screen(scr)
            draw_empty = false,
            top = true
        }
-       left_margin_container = with_border {
+       scr.widgets.bar.left_margin_expanded = with_border {
            widget = left_layout,
            top = true,
        }
-       right_margin_container = with_border {
-           id = "right_margin_container",
+       scr.widgets.bar.right_margin_expanded = with_border {
            widget = wibox.widget {
                right_layout,
                -- left = beautiful.sep_median_size,
@@ -995,9 +1004,36 @@ local function setup_screen(scr)
            },
            top = true,
        }
+
+       scr.widgets.bar.middle_margin_splitted = with_border {
+           widget = {
+               tasklist_with_fallback,
+               bg = beautiful.bg_normal,
+               widget = wibox.container.background,
+           },
+           draw_empty = false,
+           top = true, left = true, right = true,
+       }
+       scr.widgets.bar.left_margin_splitted = with_border {
+           widget = left_layout,
+           top = true, right = true,
+       }
+       scr.widgets.bar.right_margin_splitted = with_border {
+           widget = wibox.widget {
+               right_layout,
+               left = scr == primary_screen and beautiful.sep_median_size or nil,
+               widget = fixed_margin
+           },
+           top = true, left = true,
+       }
+
        layout = wibox.widget {
            {
-               left_margin_container,
+               {
+                   id = "left_margin_holder",
+                   scr.widgets.bar.left_margin_expanded,
+                   widget = wibox.container.background,
+               },
                {
                    id = "space_filler_left",
                    buttons = root_buttons,
@@ -1009,7 +1045,11 @@ local function setup_screen(scr)
                expand = "inside",
                layout = fixed_align[direction_index[shared.vars.bar_position]]
            },
-           middle_margin_container,
+           {
+               id = "middle_margin_holder",
+               scr.widgets.bar.middle_margin_expanded,
+               widget = wibox.container.background,
+           },
            {
                nil,
                {
@@ -1019,7 +1059,11 @@ local function setup_screen(scr)
                    ["content_fill_vertical"] = true,
                    widget = fixed_place
                },
-               right_margin_container,
+               {
+                   id = "right_margin_holder",
+                   scr.widgets.bar.right_margin_expanded,
+                   widget = wibox.container.background,
+               },
                expand = "inside",
                layout = fixed_align[direction_index[shared.vars.bar_position]]
            },
@@ -1027,20 +1071,21 @@ local function setup_screen(scr)
            layout = fixed_align[direction_index[shared.vars.bar_position]],
        }
    end
-   scr.widgets.wibar:set_widget(layout)
-   scr.widgets.wibar.left_margin_container = left_margin_container
-   scr.widgets.wibar.right_margin_container = right_margin_container
-   scr.widgets.wibar.middle_margin_container = middle_margin_container
+   scr.widgets.bar:set_widget(layout)
 end
 
 -- Avoid nested call of reset_widgets
 local reset_widgets_flag = false
 
 local function reset_widgets()
-    for _, wb in ipairs(my_wibars) do
-        wb:remove()
+    for _, wb in ipairs(my_bars) do
+        if wb.remove then
+            wb:remove()
+        else
+            wb.visible = false
+        end
     end
-    my_wibars = {}
+    my_bars = {}
     current_screen = nil
     primary_screen = capi.screen.primary
 

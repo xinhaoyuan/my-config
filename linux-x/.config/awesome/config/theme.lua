@@ -21,6 +21,7 @@ local cbg = require("contextual_background")
 local lgi   = require("lgi")
 local icons = require("icons")
 local cairo = lgi.cairo
+local decorator = require("decorator")
 
 local c_normal = { xrdb.foreground, xrdb.background }
 local c_black  = { xrdb.color0, xrdb.color8 }
@@ -35,6 +36,14 @@ local c_white  = { xrdb.color7, xrdb.color15 }
 -- Copied from theme/xresource
 
 local theme = dofile(themes_path.."default/theme.lua")
+
+theme.decorator = decorator.presets.soft_relief{
+    light_shade = "#ffffff60",
+    dark_shade = "#00000030",
+    radius = dpi(6),
+    shade_width = dpi(10),
+    border_width = 2,
+}
 
 local function is_light_color(color)
     return acolor(color):lightness() > 0.7
@@ -552,101 +561,74 @@ if theme.xborder_radius and theme.xborder_radius > 0 then
 else
     theme.rect_with_corners = gshape.rectangle
 end
+
+local function dispose_pattern(pattern)
+    local status, s = pattern:get_surface()
+    if status == "SUCCESS" then
+        s:finish()
+    end
+end
 theme.apply_border_to_widget = function(args)
     args = args or {}
+    -- args.bottom = false
+    local decorator = beautiful.decorator
     local widget
-    local inner_widget = wibox.widget {
-        {
-            args.widget,
-            widget = fixed_margin,
-        },
-        shape = beautiful.xborder_radius ~= nil and
-            function (cr, width, height)
-                beautiful.rect_with_corners(
-                    cr, width, height,
-                    args.tl ~= false and widget.widget.top > 0 and widget.widget.left > 0,
-                    args.tr ~= false and widget.widget.top > 0 and widget.widget.right > 0,
-                    args.br ~= false and widget.widget.bottom > 0 and widget.widget.right > 0,
-                    args.bl ~= false and widget.widget.bottom > 0 and widget.widget.left > 0,
-                    beautiful.xborder_radius -
-                    beautiful.xborder_width)
-            end,
-        bg = beautiful.bg_normal,
-        widget = wibox.container.background
-    }
     widget = wibox.widget {
         {
-            inner_widget,
-            top = args.top and beautiful.xborder_width or 0,
-            left = args.left and beautiful.xborder_width or 0,
-            right = args.right and beautiful.xborder_width or 0,
-            bottom = args.bottom and beautiful.xborder_width or 0,
+            args.widget,
+            top = args.top and decorator.top_space - decorator.top_size or 0,
+            left = args.left and decorator.left_space - decorator.left_size or 0,
+            right = args.right and decorator.right_space - decorator.right_size or 0,
+            bottom = args.bottom and decorator.bottom_space - decorator.bottom_size or 0,
             draw_empty = args.draw_empty,
             widget = fixed_margin,
+            before_draw_children = function (self, context, cr, width, height)
+                if width <= 0 or height <= 0 then return end
+                cr:push_group_with_content(cairo.Content.COLOR_ALPHA)
+                cr:save()
+                cr:set_source(gcolor(beautiful.bg_normal))
+                cr:paint()
+                cr:restore()
+            end,
+            after_draw_children = function (self, context, cr, width, height)
+                if width <= 0 or height <= 0 then return end
+                cr:push_group_with_content(cairo.Content.ALPHA)
+                local top = args.top and decorator.top_space or 0
+                local left = args.left and decorator.left_space or 0
+                local right = args.right and decorator.right_space or 0
+                local bottom = args.bottom and decorator.bottom_space or 0
+                cr:translate(self._private.left, self._private.top)
+                decorator:draw({}, cr, true,
+                               width - self._private.left - self._private.right,
+                               height - self._private.top - self._private.bottom,
+                               {
+                                   top = widget.widget.top > 0,
+                                   left = widget.widget.left > 0,
+                                   right = widget.widget.right > 0,
+                                   bottom = widget.widget.bottom > 0,
+                               })
+                local mask = cr:pop_group()
+                local source = cr:pop_group()
+
+                cr:save()
+                cr:set_source(source)
+                cr:mask(mask)
+                cr:restore()
+
+                dispose_pattern(source)
+                dispose_pattern(mask)
+            end,
         },
         bgimage = function (context, cr, width, height)
-            if width == 0 or height == 0 then return end
-            local tl = args.tl ~= false and widget.widget.top > 0 and widget.widget.left > 0
-            local tr = args.tr ~= false and widget.widget.top > 0 and widget.widget.right > 0
-            local br = args.br ~= false and widget.widget.bottom > 0 and widget.widget.right > 0
-            local bl = args.bl ~= false and widget.widget.bottom > 0 and widget.widget.left > 0
-            local indicator = args.indicator ~= false and beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width and beautiful.xborder_radius_cut and beautiful.xborder_indicator
-            if beautiful.xborder_radius then
-                cr:set_source(gcolor(beautiful.xborder_space))
-                if indicator then
-                    gshape.rectangle(cr, width, height)
-                else
-                    beautiful.rect_with_corners(
-                        cr, width, height,
-                        tl, tr, br, bl,
-                        beautiful.xborder_radius)
-                end
-                if args.clip then
-                    cr:clip()
-                else
-                    cr:fill()
-                    cr:set_operator('ATOP')
-                end
-            end
-            border:draw({ theme = beautiful.get_border_theme(),
-                          color = beautiful.border_focus }, cr, width, height,
-                border.directions{
-                    widget.widget.top > 0 and "top",
-                    widget.widget.left > 0 and "left",
-                    widget.widget.right > 0 and "right",
-                    widget.widget.bottom > 0 and "bottom"
-            })
-            if indicator then
-                cr:set_source(gcolor(beautiful.fg_normal))
-                local indent = (2 - math.sqrt(2)) * (beautiful.xborder_radius) - beautiful.xborder_outer_space
-                if tl then
-                    cr:move_to(beautiful.xborder_outer_space, beautiful.xborder_outer_space)
-                    cr:line_to(beautiful.xborder_outer_space, indent)
-                    cr:line_to(indent, beautiful.xborder_outer_space)
-                    cr:fill()
-                end
-
-                if tr then
-                    cr:move_to(width - indent, beautiful.xborder_outer_space)
-                    cr:line_to(width - beautiful.xborder_outer_space, beautiful.xborder_outer_space)
-                    cr:line_to(width - beautiful.xborder_outer_space, indent)
-                    cr:fill()
-                end
-
-                if br then
-                    cr:move_to(width - indent, height - beautiful.xborder_outer_space)
-                    cr:line_to(width - beautiful.xborder_outer_space, height - beautiful.xborder_outer_space)
-                    cr:line_to(width - beautiful.xborder_outer_space, height - indent)
-                    cr:fill()
-                end
-
-                if bl then
-                    cr:move_to(indent, height - beautiful.xborder_outer_space)
-                    cr:line_to(beautiful.xborder_outer_space, height - beautiful.xborder_outer_space)
-                    cr:line_to(beautiful.xborder_outer_space, height - indent)
-                    cr:fill()
-                end
-            end
+            if width <= 0 or height <= 0 then return end
+            local new_context = setmetatable({focus = true}, {__index = context})
+            decorator:draw(new_context, cr, false, width, height,
+                           {
+                                   top = widget.widget.top > 0,
+                                   left = widget.widget.left > 0,
+                                   right = widget.widget.right > 0,
+                                   bottom = widget.widget.bottom > 0,
+                           })
         end,
         widget = wibox.container.background
     }
