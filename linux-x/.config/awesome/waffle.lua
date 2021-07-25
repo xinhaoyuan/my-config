@@ -52,8 +52,8 @@ end
 
 function PlacementLayout:default_place_func(context, parent_w, parent_h, child_w, child_h)
     local drawable = context["wibox"]
-    local geo = { x = drawable.anchor and (drawable.anchor.x - child_w / 2) or 0,
-                  y = drawable.anchor and (drawable.anchor.y - child_h / 2) or 0,
+    local geo = { x = drawable.anchor and math.floor(drawable.anchor.x - child_w / 2) or 0,
+                  y = drawable.anchor and math.floor(drawable.anchor.y - child_h / 2) or 0,
                   width = child_w, height = child_h }
     local obj = {
         geometry = function(_, new_geo)

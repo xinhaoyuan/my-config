@@ -37,14 +37,6 @@ local c_white  = { xrdb.color7, xrdb.color15 }
 
 local theme = dofile(themes_path.."default/theme.lua")
 
-theme.decorator = decorator.presets.soft_relief{
-    light_shade = "#ffffff60",
-    dark_shade = "#00000030",
-    radius = dpi(6),
-    shade_width = dpi(10),
-    border_width = 2,
-}
-
 local function is_light_color(color)
     return acolor(color):lightness() > 0.7
 end
@@ -78,8 +70,6 @@ theme.sep_normal = acolor(theme.bg_normal):blend_with(acolor(theme.fg_normal), 0
 theme.sep_small_size = dpi(4)
 theme.sep_median_size = dpi(6)
 theme.sep_big_size = dpi(12)
-
-theme.useless_gap   = dpi(6)
 
 -- Disabling the native border.
 theme.border_width = 0
@@ -561,6 +551,14 @@ if theme.xborder_radius and theme.xborder_radius > 0 then
 else
     theme.rect_with_corners = gshape.rectangle
 end
+
+theme.decorator = decorator.presets.soft_relief{
+    light_shade = "#ffffff60",
+    dark_shade = "#00000030",
+    radius = dpi(6),
+    shade_width = dpi(10),
+    border_width = 2,
+}
 
 local function dispose_pattern(pattern)
     local status, s = pattern:get_surface()
