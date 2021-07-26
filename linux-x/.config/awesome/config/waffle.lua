@@ -2447,6 +2447,7 @@ function shared.waffle.show_client_waffle(c, args)
     if args.anchor == "client" then
         local geo = c:geometry()
         args.anchor = { x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 }
+        args.screen = c.screen
         client_waffle_attached = true
     end
     waffle:show(client_waffle, args)
