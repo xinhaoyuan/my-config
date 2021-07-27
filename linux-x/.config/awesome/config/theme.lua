@@ -75,6 +75,8 @@ theme.sep_big_size = dpi(12)
 theme.border_width = 0
 
 theme.decorator_border_width = 3
+theme.decorator_padding_width = 2
+
 theme.xborder_width  = 8
 theme.xborder_outer_space = 6
 theme.xborder_inner_space = 0
@@ -558,6 +560,7 @@ theme.decorator = decorator.presets.soft_relief{
     radius = dpi(6),
     shade_width = dpi(10),
     border_width = theme.decorator_border_width,
+    padding_width = theme.decorator_padding_width,
 }
 
 local function dispose_pattern(pattern)

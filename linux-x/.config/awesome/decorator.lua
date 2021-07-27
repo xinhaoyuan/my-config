@@ -187,6 +187,7 @@ function module.presets.soft_relief(args)
     local shade_dark_r, shade_dark_g, shade_dark_b, shade_dark_a =
         gcolor.parse_color(args.dark_shade)
     local border_width = args.border_width
+    local padding_width = args.padding_width or 0
 
     return module.create{
         top_left_border = function (self, context, cr, _is_shape, width, _height)
@@ -201,8 +202,15 @@ function module.presets.soft_relief(args)
 
             cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
             cr:move_to(width, width)
-            cr:arc(width, width, self.left_size + border_width, -math.pi, -math.pi / 2)
+            cr:arc(width, width, self.left_size + border_width + padding_width, -math.pi, -math.pi / 2)
             cr:fill()
+
+            if padding_width > 0 then
+                cr:set_source(gcolor(beautiful.bg_normal))
+                cr:move_to(width, width)
+                cr:arc(width, width, self.left_size + padding_width, -math.pi, -math.pi / 2)
+                cr:fill()
+            end
         end,
         top_border = function (self, context, cr, _is_shape, width, height)
             local pattern = cairo.Pattern.create_linear(0, height, 0, 0)
@@ -213,8 +221,14 @@ function module.presets.soft_relief(args)
             cr:fill()
 
             cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
-            cr:rectangle(0, height - self.left_size - border_width, width, self.left_size + border_width)
+            cr:rectangle(0, height - self.left_size - border_width - padding_width, width, self.left_size + border_width + padding_width)
             cr:fill()
+
+            if padding_width > 0 then
+                cr:set_source(gcolor(beautiful.bg_normal))
+                cr:rectangle(0, height - self.left_size - padding_width, width, self.left_size + padding_width)
+                cr:fill()
+            end
         end,
         top_right_border = function (self, context, cr, _is_shape, width, _height)
             local color_pattern = cairo.Pattern.create_mesh()
@@ -278,8 +292,15 @@ function module.presets.soft_relief(args)
 
             cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
             cr:move_to(0, width)
-            cr:arc(0, width, self.left_size + border_width, -math.pi / 2, 0)
+            cr:arc(0, width, self.left_size + border_width + padding_width, -math.pi / 2, 0)
             cr:fill()
+
+            if padding_width > 0 then
+                cr:set_source(gcolor(beautiful.bg_normal))
+                cr:move_to(0, width)
+                cr:arc(0, width, self.left_size + padding_width, -math.pi / 2, 0)
+                cr:fill()
+            end
         end,
         left_border = function (self, context, cr, _is_shape, width, height)
             local pattern = cairo.Pattern.create_linear(width, 0, 0, 0)
@@ -290,8 +311,14 @@ function module.presets.soft_relief(args)
             cr:fill()
 
             cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
-            cr:rectangle(width - self.left_size - border_width, 0, self.left_size + border_width, height)
+            cr:rectangle(width - self.left_size - border_width - padding_width, 0, self.left_size + border_width + padding_width, height)
             cr:fill()
+
+            if padding_width > 0 then
+                cr:set_source(gcolor(beautiful.bg_normal))
+                cr:rectangle(width - self.left_size - padding_width, 0, self.left_size + padding_width, height)
+                cr:fill()
+            end
         end,
         right_border = function (self, context, cr, _is_shape, width, height)
             local pattern = cairo.Pattern.create_linear(0, 0, width, 0)
@@ -302,8 +329,14 @@ function module.presets.soft_relief(args)
             cr:fill()
 
             cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
-            cr:rectangle(0, 0, self.left_size + border_width, height)
+            cr:rectangle(0, 0, self.left_size + border_width + padding_width, height)
             cr:fill()
+
+            if padding_width > 0 then
+                cr:set_source(gcolor(beautiful.bg_normal))
+                cr:rectangle(0, 0, self.left_size + padding_width, height)
+                cr:fill()
+            end
         end,
         bottom_left_border = function (self, context, cr, _is_shape, width, _height)
             local color_pattern = cairo.Pattern.create_mesh()
@@ -368,8 +401,15 @@ function module.presets.soft_relief(args)
 
             cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
             cr:move_to(width, 0)
-            cr:arc(width, 0, self.left_size + border_width, math.pi / 2, math.pi)
+            cr:arc(width, 0, self.left_size + border_width + padding_width, math.pi / 2, math.pi)
             cr:fill()
+
+            if padding_width > 0 then
+                cr:set_source(gcolor(beautiful.bg_normal))
+                cr:move_to(width, 0)
+                cr:arc(width, 0, self.left_size + padding_width, math.pi / 2, math.pi)
+                cr:fill()
+            end
         end,
         bottom_border = function (self, context, cr, _is_shape, width, height)
             local pattern = cairo.Pattern.create_linear(shade_dark_r, shade_dark_g, shade_dark_b, height)
@@ -380,8 +420,14 @@ function module.presets.soft_relief(args)
             cr:fill()
 
             cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
-            cr:rectangle(0, 0, width, self.left_size + border_width)
+            cr:rectangle(0, 0, width, self.left_size + border_width + padding_width)
             cr:fill()
+
+            if padding_width > 0 then
+                cr:set_source(gcolor(beautiful.bg_normal))
+                cr:rectangle(0, 0, width, self.left_size + padding_width)
+                cr:fill()
+            end
         end,
         bottom_right_border = function (self, context, cr, _is_shape, width, _height)
             local pattern = cairo.Pattern.create_radial(shade_dark_r, shade_dark_g, shade_dark_b,
@@ -395,8 +441,15 @@ function module.presets.soft_relief(args)
 
             cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
             cr:move_to(0, 0)
-            cr:arc(0, 0, self.left_size + border_width, 0, math.pi / 2)
+            cr:arc(0, 0, self.left_size + border_width + padding_width, 0, math.pi / 2)
             cr:fill()
+
+            if padding_width > 0 then
+                cr:set_source(gcolor(beautiful.bg_normal))
+                cr:move_to(0, 0)
+                cr:arc(0, 0, self.left_size + padding_width, 0, math.pi / 2)
+                cr:fill()
+            end
         end,
         top_left_shape = function (self, context, cr, _is_shape, width, _height)
             cr:set_source_rgb(0, 0, 0)

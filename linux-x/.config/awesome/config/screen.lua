@@ -779,7 +779,9 @@ local function setup_screen(scr)
          ontop = false,
          bg = "#00000000",
          [size_index[shared.vars.bar_position]] =
-             beautiful.bar_height + beautiful.decorator_border_width,
+             beautiful.bar_height +
+             beautiful.decorator_border_width +
+             beautiful.decorator_padding_width,
          position = shared.vars.bar_position,
          border_width = 0,
          input_passthrough = true,
