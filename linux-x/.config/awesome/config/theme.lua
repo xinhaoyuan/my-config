@@ -74,6 +74,7 @@ theme.sep_big_size = dpi(12)
 -- Disabling the native border.
 theme.border_width = 0
 
+theme.decorator_border_width = 3
 theme.xborder_width  = 8
 theme.xborder_outer_space = 6
 theme.xborder_inner_space = 0
@@ -86,8 +87,7 @@ else
     theme.xborder_indent = dpi(4)
 end
 theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
-theme.border_normal = theme.bg_normal
-theme.xborder_space = acolor(is_light_color(theme.bg_normal) and "#ffffff" or "#000000"):blend_with(acolor(theme.bg_normal), 0.5):to_string()
+theme.border_normal = acolor(is_light_color(theme.bg_normal) and "#ffffff" or "#000000"):blend_with(acolor(theme.bg_normal), 0.5):to_string()
 theme.xborder_shade = c_black[2].."80"
 -- theme.xborder_space = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
 -- theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
@@ -557,7 +557,7 @@ theme.decorator = decorator.presets.soft_relief{
     dark_shade = "#00000030",
     radius = dpi(6),
     shade_width = dpi(10),
-    border_width = 2,
+    border_width = theme.decorator_border_width,
 }
 
 local function dispose_pattern(pattern)
