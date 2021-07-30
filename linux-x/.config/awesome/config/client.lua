@@ -923,6 +923,12 @@ require("awful.rules").rules = {
        },
    },
    {
+       rule = { class = "Firefox", role = "PictureInPicture" },
+       properties = {
+           above = false,
+       },
+   },
+   {
        rule = { type = "dialog" },
        properties = {
            floating = true,

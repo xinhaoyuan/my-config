@@ -226,7 +226,7 @@ capi.screen.connect_signal(
         local screen_wibox = waffle.screen_wibox_[s]
         if screen_wibox ~= nil then
             print("Screen "..tostring(s).." is removed. Removing its waffle wibox.")
-            screen_wibox:remove()
+            screen_wibox.visible = false
             waffle.screen_wibox_[s] = nil
         end
     end

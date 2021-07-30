@@ -1622,10 +1622,19 @@ local waffle_root_view = view {
         waffle_root_admin_widget,
         layout = wibox.layout.fixed.vertical,
     },
-    default_key_handler = function (mode, key, event)
-        if event == "press" and key:find("^XF86Launch.*") then
+    key_filter = function (mod, key, event)
+        if event ~= "press" then return true end
+        if key == "Return" or key:find("^XF86Launch.*") then
             waffle:hide()
+            return
         end
+        if #mod == 0 and (key == "Left" or key == "Right" or key == "Up" or key == "Down") then
+            pcall(awful.screen.focus_bydirection, key:lower())
+            waffle:hide()
+            capi.awesome.emit_signal("show_main_waffle", "screen")
+            return
+        end
+        return true
     end,
 }
 
