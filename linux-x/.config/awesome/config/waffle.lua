@@ -1624,7 +1624,7 @@ local waffle_root_view = view {
     },
     key_filter = function (mod, key, event)
         if event ~= "press" then return true end
-        if key == "Return" or key:find("^XF86Launch.*") then
+        if key:find("^XF86Launch.*") then
             waffle:hide()
             return
         end
