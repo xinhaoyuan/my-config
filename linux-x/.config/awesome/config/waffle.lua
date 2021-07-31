@@ -5,6 +5,7 @@ local capi = {
    client = client,
    screen = screen,
    awesome = awesome,
+   mouse = mouse,
 }
 
 local awful = require("awful")
@@ -2380,37 +2381,53 @@ local client_waffle = view {
         for i = 1, #mod do mod[mod[i]] = true end
         if key == "Left" or key == "Right" or key == "Up" or key == "Down" then
             if not client_waffle_attached then return end
-
             local c = shared.waffle_selected_client
-            if c.maximized then return end
 
-            -- This would only work single-threaded.
-            local old_visible = awful.client.visible
-            awful.client.visible = function (...)
-                local result = old_visible(...)
-                local head = 0
-                for i = 1, #result do
-                    if not result[i].maximized then
-                        head = head + 1
-                        result[head] = result[i]
-                    end
-                end
-                for i = #result, head + 1, -1 do
-                    result[i] = nil
-                end
-                return result
-            end
-            pcall(awful.client.focus.global_bydirection, key:lower(), c)
-            awful.client.visible = old_visible
+            if mod["Shift"] then
+                -- Switch screen by direction
+                awful.screen.focus_bydirection(key:lower(), c.screen)
+                c:move_to_screen(capi.mouse.screen.index)
+                c:emit_signal("request::activate", "mouse.resize", {raise = true})
 
-            c = capi.client.focus
-            if c then
                 client_waffle_transient = true
                 waffle:hide()
 
                 c:raise()
                 client_waffle_transient = true
                 capi.awesome.emit_signal("show_client_waffle", c, "client")
+            else
+                -- Focus by direction
+                if c.maximized then return end
+
+                -- Filter out maximized clients.
+                -- This would only work single-threaded.
+                local old_visible = awful.client.visible
+                awful.client.visible = function (...)
+                    local result = old_visible(...)
+                    local head = 0
+                    for i = 1, #result do
+                        if not result[i].maximized then
+                            head = head + 1
+                            result[head] = result[i]
+                        end
+                    end
+                    for i = #result, head + 1, -1 do
+                        result[i] = nil
+                    end
+                    return result
+                end
+                pcall(awful.client.focus.global_bydirection, key:lower(), c)
+                awful.client.visible = old_visible
+
+                c = capi.client.focus
+                if c then
+                    client_waffle_transient = true
+                    waffle:hide()
+
+                    c:raise()
+                    client_waffle_transient = true
+                    capi.awesome.emit_signal("show_client_waffle", c, "client")
+                end
             end
             return
         elseif key == "Prior" or key == "Next" or key == "," or key == "." then
