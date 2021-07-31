@@ -953,7 +953,7 @@ local function setup_screen(scr)
        'mouse::enter', function()
            local waffle_scr = waffle:get_screen()
            if waffle:autohide() or waffle_scr == nil or waffle_scr ~= scr then
-               capi.awesome.emit_signal("toggle_calendar_waffle", {anchor = "mouse", autohide = 0.5})
+               capi.awesome.emit_signal("show_calendar_waffle", {anchor = "mouse", autohide = 0.5})
            end
            waffle:autohide_lock_acquire()
        end)
@@ -1257,7 +1257,7 @@ local global_keys = table_join(
    awful.key({ "Mod4" }, "e",               function () shared.action.file_manager() end),
    awful.key({ "Mod4" }, "l",               function () shared.action.screen_locker() end),
    awful.key({ "Mod4" }, "t",               function () shared.action.calendar() end),
-   awful.key({ "Mod4" }, "a",               function () capi.awesome.emit_signal("show_calendar_waffle", "screen") end),
+   awful.key({ "Mod4" }, "a",               function () capi.awesome.emit_signal("show_calendar_waffle", {anchor = "screen"}) end),
    awful.key({ "Mod4" }, "r",               function () shared.action.launcher() end),
    awful.key({ "Mod4" }, "F1",              function () shared.action.terminal_session{ name = "F1" } end),
    awful.key({ "Mod4" }, "F2",              function () shared.action.terminal_session{ name = "F2" } end),

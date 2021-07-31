@@ -1649,8 +1649,8 @@ capi.awesome.connect_signal(
 
 capi.awesome.connect_signal(
     "show_calendar_waffle",
-    function (anchor)
-        waffle:show(waffle_calendar_view, {anchor = anchor})
+    function (args)
+        waffle:show(waffle_calendar_view, args)
     end
 )
 
