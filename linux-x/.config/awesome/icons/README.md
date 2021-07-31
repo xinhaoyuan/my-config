@@ -7,4 +7,5 @@
    [https://www.svgrepo.com]. License: CC-BY 4.0
  - disk.svg: [https://www.onlinewebfonts.com/icon/125972].
  - terminal.svg, calendar-todo.svg: [https://remixicon.com/]. License: Apache 2.0
+ - waffle.svg: [https://thenounproject.com/term/waffle/3865622/]
  - Others: home-made

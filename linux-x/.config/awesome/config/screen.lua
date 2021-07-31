@@ -734,6 +734,23 @@ orgenda.data:connect_signal(
     end
 )
 
+local waffle_indicator = wibox.widget{
+    {
+        image = gcolor.recolor_image(icons.waffle, beautiful.fg_normal),
+        forced_height = beautiful.bar_icon_size,
+        forced_width = beautiful.bar_icon_size,
+        widget = masked_imagebox,
+    },
+    forced_width = beautiful.bar_height,
+    forced_height = beautiful.bar_height,
+    visible = false,
+    valign = "center",
+    widget = wibox.container.place,
+}
+
+capi.awesome.connect_signal("waffle.show", function () if not waffle:autohide() then waffle_indicator.visible = true end end)
+capi.awesome.connect_signal("waffle.hide", function () waffle_indicator.visible = false end)
+
 local function setup_screen(scr)
    scr.mypromptbox = awful.widget.prompt()
 
@@ -808,7 +825,11 @@ local function setup_screen(scr)
    local layoutbox = awful.widget.layoutbox{screen = scr}
    masked_imagebox.convert(layoutbox.imagebox)
    scr.widgets.indicator = wibox.widget {
-       layoutbox,
+       {
+           waffle_indicator,
+           layoutbox,
+           widget = fallback,
+       },
        fg_function = {"fg_"},
        bg_function = {"bg_"},
        widget = cbg

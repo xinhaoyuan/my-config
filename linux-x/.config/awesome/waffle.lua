@@ -289,6 +289,7 @@ function waffle:show(view, args)
     if self.wibox_ ~= nil and self.wibox_.screen ~= screen then
         self:hide()
     end
+
     if self.wibox_ == nil then
         self.focused_client = capi.client.focus
         if not self.autohide_ then
@@ -308,6 +309,10 @@ function waffle:show(view, args)
 
     if mode == "set" then
         self:clear_stack()
+    end
+
+    if self.stack_ == nil or #self.stack_ == 0 then
+        capi.awesome.emit_signal("waffle.show")
     end
 
     if self.wibox_.input_passthrough then
@@ -386,6 +391,7 @@ function waffle:hide()
     self:set_view(nil)
     self:clear_stack()
     self:disconnect_button_signals()
+    capi.awesome.emit_signal("waffle.hide")
 end
 
 waffle.autohide_lock_ = 0
