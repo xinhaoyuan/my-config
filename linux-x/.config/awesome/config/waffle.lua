@@ -89,7 +89,7 @@ local function view(args)
     view.key_handler = args.key_handler or function (mod, key, event)
         if args.key_filter and not args.key_filter(mod, key, event) then
             return
-        elseif event == "press" and view.keys[key] then
+        elseif view.keys[key] then
             view.keys[key](mod, key, event)
             return true
         elseif args.default_key_handler then
@@ -154,7 +154,7 @@ local function simple_button(args)
          for _, m in ipairs(mod) do
             mod[m] = true
          end
-         if event == "press" then
+         if event == "release" then
             key_action(mod["Shift"])
          end
       end
@@ -1136,30 +1136,33 @@ do
    }
 
    volumebar_widget.keys = {
-      ["-"] = function (mod, _, event)
-         awful.spawn.easy_async_with_shell(
-            DEC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
-            function (stdout, stderr, exitreason, exitcode)
-               update_graphic(volumebar_widget, stdout, stderr, exitreason, exitcode)
-            end
-         )
-      end,
-      ["_"] = function ()
-         awful.spawn.easy_async_with_shell(
-            TOG_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
-            function (stdout, stderr, exitreason, exitcode)
-               update_graphic(volumebar_widget, stdout, stderr, exitreason, exitcode)
-            end
-         )
-      end,
-      ["="] = function ()
-         awful.spawn.easy_async_with_shell(
-            INC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
-            function (stdout, stderr, exitreason, exitcode)
-               update_graphic(volumebar_widget, stdout, stderr, exitreason, exitcode)
-            end
-         )
-      end,
+       ["-"] = function (mod, _, event)
+           if event == "release" then return end
+           awful.spawn.easy_async_with_shell(
+               DEC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
+               function (stdout, stderr, exitreason, exitcode)
+                   update_graphic(volumebar_widget, stdout, stderr, exitreason, exitcode)
+               end
+           )
+       end,
+       ["_"] = function (_mod, _key, event)
+           if event == "press" then return end
+           awful.spawn.easy_async_with_shell(
+               TOG_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
+               function (stdout, stderr, exitreason, exitcode)
+                   update_graphic(volumebar_widget, stdout, stderr, exitreason, exitcode)
+               end
+           )
+       end,
+       ["="] = function (_mod, _key, event)
+           if event == "release" then return end
+           awful.spawn.easy_async_with_shell(
+               INC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
+               function (stdout, stderr, exitreason, exitcode)
+                   update_graphic(volumebar_widget, stdout, stderr, exitreason, exitcode)
+               end
+           )
+       end,
    }
 end
 
@@ -1350,19 +1353,22 @@ do
         ),
     }
 
-    mpd_widget.keys["Left"] = function (mod)
+    mpd_widget.keys["Left"] = function (mod, _key, event)
+        if event == "press" then return end
         for _, m in ipairs(mod) do mod[m] = true end
         if mod["Shift"] then
             mpc_gobject:go_previous()
         end
     end
-    mpd_widget.keys["Right"] = function (mod)
+    mpd_widget.keys["Right"] = function (mod, _key, event)
+        if event == "press" then return end
         for _, m in ipairs(mod) do mod[m] = true end
         if mod["Shift"] then
             mpc_gobject:go_next()
         end
     end
-    mpd_widget.keys["Up"] = function (mod)
+    mpd_widget.keys["Up"] = function (mod, _key, event)
+        if event == "press" then return end
         for _, m in ipairs(mod) do mod[m] = true end
         if mod["Shift"] then
             mpc_gobject:toggle_play()
