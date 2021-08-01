@@ -1167,7 +1167,7 @@ do
    }
 end
 
-local mpd_widget
+local music_widget
 do
     -- Not used anymore
     -- local GET_STATUS_CMD = 'mpc current -f "%title% - %artist%" -q'
@@ -1238,7 +1238,7 @@ do
                 -- mpd_status_widget:set_text("✖")
                 -- mpd_title_widget:set_text(tostring(err))
                 -- mpd_meta_widget:set_text("(╯°Д°)╯ ┻━┻")
-                mpd_widget:set_visible(false)
+                music_widget:set_visible(false)
                 return
             end
 
@@ -1253,7 +1253,7 @@ do
             end
 
             mpd_progress_widget:set_value(status.progress or 0)
-            mpd_widget:set_visible(true)
+            music_widget:set_visible(true)
         end
     )
 
@@ -1274,7 +1274,7 @@ do
         end
     )
 
-    mpd_widget = button {
+    music_widget = button {
         icon_widget = wibox.widget {
             {
                 mpd_status_widget,
@@ -1354,21 +1354,21 @@ do
         ),
     }
 
-    mpd_widget.keys["Left"] = function (mod, _key, event)
+    music_widget.keys["Left"] = function (mod, _key, event)
         if event == "press" then return end
         for _, m in ipairs(mod) do mod[m] = true end
         if mod["Shift"] then
             mpc_gobject:go_previous()
         end
     end
-    mpd_widget.keys["Right"] = function (mod, _key, event)
+    music_widget.keys["Right"] = function (mod, _key, event)
         if event == "press" then return end
         for _, m in ipairs(mod) do mod[m] = true end
         if mod["Shift"] then
             mpc_gobject:go_next()
         end
     end
-    mpd_widget.keys["Up"] = function (mod, _key, event)
+    music_widget.keys["Up"] = function (mod, _key, event)
         if event == "press" then return end
         for _, m in ipairs(mod) do mod[m] = true end
         if mod["Shift"] then
@@ -1585,10 +1585,10 @@ local waffle_root_audio_widget = decorate_panel {
     },
 }
 
-local waffle_root_mpd_widget = decorate_panel {
+local waffle_root_music_widget = decorate_panel {
     top_sep = true,
     widget = {
-        mpd_widget,
+        music_widget,
         draw_empty = false,
         layout = fixed_margin,
     },
@@ -1624,7 +1624,7 @@ local waffle_root_view = view {
     root = decorate_waffle {
         waffle_root_status_widget,
         waffle_root_audio_widget,
-        waffle_root_mpd_widget,
+        waffle_root_music_widget,
         waffle_root_action_widget,
         waffle_root_admin_widget,
         layout = wibox.layout.fixed.vertical,
@@ -2021,7 +2021,7 @@ waffle_settings_view = view{
                 --       indicator = em("m"),
                 --       key = "m",
                 --       action = function (alt)
-                --           mpd_widget:set_visible(not mpd_widget:get_visible())
+                --           music_widget:set_visible(not music_widget:get_visible())
                 --           waffle:go_back()
                 --       end
                 -- }),
