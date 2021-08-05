@@ -26,18 +26,60 @@ local notif_counter = 0
 local notif_widgets = {}
 local notif_objects = {}
 
-local notix_counter_header = wibox.widget.textbox("Notifications:")
+local remove_unpinned -- forward function desc
+
+local notix_counter_header = wibox.widget.textbox("Notifications")
 local notix_header_bar = wibox.widget{
     {
-        notix_counter_header,
-        nil,
-        nil,
-        layout = wibox.layout.align.horizontal,
+        {
+            nil,
+            notix_counter_header,
+            {
+                {
+                    {
+                        image = gcolor.recolor_image(icons.remove, beautiful.fg_normal),
+                        widget = masked_imagebox,
+                    },
+                    forced_height = beautiful.bar_icon_size,
+                    forced_width = beautiful.bar_icon_size,
+                    margins = beautiful.sep_small_size / 2,
+                    widget = wibox.container.margin,
+                },
+                halign = "right",
+                widget = wibox.container.place,
+            },
+            expand = "outside",
+            layout = wibox.layout.align.horizontal,
+        },
+        left = beautiful.sep_small_size,
+        widget = wibox.container.margin,
     },
-    left = beautiful.sep_small_size,
-    widget = wibox.container.margin,
+    fg_function = {"fg_"},
+    bg_function = {"bg_"},
+    context_transform_function = {focus = false},
     visible = false,
+    widget = cbg,
 }
+
+notix_header_bar:connect_signal(
+    "mouse::enter",
+    function ()
+        notix_header_bar.context_transform_function = {focus = true}
+    end
+)
+notix_header_bar:connect_signal(
+    "mouse::leave",
+    function ()
+        notix_header_bar.context_transform_function = {focus = false}
+    end
+)
+notix_header_bar:connect_signal(
+    "button::release",
+    function ()
+        remove_unpinned()
+    end
+)
+
 local notix_pinned_container = wibox.widget{
     layout = wibox.layout.fixed.vertical,
 }
@@ -161,7 +203,7 @@ function config.create_notif_widget(notif)
                             },
                             widget = fallback,
                         },
-                        valign = "top",
+                        valign = "center",
                         halign = "center",
                         widget = wibox.container.place,
                     },
@@ -307,7 +349,7 @@ remove_notification = function (notif, reason)
     update_notif_counter(-1)
 end
 
-local function remove_unpinned()
+remove_unpinned = function()
     local removed_counter = 0
     for id, widget in pairs(notif_widgets) do
         if widget.notif_container == notix_reg_container then
@@ -318,9 +360,6 @@ end
 
 gtimer.delayed_call(
     function ()
-        notix_header_bar.widget.third = config.create_button(
-            config.org_file_for_pin and "Ignore all" or "Ignore unpinned", remove_unpinned)
-
         naughty.connect_signal(
             "new",
             function (notif, args)

@@ -1828,52 +1828,54 @@ gtimer {
 
 local orgenda_header
 do
-    local refresh_button = wibox.widget{
+    orgenda_header = wibox.widget{
         {
+            nil,
             {
-                text = "Reload",
-                font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
+                text = "TODO",
                 widget = wibox.widget.textbox,
             },
-            margins = beautiful.sep_small_size,
-            widget = wibox.container.margin,
+            {
+                {
+                    {
+                        image = gcolor.recolor_image(icons.refresh, beautiful.fg_normal),
+                        resize = true,
+                        forced_height = button_height,
+                        forced_width = button_height,
+                        widget = masked_imagebox,
+                    },
+                    margins = 0,
+                    widget = wibox.container.margin,
+                },
+                halign = "right",
+                widget = wibox.container.place,
+            },
+            expand = "outside",
+            layout = wibox.layout.align.horizontal,
         },
         fg_function = {"fg_"},
         bg_function = {"bg_"},
         context_transform_function = {focus = false},
         widget = cbg,
     }
-    refresh_button:connect_signal(
+    orgenda_header:connect_signal(
         "mouse::enter",
         function ()
-            refresh_button.context_transform_function = {focus = true}
+            orgenda_header.context_transform_function = {focus = true}
         end
     )
-    refresh_button:connect_signal(
+    orgenda_header:connect_signal(
         "mouse::leave",
         function ()
-            refresh_button.context_transform_function = {focus = false}
+            orgenda_header.context_transform_function = {focus = false}
         end
     )
-    refresh_button:connect_signal(
+    orgenda_header:connect_signal(
         "button::release",
         function ()
             capi.awesome.emit_signal("orgenda::request_reset")
         end
     )
-    orgenda_header = wibox.widget{
-        {
-            {
-                text = "TODOs:",
-                widget = wibox.widget.textbox,
-            },
-            left = beautiful.sep_small_size,
-            widget = wibox.container.margin,
-        },
-        nil,
-        refresh_button,
-        layout = wibox.layout.align.horizontal,
-    }
 end
 
 orgenda.data:connect_signal(

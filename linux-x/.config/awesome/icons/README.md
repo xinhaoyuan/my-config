@@ -8,4 +8,6 @@
  - disk.svg: [https://www.onlinewebfonts.com/icon/125972].
  - terminal.svg, calendar-todo.svg: [https://remixicon.com/]. License: Apache 2.0
  - waffle.svg: [https://thenounproject.com/term/waffle/3865622/]
+ - refresh.svg: [https://thenounproject.com/term/refresh/4132267]
+ - remove.svg: [https://thenounproject.com/term/remove/900556]
  - Others: home-made
