@@ -12,7 +12,7 @@ setmetatable(
             end
         end
     })
-icons.calendar_todo = local_path .. "calendar-todo.svg"
+icons.calendar_todo = local_path .. "checklist.svg"
 icons.battery_full = local_path .. "battery-full.svg"
 icons.battery_half = local_path .. "battery-half.svg"
 

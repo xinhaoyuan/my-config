@@ -11,4 +11,5 @@
  - refresh.svg: [https://thenounproject.com/term/refresh/4132267]
  - remove.svg: [https://thenounproject.com/term/remove/900556]
  - notification.svg [https://thenounproject.com/term/alarm/3407999/]
+ - checklist.svg [https://thenounproject.com/term/checklist/1499062]
  - Others: home-made

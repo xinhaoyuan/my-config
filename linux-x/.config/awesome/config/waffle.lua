@@ -1718,6 +1718,7 @@ local cal_widget = wibox.widget {
         elseif flag == "month" then
             return widget
         elseif flag == "weekday" or flag == "weeknumber" then
+            widget.font = font_info
             widget = wibox.widget{
                 widget,
                 fg = beautiful.minor_normal,
