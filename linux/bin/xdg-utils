@@ -11,7 +11,15 @@ import subprocess
 import argparse
 import re
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(
+    formatter_class = argparse.RawDescriptionHelpFormatter,
+    epilog = """
+Examples:
+  $0 -s X                # List all mime entries related to X.
+  $0 -m pdf              # List all desktop entries that can open pdf files.
+  $0 -m pdf -r X.desktop # Replace pdf opener.
+"""
+)
 parser.add_argument("-m", dest = "mime_type")
 parser.add_argument("-t", dest = "target")
 parser.add_argument("-s", dest = "search")
