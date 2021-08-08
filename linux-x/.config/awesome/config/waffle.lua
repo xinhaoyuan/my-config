@@ -1981,6 +1981,12 @@ waffle_calendar_view = view {
         strategy = "max",
         widget = wibox.container.constraint,
     },
+    default_key_handler = function (mod, key, event)
+        if event == "press" then return end
+        if key == "n" then
+            notix.remove_unpinned()
+        end
+    end,
     on_close = function (_)
         for s in screen do
             s.actions.set_clock_area_focus(false)
