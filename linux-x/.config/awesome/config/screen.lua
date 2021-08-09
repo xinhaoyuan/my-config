@@ -954,7 +954,11 @@ local function setup_screen(scr)
                             if not clock_area_focused then
                                 gtimer.delayed_call(
                                     function()
-                                        capi.awesome.emit_signal("toggle_calendar_waffle", {anchor = "mouse"})
+                                        local anchor = {
+                                            x = scr.geometry.x + scr.geometry.width,
+                                            y = scr.geometry.y + scr.geometry.height
+                                        }
+                                        capi.awesome.emit_signal("toggle_calendar_waffle", { anchor = anchor })
                                         if not waffle:is_in_view(nil) then
                                             scr.actions.set_clock_area_focus(true)
                                         end
@@ -974,7 +978,11 @@ local function setup_screen(scr)
        'mouse::enter', function()
            local waffle_scr = waffle:get_screen()
            if waffle:autohide() or waffle_scr == nil or waffle_scr ~= scr then
-               capi.awesome.emit_signal("show_calendar_waffle", {anchor = "mouse", autohide = 0.5})
+               local anchor = {
+                   x = scr.geometry.x + scr.geometry.width,
+                   y = scr.geometry.y + scr.geometry.height
+               }
+               capi.awesome.emit_signal("show_calendar_waffle", {anchor = anchor, autohide = 0.5})
            end
            waffle:autohide_lock_acquire()
        end)
