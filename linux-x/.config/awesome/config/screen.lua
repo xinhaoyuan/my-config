@@ -811,7 +811,7 @@ local function setup_screen(scr)
        bg = "#00000000",
        border_width = 0,
        opacity = 1,
-       height = beautiful.bar_height + dpi(10),
+       height = beautiful.bar_height + beautiful.decorator_shade_width,
        cursor = "cross",
        visible = true,
        type = "dock",

@@ -74,6 +74,7 @@ theme.sep_big_size = dpi(12)
 -- Disabling the native border.
 theme.border_width = 0
 
+theme.decorator_shade_width = dpi(10)
 theme.decorator_border_width = 3
 theme.decorator_padding_width = 2
 
@@ -558,7 +559,7 @@ theme.decorator = decorator.presets.soft_relief{
     light_shade = "#ffffff40",
     dark_shade = "#00000040",
     radius = dpi(6),
-    shade_width = dpi(10),
+    shade_width = theme.decorator_shade_width,
     border_width = theme.decorator_border_width,
     padding_width = theme.decorator_padding_width,
 }
