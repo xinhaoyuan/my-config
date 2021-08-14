@@ -811,9 +811,6 @@ local function setup_screen(scr)
        bg = "#00000000",
        border_width = 0,
        opacity = 1,
-       x = scr.geometry.x,
-       y = scr.geometry.y + scr.geometry.height - beautiful.bar_height - dpi(10),
-       width = scr.geometry.width,
        height = beautiful.bar_height + dpi(10),
        cursor = "cross",
        visible = true,
@@ -1102,7 +1099,10 @@ local function setup_screen(scr)
            layout = fixed_align[direction_index[shared.vars.bar_position]],
        }
    end
-   scr.widgets.bar:set_widget(layout)
+   (awful.placement["bottom"] + awful.placement["maximize_horizontally"])(
+       scr.widgets.bar, {attach = true})
+   scr.widgets.bar.widget = layout
+   scr.widgets.bar.visible = true
 end
 
 -- Avoid nested call of reset_widgets
