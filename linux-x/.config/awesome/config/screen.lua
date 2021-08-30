@@ -213,7 +213,7 @@ local my_bars = {}
 local my_tray
 my_tray = wibox.widget.systray()
 my_tray.horizontal = direction_index[shared.vars.bar_position] == "horizontal"
-my_tray.base_size = beautiful.systray_icon_size
+my_tray.rows = beautiful.bar_rows
 local bar_tray_wrapper = wibox.widget {
     my_tray,
     valign = "center",
@@ -705,7 +705,7 @@ local orgenda_counter_widget = wibox.widget {
         widget = wibox.container.place
     },
     orgenda_counter_text_widget,
-    layout = wibox.layout.fixed.horizontal
+    layout = wibox.layout.fixed.vertical
 }
 
 orgenda.data:connect_signal(
@@ -771,7 +771,8 @@ local function setup_screen(scr)
        screen = scr,
        filter = function (t) return true end,
        buttons = my_tag_list_buttons,
-       layout = wibox.layout.fixed[direction_index[shared.vars.bar_position]],
+       -- layout = wibox.layout.fixed[direction_index[shared.vars.bar_position]],
+       layout = wibox.layout.grid[dual_direction_index[shared.vars.bar_position]](beautiful.bar_rows),
        style = {
            font = "DejaVu Sans 10",
        },
@@ -783,7 +784,8 @@ local function setup_screen(scr)
                },
                halign = "center",
                valign = "center",
-               forced_width = beautiful.bar_height,
+               forced_width = beautiful.bar_height / beautiful.bar_rows,
+               forced_height = beautiful.bar_height / beautiful.bar_rows,
                widget = wibox.container.place
            },
            id = "background_role",
@@ -856,21 +858,23 @@ local function setup_screen(scr)
 
    local clock
    if direction_index[shared.vars.bar_position] == "horizontal" then
-       clock = wibox.widget{
-           {
+       clock = {
+           wibox.widget{
                {
-                   format = "%m<b>%d</b>",
+                   {
+                       format = "%m<b>%d</b>",
+                       widget = wibox.widget.textclock,
+                   },
+                   fg_function = {"minor_"},
+                   widget = cbg,
+               },
+               {
+                   format = "%H<b>%M</b>",
                    widget = wibox.widget.textclock,
                },
-               fg_function = {"minor_"},
-               widget = cbg,
+               layout = wibox.layout.fixed.vertical,
            },
-           {
-               format = "%H<b>%M</b>",
-               widget = wibox.widget.textclock,
-           },
-           spacing = beautiful.sep_small_size,
-           layout = wibox.layout.fixed.horizontal,
+           widget = wibox.container.place,
        }
    else
        clock = wibox.widget{
