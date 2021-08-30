@@ -697,8 +697,8 @@ local orgenda_counter_widget = wibox.widget {
     {
         {
             image = gcolor.recolor_image(icons.calendar_todo, beautiful.fg_normal),
-            forced_height = beautiful.bar_icon_size,
-            forced_width = beautiful.bar_icon_size,
+            forced_height = beautiful.bar_height / beautiful.bar_rows,
+            forced_width = beautiful.bar_height / beautiful.bar_rows,
             widget = masked_imagebox,
         },
         valign = "center",
