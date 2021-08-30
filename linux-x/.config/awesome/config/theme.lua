@@ -169,7 +169,7 @@ theme.bar_height = dpi(40)
 theme.bar_rows = 2
 theme.menu_width = dpi(150)
 theme.icon_size = dpi(24)
-theme.bar_icon_size = dpi(32)
+theme.bar_icon_size = dpi(36)
 theme.systray_icon_spacing = dpi(0)
 -- custom property color
 theme.special_normal = is_light_color(theme.bg_normal) and c_red[1] or c_yellow[2]

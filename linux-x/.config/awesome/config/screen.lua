@@ -705,6 +705,7 @@ local orgenda_counter_widget = wibox.widget {
         widget = wibox.container.place
     },
     orgenda_counter_text_widget,
+    expand = true,
     layout = wibox.layout.grid[direction_index[shared.vars.bar_position]](beautiful.bar_rows),
 }
 
@@ -858,24 +859,22 @@ local function setup_screen(scr)
 
    local clock
    if direction_index[shared.vars.bar_position] == "horizontal" then
-       clock = {
-           wibox.widget{
+       clock = wibox.widget{
+           {
                {
-                   {
-                       format = "%m<b>%d</b>",
-                       widget = wibox.widget.textclock,
-                   },
-                   fg_function = {"minor_"},
-                   widget = cbg,
-               },
-               {
-                   format = "%H<b>%M</b>",
+                   format = "%m<b>%d</b>",
                    widget = wibox.widget.textclock,
                },
-               spacing = beautiful.bar_rows == 1 and beautiful.sep_small_size or 0,
-               layout = wibox.layout.grid[direction_index[shared.vars.bar_position]](beautiful.bar_rows),
+               fg_function = {"minor_"},
+               widget = cbg,
            },
-           widget = wibox.container.place,
+           {
+               format = "%H<b>%M</b>",
+               widget = wibox.widget.textclock,
+           },
+           spacing = beautiful.bar_rows == 1 and beautiful.sep_small_size or 0,
+           expand = true,
+           layout = wibox.layout.grid[direction_index[shared.vars.bar_position]](beautiful.bar_rows),
        }
    else
        clock = wibox.widget{
