@@ -705,7 +705,7 @@ local orgenda_counter_widget = wibox.widget {
         widget = wibox.container.place
     },
     orgenda_counter_text_widget,
-    layout = wibox.layout.fixed.vertical
+    layout = wibox.layout.grid[direction_index[shared.vars.bar_position]](beautiful.bar_rows),
 }
 
 orgenda.data:connect_signal(
@@ -772,7 +772,7 @@ local function setup_screen(scr)
        filter = function (t) return true end,
        buttons = my_tag_list_buttons,
        -- layout = wibox.layout.fixed[direction_index[shared.vars.bar_position]],
-       layout = wibox.layout.grid[dual_direction_index[shared.vars.bar_position]](beautiful.bar_rows),
+       layout = wibox.layout.grid[direction_index[shared.vars.bar_position]](beautiful.bar_rows),
        style = {
            font = "DejaVu Sans 10",
        },
@@ -872,7 +872,8 @@ local function setup_screen(scr)
                    format = "%H<b>%M</b>",
                    widget = wibox.widget.textclock,
                },
-               layout = wibox.layout.fixed.vertical,
+               spacing = beautiful.bar_rows == 1 and beautiful.sep_small_size or 0,
+               layout = wibox.layout.grid[direction_index[shared.vars.bar_position]](beautiful.bar_rows),
            },
            widget = wibox.container.place,
        }
