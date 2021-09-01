@@ -103,36 +103,20 @@ local notix_widget = wibox.widget{
     layout = wibox.layout.align.vertical,
 }
 
-local notix_counter_number = wibox.widget{
-    text = "0",
-    widget = wibox.widget.textbox
-}
 local notix_counter_widget = wibox.widget{
-    {
-        {
-            image = gcolor.recolor_image(icons.notification, beautiful.fg_normal),
-            forced_height = beautiful.bar_icon_size,
-            forced_width = beautiful.bar_icon_size,
-            widget = masked_imagebox,
-        },
-        valign = "center",
-        widget = wibox.container.place,
-    },
-    notix_counter_number,
-    visible = false,
-    layout = wibox.layout.fixed.horizontal,
+    text = "0",
+    widget = wibox.widget.textbox,
 }
 
 local function update_notif_counter(delta)
     notif_counter = notif_counter + delta
     if notif_counter <= 0 then
         notix_header_bar.visible = false
-        notix_counter_widget.visible = false
     elseif notif_counter <= delta then
         notix_header_bar.visible = true
-        notix_counter_widget.visible = true
     end
-    notix_counter_number.text = tostring(notif_counter)
+    notix_counter_widget.text = tostring(notif_counter)
+    capi.awesome.emit_signal("notix::on_counter_change", notif_counter)
 end
 
 local function add_widget_to_container(widget, container)

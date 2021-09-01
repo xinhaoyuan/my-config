@@ -379,8 +379,18 @@ capi.awesome.connect_signal(
 
 -- Next TODO item
 
+local next_todo_counter = wibox.widget.textbox()
 local next_todo_widget = wibox.widget {
-    widget = wibox.widget.textbox
+    {
+        image = gcolor.recolor_image(icons.alert, beautiful.fg_normal),
+        forced_height = beautiful.bar_height / beautiful.bar_rows,
+        forced_width = beautiful.bar_height / beautiful.bar_rows,
+        widget = masked_imagebox,
+    },
+    next_todo_counter,
+    expand = true,
+    horizontal_homogeneous = false,
+    layout = wibox.layout.grid[direction_index[shared.vars.bar_position]](beautiful.bar_rows),
 }
 local function update_next_todo()
     local next_todo = {}
@@ -400,12 +410,15 @@ local function update_next_todo()
     end
     local ndate = #next_todo > 0 and os.date("*t", next_todo[1].timestamp)
     if #next_todo == 0 then
-        next_todo_widget.markup = ""
+        next_todo_counter.markup = ""
+        next_todo_widget.visible = false
     else
         if ndate.year == date.year and ndate.month == date.month and ndate.day == date.day then
-            next_todo_widget.markup = "!"..os.date("%H<b>%M</b>", next_todo[1].timestamp)
+            next_todo_counter.markup = os.date("%H<b>%M</b>", next_todo[1].timestamp)
+            next_todo_widget.visible = true
         else
-            next_todo_widget.markup = ""
+            next_todo_counter.markup = ""
+            next_todo_widget.visible = false
         end
     end
 end
@@ -706,6 +719,7 @@ local orgenda_counter_widget = wibox.widget {
     },
     orgenda_counter_text_widget,
     expand = true,
+    horizontal_homogeneous = false,
     layout = wibox.layout.grid[direction_index[shared.vars.bar_position]](beautiful.bar_rows),
 }
 
@@ -734,6 +748,30 @@ orgenda.data:connect_signal(
         end
     end
 )
+
+-- Notix
+
+local notix_counter_widget = wibox.widget{
+    {
+        image = gcolor.recolor_image(icons.notification, beautiful.fg_normal),
+        forced_height = beautiful.bar_height / beautiful.bar_rows,
+        forced_width = beautiful.bar_height / beautiful.bar_rows,
+        widget = masked_imagebox,
+    },
+    {
+        notix.counter_widget,
+        widget = wibox.container.place,
+    },
+    expand = true,
+    horizontal_homogeneous = false,
+    layout = wibox.layout.grid[direction_index[shared.vars.bar_position]](beautiful.bar_rows),
+    visible = false,
+}
+
+capi.awesome.connect_signal(
+    "notix::on_counter_change", function (counter)
+        notix_counter_widget.visible = counter > 0
+    end)
 
 local waffle_indicator = wibox.widget{
     {
@@ -914,7 +952,7 @@ local function setup_screen(scr)
                widget = fixed_margin,
            },
            {
-               notix.counter_widget,
+               notix_counter_widget,
                right = beautiful.sep_small_size,
                draw_empty = false,
                widget = fixed_margin,

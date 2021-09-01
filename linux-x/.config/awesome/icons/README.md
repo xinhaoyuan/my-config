@@ -12,4 +12,5 @@
  - remove.svg: [https://thenounproject.com/term/remove/900556]
  - notification.svg [https://thenounproject.com/term/alarm/3407999/]
  - checklist.svg [https://thenounproject.com/term/checklist/1499062]
+ - alert.svg [https://thenounproject.com/term/important/38175]
  - Others: home-made
