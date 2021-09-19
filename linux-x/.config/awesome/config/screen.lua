@@ -1393,7 +1393,9 @@ local global_keys = table_join(
 -- tags and layouts
 
 -- shared.screen.tags = { "壹", "贰", "叁", "肆" }
-shared.screen.tags = { "☱", "☲", "☳", "☴" }
+shared.screen.tags = {
+    "☰", "☱", "☲", "☳", -- "☴", "☵", "☶", "☷"
+}
 
 for i = 1, #shared.screen.tags do
     local key = tostring(i)
