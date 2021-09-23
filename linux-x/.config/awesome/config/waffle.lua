@@ -1638,7 +1638,7 @@ local waffle_root_view = view {
         if #mod == 0 and (key == "Left" or key == "Right" or key == "Up" or key == "Down") then
             pcall(awful.screen.focus_bydirection, key:lower())
             waffle:hide()
-            capi.awesome.emit_signal("show_main_waffle", "screen")
+            capi.awesome.emit_signal("show_main_waffle", {anchor = "screen"})
             return
         end
         return true
@@ -1649,8 +1649,8 @@ waffle:set_root_view(waffle_root_view)
 
 capi.awesome.connect_signal(
     "show_main_waffle",
-    function (anchor)
-        waffle:show(nil, {anchor = anchor})
+    function (args)
+        waffle:show(nil, args)
     end
 )
 

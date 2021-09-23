@@ -155,7 +155,7 @@ alayout.layouts = {
 -- Define the tag list upfront for keybindings
 
 local root_buttons = awful.util.table.join(
-    awful.button({ }, 3, function () capi.awesome.emit_signal("show_main_waffle", "mouse") end),
+    awful.button({ }, 3, function () capi.awesome.emit_signal("show_main_waffle", {anchor = "mouse"}) end),
     capi.root.buttons()
 )
 
@@ -172,7 +172,7 @@ local fortune_widget = wibox.widget {
     },
     valign = "center",
     halign = "center",
-    buttons = awful.util.table.join(awful.button({ }, 3, function () capi.awesome.emit_signal("show_main_waffle", "mouse") end)),
+    buttons = awful.util.table.join(awful.button({ }, 3, function () capi.awesome.emit_signal("show_main_waffle", {anchor = "mouse"}) end)),
     widget = fixed_place
 }
 fortune_widget.watch = require("watchcommand").create({"fortune", "-s"}, 300)
@@ -874,14 +874,30 @@ local function setup_screen(scr)
    }
    scr.widgets.indicator:buttons(
       awful.util.table.join(
-          awful.button({ }, 1, function () capi.awesome.emit_signal("show_main_waffle", "mouse") end),
-          awful.button({ }, 3, function ()
-                  if capi.client.focus ~= nil then
-                      capi.awesome.emit_signal("show_client_waffle", capi.client.focus, "mouse")
-                  end
-          end),
+          awful.button({ }, 1, function () capi.awesome.emit_signal("show_main_waffle", {anchor = "mouse"}) end),
+          -- awful.button({ }, 3, function ()
+          --         if capi.client.focus ~= nil then
+          --             capi.awesome.emit_signal("show_client_waffle", capi.client.focus, "mouse")
+          --         end
+          -- end),
           awful.button({ }, 4, function () awful.layout.inc( 1) end),
           awful.button({ }, 5, function () awful.layout.inc(-1) end)))
+   scr.widgets.indicator:connect_signal(
+       'mouse::enter', function()
+           local waffle_scr = waffle:get_screen()
+           if waffle:autohide() or waffle_scr == nil or waffle_scr ~= scr then
+               local anchor = {
+                   x = scr.geometry.x,
+                   y = scr.geometry.y + scr.geometry.height
+               }
+               capi.awesome.emit_signal("show_main_waffle", {anchor = anchor, autohide = 0.5})
+           end
+           waffle:autohide_lock_acquire()
+       end)
+   scr.widgets.indicator:connect_signal(
+       'mouse::leave', function()
+           waffle:autohide_lock_release()
+       end)
    left_layout:add(scr.widgets.indicator)
    left_layout:add(scr.widgets.tag_list)
    left_layout:add(scr.mypromptbox)
@@ -1229,7 +1245,7 @@ capi.screen.connect_signal("primary_changed", schedule_reset_widgets)
 capi.root.keys(
    awful.util.table.join(
       capi.root.keys(),
-      awful.key({ }, "XF86Launch1", function () capi.awesome.emit_signal("show_main_waffle", "screen") end),
+      awful.key({ }, "XF86Launch1", function () capi.awesome.emit_signal("show_main_waffle", {anchor = "screen"}) end),
       awful.key({ "Mod4" }, ";",
          function ()
             awful.prompt.run {
