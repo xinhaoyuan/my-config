@@ -923,6 +923,12 @@ require("awful.rules").rules = {
        },
    },
    {
+       rule = { class = "Firefox" },
+       properties = {
+           fake_fullscreen = true,
+       },
+   },
+   {
        rule = { class = "Firefox", role = "PictureInPicture" },
        properties = {
            above = false,
@@ -1014,5 +1020,12 @@ require("awful.rules").rules = {
        },
    },
 }
+
+client.disconnect_signal("request::geometry", awful.ewmh.geometry)
+client.connect_signal("request::geometry", function(c, context, ...)
+    if context ~= "fullscreen" or not c.fake_fullscreen then
+        awful.ewmh.geometry(c, context, ...)
+    end
+end)
 
 return nil
