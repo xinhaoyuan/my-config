@@ -167,8 +167,8 @@ theme.useless_gap = dpi(8)
 -- custom property number
 theme.bar_rows = 2
 theme.bar_height = dpi(22 * theme.bar_rows)
-theme.icon_size = dpi(20 * theme.bar_rows)
 theme.bar_icon_size = dpi(20 * theme.bar_rows)
+theme.icon_size = dpi(20)
 theme.menu_width = dpi(150)
 theme.systray_icon_spacing = dpi(0)
 -- custom property color
