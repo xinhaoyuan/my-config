@@ -21,13 +21,18 @@ DEP_ARRAY=(
     fortune
     # util
     cbatticon
+    alsa-utils
     pasystray
+    pavucontrol
     pcmanfm
     mousepad
     evtest
     xinput
     xdotool
     network-manager-gnome
+    lxappearance
+    x11-utils
+    xclip
     # awesome needs these
     librsvg2-dev
     fswatch
