@@ -8,6 +8,19 @@ local capi = {
     client = client,
 }
 
+local safe_require_warned = {}
+function safe_require(m)
+    assert(type(m) == "string")
+    local ok, mod = pcall(require, m)
+    if not ok and not safe_require_warned[m] then
+        safe_require_warned[m] = true
+        print(string.format("Cannot load module %s, returning nil.", m))
+        print(mod)
+        mod = nil
+    end
+    return mod
+end
+
 capi.client.connect_signal(
     "before::unmanage",
     function (c)

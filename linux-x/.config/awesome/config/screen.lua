@@ -129,14 +129,15 @@ local xlayout = tabber{
 }
 machi.editor.nested_layouts["4"] = xlayout
 
-local yggdrasil = require("yggdrasil")
-yggdrasil.set_icon()
+local yggdrasil = safe_require("yggdrasil")
+if yggdrasil then
+    yggdrasil.set_icon()
+end
 
 local alayout = require("awful.layout")
 alayout.layouts = {
    machi.default_layout,
-   yggdrasil.create_root{
-   },
+   yggdrasil and yggdrasil.create_root{},
    alayout.suit.tile,
    alayout.suit.tile.left,
    alayout.suit.tile.bottom,
