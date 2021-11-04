@@ -41,6 +41,10 @@ DEP_ARRAY=(
     libgtk-3-dev
     python3-pil
     inkscape
+    # luakit
+    libwebkit2gtk-4.0-dev
+    libluajit-5.1-dev
+    luajit
 )
     
 install_dep xy-desktop-dev "${DEP_ARRAY[@]}"
