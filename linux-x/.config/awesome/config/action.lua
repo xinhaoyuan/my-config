@@ -10,6 +10,7 @@ local unpack = unpack or table.unpack
 local autolocker = require("autolocker")
 
 local term_cmd
+local browser_cmd
 do
     local term_prog = "urxvt"
     if os.execute("command -v st") then
@@ -28,6 +29,12 @@ do
         term_cmd = {"tabbed", "-kc", "-F", beautiful.fontname_normal .. ":size=10", "-M", beautiful.fg_normal, "-m", beautiful.bg_normal, "-T", beautiful.fg_focus, "-t", beautiful.bg_focus, "-r", "2", "--", "urxvt", "-embed", "--"}
     else
         term_cmd = {term_prog}
+    end
+
+    if os.execute("command -v luakit") then
+        browser_cmd = {"luakit"}
+    else
+        browser_cmd = {"firefox"}
     end
 end
 
@@ -53,7 +60,7 @@ shared.action = {
         shared.action.terminal(real_cmd)
     end,
     web_browser = function (url)
-        local cmd = {"x-www-browser"}
+        local cmd = browser_cmd
         if url then table.insert(cmd, url) end
         awful.spawn(cmd)
     end,
