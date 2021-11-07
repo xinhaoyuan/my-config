@@ -61,6 +61,7 @@ theme.ibar_bg           = "rgba(0,0,0,0)"
 -- Tab label
 theme.tab_fg            = "#1c1c1c"
 theme.tab_bg            = "#e0e0e0"
+theme.tab_hover_fg      = "#e0e0e0"
 theme.tab_hover_bg      = "#292929"
 theme.tab_ntheme        = "#ddd"
 theme.selected_fg       = "#1c1c1c"

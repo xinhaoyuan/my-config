@@ -17,14 +17,16 @@ local webview = require("webview")
 
 tab.add_signal("build", function (tl, view)
     local label = tl.widget.child
+    local overall_overlay = widget{ type = "overlay" }
     local layout, fav, spin = widget{type = "hbox"}, widget{type="image"}, widget{type="spinner"}
-    tl.widget.child = layout
+    tl.widget.child = overall_overlay
     layout.homogeneous = false
     layout:pack(fav)
     layout:pack(spin)
-    local overlay = widget{ type = "overlay" }
-    overlay:pack(label, { halign = "fill", valign = "center" })
-    layout:pack(overlay, { expand = true, fill = true })
+    label.align = { v = "center" }
+    layout:pack(label, { expand = true, fill = true })
+    overall_overlay:pack(layout, { halign = "fill", valign = "center" })
+    overall_overlay.min_size = { h = 40 }
 
     fav.min_size = { w = 32, h = 32 }
     spin.min_size = { w = 32, h = 32 }

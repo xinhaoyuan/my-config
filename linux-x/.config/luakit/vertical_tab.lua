@@ -11,6 +11,7 @@ local window = require("window")
 local lousy = require("lousy")
 local modes = require("modes")
 local settings = require("settings")
+local button = require("button")
 
 local appear_cb = setmetatable({}, { __mode = "k" })
 
@@ -19,12 +20,27 @@ window.add_signal("build", function (w)
     w.tablist:destroy()
     w.tablist = lousy.widget.tablist(w.tabs, "vertical")
     local tablist_box = widget{ type = "eventbox" }
-    local tablist_container = widget{ type = "overlay" }
-    local sizing_widget = widget{ type = "image" }
-    tablist_box.child = tablist_container
-    tablist_container.child = sizing_widget
-    tablist_container:pack(w.tablist.widget, { halign = "fill", valign = "fill"})
-    w.tablist_sizing_widget = sizing_widget
+    local tablist_overlay = widget{ type = "overlay" }
+    local sizing_widget = widget{ type = "eventbox" }
+    tablist_box.child = tablist_overlay
+    tablist_overlay.child = sizing_widget
+
+    local control_widget_container = widget{ type = "hbox" }
+    control_widget_container.min_size = { h = 40, w = settings.get_setting("vertical_tabs.sidebar_width") }
+    local new_tab_button = button{
+        icon_text = "<big>+</big>",
+        icon_bg = "#0ad",
+        text = "New tab",
+        on_click = function ()
+            w:new_tab(settings.get_setting("window.new_tab_page"))
+        end
+    }
+    control_widget_container:pack(new_tab_button.widget, { expand = true, fill = true })
+
+    local tablist_container = widget{ type = "vbox" }
+    tablist_container:pack(control_widget_container)
+    tablist_container:pack(w.tablist.widget, { expand = true, fill = true })
+    tablist_overlay:pack(tablist_container, { halign = "fill", valign = "fill"})
 
     local left = settings.get_setting("vertical_tabs.side") == "left"
     local padding = settings.get_setting("vertical_tabs.sidebar_padding")
@@ -53,7 +69,7 @@ window.add_signal("build", function (w)
             end
             shrink_timer:start()
         end)
-end)                                
+end)
 
 settings.register_settings({
     ["vertical_tabs.sidebar_padding"] = {

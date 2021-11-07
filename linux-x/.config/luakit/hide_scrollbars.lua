@@ -1,0 +1,1 @@
+-- Empty script to skip hiding scrollbars.
