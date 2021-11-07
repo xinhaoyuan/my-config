@@ -58,6 +58,15 @@ function mod:set_outline_color(outline_color)
     self:emit_signal("widget::redraw_needed")
 end
 
+function mod:set_outline_color_focus(outline_color_focus)
+    if outline_color_focus then
+        self._private.outline_color_focus = gcolor(outline_color_focus)
+    else
+        self._private.outline_color_focus = nil
+    end
+    self:emit_signal("widget::redraw_needed")
+end
+
 function mod:set_outline_size(outline_size)
     if outline_size then
         self._private.outline_size = outline_size

@@ -116,9 +116,9 @@ function mod.focusable_color(prefix, suffix)
     if focusable_color_func[prefix][suffix] == nil then
         focusable_color_func[prefix][suffix] = function (c)
             if c.focus then
-                return beautiful[prefix .. "focus" .. suffix]
+                return beautiful[prefix .. "focus" .. suffix] or beautiful[prefix .. "focus"]
             else
-                return beautiful[prefix .. "normal" .. suffix]
+                return beautiful[prefix .. "normal" .. suffix] or beautiful[prefix .. "normal"]
             end
         end
     end

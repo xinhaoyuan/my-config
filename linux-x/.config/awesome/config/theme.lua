@@ -102,6 +102,7 @@ theme.titlebar_fg_focus  = theme.fg_focus
 theme.titlebar_bg_normal = acolor(theme.bg_normal):blend_with(acolor(theme.bg_focus), 0.3):to_string()
 theme.titlebar_fg_normal = theme.fg_normal
 
+theme.bg_normal_button = "#00000000"
 
 -- There are other variable sets
 -- overriding the default one when

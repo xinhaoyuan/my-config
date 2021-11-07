@@ -132,7 +132,7 @@ local function simple_button(args)
       forced_width = args.width,
       forced_height = args.height,
       fg_function = {"fg_"},
-      bg_function = {"bg_"},
+      bg_function = {"bg_", "_button"},
       widget = cbg
    }
 
@@ -2169,6 +2169,13 @@ local waffle_client_icon_container = wibox.widget {
     widget = wibox.container.constraint,
 }
 
+local waffle_client_pid_label = wibox.widget{
+    align = "center",
+    outline_color = beautiful.bg_normal,
+    outline_size = dpi(2),
+    widget = outlined_textbox,
+}
+
 local update_client_waffle_labels
 local client_waffle_attached = false
 local client_waffle_transient = false
@@ -2253,12 +2260,49 @@ local client_waffle = view {
                             end
                     }),
                     {
-                        waffle_client_icon_container,
-                        forced_width = dpi(64),
-                        forced_height = dpi(64),
-                        halign = "center",
-                        valign = "center",
-                        widget = wibox.container.place,
+                        {
+                            waffle_client_icon_container,
+                            halign = "center",
+                            valign = "center",
+                            widget = wibox.container.place,
+                        },
+                        button{
+                            width = dpi(64),
+                            height = dpi(64),
+                            label_widget = wibox.widget{
+                                nil,
+                                waffle_client_pid_label,
+                                {
+                                    {
+                                        text = "d",
+                                        align = "center",
+                                        widget = wibox.widget.textbox
+                                    },
+                                    fg_function = function (ctx)
+                                        if ctx.focus then return beautiful.special_focus else return "#00000000" end
+                                    end,
+                                    bg_function = function (ctx)
+                                        if ctx.focus then return beautiful.bg_focus else return "#00000000" end
+                                    end,
+                                    widget = cbg,
+                                },
+                                layout = fixed_align.vertical
+                            },
+                            key = "d",
+                            action = function (alt)
+                                local client = shared.waffle_selected_client
+                                waffle:hide()
+                                if not client.valid or type(client.pid) ~= "number" then
+                                    return
+                                end
+                                if alt then
+                                    os.execute("echo -n "..tostring(client.pid).." | xclip -i -selection clipboard")
+                                else
+                                    shared.action.terminal({"htop", "-p", tostring(client.pid)})
+                                end
+                            end
+                        },
+                        layout = wibox.layout.stack,
                     },
                     button({
                             width = dpi(64),
@@ -2493,7 +2537,7 @@ function shared.waffle.show_client_waffle(c, args)
     end
     waffle:show(client_waffle, args)
     shared.waffle_selected_client = c
-    waffle_client_icon_container.widget = wibox.widget {
+    waffle_client_icon_container.widget = wibox.widget{
         awful.widget.clienticon(c),
         {
             id = "default_icon",
@@ -2502,6 +2546,7 @@ function shared.waffle.show_client_waffle(c, args)
         },
         widget = fallback,
     }
+    waffle_client_pid_label.text = c.pid and tostring(c.pid) or ""
     update_client_waffle_labels()
     capi.client.emit_signal("list")
 end
