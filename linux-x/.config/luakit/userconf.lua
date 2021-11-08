@@ -32,3 +32,7 @@ webview.add_signal(
 
 settings.set_setting("tablist.visibility", "always")
 settings.set_setting("webview.zoom_level", 150)
+local engines = settings.get_setting("window.search_engines");
+print(engines["d"])
+engines["d"] = "https://dict.cn/%s"
+settings.set_setting("window.search_engines", engines)
