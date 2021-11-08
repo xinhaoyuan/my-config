@@ -36,6 +36,8 @@ function _M.new(args)
         label_widget.align = { h = "center", v = "center" }
     end
     button_layout:pack(label_widget, { expand = true, fill = true })
+    label_widget.fg = theme.tab_fg
+    ebox.bg = theme.tab_bg
     ebox.child = button_layout
 
     ebox:add_signal(
