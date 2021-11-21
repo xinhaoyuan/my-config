@@ -149,13 +149,13 @@ local property_to_text = {
 }
 
 local function tasklist_update_function(widget, c, index, objects)
-    local sb = widget:get_children_by_id("status_role")[1]
-    local bgb = widget:get_children_by_id("my_background_role")[1]
-    local title_text_role = widget:get_children_by_id("title_text_role")[1]
+    local status_widget = widget:get_children_by_id("status_role")[1]
+    local background_widget = widget:get_children_by_id("my_background_role")[1]
+    local title_widget = widget:get_children_by_id("title_text_role")[1]
     local status_text = ""
     local prop = {}
-    if title_text_role ~= nil then
-        title_text_role.text = c.name or "<Untitled>"
+    if title_widget ~= nil then
+        title_widget.text = c.name or "<Untitled>"
     end
     if c.cgroup and c.cgroup.current_client ~= c then
         widget.forced_width = dpi(150)
@@ -181,18 +181,19 @@ local function tasklist_update_function(widget, c, index, objects)
             end
         end
     end
-    if sb then
+    if status_widget then
         if #status_text > 0 then
-            sb.text = status_text
+            status_widget.text = status_text
         else
-            sb.text = ""
+            status_widget.text = ""
         end
     end
-    bgb:set_context_transform_function({
-            focus = client.focus == c,
-            selected = shared.waffle_selected_client == c and not waffle:autohide(),
-            minimized = c.minimized,
-            is_odd = index % 2 == 1})
+    background_widget:set_context_transform_function{
+        focus = client.focus == c,
+        selected = shared.waffle_selected_client == c and not waffle:autohide(),
+        minimized = c.minimized,
+        is_odd = index % 2 == 1
+    }
 end
 
 local function tasklist_create_function(widget, c, index, objects)
