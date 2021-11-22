@@ -21,7 +21,8 @@ local fixed_place = require("fixed_place")
 local fixed_align = require("fixed_align")
 local matrix = require("gears.matrix")
 local waffle = require("waffle")
-
+local outlined_textbox = require("outlined_textbox")
+local debug_container = require("debug_container")
 local module = {}
 
 local size_index = shared.size_index
@@ -150,22 +151,21 @@ local property_to_text = {
 
 local function tasklist_update_function(widget, c, index, objects)
     local status_widget = widget:get_children_by_id("status_role")[1]
+    local inline_status_widget = widget:get_children_by_id("inline_status_role")[1]
     local background_widget = widget:get_children_by_id("my_background_role")[1]
     local title_widget = widget:get_children_by_id("title_text_role")[1]
     local status_text = ""
     local prop = {}
-    if title_widget ~= nil then
-        title_widget.text = c.name or "<Untitled>"
-    end
+    local forced_width
     if c.cgroup and c.cgroup.current_client ~= c then
-        widget.forced_width = dpi(150)
+        if not c.tasklist_icon_only then forced_width = dpi(150) end
         if c.cgroup.current_client.manage_ticket < c.manage_ticket then
             status_text = "<G"
         else
             status_text = "G>"
         end
     else
-        widget.forced_width = dpi(300)
+        if not c.tasklist_icon_only then forced_width = dpi(300) end
         for _, pp in ipairs(property_to_text) do
             local key = pp[1]
             if c.saved and c.saved[key] ~= nil then
@@ -181,16 +181,18 @@ local function tasklist_update_function(widget, c, index, objects)
             end
         end
     end
-    if status_widget then
-        if #status_text > 0 then
-            status_widget.text = status_text
-        else
-            status_widget.text = ""
-        end
+    widget.forced_width = forced_width
+    if c.tasklist_icon_only then
+        if title_widget and #title_widget.text > 0 then title_widget.text = "" end
+        if status_widget and #status_widget.text > 0 then status_widget.text = "" end
+        if inline_status_widget then inline_status_widget.text = status_text end
+    else
+        if title_widget then title_widget.text = c.name or "<Untitled>" end
+        if status_widget then status_widget.text = status_text end
+        if inline_status_widget and #inline_status_widget.text > 0 then inline_status_widget.text = "" end
     end
     background_widget:set_context_transform_function{
-        focus = client.focus == c,
-        selected = shared.waffle_selected_client == c and not waffle:autohide(),
+        focus = client.focus == c or (shared.waffle_selected_client == c and not waffle:autohide()),
         minimized = c.minimized,
         is_odd = index % 2 == 1
     }
@@ -223,51 +225,64 @@ local tasklist_template = {
         {
             {
                 {
-
-                    {
-                        {
-                            {
-                                widget = awful.widget.clienticon,
-                            },
-                            {
-                                id = "default_icon",
-                                image = beautiful.client_default_icon,
-                                widget = wibox.widget.imagebox,
-                            },
-                            widget = fallback,
-                        },
-                        [top_index[shared.vars.bar_position]] = (beautiful.bar_height - beautiful.bar_icon_size) / 2,
-                        [bottom_index[shared.vars.bar_position]] = (beautiful.bar_height - beautiful.bar_icon_size) / 2,
-                        [right_index[shared.vars.bar_position]] = beautiful.sep_small_size,
-                        widget = wibox.container.margin,
-                    },
-                    {
-                        id = "title_text_role",
-                        widget = wibox.widget.textbox,
-                    },
                     {
                         {
                             {
                                 {
-                                    id = "status_role",
-                                    valign = "center",
-                                    align = "center",
-                                    widget = wibox.widget.textbox,
+                                    widget = awful.widget.clienticon,
                                 },
-                                direction = direction_index[shared.vars.bar_position] == "horizontal" and "north" or "west",
-                                widget = wibox.container.rotate
+                                {
+                                    id = "default_icon",
+                                    image = beautiful.client_default_icon,
+                                    widget = wibox.widget.imagebox,
+                                },
+                                widget = fallback,
                             },
-                            fg_function = function (context)
-                                if context.selected or context.focus or context.minimized then
-                                    return beautiful.special_focus
-                                else
-                                    return beautiful.special_normal
-                                end
-                            end,
-                            widget = cbg
+                            {
+                                id = "inline_status_role",
+                                text = "",
+                                align = "right",
+                                valign = "bottom",
+                                outline_color = beautiful.bg_normal,
+                                outline_color_focus = beautiful.bg_focus,
+                                outline_size = dpi(2),
+                                widget = outlined_textbox,
+                            },
+                            layout = wibox.layout.stack,
                         },
-                        left = beautiful.sep_small_size,
+                        [top_index[shared.vars.bar_position]] = (beautiful.bar_height - beautiful.bar_icon_size) / 2,
+                        [bottom_index[shared.vars.bar_position]] = (beautiful.bar_height - beautiful.bar_icon_size) / 2,
                         widget = wibox.container.margin,
+                    },
+                    {
+                        {
+                            id = "title_text_role",
+                            widget = wibox.widget.textbox,
+                        },
+                        [left_index[shared.vars.bar_position]] = beautiful.sep_small_size,
+                        [right_index[shared.vars.bar_position]] = beautiful.sep_small_size,
+                        draw_empty = false,
+                        widget = fixed_margin,
+                    },
+                    {
+                        {
+                            {
+                                id = "status_role",
+                                valign = "center",
+                                align = "center",
+                                widget = wibox.widget.textbox,
+                            },
+                            direction = direction_index[shared.vars.bar_position] == "horizontal" and "north" or "west",
+                            widget = wibox.container.rotate
+                        },
+                        fg_function = function (context)
+                            if context.selected or context.focus or context.minimized then
+                                return beautiful.special_focus
+                            else
+                                return beautiful.special_normal
+                            end
+                        end,
+                        widget = cbg
                     },
                     layout = wibox.layout.align[direction_index[shared.vars.bar_position]],
                 },

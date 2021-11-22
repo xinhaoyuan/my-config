@@ -1009,6 +1009,7 @@ require("awful.rules").rules = {
        rule = { class = "TelegramDesktop" },
        properties = {
            size_hints_honor = false,
+           tasklist_icon_only = true,
        },
    },
    {
