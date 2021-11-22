@@ -92,10 +92,8 @@ function flexer:fit(context, width, height, fill_space)
     for _, v in pairs(self._private.widgets) do
         local w, h = base.fit_widget(self, context, v, width, height)
 
-        -- (hacky) add error value (1 is not enough) in the direction to compensate the rounding errors.
         if self._private.dir == "y" then
             if h > 0 then
-                h = h + 2
                 if self._private.size_transform then
                     h = self._private.size_transform(h, v)
                 end
@@ -107,7 +105,6 @@ function flexer:fit(context, width, height, fill_space)
             self._private.calculated_space[v] = h
         else
             if w > 0 then
-                w = w + 2
                 if self._private.size_transform then
                     w = self._private.size_transform(w, v)
                 end
