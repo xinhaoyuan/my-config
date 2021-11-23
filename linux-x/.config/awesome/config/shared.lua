@@ -28,6 +28,9 @@ local shared = {
         end
         table.sort(clients,
                    function (a, b)
+                       local a_iconized = a.cgroup == nil and a.tasklist_icon_only == true
+                       local b_iconized = b.cgroup == nil and b.tasklist_icon_only == true
+                       if a_iconized ~= b_iconized then return b_iconized end
                        -- -- Minimized windows appear at last
                        -- if a.minimized ~= b.minimized then return b.minimized else return a.window < b.window end
                        local a_ticket = a.cgroup and ticket[a.cgroup] or a.manage_ticket

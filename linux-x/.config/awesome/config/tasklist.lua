@@ -157,15 +157,20 @@ local function tasklist_update_function(widget, c, index, objects)
     local status_text = ""
     local prop = {}
     local forced_width
-    if c.cgroup and c.cgroup.current_client ~= c then
-        if not c.tasklist_icon_only then forced_width = dpi(150) end
+    local group_hidden = c.cgroup and c.cgroup.current_client ~= c
+    local icon_only
+    if c.cgroup == nil then icon_only = c.tasklist_icon_only
+    else icon_only = group_hidden
+    end
+    if group_hidden then
+        if not icon_only then forced_width = dpi(150) end
         if c.cgroup.current_client.manage_ticket < c.manage_ticket then
-            status_text = "<G"
+            status_text = "<"
         else
-            status_text = "G>"
+            status_text = ">"
         end
     else
-        if not c.tasklist_icon_only then forced_width = dpi(300) end
+        if not icon_only then forced_width = dpi(300) end
         for _, pp in ipairs(property_to_text) do
             local key = pp[1]
             if c.saved and c.saved[key] ~= nil then
@@ -182,7 +187,7 @@ local function tasklist_update_function(widget, c, index, objects)
         end
     end
     widget.forced_width = forced_width
-    if c.tasklist_icon_only then
+    if icon_only then
         if title_widget and #title_widget.text > 0 then title_widget.text = "" end
         if status_widget and #status_widget.text > 0 then status_widget.text = "" end
         if inline_status_widget then inline_status_widget.text = status_text end
@@ -193,7 +198,7 @@ local function tasklist_update_function(widget, c, index, objects)
     end
     background_widget:set_context_transform_function{
         focus = client.focus == c or (shared.waffle_selected_client == c and not waffle:autohide()),
-        minimized = c.minimized,
+        minimized = (c.cgroup and c.cgroup.current_client or c).minimized,
         is_odd = index % 2 == 1
     }
 end
