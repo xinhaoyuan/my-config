@@ -87,6 +87,14 @@ local function create(config)
         local screen = args.screen
         local start_x = screen.workarea.x
         local start_y = screen.workarea.y
+        local client_compare = function (a, b)
+            -- prioritize non-minimized client
+            if a.minimized ~= b.minimized then
+                return b.minimized
+            end
+            return fts.get(a) > fts.get(b)
+        end
+        local saved_client_compare = screen.client_compare
 
         local panel = nil
 
@@ -129,16 +137,7 @@ local function create(config)
             else
                 tablist = default_clients(args.screen)
             end
-            table.sort(
-                tablist,
-                function (a, b)
-                    -- prioritize non-minimized client
-                    if a.minimized ~= b.minimized then
-                        return b.minimized
-                    end
-                    return fts.get(a) > fts.get(b)
-                end
-            )
+            table.sort(tablist, client_compare)
 
             for i = #tablist, 1, -1 do
                 local c = tablist[i]
@@ -176,6 +175,11 @@ local function create(config)
                 end
                 activate_client(c)
                 c:raise()
+            end
+
+            if screen.client_compare ~= saved_client_compare then
+                screen.client_compare = saved_client_compare
+                capi.client.emit_signal("list")
             end
         end
 
@@ -268,6 +272,8 @@ local function create(config)
         end
 
         awful.client.focus.history.disable_tracking()
+        screen.client_compare = client_compare
+        capi.client.emit_signal("list")
 
         switch(true)
 

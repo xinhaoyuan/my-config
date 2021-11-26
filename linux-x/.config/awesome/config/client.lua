@@ -1003,6 +1003,7 @@ require("awful.rules").rules = {
        rule = { class = "discord" },
        properties = {
            size_hints_honor = false,
+           tasklist_icon_only = true,
        },
    },
    {

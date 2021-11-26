@@ -159,8 +159,10 @@ local function tasklist_update_function(widget, c, index, objects)
     local forced_width
     local group_hidden = c.cgroup and c.cgroup.current_client ~= c
     local icon_only
-    if c.cgroup == nil then icon_only = c.tasklist_icon_only
-    else icon_only = group_hidden
+    if not c.screen.client_compare then
+        if c.cgroup == nil then icon_only = c.tasklist_icon_only
+        else icon_only = group_hidden
+        end
     end
     if group_hidden then
         if not icon_only then forced_width = dpi(150) end
@@ -353,7 +355,19 @@ function module.create(scr)
         style = { font = beautiful.font },
         layout = beautiful.tasklist_layout[direction_index[shared.vars.bar_position]][beautiful.bar_style],
         source = function ()
-            return shared.tasklist_order_function(awful.widget.tasklist.source.all_clients())
+            local all_clients = awful.widget.tasklist.source.all_clients()
+            if scr.client_compare then
+                local non_hidden_clients = {}
+                for i = 1, #all_clients do
+                    local c = all_clients[i]
+                    if c.cgroup == nil or c.cgroup.current_client ~= c then
+                        non_hidden_clients[#non_hidden_clients + 1] = c
+                    end
+                end
+                table.sort(non_hidden_clients, scr.client_compare)
+                return non_hidden_clients
+            end
+            return shared.tasklist_order_function(all_clients)
         end,
         update_function = function (w, b, l, d, clients, args)
             capi.awesome.emit_signal("tasklist::update::before", scr)
