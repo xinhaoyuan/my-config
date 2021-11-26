@@ -87,7 +87,9 @@ local function create(config)
         local screen = args.screen
         local start_x = screen.workarea.x
         local start_y = screen.workarea.y
+        local current_focus = capi.client.focus
         local client_compare = function (a, b)
+            if a == current_focus then return false elseif b == current_focus then return true end
             -- prioritize non-minimized client
             if a.minimized ~= b.minimized then
                 return b.minimized
@@ -151,9 +153,10 @@ local function create(config)
                 -- elseif c.saved.below then
                 --    c:lower()
                 -- end
+                if c == current_focus then tablist_index = i end
             end
-
-            tablist_index = 1
+            -- Set to the end since we'll switch once at the beginning.
+            if tablist_index == nil then tablist_index = #tablist end
         end
 
         local function finalize()
