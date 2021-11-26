@@ -184,21 +184,60 @@ end
 function module.presets.soft_relief(args)
     local shade_light_r, shade_light_g, shade_light_b, shade_light_a =
         gcolor.parse_color(args.light_shade)
+    local shade_high_light_r, shade_high_light_g, shade_high_light_b, shade_high_light_a =
+        gcolor.parse_color(args.high_light_shade or args.light_shade)
     local shade_dark_r, shade_dark_g, shade_dark_b, shade_dark_a =
         gcolor.parse_color(args.dark_shade)
+    local shade_high_dark_r, shade_high_dark_g, shade_high_dark_b, shade_high_dark_a =
+        gcolor.parse_color(args.high_dark_shade or args.dark_shade)
     local border_width = args.border_width
     local padding_width = args.padding_width or 0
 
     return module.create{
         top_left_border = function (self, context, cr, _is_shape, width, _height)
+            local color_pattern = cairo.Pattern.create_mesh()
+            local ctrl_length = width * 0.2652
+            local mid_length = width * 0.7071
+            color_pattern:begin_patch()
+            color_pattern:move_to(0, width)
+            color_pattern:curve_to(0, width - ctrl_length,
+                                   width - mid_length - ctrl_length, width - mid_length + ctrl_length,
+                                   width - mid_length, width - mid_length)
+            color_pattern:line_to(width, width)
+            color_pattern:line_to(width, width)
+            color_pattern:set_corner_color_rgba(0, shade_light_r, shade_light_g, shade_light_b, shade_light_a)
+            color_pattern:set_corner_color_rgba(1, shade_high_light_r, shade_high_light_g, shade_high_light_b, shade_high_light_a)
+            color_pattern:set_corner_color_rgba(2, shade_high_light_r, shade_high_light_g, shade_high_light_b, shade_high_light_a)
+            color_pattern:set_corner_color_rgba(3, shade_light_r, shade_light_g, shade_light_b, shade_light_a)
+            color_pattern:end_patch()
+            color_pattern:begin_patch()
+            color_pattern:move_to(width - mid_length, width - mid_length)
+            color_pattern:curve_to(width - mid_length + ctrl_length, width - mid_length - ctrl_length,
+                                   width - ctrl_length, 0,
+                                   width, 0)
+            color_pattern:line_to(width, width)
+            color_pattern:line_to(width, width)
+            color_pattern:set_corner_color_rgba(0, shade_high_light_r, shade_high_light_g, shade_high_light_b, shade_high_light_a)
+            color_pattern:set_corner_color_rgba(1, shade_light_r, shade_light_g, shade_light_b, shade_light_a)
+            color_pattern:set_corner_color_rgba(2, shade_light_r, shade_light_g, shade_light_b, shade_light_a)
+            color_pattern:set_corner_color_rgba(3, shade_high_light_r, shade_high_light_g, shade_high_light_b, shade_high_light_a)
+            color_pattern:end_patch()
+
+            cr:push_group_with_content(cairo.Content.ALPHA)
             local pattern = cairo.Pattern.create_radial(width, width, 0,
                                                         width, width, width)
-            pattern:add_color_stop_rgba(0.5, shade_light_r, shade_light_g, shade_light_b, shade_light_a)
+            pattern:add_color_stop_rgba(0.5, shade_light_r, shade_light_g, shade_light_b, 1)
             pattern:add_color_stop_rgba(1, shade_light_r, shade_light_g, shade_light_b, 0)
             cr:move_to(width, width)
             cr:arc(width, width, width, -math.pi, -math.pi / 2)
             cr:set_source(pattern)
             cr:fill()
+            local mask = cr:pop_group()
+
+            cr:set_source(color_pattern)
+            cr:mask(mask)
+
+            dispose_pattern(mask)
 
             cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
             cr:move_to(width, width)
@@ -430,14 +469,58 @@ function module.presets.soft_relief(args)
             end
         end,
         bottom_right_border = function (self, context, cr, _is_shape, width, _height)
-            local pattern = cairo.Pattern.create_radial(shade_dark_r, shade_dark_g, shade_dark_b,
+            local color_pattern = cairo.Pattern.create_mesh()
+            local ctrl_length = width * 0.2652
+            local mid_length = width * 0.7071
+            color_pattern:begin_patch()
+            color_pattern:move_to(width, 0)
+            color_pattern:curve_to(width, ctrl_length,
+                                   mid_length + ctrl_length, mid_length - ctrl_length,
+                                   mid_length, mid_length)
+            color_pattern:line_to(0, 0)
+            color_pattern:line_to(0, 0)
+            color_pattern:set_corner_color_rgba(0, shade_dark_r, shade_dark_g, shade_dark_b, shade_dark_a)
+            color_pattern:set_corner_color_rgba(1, shade_high_dark_r, shade_high_dark_g, shade_high_dark_b, shade_high_dark_a)
+            color_pattern:set_corner_color_rgba(2, shade_high_dark_r, shade_high_dark_g, shade_high_dark_b, shade_high_dark_a)
+            color_pattern:set_corner_color_rgba(3, shade_dark_r, shade_dark_g, shade_dark_b, shade_dark_a)
+            color_pattern:end_patch()
+            color_pattern:begin_patch()
+            color_pattern:move_to(mid_length, mid_length)
+            color_pattern:curve_to(mid_length - ctrl_length, mid_length + ctrl_length,
+                                   ctrl_length, width,
+                                   0, width)
+            color_pattern:line_to(0, 0)
+            color_pattern:line_to(0, 0)
+            color_pattern:set_corner_color_rgba(0, shade_high_dark_r, shade_high_dark_g, shade_high_dark_b, shade_high_dark_a)
+            color_pattern:set_corner_color_rgba(1, shade_dark_r, shade_dark_g, shade_dark_b, shade_dark_a)
+            color_pattern:set_corner_color_rgba(2, shade_dark_r, shade_dark_g, shade_dark_b, shade_dark_a)
+            color_pattern:set_corner_color_rgba(3, shade_high_dark_r, shade_high_dark_g, shade_high_dark_b, shade_high_dark_a)
+            color_pattern:end_patch()
+
+            cr:push_group_with_content(cairo.Content.ALPHA)
+            local pattern = cairo.Pattern.create_radial(0, 0, 0,
                                                         0, 0, width)
-            pattern:add_color_stop_rgba(0.5, shade_dark_r, shade_dark_g, shade_dark_b, shade_dark_a)
+            pattern:add_color_stop_rgba(0.5, shade_dark_r, shade_dark_g, shade_dark_b, 1)
             pattern:add_color_stop_rgba(1, shade_dark_r, shade_dark_g, shade_dark_b, 0)
             cr:move_to(0, 0)
             cr:arc(0, 0, width, 0, math.pi / 2)
             cr:set_source(pattern)
             cr:fill()
+            local mask = cr:pop_group()
+
+            cr:set_source(color_pattern)
+            cr:mask(mask)
+
+            dispose_pattern(mask)
+
+            -- local pattern = cairo.Pattern.create_radial(0, 0, 0,
+            --                                             0, 0, width)
+            -- pattern:add_color_stop_rgba(0.5, shade_dark_r, shade_dark_g, shade_dark_b, shade_dark_a)
+            -- pattern:add_color_stop_rgba(1, shade_dark_r, shade_dark_g, shade_dark_b, 0)
+            -- cr:move_to(0, 0)
+            -- cr:arc(0, 0, width, 0, math.pi / 2)
+            -- cr:set_source(pattern)
+            -- cr:fill()
 
             cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
             cr:move_to(0, 0)

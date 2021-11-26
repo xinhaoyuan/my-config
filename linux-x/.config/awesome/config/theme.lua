@@ -559,7 +559,9 @@ end
 
 theme.decorator = decorator.presets.soft_relief{
     light_shade = "#ffffff40",
+    high_light_shade = "#ffffff80",
     dark_shade = "#00000040",
+    high_dark_shade = "#00000080",
     radius = dpi(6),
     shade_width = theme.decorator_shade_width,
     border_width = theme.decorator_border_width,
