@@ -54,7 +54,12 @@ local function create(config)
         end
     end
 
-    config.keys = config.keys or { ["Alt_L"] = "release_to_exit", ["Alt_R"] = "release_to_exit", ["Tab"] = "switch", ["q"] = "switch_back" }
+    config.keys = config.keys or {
+        ["Alt_L"] = "release_to_exit",
+        ["Alt_R"] = "release_to_exit",
+        ["Tab"] = "switch",
+        ["q"] = "switch_back",
+    }
 
     if config.opacity_other == nil then
         config.opacity_other = 0.5
