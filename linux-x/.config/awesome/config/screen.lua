@@ -214,10 +214,10 @@ local my_bars = {}
 local my_tray
 my_tray = wibox.widget.systray()
 my_tray.horizontal = direction_index[shared.vars.bar_position] == "horizontal"
-my_tray.rows = beautiful.bar_rows
+my_tray.base_size = beautiful.bar_height / beautiful.bar_rows
 local bar_tray_wrapper = wibox.widget {
     my_tray,
-    valign = "center",
+    valign = "bottom",
     widget = wibox.container.place
 }
 
