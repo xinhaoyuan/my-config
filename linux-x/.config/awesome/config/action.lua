@@ -75,7 +75,8 @@ shared.action = {
                      "-combi-modi", "window,drun",
                      "-show", "combi",
                      "-modi", "combi",
-                     "-font", beautiful.font}
+                     "-font", beautiful.font,
+                     "-dpi", tostring(dpi(96))}
         awful.spawn(cmd, false)
     end,
     calendar = function ()
