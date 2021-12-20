@@ -1,3 +1,5 @@
+# -*- mode: sh -*-
+
 . $HOME/.path_profile
 
 if [[ -z "$SHELL" ]]; then
@@ -202,6 +204,7 @@ change_prompt() {
 }
 zle -N change_prompt
 
-alias pop_path=$'PATH=$(echo "$PATH" | sed -e \'s|[^:]*:||\')'
+push_path() { export PATH="$1:$PATH" }
+pop_path() { export PATH="$(echo "$PATH" | sed -e 's|[^:]*:||')" }
 
 bindkey "^P" change_prompt
