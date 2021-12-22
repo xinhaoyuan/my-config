@@ -129,17 +129,20 @@ preexec_date() {
     if [[ "$1" == *$'\n'* ]]; then
         # print simple time for multiline command
         echo -e "$fg_bold[green][${DATE}]${reset_color}"
-    elif [[ "$MY_PROMPT_MODE" = "0" ]]; then
+    elif [[ "$MY_PROMPT_STYLE" = "0" ]]; then
         # Assume expr length S calculate the char width of S on terminal.
         # This would work only for regular ascii cmd ...
         local temp="$1$(print -P %c)"
         C=$(( ( ${#temp} + ${DATE_FORMAT_LEN} + 3 ) / $COLUMNS + 1 ))
-        print -P '%{\033[${C}A$fg_bold[default]%}↓%{${STYLED_DATE}%'$DATE_FORMAT_LEN'G%} %{$reset_color%}'
+        print -nP '%{\033[${C}A\033[${C}M%}'
+        print -nP '%{$fg_bold[default]%}↓%{${STYLED_DATE}%'$DATE_FORMAT_LEN'G%} %{$reset_color%}'
+        print -r "$1"
     else
         # similar to above, but don't count the pwd in. Also swallow the header line.
         W=$(( ${#1} + ${#ML_PROMPT_L2} ))
         C=$(( W / COLUMNS + 1 ))
-        print -nP '%{\033[$((C + 1))A\033[$((C + 1))M$fg_bold[default]%}↓%{${STYLED_DATE}%'$DATE_FORMAT_LEN'G $fg_bold[green]%G%}%~%{${reset_color}%} '
+        print -nP '%{\033[$((C + 1))A\033[$((C + 1))M%}'
+        print -nP '%{$fg_bold[default]%}↓%{${STYLED_DATE}%'$DATE_FORMAT_LEN'G $fg_bold[green]%G%}%~%{${reset_color}%} '
         print -r "$1"
     fi
 
@@ -154,7 +157,7 @@ precmd_date() {
 
     my_title $ZSH_THEME_TERM_TAB_TITLE_IDLE $ZSH_THEME_TERM_TITLE_IDLE
     if [[ -z "$LAST_CMD_TS" ]]; then
-        if [[ "$MY_PROMPT_MODE" = "0" ]]; then
+        if [[ "$MY_PROMPT_STYLE" = "0" ]]; then
             print -n '\033[1A\033[1M\r'
         else
             print -n '\033[2A\033[2M\r'
@@ -162,7 +165,7 @@ precmd_date() {
     else
         duration="$(print -f "%'d" $(($(timestamp_ms) - LAST_CMD_TS)))"
         export LAST_CMD_STATUS="${duration}ms $ret_status"
-        if [[ "$MY_PROMPT_MODE" = "1" ]]; then
+        if [[ "$MY_PROMPT_STYLE" = "1" ]]; then
             print -P '\e[1m↑${duration}ms $ev'
         fi
     fi
@@ -178,7 +181,7 @@ add-zsh-hook preexec preexec_date
 add-zsh-hook precmd precmd_date
 
 set_prompt() {
-  if [[ "$MY_PROMPT_MODE" = "0" ]]; then
+  if [[ "$MY_PROMPT_STYLE" = "0" ]]; then
     PROMPT='%{$fg_bold[default]%}→%{$DATE_PRECMD%'$DATE_FORMAT_LEN'G%} %{$fg_bold[cyan]%}%c%{$reset_color%} '
     RPROMPT=' %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[default]%} ↑${LAST_CMD_STATUS}%{$fg_bold[green]%}%p:${SSH_TTY:+%n@%m:}%j%{$reset_color%}'
   else
@@ -192,12 +195,12 @@ set_prompt() {
   fi
 }
 
-MY_PROMPT_MODE=1
+MY_PROMPT_STYLE=1
 set_prompt
 
 change_prompt() {
-  if [ "$MY_PROMPT_MODE" = "0" ]; then MY_PROMPT_MODE=1
-  elif [ "$MY_PROMPT_MODE" = "1" ]; then MY_PROMPT_MODE=0
+  if [ "$MY_PROMPT_STYLE" = "0" ]; then MY_PROMPT_STYLE=1
+  elif [ "$MY_PROMPT_STYLE" = "1" ]; then MY_PROMPT_STYLE=0
   fi
   set_prompt
   zle reset-prompt
