@@ -72,6 +72,7 @@ local gravity_index = shared.gravity_index
 
 local machi = require("layout-machi")
 local tabber = require("tabber")
+local amnesia_layout = require("amnesia.layout")
 beautiful.layout_machi = machi.get_icon()
 local xlayout = tabber{
     layout = require("external.equalarea"),
@@ -138,20 +139,24 @@ local alayout = require("awful.layout")
 alayout.layouts = {
    machi.default_layout,
    yggdrasil and yggdrasil.create_root{},
-   alayout.suit.tile,
-   alayout.suit.tile.left,
-   alayout.suit.tile.bottom,
-   alayout.suit.tile.top,
-   alayout.suit.fair,
-   alayout.suit.fair.horizontal,
-   alayout.suit.spiral,
-   alayout.suit.spiral.dwindle,
-   alayout.suit.magnifier,
-   alayout.suit.corner.nw,
-   -- alayout.suit.corner.ne,
-   -- alayout.suit.corner.sw,
-   -- alayout.suit.corner.se,
 }
+for _, l in ipairs{
+    alayout.suit.tile,
+    alayout.suit.tile.left,
+    alayout.suit.tile.bottom,
+    alayout.suit.tile.top,
+    alayout.suit.fair,
+    alayout.suit.fair.horizontal,
+    alayout.suit.spiral,
+    alayout.suit.spiral.dwindle,
+    alayout.suit.magnifier,
+    alayout.suit.corner.nw,
+    alayout.suit.corner.ne,
+    alayout.suit.corner.sw,
+    alayout.suit.corner.se,
+} do
+    alayout.layouts[#alayout.layouts + 1] = amnesia_layout.wrap{layout = l}
+end
 
 -- Define the tag list upfront for keybindings
 
