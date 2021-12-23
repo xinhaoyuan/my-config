@@ -72,7 +72,7 @@ local gravity_index = shared.gravity_index
 
 local machi = require("layout-machi")
 local tabber = require("tabber")
-local amnesia_layout = require("amnesia.layout")
+local amnesia = require("amnesia")
 beautiful.layout_machi = machi.get_icon()
 local xlayout = tabber{
     layout = require("external.equalarea"),
@@ -155,7 +155,7 @@ for _, l in ipairs{
     alayout.suit.corner.sw,
     alayout.suit.corner.se,
 } do
-    alayout.layouts[#alayout.layouts + 1] = amnesia_layout.wrap{layout = l}
+    alayout.layouts[#alayout.layouts + 1] = amnesia.wrap_layout{layout = l}
 end
 
 -- Define the tag list upfront for keybindings

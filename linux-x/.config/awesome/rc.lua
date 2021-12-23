@@ -45,7 +45,6 @@ local HOME_DIR = os.getenv("HOME")
 
 os.execute(HOME_DIR .. "/.xdesktoprc")
 
-require("amnesia.tag")
 local config = require("config")
 local beautiful = require("beautiful")
 local gstring = require("gears.string")
