@@ -1411,7 +1411,7 @@ local global_keys = table_join(
 
 -- shared.screen.tags = { "壹", "贰", "叁", "肆" }
 shared.screen.tags = {
-    "☰", "☱", "☲", "☳", -- "☴", "☵", "☶", "☷"
+    "☰", "☱", "☲", "☳", "☴", "☵", "☶", "☷"
 }
 
 for i = 1, #shared.screen.tags do
