@@ -127,10 +127,13 @@ local signal_watched_properties = {
 
 local during_screen_refresh = false
 local client_properties_to_save = setmetatable({}, {__mode = "k"})
+local client_tagged_callback_tag = setmetatable({}, {__mode = "k"})
 local function save_client_properties(client)
     local properties_to_save = client_properties_to_save[client]
     client_properties_to_save[client] = nil
     if not client.valid then return end
+    -- Do not save properties when switching tags. Saving will be done there if needed.
+    if client_tagged_callback_tag[client] ~= nil then return end
     local tag = client.screen.selected_tag
     local layout = tag.layout
     local data = get_data(layout, tag)
@@ -138,7 +141,7 @@ local function save_client_properties(client)
     local info = data.client_info[client]
     if info == nil then return end
     for property, _ in pairs(properties_to_save) do
-        -- print("saved", client, property, client[property], tag, layout)
+        -- print("saved client property", client, property, client[property], tag.name, tag.screen.index, layout)
         info[property] = client[property]
     end
 end
@@ -150,7 +153,7 @@ for i, property in ipairs(properties) do
                 client_properties_to_save[client] = {}
                 gtimer.delayed_call(save_client_properties, client)
             end
-            -- print("signal", client, property)
+            -- print("signal client property", client, property)
             client_properties_to_save[client][property] = true
         end)
 end
@@ -163,40 +166,64 @@ for signal, properties in pairs(signal_watched_properties) do
                 gtimer.delayed_call(save_client_properties, client)
             end
             for _, property in ipairs(properties) do
-                -- print("signal", client, property)
+                -- print("signal client property", client, property)
                 client_properties_to_save[client][property] = true
             end
         end)
 end
 
-local client_tagged_callback_scheduled = setmetatable({}, {__mode = "k"})
-local function client_tagged_callback(client, tag)
-    client_tagged_callback_scheduled[client][tag] = nil
+local function sync_client_info(client_info, client)
+    local info = client_info[client]
+    if info == nil then
+        info = {}
+        for _, property in ipairs(properties) do
+            -- print("stored client property", client, property, client[property])
+            info[property] = client[property]
+        end
+        client_info[client] = info
+    else
+        for _, property in ipairs(properties) do
+            -- Avoid unnecessary hooks.
+            if client[property] ~= info[property] then
+                -- print("restored client property", client, property, info[property])
+                client[property] = info[property]
+            else
+                -- print("skipped client property", client, property)
+            end
+        end
+    end
+end
+
+local function client_tagged_callback(client)
+    local tag = client_tagged_callback_tag[client]
+    client_tagged_callback_tag[client] = nil
     if not client.valid then return end
     -- Otherwise the property changes later may not be tracked while the tag is not the main.
+    -- print("tagged", tag.name, tag.screen.index, tag.screen.selected_tag)
     if tag.screen.selected_tag ~= tag then return end
     local layout = tag.layout
     local data = get_data(layout, tag)
     if data == nil then return end
-    local info = data.client_info[client]
-    if info == nil then
-        info = {}
-        data.client_info[client] = info
-    end
-    for _, property in ipairs(properties) do
-        -- print("tagged", client, property, client[property])
-        info[property] = client[property]
-    end
+    -- print("sync client info", client, tag.name, tag.screen.index, layout)
+    sync_client_info(data.client_info, client)
 end
 capi.client.connect_signal(
     "tagged", function (client, tag)
-        if client_tagged_callback_scheduled[client] == nil then
-            client_tagged_callback_scheduled[client] = setmetatable({}, {__mode = "k"})
+        if client_tagged_callback_tag[client] == nil then
+            -- print("trigger client tagged callback", client)
+            gtimer.delayed_call(client_tagged_callback, client)
         end
-        if client_tagged_callback_scheduled[client][tag] == nil then
-            client_tagged_callback_scheduled[client][tag] = true
-            gtimer.delayed_call(client_tagged_callback, client, tag)
+        client_tagged_callback_tag[client] = tag
+    end)
+-- This is needed since `tagged` may be called after some client properties were synced, which is too late.
+capi.client.connect_signal(
+    "property::screen", function (client)
+        local tag = client.screen.selected_tag
+        if client_tagged_callback_tag[client] == nil then
+            -- print("trigger client tagged callback", client)
+            gtimer.delayed_call(client_tagged_callback, client)
         end
+        client_tagged_callback_tag[client] = tag
     end)
 
 local screen_last_refreshed_data = setmetatable({}, {__mode = "k"})
@@ -211,23 +238,8 @@ local function screen_refresh(s)
     screen_last_refreshed_data[s] = data
     local clients = s.clients
     for _, client in ipairs(clients) do
-        info = data.client_info[client]
-        if info == nil then
-            info = {}
-            for _, property in ipairs(properties) do
-                -- print("init", client, property, client[property], tag, layout)
-                info[property] = client[property]
-            end
-            data.client_info[client] = info
-        else
-            for _, property in ipairs(properties) do
-                -- Avoid unnecessary hooks.
-                if client[property] ~= info[property] then
-                    -- print("restored", client, property, info[property], tag, layout)
-                    client[property] = info[property]
-                end
-            end
-        end
+        -- print("sync client info", client, tag.name, tag.screen.index, layout)
+        sync_client_info(data.client_info, client)
     end
     during_screen_refresh = false
 end
@@ -250,7 +262,7 @@ local alayout = require("awful.layout")
 local original_alayout_get = alayout.get
 alayout.get = function(args)
     local original_layout = original_alayout_get(args)
-    -- print("get", original_layout)
+    -- print("get wrapped layout for", original_layout)
     return wrap_layout(original_layout)
 end
 
