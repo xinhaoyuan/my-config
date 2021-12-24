@@ -4,14 +4,21 @@ local capi = {
     screen = screen,
 }
 local gtimer = require("gears.timer")
-local module = {}
+local module = {
+    ignore_layout = true,
+    ignore_tag = false,
+}
 
-local __default_tag_object = {}
 -- Instance in this module means a wrapped layout.
 local data_per_instance_tag = setmetatable({}, {__mode = "k"})
 local instance_map = setmetatable({}, {__mode = "k"})
+local __default_tag = {}
+local __default_instance = {}
 
 local function get_data_per_tag(instance)
+    if module.ignore_layout then
+        instance = __default_instance
+    end
     local data_per_tag = data_per_instance_tag[instance]
     if data_per_tag == nil then
         data_per_tag = setmetatable({}, {__mode = "k"})
@@ -22,6 +29,9 @@ end
 
 local function get_data(instance, tag)
     local data_per_tag = get_data_per_tag(instance)
+    if module.ignore_tag then
+        tag = __default_tag
+    end
     local data = data_per_tag[tag]
     if data == nil then
         data = {
@@ -90,7 +100,7 @@ local function wrap_layout(base_layout)
     function instance.arrange(params)
         local tag = params.tag or
             (params.screen and capi.screen[params.screen].selected_tag) or
-            __default_tag_object
+            __default_tag
         local data = get_data(instance, tag)
         local client_order = data.client_order
         local clients = params.clients
