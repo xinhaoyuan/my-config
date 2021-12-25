@@ -37,6 +37,8 @@ DEP_ARRAY=(
     libstartup-notification0-dev
     libxdg-basedir-dev
     libdbus-1-dev
+    # seems required for awesomewm testing
+    dbus-x11
     # oomox
     libgtk-3-dev
     python3-pil
