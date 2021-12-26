@@ -37,23 +37,40 @@ local function get_data(instance, tag)
         data = {
             client_order = setmetatable({}, {__mode = "k"}),
             client_info = setmetatable({}, {__mode = "k"}),
-            ticket_count = 0,
+            max_rank = 0,
         }
         data_per_tag[tag] = data
     end
     return data
 end
 
-local function sort_clients(clients, client_order)
+local function sort_clients(clients, data)
+    local client_order = data.client_order
+    local rank_slot = {}
+    for i, c in pairs(clients) do
+        local rank = client_order[c].rank
+        assert(rank_slot[rank] == nil)
+        rank_slot[rank] = c
+    end
+    local index = 0
+    for i = 1, data.max_rank do
+        if rank_slot[i] then
+            index = index + 1
+            clients[index] = rank_slot[i]
+        end
+    end
+    -- Alternatively, use simple sort.
+    --[[
     table.sort(
         clients, function (a, b)
-            return client_order[a].order > client_order[b].order
+            return client_order[a].rank > client_order[b].rank
         end)
+    --]]
 end
 
 local function try_gc(data)
     local client_order = data.client_order
-    if data.ticket_count <= capi.client.instances() * 2 then
+    if data.max_rank <= capi.client.instances() * 2 then
         return
     end
     local all_clients = {}
@@ -62,11 +79,11 @@ local function try_gc(data)
             all_clients[#all_clients + 1] = c
         end
     end
-    sort_clients(all_clients, client_order)
+    sort_clients(all_clients, data)
     for i, c in ipairs(all_clients) do
-        client_order[c].order = i
+        client_order[c].rank = i
     end
-    data.ticket_count = #all_clients
+    data.max_rank = #all_clients
 end
 
 local function swapped_callback(source, target, is_source)
@@ -107,12 +124,12 @@ local function wrap_layout(base_layout)
         for _, c in ipairs(clients) do
             local order = client_order[c]
             if order == nil then
-                data.ticket_count = data.ticket_count + 1
-                order = { order = data.ticket_count }
+                data.max_rank = data.max_rank + 1
+                order = { rank = data.max_rank }
                 client_order[c] = order
             end
         end
-        sort_clients(clients, client_order)
+        sort_clients(clients, data)
         try_gc(data)
         base_layout.arrange(params)
     end
