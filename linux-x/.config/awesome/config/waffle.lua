@@ -2494,7 +2494,7 @@ local client_waffle = view {
             local c = shared.waffle_selected_client
             local clients
             if key == "Prior" or key == "Next" then
-                clients = capi.client.get(c.screen)
+                clients = c.screen.clients
                 table.sort(clients, function (a, b)
                                return fts.get(a) > fts.get(b)
                            end)
