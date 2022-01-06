@@ -891,13 +891,24 @@ local function setup_screen(scr)
                    x = scr.geometry.x,
                    y = scr.geometry.y + scr.geometry.height
                }
-               capi.awesome.emit_signal("show_main_waffle", {anchor = anchor, autohide = 0.5})
+               local locking_callback = function ()
+                   if capi.mouse.current_widgets then
+                       for _, w in ipairs(capi.mouse.current_widgets) do
+                           if w == scr.widgets.indicator then return true end
+                       end
+                   end
+               end
+               capi.awesome.emit_signal(
+                   "show_main_waffle", {
+                       anchor = anchor,
+                       autohide = 0.5,
+                       autohide_locking_callback = locking_callback,
+                   })
            end
-           waffle:autohide_lock_acquire()
        end)
    scr.widgets.indicator:connect_signal(
        'mouse::leave', function()
-           waffle:autohide_lock_release()
+           waffle:autohide_delayed_check(true)
        end)
    left_layout:add(scr.widgets.indicator)
    left_layout:add(scr.widgets.tag_list)
@@ -1038,13 +1049,24 @@ local function setup_screen(scr)
                    x = scr.geometry.x + scr.geometry.width,
                    y = scr.geometry.y + scr.geometry.height
                }
-               capi.awesome.emit_signal("show_calendar_waffle", {anchor = anchor, autohide = 0.5})
+               local locking_callback = function ()
+                   if capi.mouse.current_widgets then
+                       for _, w in ipairs(capi.mouse.current_widgets) do
+                           if w == clock_area then return true end
+                       end
+                   end
+               end
+               capi.awesome.emit_signal(
+                   "show_calendar_waffle", {
+                       anchor = anchor,
+                       autohide = 0.5,
+                       autohide_locking_callback = locking_callback,
+                   })
            end
-           waffle:autohide_lock_acquire()
        end)
    clock_area:connect_signal(
        'mouse::leave', function()
-           waffle:autohide_lock_release()
+           waffle:autohide_delayed_check(true)
        end)
    right_layout:add(clock_area)
    scr.widgets.clock_area = clock_area
@@ -1163,6 +1185,8 @@ local function setup_screen(scr)
    scr.widgets.bar.widget = layout
    scr.widgets.bar.visible = true
 end
+
+capi.screen.connect_signal("list", function() waffle:autohide_delayed_check() end)
 
 -- Avoid nested call of reset_widgets
 local reset_widgets_flag = false

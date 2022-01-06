@@ -109,17 +109,24 @@ local function attach_tasklist_item_buttons(w, c)
             if wgeo ~= nil then
                 local waffle_scr = waffle:get_screen()
                 if waffle:autohide() or waffle_scr == nil or waffle_scr ~= wb.screen then
+                    local locking_callback = function ()
+                        if capi.mouse.current_widgets then
+                            for _, ow in ipairs(capi.mouse.current_widgets) do
+                                if ow == w then return true end
+                            end
+                        end
+                    end
                     shared.waffle.show_client_waffle(
                         c, {
                             anchor = {
                                 x = wb.x + wgeo.x + wgeo.width / 2,
                                 y = wb.y + wgeo.y + wgeo.height / 2
                             },
-                            autohide= 0.5
+                            autohide = 0.5,
+                            autohide_locking_callback = locking_callback,
                         })
                 end
             end
-            waffle:autohide_lock_acquire()
         end)
     w:connect_signal(
         'mouse::leave', function (w, x, y, button)
@@ -137,9 +144,11 @@ local function attach_tasklist_item_buttons(w, c)
                 awful.mouse.client.resize(c, "bottom_right")
             end
             w.button_pressed = {}
-            waffle:autohide_lock_release()
+            waffle:autohide_delayed_check(true)
         end)
 end
+
+capi.client.connect_signal("list", function() waffle:autohide_delayed_check() end)
 
 local property_to_text = {
     {"sticky", "S"},

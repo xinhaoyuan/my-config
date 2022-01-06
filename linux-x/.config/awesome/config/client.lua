@@ -1020,6 +1020,12 @@ require("awful.rules").rules = {
            titlebar_style = "full_top",
        },
    },
+   {
+       rule = { class = "qBittorrent", type = "normal" },
+       properties = {
+           tasklist_icon_only = true,
+       },
+   },
 }
 
 client.disconnect_signal("request::geometry", awful.ewmh.geometry)

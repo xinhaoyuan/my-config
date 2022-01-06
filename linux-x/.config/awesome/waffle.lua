@@ -202,18 +202,9 @@ function waffle:get_waffle_wibox(screen)
 
         local this = self
         screen_wibox:connect_signal(
-            "mouse::enter",
-            function ()
-                if this.autohide_ and this.autohide_timer_.started then
-                    this.autohide_timer_:stop()
-                end
-            end)
-        screen_wibox:connect_signal(
             "mouse::leave",
             function ()
-                if this.autohide_ and not this.autohide_timer_.started then
-                    this.autohide_timer_:start()
-                end
+                this:autohide_delayed_check(true)
             end)
         self.screen_wibox_[screen] = screen_wibox
     end
@@ -265,23 +256,30 @@ function waffle:show(view, args)
     local screen = args.screen or awful.screen.focused()
 
     if mode == "set" then
-        if args.autohide == nil then
-            self.autohide_ = false
-        else
+        if self.autohide_timer_ == nil then
             local this = self
-            self.autohide_ = true
-            self.autohide_lock_ = 0
             self.autohide_timer_ = gtimer{
-                timeout = args.autohide,
                 single_shot = true,
                 callback = function ()
-                    if this.autohide_lock_ <= 0 and this.autohide_ and
-                        this.wibox_ and mouse.current_wibox ~= this.wibox_
-                    then
+                    if this.autohide_ then
+                        if this.wibox_ and capi.mouse.current_wibox == this.wibox_ then
+                            return
+                        end
+                        if self.autohide_locking_callback_ and self.autohide_locking_callback_() then
+                            return
+                        end
                         this:hide()
                     end
                 end,
             }
+        end
+        if self.autohide_timer_.started then
+            self.autohide_timer_:stop()
+        end
+        if args.autohide then
+            self.autohide_ = true
+            self.autohide_locking_callback_ = args.autohide_locking_callback
+            self.autohide_timer_.timeout = tonumber(args.autohide) or 1
         end
     end
 
@@ -391,38 +389,23 @@ function waffle:hide()
     self:set_view(nil)
     self:clear_stack()
     self:disconnect_button_signals()
+    self.autohide_ = false
+    self.autohide_locking_callback_ = nil
     capi.awesome.emit_signal("waffle.hide")
 end
 
-waffle.autohide_lock_ = 0
-
-function waffle:autohide_lock_acquire()
-    if not self.autohide_ then
-        return
-    end
-    self.autohide_lock_ = self.autohide_lock_ + 1
-    if self.autohide_lock_ > 0 and self.autohide_timer_.started then
-        self.autohide_timer_:stop()
-    end
-end
-
-function waffle:autohide_lock_release()
-    if not self.autohide_ then
-        return
-    end
-    if self.autohide_lock_ > 0 then
-        self.autohide_lock_ = self.autohide_lock_ - 1
-    end
-    if self.autohide_lock_ == 0 and not self.autohide_timer_.started then
+function waffle:autohide_delayed_check(reset)
+    if self.autohide_ then
+        if self.autohide_timer_.started then
+            if reset then
+                self.autohide_timer_:stop()
+            else
+                return
+            end
+        end
         self.autohide_timer_:start()
     end
 end
-
-capi.screen.connect_signal(
-    "list", function()
-        waffle.autohide_lock_ = 0
-        waffle:hide()
-    end)
 
 function waffle:set_root_view(v)
     self.root_view_ = v
