@@ -112,6 +112,20 @@
     </edit>
   </match>
 
+  <?php foreach ([ "sans-serif", "monospace" ] as $font_name) { ?>
+  <match>
+    <test name="family">
+      <string><?=$font_name?></string>
+    </test>
+    <test name="lang" compare="contains">
+      <string>zh-cn</string>
+    </test>
+    <edit name="family" mode="prepend" binding="strong">
+      <string>等距更纱黑体 SC</string>
+    </edit>
+  </match>
+  <?php } ?>
+
   <!-- 双宽度修正 !-->
 
   <match target="font" >
