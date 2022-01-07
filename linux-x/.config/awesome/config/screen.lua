@@ -48,14 +48,15 @@ local table_join = awful.util.table.join
 local delayed = gtimer.delayed_call
 
 local function go_by_direction(dir, with_client)
-   if with_client then
-      local c = capi.client.focus
-      awful.screen.focus_bydirection(dir, c.screen)
-      c:move_to_screen(capi.mouse.screen.index)
-      c:emit_signal("request::activate", "mouse.resize", {raise = true})
-   else
-      awful.screen.focus_bydirection(dir)
-   end
+    if with_client then
+        local c = capi.client.focus
+        if not c then return end
+        awful.screen.focus_bydirection(dir, c.screen)
+        c:move_to_screen(capi.mouse.screen.index)
+        c:emit_signal("request::activate", "mouse.resize", {raise = true})
+    else
+        awful.screen.focus_bydirection(dir)
+    end
 end
 
 local size_index = shared.size_index
