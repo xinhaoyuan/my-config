@@ -23,6 +23,7 @@ local gtimer = require("gears.timer")
 local fts = require("hotpot").focus_timestamp
 
 local find_alternative_focus = function (prev, s)
+    print("find_alternative_focus", prev, s)
    local clients = {}
    for c in awful_client.iterate(
        function (c)
@@ -44,11 +45,16 @@ local find_alternative_focus = function (prev, s)
       end
    )
    if #clients == 0 then
+       print("no client found, returning nil")
       return nil
    end
    for _, c in ipairs(clients) do
-      if c.screen == s then return c end
+       if c.screen == s then
+           print("returning", c)
+           return c
+       end
    end
+   print("returning fallback", clients[1])
    return clients[1]
 end
 
