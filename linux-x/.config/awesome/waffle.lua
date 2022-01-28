@@ -255,6 +255,11 @@ function waffle:show(view, args)
     local mode = args.mode or "set"
     local screen = args.screen or awful.screen.focused()
 
+    view = view or self.root_view_
+    if self.wibox_ ~= nil and self.wibox_.screen ~= screen then
+        self:hide()
+    end
+
     if mode == "set" then
         if self.autohide_timer_ == nil then
             local this = self
@@ -280,12 +285,9 @@ function waffle:show(view, args)
             self.autohide_ = true
             self.autohide_locking_callback_ = args.autohide_locking_callback
             self.autohide_timer_.timeout = tonumber(args.autohide) or 1
+        else
+            self.autohide_ = false
         end
-    end
-
-    view = view or self.root_view_
-    if self.wibox_ ~= nil and self.wibox_.screen ~= screen then
-        self:hide()
     end
 
     if self.wibox_ == nil then
