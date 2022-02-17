@@ -20,6 +20,7 @@ local border = require("border-theme")
 local cbg = require("contextual_background")
 local masked_imagebox = require("masked_imagebox")
 local fallback = require("fallback")
+local manage_ticket = require("manage_ticket")
 local extender = require("extender")
 local cairo = require("lgi").cairo
 local table_join = awful.util.table.join
@@ -849,6 +850,11 @@ end
 capi.client.connect_signal("manage", manage_cb)
 capi.client.connect_signal("property::maximized", reset_decoration)
 capi.client.connect_signal("property::fullscreen", reset_decoration)
+capi.client.connect_signal("property::minimized", function (c)
+                               if c.minimized and awful.client.focus.history.is_enabled() then
+                                   c.manage_ticket = manage_ticket.get_new_ticket()
+                               end
+                           end)
 
 -- rules
 

@@ -94,10 +94,11 @@ local function create(config)
         local start_y = screen.workarea.y
         local current_focus = capi.client.focus
         local client_compare = function (a, b)
-            if a == current_focus then return false elseif b == current_focus then return true end
+            -- -- Move the previous focus to the last
+            -- if a == current_focus then return false elseif b == current_focus then return true end
             -- prioritize non-minimized client
-            if a.minimized ~= b.minimized then
-                return b.minimized
+            if (a.saved or a).minimized ~= (b.saved or b).minimized then
+                return (b.saved or b).minimized
             end
             return fts.get(a) > fts.get(b)
         end
