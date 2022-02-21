@@ -8,6 +8,11 @@ local module = {
     ignore_layout = true,
     ignore_tag = false,
 }
+local logging_error = 0
+local logging_warning = 1
+local logging_info = 2
+local logging_noise = 3
+local logging = logging_noise
 
 -- Instance in this module means a wrapped layout.
 local data_per_instance_tag = setmetatable({}, {__mode = "k"})
@@ -154,13 +159,18 @@ local signal_watched_properties = {
 
 local during_screen_refresh = false
 local client_properties_to_save = setmetatable({}, {__mode = "k"})
-local client_tagged_callback_tag = setmetatable({}, {__mode = "k"})
+local client_tagged_callback_tags = setmetatable({}, {__mode = "k"})
 local function save_client_properties(client)
     local properties_to_save = client_properties_to_save[client]
     client_properties_to_save[client] = nil
     if not client.valid then return end
     -- Do not save properties when switching tags. Saving will be done there if needed.
-    if client_tagged_callback_tag[client] ~= nil then return end
+    if client_tagged_callback_tags[client] ~= nil then
+        if logging >= logging_info then
+            print("Skipping saving client properties because tagged callback is not empty.")
+        end
+        return
+    end
     local tag = client.screen.selected_tag
     local layout = tag.layout
     local data = get_data(layout, tag)
@@ -168,7 +178,9 @@ local function save_client_properties(client)
     local info = data.client_info[client]
     if info == nil then return end
     for property, _ in pairs(properties_to_save) do
-        -- print("saved client property", client, property, client[property], tag.name, tag.screen.index, layout)
+        if logging >= logging_info then
+            print("Saved client property", client, property, client[property], tag.name, tag.screen.index, layout, info)
+        end
         info[property] = client[property]
     end
 end
@@ -204,7 +216,9 @@ local function sync_client_info(client_info, client)
     if info == nil then
         info = {}
         for _, property in ipairs(properties) do
-            -- print("stored client property", client, property, client[property])
+            if logging >= logging_info then
+                print("Storing client property", client, property, client[property], info)
+            end
             info[property] = client[property]
         end
         client_info[client] = info
@@ -212,45 +226,57 @@ local function sync_client_info(client_info, client)
         for _, property in ipairs(properties) do
             -- Avoid unnecessary hooks.
             if client[property] ~= info[property] then
-                -- print("restored client property", client, property, info[property])
+                if logging >= logging_info then
+                    print("Restoring client property", client, property, info[property], info)
+                end
                 client[property] = info[property]
             else
-                -- print("skipped client property", client, property)
+                if logging >= logging_noise then
+                    print("Skipping unchanged client property", client, property, info[property], info)
+                end
             end
         end
     end
 end
 
 local function client_tagged_callback(client)
-    local tag = client_tagged_callback_tag[client]
-    client_tagged_callback_tag[client] = nil
+    local callback_tags = client_tagged_callback_tags[client]
+    client_tagged_callback_tags[client] = nil
     if not client.valid then return end
-    -- Otherwise the property changes later may not be tracked while the tag is not the main.
-    -- print("tagged", tag.name, tag.screen.index, tag.screen.selected_tag)
-    if tag.screen.selected_tag ~= tag then return end
+    local tag = client.screen.selected_tag
+    if not callback_tags[tag] then
+        if logging >= logging_info then
+            print("Skipping client tag because it is not the main tag of the screen")
+        end
+        return
+    end
     local layout = tag.layout
     local data = get_data(layout, tag)
     if data == nil then return end
-    -- print("sync client info", client, tag.name, tag.screen.index, layout)
+    if logging >= logging_info then
+        print("Syncing client info", client, tag.name, tag.screen.index, layout)
+    end
     sync_client_info(data.client_info, client)
 end
 capi.client.connect_signal(
     "tagged", function (client, tag)
-        if client_tagged_callback_tag[client] == nil then
+        if client_tagged_callback_tags[client] == nil then
+            client_tagged_callback_tags[client] = {}
             -- print("trigger client tagged callback", client)
             gtimer.delayed_call(client_tagged_callback, client)
         end
-        client_tagged_callback_tag[client] = tag
+        client_tagged_callback_tags[client][tag] = true
     end)
 -- This is needed since `tagged` may be called after some client properties were synced, which is too late.
 capi.client.connect_signal(
     "property::screen", function (client)
         local tag = client.screen.selected_tag
-        if client_tagged_callback_tag[client] == nil then
+        if client_tagged_callback_tags[client] == nil then
+            client_tagged_callback_tags[client] = {}
             -- print("trigger client tagged callback", client)
             gtimer.delayed_call(client_tagged_callback, client)
         end
-        client_tagged_callback_tag[client] = tag
+        client_tagged_callback_tags[client][tag] = true
     end)
 
 local screen_last_refreshed_data = setmetatable({}, {__mode = "k"})
@@ -263,9 +289,11 @@ local function screen_refresh(s)
     local data = get_data(layout, tag)
     if data == nil then return end
     screen_last_refreshed_data[s] = data
-    local clients = s.clients
+    local clients = s.all_clients
     for _, client in ipairs(clients) do
-        -- print("sync client info", client, tag.name, tag.screen.index, layout)
+        if logging >= logging_info then
+            print("Syncing client info", client, tag.name, tag.screen.index, layout)
+        end
         sync_client_info(data.client_info, client)
     end
     during_screen_refresh = false
