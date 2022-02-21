@@ -26,10 +26,11 @@ local function activate_client(c)
     c:emit_signal("request::activate", "switch", {raise=false})
 end
 
--- the default filter will get all focusable client with any selected tags
+-- the default filter will get all focusable client with any selected tags or are sticky
 local function default_filter(c)
     if not awful.client.focus.filter(c) then return false end
     if c.cgroup ~= nil and c.cgroup.current_client ~= c then return false end
+    if c.sticky then return true end
     for _, t in ipairs(c:tags()) do
         if t.selected then
             return true
