@@ -74,7 +74,8 @@ shared.action = {
                      "-normal-window",
                      "-combi-modi", "window,drun",
                      "-show", "combi",
-                     "-modi", "combi",
+                     "-modi", "combi,xmode:rofi_xmode.sh",
+                     "-sidebar-mode",
                      "-font", beautiful.font,
                      "-dpi", tostring(dpi(96))}
         awful.spawn(cmd, false)
