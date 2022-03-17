@@ -2288,6 +2288,9 @@ local client_waffle = view {
                             key = "i",
                             action = function (alt)
                                 local client = shared.waffle_selected_client
+                                if client.valid and not client.minimized then
+                                    client_waffle_attached = false
+                                end
                                 if not alt then
                                     waffle:hide()
                                 end
