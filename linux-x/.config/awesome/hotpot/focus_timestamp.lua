@@ -17,7 +17,7 @@ local function try_compact_focus_timestamp()
                    local a_timestamp = a.focus_timestamp or 0
                    local b_timestamp = b.focus_timestamp or 0
                    return a_timestamp < b_timestamp
-    end)
+               end)
     for i, c in ipairs(clients) do
         c.focus_timestamp = i
     end
@@ -53,7 +53,11 @@ capi.client.connect_signal(
     "manage",
     function (c)
         if c.focus_timestamp == nil then
-            c.focus_timestamp = 0
+            if capi.client.focus == c then
+                mod.update(c)
+            else
+                c.focus_timestamp = 0
+            end
         else
             if c.focus_timestamp > global_focus_timestamp then
                 global_focus_timestamp = c.focus_timestamp
