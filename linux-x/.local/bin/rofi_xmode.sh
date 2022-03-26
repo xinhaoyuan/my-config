@@ -3,53 +3,97 @@
 echo "INFO: $ROFI_INFO" >&2
 if [[ $ROFI_INFO = "enter-mode "* ]]; then
     MODE="${ROFI_INFO#enter-mode }"
-    ITEM=""
+    ACTION=""
 else
     MODE="${ROFI_INFO%% *}"
-    ITEM="${ROFI_INFO#${MODE} }"
+    ACTION="${ROFI_INFO#${MODE} }"
 fi
-echo "MODE[$MODE] ITEM[$ITEM]" >&2
+echo "MODE[$MODE] ACTION[$ACTION]" >&2
+
+declare -a _ROFI_ACTION_NAME
+declare -a _ROFI_ACTION_INFO
+declare -a _ROFI_ACTION_ACTIVE
+declare -a _ROFI_ACTION_URGENT
+declare _ROFI_MESSAGE=""
 
 action() {
-    echo -e "$1\0info\x1f$MODE $2"
+    _ROFI_ACTION_NAME+=("$1")
+    if [[ "$2" = "enter-mode "* ]]; then
+        _ROFI_ACTION_INFO+=("$2")
+    else
+        _ROFI_ACTION_INFO+=("$MODE $2")
+    fi
 }
 
-mode() {
-    echo -e "$1\0info\x1fenter-mode $2"
+set_message() {
+    _ROFI_MESSAGE="$1"
 }
 
-case "$MODE" in
-    "")
-        case "$ITEM" in
-            "")
-                mode "Toggle xinput devices" "toggle-xinput"
-                ;;
-        esac
-        ;;
-    toggle-xinput)
-        case "$ITEM" in
-            "")
-                IFS=$'\n'
-                XINPUT_REGEX="↳ (.*[^ ]) *id=([0-9]*)"
-                for line in `xinput list | sort`; do
-                    if [[ $line =~ $XINPUT_REGEX ]]; then
-                        NAME="${BASH_REMATCH[1]}"
-                        ID="${BASH_REMATCH[2]}"
-                        action "$NAME" "$ID"
-                    fi
-                done
-                ;;
-            *)
-                ID="$ITEM"
-                ENABLED_LINE=`xinput list-props "$ID" | grep -e "Device Enabled"`
+write_rofi_output() {
+    if [[ -n "$_ROFI_MESSAGE" ]]; then
+        echo -e "\0message\x1f$_ROFI_MESSAGE"
+    fi
+    for ((i=0; i<${#_ROFI_ACTION_NAME[@]};i++)); do
+        echo -e "${_ROFI_ACTION_NAME[$i]}\0info\x1f${_ROFI_ACTION_INFO[$i]}"
+    done
+}
+
+list_xinput_devices() {
+    local PREVIOUS_ID="$1"
+    local IFS=$'\n'
+    local XINPUT_REGEX="↳ (.*[^ ]) *id=([0-9]*)"
+    local XINPUT_DISABLE_REGEX=".*This device is disabled.*"
+    local -a DEVICE_NAME
+    local -A DEVICE_ENABLED
+    local -A DEVICE_ID
+    for line in `xinput list --long`; do
+        if [[ $line =~ $XINPUT_REGEX ]]; then
+            NAME="${BASH_REMATCH[1]}"
+            ID="${BASH_REMATCH[2]}"
+            DEVICE_NAME+=("$NAME")
+            DEVICE_ID[$NAME]="$ID"
+            DEVICE_ENABLED[$NAME]=1
+        elif [[ $line = *"This device is disabled" ]]; then
+            DEVICE_ENABLED[$NAME]=0
+        fi
+    done
+    DEVICE_NAME=($(sort <<<"${DEVICE_NAME[*]}"))
+    for NAME in "${DEVICE_NAME[@]}"; do
+        if (( ${DEVICE_ENABLED[$NAME]} )); then
+            action "$NAME" "${DEVICE_ID[$NAME]}"
+        else
+            action "$NAME disabled" "${DEVICE_ID[$NAME]}"
+        fi
+    done
+}
+
+process_action() {
+    local MODE="$1"
+    local ACTION="$2"
+    case "$MODE" in
+        "")
+            case "$ACTION" in
+                "")
+                    action "Toggle xinput devices" "enter-mode toggle-xinput"
+                    ;;
+            esac
+            ;;
+        toggle-xinput)
+            if [[ -n "$ACTION" ]]; then
+                local ID="$ACTION"
+                local ENABLED_LINE=`xinput list-props "$ID" | grep -e "Device Enabled"`
                 if [[ $ENABLED_LINE = *:*1 ]]; then
                     echo "Disabling xinput device $ID" >&2
-                    coproc xinput disable "$ID" >/dev/null
+                    xinput disable "$ID" >/dev/null
                 else
                     echo "Enabling xinput device $ID" >&2
-                    coproc xinput enable "$ID" >/dev/null
+                    xinput enable "$ID" >/dev/null
                 fi
-                ;;
-        esac
-        ;;
-esac
+            fi
+            list_xinput_devices "$ACTION"
+            ;;
+    esac
+}
+
+process_action "$MODE" "$ACTION"
+write_rofi_output
