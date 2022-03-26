@@ -369,7 +369,7 @@ function module.create(scr)
                 local non_hidden_clients = {}
                 for i = 1, #all_clients do
                     local c = all_clients[i]
-                    if c.cgroup == nil or c.cgroup.current_client ~= c then
+                    if c.cgroup == nil or c.cgroup.current_client == c then
                         non_hidden_clients[#non_hidden_clients + 1] = c
                     end
                 end

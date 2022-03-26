@@ -32,7 +32,9 @@ local shared = {
                        local b_iconized = b.cgroup == nil and b.tasklist_icon_only == true
                        if a_iconized ~= b_iconized then return b_iconized end
                        -- Minimized windows appear at last
-                       if (a.cgroup or a).minimized ~= (b.cgroup or b).minimized then return (b.cgroup or b).minimized end
+                       if (a.cgroup and a.cgroup.current_client or a).minimized ~= (b.cgroup and b.cgroup.current_client or b).minimized then
+                           return (b.cgroup and b.cgroup.current_client or b).minimized
+                       end
                        local a_ticket = a.cgroup and ticket[a.cgroup] or a.manage_ticket
                        local b_ticket = b.cgroup and ticket[b.cgroup] or b.manage_ticket
                        if a_ticket == b_ticket then

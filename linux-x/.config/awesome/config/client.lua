@@ -851,7 +851,7 @@ capi.client.connect_signal("manage", manage_cb)
 capi.client.connect_signal("property::maximized", reset_decoration)
 capi.client.connect_signal("property::fullscreen", reset_decoration)
 capi.client.connect_signal("property::minimized", function (c)
-                               if awful.client.focus.history.is_enabled() then
+                               if awful.client.focus.history.is_enabled() and c.cgroup == nil then
                                    c.manage_ticket = manage_ticket.get_new_ticket()
                                end
                            end)

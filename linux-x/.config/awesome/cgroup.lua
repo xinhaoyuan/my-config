@@ -112,6 +112,7 @@ function cgroup:switch(client, force_show)
         return
     end
     self.in_switch = true
+    awful.client.focus.history.disable_tracking()
 
     local old_client = self.current_client
     self.current_client = client
@@ -127,6 +128,7 @@ function cgroup:switch(client, force_show)
         client.minimized = false
     end
 
+    awful.client.focus.history.enable_tracking()
     self.in_switch = false
 
     self:emit_signal('switch', old_client, client)
