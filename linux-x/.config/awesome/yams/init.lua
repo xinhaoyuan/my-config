@@ -94,7 +94,7 @@ local function create(config)
         local start_x = screen.workarea.x
         local start_y = screen.workarea.y
         local current_focus = capi.client.focus
-        local client_compare = function (a, b)
+        local function client_compare (a, b)
             -- -- Move the previous focus to the last
             -- if a == current_focus then return false elseif b == current_focus then return true end
             -- prioritize non-minimized client
@@ -103,7 +103,7 @@ local function create(config)
             end
             return fts.get(a) > fts.get(b)
         end
-        local saved_client_compare = screen.client_compare
+        local saved_tasklist_clients = screen.tasklist_clients
 
         local panel = nil
 
@@ -187,8 +187,8 @@ local function create(config)
                 c:raise()
             end
 
-            if screen.client_compare ~= saved_client_compare then
-                screen.client_compare = saved_client_compare
+            if screen.tasklist_clients ~= saved_tasklist_clients then
+                screen.tasklist_clients = saved_tasklist_clients
                 capi.client.emit_signal("list")
             end
         end
@@ -282,7 +282,9 @@ local function create(config)
         end
 
         awful.client.focus.history.disable_tracking()
-        screen.client_compare = client_compare
+        screen.tasklist_clients = function ()
+            return tablist
+        end
         capi.client.emit_signal("list")
 
         switch(true)
