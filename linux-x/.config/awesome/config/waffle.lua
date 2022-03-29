@@ -2495,15 +2495,7 @@ local client_waffle = view {
             if not client_waffle_attached then return end
 
             local c = shared.waffle_selected_client
-            local clients
-            if key == "Prior" or key == "Next" then
-                clients = c.screen.clients
-                table.sort(clients, function (a, b)
-                               return fts.get(a) > fts.get(b)
-                           end)
-            else
-                clients = shared.tasklist_order_function(capi.client.get(c.screen))
-            end
+            local clients = c.screen.tasklist_clients()
 
             local forward = key == "Prior" or key == ","
             for i = 1, #clients do

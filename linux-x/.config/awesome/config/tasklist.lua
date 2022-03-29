@@ -363,37 +363,7 @@ function module.create(scr)
         -- buttons = my_tasklist_buttons,
         style = { font = beautiful.font },
         layout = beautiful.tasklist_layout[direction_index[shared.vars.bar_position]][beautiful.bar_style],
-        source = function ()
-            if scr.tasklist_clients then return scr:tasklist_clients() end
-            -- Default source
-            local clients = awful.widget.tasklist.source.all_clients()
-            local ticket = {}
-            for _, c in ipairs(clients) do
-                if c.cgroup then
-                    local old_ticket = ticket[c.cgroup]
-                    ticket[c.cgroup] = (old_ticket == nil) and c.manage_ticket or math.min(old_ticket, c.manage_ticket)
-                end
-            end
-            table.sort(clients,
-                       function (a, b)
-                           local a_iconized = a.cgroup == nil and a.tasklist_icon_only == true
-                           local b_iconized = b.cgroup == nil and b.tasklist_icon_only == true
-                           if a_iconized ~= b_iconized then return b_iconized end
-                           -- Minimized windows appear at last
-                           if (a.cgroup and a.cgroup.current_client or a).minimized ~= (b.cgroup and b.cgroup.current_client or b).minimized then
-                               return (b.cgroup and b.cgroup.current_client or b).minimized
-                           end
-                           local a_ticket = a.cgroup and ticket[a.cgroup] or a.manage_ticket
-                           local b_ticket = b.cgroup and ticket[b.cgroup] or b.manage_ticket
-                           if a_ticket == b_ticket then
-                               return a.manage_ticket < b.manage_ticket
-                           else
-                               return a_ticket < b_ticket
-                           end
-                       end
-                      )
-            return clients
-        end,
+        source = function () return scr:tasklist_clients() end,
         update_function = function (w, b, l, d, clients, args)
             capi.awesome.emit_signal("tasklist::update::before", scr)
             awful.widget.common.list_update(w, b, l, d, clients, args)

@@ -798,6 +798,36 @@ local function setup_screen(scr)
    scr.widgets = {}
    scr.actions = {}
    local tasklist = tasklist.create(scr)
+   scr.widgets.tasklist = tasklist
+   scr.tasklist_clients = function()
+       local clients = scr.all_clients
+       local ticket = {}
+       for _, c in ipairs(clients) do
+           if c.cgroup then
+               local old_ticket = ticket[c.cgroup]
+               ticket[c.cgroup] = (old_ticket == nil) and c.manage_ticket or math.min(old_ticket, c.manage_ticket)
+           end
+       end
+       table.sort(clients,
+                  function (a, b)
+                      local a_iconized = a.cgroup == nil and a.tasklist_icon_only == true
+                      local b_iconized = b.cgroup == nil and b.tasklist_icon_only == true
+                      if a_iconized ~= b_iconized then return b_iconized end
+                      -- Minimized windows appear at last
+                      if (a.cgroup and a.cgroup.current_client or a).minimized ~= (b.cgroup and b.cgroup.current_client or b).minimized then
+                          return (b.cgroup and b.cgroup.current_client or b).minimized
+                      end
+                      local a_ticket = a.cgroup and ticket[a.cgroup] or a.manage_ticket
+                      local b_ticket = b.cgroup and ticket[b.cgroup] or b.manage_ticket
+                      if a_ticket == b_ticket then
+                          return a.manage_ticket < b.manage_ticket
+                      else
+                          return a_ticket < b_ticket
+                      end
+                  end
+                 )
+       return clients
+   end
    local tasklist_with_fallback = {
        tasklist,
        {
