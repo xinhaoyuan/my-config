@@ -15,9 +15,13 @@ declare -a _ROFI_ACTION_INFO
 declare -a _ROFI_ACTION_ACTIVE
 declare -a _ROFI_ACTION_URGENT
 declare _ROFI_MESSAGE=""
+declare _ROFI_SELECTED=""
 
 action() {
     _ROFI_ACTION_NAME+=("$1")
+    if [[ ",$3," = *,selected,* ]]; then
+        _ROFI_SELECTED=${#_ROFI_ACTION_INFO[@]}
+    fi
     if [[ "$2" = "enter-mode "* ]]; then
         _ROFI_ACTION_INFO+=("$2")
     else
@@ -32,6 +36,9 @@ set_message() {
 write_rofi_output() {
     if [[ -n "$_ROFI_MESSAGE" ]]; then
         echo -e "\0message\x1f$_ROFI_MESSAGE"
+    fi
+    if [[ -n "$_ROFI_SELECTED" ]]; then
+        echo -e "\0selected\x1f$_ROFI_SELECTED"
     fi
     for ((i=0; i<${#_ROFI_ACTION_NAME[@]};i++)); do
         echo -e "${_ROFI_ACTION_NAME[$i]}\0info\x1f${_ROFI_ACTION_INFO[$i]}"
@@ -48,7 +55,7 @@ list_xinput_devices() {
     local -A DEVICE_ID
     for line in `xinput list --long`; do
         if [[ $line =~ $XINPUT_REGEX ]]; then
-            NAME="${BASH_REMATCH[1]}"
+            NAME="${BASH_REMATCH[1]} (${BASH_REMATCH[2]})"
             ID="${BASH_REMATCH[2]}"
             DEVICE_NAME+=("$NAME")
             DEVICE_ID[$NAME]="$ID"
@@ -59,10 +66,14 @@ list_xinput_devices() {
     done
     DEVICE_NAME=($(sort <<<"${DEVICE_NAME[*]}"))
     for NAME in "${DEVICE_NAME[@]}"; do
+        local ATTR=""
+        if [[ ${DEVICE_ID[$NAME]} = $PREVIOUS_ID ]]; then
+            ATTR=selected
+        fi
         if (( ${DEVICE_ENABLED[$NAME]} )); then
-            action "$NAME" "${DEVICE_ID[$NAME]}"
+            action "$NAME" "${DEVICE_ID[$NAME]}" "$ATTR"
         else
-            action "$NAME disabled" "${DEVICE_ID[$NAME]}"
+            action "$NAME disabled" "${DEVICE_ID[$NAME]}" "$ATTR"
         fi
     done
 }
