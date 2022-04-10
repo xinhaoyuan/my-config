@@ -12,7 +12,7 @@ local logging_error = 0
 local logging_warning = 1
 local logging_info = 2
 local logging_noise = 3
-local logging = logging_noise
+module.log_level = logging_warning
 
 -- Instance in this module means a wrapped layout.
 local data_per_instance_tag = setmetatable({}, {__mode = "k"})
@@ -166,7 +166,7 @@ local function save_client_properties(client)
     if not client.valid then return end
     -- Do not save properties when switching tags. Saving will be done there if needed.
     if client_tagged_callback_tags[client] ~= nil then
-        if logging >= logging_info then
+        if module.log_level >= logging_info then
             print("Skipping saving client properties because tagged callback is not empty.")
         end
         return
@@ -178,7 +178,7 @@ local function save_client_properties(client)
     local info = data.client_info[client]
     if info == nil then return end
     for property, _ in pairs(properties_to_save) do
-        if logging >= logging_info then
+        if module.log_level >= logging_info then
             print("Saved client property", client, property, client[property], tag.name, tag.screen.index, layout, info)
         end
         info[property] = client[property]
@@ -216,7 +216,7 @@ local function sync_client_info(client_info, client)
     if info == nil then
         info = {}
         for _, property in ipairs(properties) do
-            if logging >= logging_info then
+            if module.log_level >= logging_info then
                 print("Storing client property", client, property, client[property], info)
             end
             info[property] = client[property]
@@ -226,12 +226,12 @@ local function sync_client_info(client_info, client)
         for _, property in ipairs(properties) do
             -- Avoid unnecessary hooks.
             if client[property] ~= info[property] then
-                if logging >= logging_info then
+                if module.log_level >= logging_info then
                     print("Restoring client property", client, property, info[property], info)
                 end
                 client[property] = info[property]
             else
-                if logging >= logging_noise then
+                if module.log_level >= logging_noise then
                     print("Skipping unchanged client property", client, property, info[property], info)
                 end
             end
@@ -245,7 +245,7 @@ local function client_tagged_callback(client)
     if not client.valid then return end
     local tag = client.screen.selected_tag
     if not callback_tags[tag] then
-        if logging >= logging_info then
+        if module.log_level >= logging_info then
             print("Skipping client tag because it is not the main tag of the screen")
         end
         return
@@ -253,7 +253,7 @@ local function client_tagged_callback(client)
     local layout = tag.layout
     local data = get_data(layout, tag)
     if data == nil then return end
-    if logging >= logging_info then
+    if module.log_level >= logging_info then
         print("Syncing client info", client, tag.name, tag.screen.index, layout)
     end
     sync_client_info(data.client_info, client)
@@ -291,7 +291,7 @@ local function screen_refresh(s)
     screen_last_refreshed_data[s] = data
     local clients = s.all_clients
     for _, client in ipairs(clients) do
-        if logging >= logging_info then
+        if module.log_level >= logging_info then
             print("Syncing client info", client, tag.name, tag.screen.index, layout)
         end
         sync_client_info(data.client_info, client)
