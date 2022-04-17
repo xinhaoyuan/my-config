@@ -156,6 +156,7 @@ local property_to_text = {
     {"ontop", "T"},
     {"floating", "F"},
     {"maximized", "M"},
+    {"minimized", ""},
 }
 
 local function tasklist_update_function(widget, c, index, objects)
@@ -195,6 +196,9 @@ local function tasklist_update_function(widget, c, index, objects)
             if prop[key] == true then
                 status_text = status_text .. text
             end
+        end
+        if status_text == "" and prop["minimized"] then
+            status_text = "m"
         end
     end
     widget.forced_width = forced_width
