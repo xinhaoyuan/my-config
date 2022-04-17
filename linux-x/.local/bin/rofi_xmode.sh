@@ -1,48 +1,33 @@
 #!/bin/bash
 
-echo "INFO: $ROFI_INFO" >&2
-if [[ $ROFI_INFO = "enter-mode "* ]]; then
-    MODE="${ROFI_INFO#enter-mode }"
-    ACTION=""
-else
-    MODE="${ROFI_INFO%% *}"
-    ACTION="${ROFI_INFO#${MODE} }"
-fi
-echo "MODE[$MODE] ACTION[$ACTION]" >&2
+source rofi_script_lib.sh
 
-declare -a _ROFI_ACTION_NAME
-declare -a _ROFI_ACTION_INFO
-declare -a _ROFI_ACTION_ACTIVE
-declare -a _ROFI_ACTION_URGENT
-declare _ROFI_MESSAGE=""
-declare _ROFI_SELECTED=""
-
-action() {
-    _ROFI_ACTION_NAME+=("$1")
-    if [[ ",$3," = *,selected,* ]]; then
-        _ROFI_SELECTED=${#_ROFI_ACTION_INFO[@]}
-    fi
-    if [[ "$2" = "enter-mode "* ]]; then
-        _ROFI_ACTION_INFO+=("$2")
-    else
-        _ROFI_ACTION_INFO+=("$MODE $2")
-    fi
-}
-
-set_message() {
-    _ROFI_MESSAGE="$1"
-}
-
-write_rofi_output() {
-    if [[ -n "$_ROFI_MESSAGE" ]]; then
-        echo -e "\0message\x1f$_ROFI_MESSAGE"
-    fi
-    if [[ -n "$_ROFI_SELECTED" ]]; then
-        echo -e "\0selected\x1f$_ROFI_SELECTED"
-    fi
-    for ((i=0; i<${#_ROFI_ACTION_NAME[@]};i++)); do
-        echo -e "${_ROFI_ACTION_NAME[$i]}\0info\x1f${_ROFI_ACTION_INFO[$i]}"
-    done
+rofi_script_entry() {
+    local MODE="$1"
+    local ACTION="$2"
+    case "$MODE" in
+        "")
+            case "$ACTION" in
+                "")
+                    rofi_action "Toggle xinput devices" "enter-mode toggle-xinput"
+                    ;;
+            esac
+            ;;
+        toggle-xinput)
+            if [[ -n "$ACTION" ]]; then
+                local ID="$ACTION"
+                local ENABLED_LINE=`xinput list-props "$ID" | grep -e "Device Enabled"`
+                if [[ $ENABLED_LINE = *:*1 ]]; then
+                    echo "Disabling xinput device $ID" >&2
+                    xinput disable "$ID" >/dev/null
+                else
+                    echo "Enabling xinput device $ID" >&2
+                    xinput enable "$ID" >/dev/null
+                fi
+            fi
+            list_xinput_devices "$ACTION"
+            ;;
+    esac
 }
 
 list_xinput_devices() {
@@ -71,40 +56,9 @@ list_xinput_devices() {
             ATTR=selected
         fi
         if (( ${DEVICE_ENABLED[$NAME]} )); then
-            action "$NAME" "${DEVICE_ID[$NAME]}" "$ATTR"
+            rofi_action "$NAME" "${DEVICE_ID[$NAME]}" "$ATTR"
         else
-            action "$NAME disabled" "${DEVICE_ID[$NAME]}" "$ATTR"
+            rofi_action "$NAME disabled" "${DEVICE_ID[$NAME]}" "$ATTR"
         fi
     done
 }
-
-process_action() {
-    local MODE="$1"
-    local ACTION="$2"
-    case "$MODE" in
-        "")
-            case "$ACTION" in
-                "")
-                    action "Toggle xinput devices" "enter-mode toggle-xinput"
-                    ;;
-            esac
-            ;;
-        toggle-xinput)
-            if [[ -n "$ACTION" ]]; then
-                local ID="$ACTION"
-                local ENABLED_LINE=`xinput list-props "$ID" | grep -e "Device Enabled"`
-                if [[ $ENABLED_LINE = *:*1 ]]; then
-                    echo "Disabling xinput device $ID" >&2
-                    xinput disable "$ID" >/dev/null
-                else
-                    echo "Enabling xinput device $ID" >&2
-                    xinput enable "$ID" >/dev/null
-                fi
-            fi
-            list_xinput_devices "$ACTION"
-            ;;
-    esac
-}
-
-process_action "$MODE" "$ACTION"
-write_rofi_output
