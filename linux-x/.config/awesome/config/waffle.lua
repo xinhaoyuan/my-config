@@ -2214,9 +2214,16 @@ local waffle_client_pid_button = button{
     end
 }
 
+local close_label = wibox.widget {
+    markup = "Close",
+    widget = wibox.widget.textbox,
+    align = "center",
+}
+
 local update_client_waffle_labels
 local client_waffle_attached = false
 local client_waffle_transient = false
+local client_close_count
 local client_waffle = view {
     root = decorate_waffle {
         decorate_panel {
@@ -2382,21 +2389,27 @@ local client_waffle = view {
                             end
                     }),
                     button({
-                            width = dpi(64),
-                            height = dpi(64),
-                            button_layout = fixed_align.vertical,
-                            markup = "Close",
-                            indicator = em("c"),
-                            key = "c",
-                            action = function (alt)
-                                local client = shared.waffle_selected_client
-                                waffle:hide()
-                                if not client.valid then
-                                    return
-                                end
-                                client:kill()
-                            end,
-                    }),
+                               width = dpi(64),
+                               height = dpi(64),
+                               button_layout = fixed_align.vertical,
+                               label_widget = close_label,
+                               indicator = em("c"),
+                               key = "c",
+                               action = function (alt)
+                                   local client = shared.waffle_selected_client
+                                   if not client.valid then
+                                       waffle:hide()
+                                       return
+                                   end
+                                   client_close_count = client_close_count + 1
+                                   if client_close_count >= 3 then
+                                       waffle:hide()
+                                       client:kill()
+                                   else
+                                       update_client_waffle_labels()
+                                   end
+                               end,
+                           }),
                     layout = wibox.layout.fixed.horizontal,
                 },
                 layout = wibox.layout.fixed.vertical,
@@ -2410,6 +2423,7 @@ local client_waffle = view {
             awful.client.focus.history.disable_tracking()
         end
         client_waffle_transient = false
+        client_close_count = 0
     end,
     on_close = function()
         if client_waffle_attached and not client_waffle_transient then
@@ -2602,6 +2616,12 @@ update_client_waffle_labels = function ()
     if min_cache ~= now_min then
         min_cache = now_min
         min_label:set_markup(now_min and "MIN" or "min")
+    end
+
+    if client_close_count == 0 then
+        close_label:set_markup("Close")
+    else
+        close_label:set_markup("Close "..tostring(client_close_count))
     end
 end
 
