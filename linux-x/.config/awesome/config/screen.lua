@@ -719,7 +719,10 @@ local orgenda_counter_widget = wibox.widget {
         valign = "center",
         widget = wibox.container.place
     },
-    orgenda_counter_text_widget,
+    {
+        orgenda_counter_text_widget,
+        widget = wibox.container.place
+    },
     expand = true,
     horizontal_homogeneous = false,
     layout = wibox.layout.grid[direction_index[shared.vars.bar_position]](beautiful.bar_rows),
