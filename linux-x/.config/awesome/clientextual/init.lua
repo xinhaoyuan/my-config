@@ -225,7 +225,14 @@ local function sync_client_info(client_info, client)
     else
         for _, property in ipairs(properties) do
             -- Avoid unnecessary hooks.
-            if client[property] ~= info[property] then
+            if ((property == "x" or property == "width") and
+                (client.maximized or client.maximized_horizontal)) or
+                ((property == "y" or property == "height") and
+                 (client.maximized or client.maximized_vertical)) then
+                if module.log_level >= logging_noise then
+                    print("Skipping geometry property for maximized client", client, property, info[property], info)
+                end
+            elseif client[property] ~= info[property] then
                 if module.log_level >= logging_info then
                     print("Restoring client property", client, property, info[property], info)
                 end
