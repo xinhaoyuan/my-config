@@ -5,6 +5,7 @@ local capi = {
 }
 local gtimer = require("gears.timer")
 local module = {
+    replace_awful_layouts = true,
     ignore_layout = true,
     ignore_tag = false,
 }
@@ -140,6 +141,7 @@ local function wrap_layout(base_layout)
     end
     return instance
 end
+module.wrap_layout = wrap_layout
 
 local properties = {
     "maximized_horizontal",
@@ -320,12 +322,27 @@ end
 capi.tag.connect_signal("property::selected", maybe_call_screen_refresh)
 capi.tag.connect_signal("property::layout", maybe_call_screen_refresh)
 
-local alayout = require("awful.layout")
-local original_alayout_get = alayout.get
-alayout.get = function(args)
-    local original_layout = original_alayout_get(args)
-    -- print("get wrapped layout for", original_layout)
-    return wrap_layout(original_layout)
+function module.init(settings)
+    if type(settings) == "table" then
+        for k, v in pairs(settings) do
+            if module[k] then
+                module[k] = v
+            end
+        end
+    end
+
+    if module.replace_awful_layouts then
+        local alayout = require("awful.layout")
+        local original_alayout_get = alayout.get
+        alayout.get = function(args)
+            local original_layout = original_alayout_get(args)
+            if module.log_level >= logging_info then
+                print("get wrapped layout for", original_layout)
+            end
+            return wrap_layout(original_layout)
+        end
+    end
 end
 
+setmetatable(module, {__call = function (self, args, ...) self.init(args, ...) end})
 return module
