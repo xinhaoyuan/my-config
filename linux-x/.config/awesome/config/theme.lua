@@ -74,7 +74,7 @@ theme.sep_big_size = dpi(12)
 -- Disabling the native border.
 theme.border_width = 0
 
-theme.decorator_shade_width = dpi(10)
+theme.decorator_shade_width = 0 -- dpi(10)
 theme.decorator_border_width = 3
 theme.decorator_padding_width = 2
 
@@ -558,15 +558,23 @@ else
     theme.rect_with_corners = gshape.rectangle
 end
 
-theme.decorator = decorator.presets.soft_relief{
-    light_shade = "#ffffff40",
-    high_light_shade = "#ffffff80",
-    dark_shade = "#00000040",
-    high_dark_shade = "#00000080",
-    radius = dpi(6),
-    shade_width = theme.decorator_shade_width,
+-- theme.decorator = decorator.presets.soft_relief{
+--     light_shade = "#ffffff40",
+--     high_light_shade = "#ffffff80",
+--     dark_shade = "#00000040",
+--     high_dark_shade = "#00000080",
+--     radius = dpi(6),
+--     shade_width = theme.decorator_shade_width,
+--     border_width = theme.decorator_border_width,
+--     padding_width = theme.decorator_padding_width,
+-- }
+theme.decorator = decorator.presets.cutted_box{
+    padding_color = theme.bg_normal,
     border_width = theme.decorator_border_width,
-    padding_width = theme.decorator_padding_width,
+    inner_padding_width = theme.decorator_padding_width,
+    outer_padding_width = theme.decorator_padding_width,
+    top_left_cut = dpi(8),
+    bottom_right_cut = dpi(8),
 }
 
 local function dispose_pattern(pattern)

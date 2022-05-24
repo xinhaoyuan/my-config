@@ -128,7 +128,7 @@ function module:draw_part(context, cr, part_name, is_shape, width, height)
         cr:fill()
     else
         cr:save()
-        part(self, context, cr, is_shape, width, height)
+        part(self, context, cr, width, height)
         cr:restore()
     end
 end
@@ -181,6 +181,324 @@ local function dispose_pattern(pattern)
     end
 end
 
+function module.presets.box(args)
+    local border_width = args.border_width
+    local inner_padding_width = args.inner_padding_width or 0
+    local outer_padding_width = args.outer_padding_width or 0
+    local padding_color = gcolor(args.padding_color)
+
+    return module.create{
+        top_left_border = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source(padding_color)
+            cr:fill()
+            cr:rectangle(outer_padding_width, outer_padding_width, border_width, height - outer_padding_width)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+            cr:rectangle(outer_padding_width + border_width, outer_padding_width, width - outer_padding_width, border_width)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+        end,
+        top_border = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source(padding_color)
+            cr:fill()
+            cr:rectangle(0, outer_padding_width, width, border_width)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+        end,
+        top_right_border = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source(padding_color)
+            cr:fill()
+            cr:rectangle(0, outer_padding_width, width - outer_padding_width, border_width)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+            cr:rectangle(width - outer_padding_width - border_width, outer_padding_width + border_width, border_width, height - outer_padding_width - border_width)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+        end,
+        left_border = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source(padding_color)
+            cr:fill()
+            cr:rectangle(outer_padding_width, 0, border_width, height)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+        end,
+        right_border = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source(padding_color)
+            cr:fill()
+            cr:rectangle(width - outer_padding_width - border_width, 0, border_width, height)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+        end,
+        bottom_left_border = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source(padding_color)
+            cr:fill()
+            cr:rectangle(outer_padding_width, 0, border_width, height - outer_padding_width)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+            cr:rectangle(outer_padding_width + border_width, height - outer_padding_width - border_width, width - outer_padding_width - border_width, border_width)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+        end,
+        bottom_border = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source(padding_color)
+            cr:fill()
+            cr:rectangle(0, height - outer_padding_width - border_width, width, border_width)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+        end,
+        bottom_right_border = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source(padding_color)
+            cr:fill()
+            cr:rectangle(0, height - outer_padding_width - border_width, width - outer_padding_width, border_width)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+            cr:rectangle(width - outer_padding_width - border_width, 0, border_width, height - outer_padding_width)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+        end,
+        top_left_shape = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source_rgb(0, 0, 0)
+            cr:fill()
+        end,
+        top_shape = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source_rgb(0, 0, 0)
+            cr:fill()
+        end,
+        top_right_shape = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source_rgb(0, 0, 0)
+            cr:fill()
+        end,
+        left_shape = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source_rgb(0, 0, 0)
+            cr:fill()
+        end,
+        right_shape = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source_rgb(0, 0, 0)
+            cr:fill()
+        end,
+        bottom_left_shape = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source_rgb(0, 0, 0)
+            cr:fill()
+        end,
+        bottom_shape = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source_rgb(0, 0, 0)
+            cr:fill()
+        end,
+        bottom_right_shape = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source_rgb(0, 0, 0)
+            cr:fill()
+        end,
+        top_space = border_width + inner_padding_width + outer_padding_width,
+        bottom_space = border_width + inner_padding_width + outer_padding_width,
+        left_space = border_width + inner_padding_width + outer_padding_width,
+        right_space = border_width + inner_padding_width + outer_padding_width,
+        top_size = 0,
+        bottom_size = 0,
+        left_size = 0,
+        right_size = 0,
+    }
+end
+
+local cutting_factor = 2 - math.sqrt(2)
+function module.presets.cutted_box(args)
+    local border_width = args.border_width
+    local inner_padding_width = args.inner_padding_width or 0
+    local outer_padding_width = args.outer_padding_width or 0
+    local tl_cut = args.top_left_cut or args.cut or 0
+    local tr_cut = args.top_right_cut or args.cut or 0
+    local bl_cut = args.bottom_left_cut or args.cut or 0
+    local br_cut = args.bottom_right_cut or args.cut or 0
+    local top_radius = math.max(tl_cut, tr_cut)
+    local bottom_radius = math.max(bl_cut, br_cut)
+    local left_radius = math.max(tl_cut, bl_cut)
+    local right_radius = math.max(tr_cut, br_cut)
+    local padding_color = gcolor(args.padding_color)
+
+    -- Starts at (0, 0) and cuts on the top-left corner.
+    function cutted_rect_corner_path(cr, width, height, cut)
+        cut = math.min(math.max(0, cut), width, height)
+        cr:move_to(0, cut)
+        cr:line_to(cut, 0)
+        cr:line_to(width, 0)
+        cr:line_to(width, height)
+        cr:line_to(0, height)
+        cr:close_path()
+    end
+
+    return module.create{
+        top_left_border = function (self, context, cr, width, height)
+            cutted_rect_corner_path(cr, width, height, tl_cut + outer_padding_width * cutting_factor)
+            cr:set_source(padding_color)
+            cr:fill()
+            cr:translate(outer_padding_width, outer_padding_width)
+            cutted_rect_corner_path(cr, width - outer_padding_width, height - outer_padding_width, tl_cut)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+            cr:translate(border_width, border_width)
+            cutted_rect_corner_path(cr, width - outer_padding_width - border_width, height - outer_padding_width - border_width, tl_cut - border_width * cutting_factor)
+            cr:set_source(padding_color)
+            cr:fill()
+        end,
+        top_border = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source(padding_color)
+            cr:fill()
+            cr:rectangle(0, outer_padding_width, width, border_width)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+        end,
+        top_right_border = function (self, context, cr, width, height)
+            cr:rotate(math.pi / 2)
+            width, height = height, width
+            cr:translate(0, -height)
+
+            cutted_rect_corner_path(cr, width, height, tr_cut + outer_padding_width * cutting_factor)
+            cr:set_source(padding_color)
+            cr:fill()
+            cr:translate(outer_padding_width, outer_padding_width)
+            cutted_rect_corner_path(cr, width - outer_padding_width, height - outer_padding_width, tr_cut)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+            cr:translate(border_width, border_width)
+            cutted_rect_corner_path(cr, width - outer_padding_width - border_width, height - outer_padding_width - border_width, tr_cut - border_width * cutting_factor)
+            cr:set_source(padding_color)
+            cr:fill()
+        end,
+        left_border = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source(padding_color)
+            cr:fill()
+            cr:rectangle(outer_padding_width, 0, border_width, height)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+        end,
+        right_border = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source(padding_color)
+            cr:fill()
+            cr:rectangle(width - outer_padding_width - border_width, 0, border_width, height)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+        end,
+        bottom_left_border = function (self, context, cr, width, height)
+            cr:rotate(-math.pi / 2)
+            width, height = height, width
+            cr:translate(-width, 0)
+
+            cutted_rect_corner_path(cr, width, height, bl_cut + outer_padding_width * cutting_factor)
+            cr:set_source(padding_color)
+            cr:fill()
+            cr:translate(outer_padding_width, outer_padding_width)
+            cutted_rect_corner_path(cr, width - outer_padding_width, height - outer_padding_width, bl_cut)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+            cr:translate(border_width, border_width)
+            cutted_rect_corner_path(cr, width - outer_padding_width - border_width, height - outer_padding_width - border_width, bl_cut - border_width * cutting_factor)
+            cr:set_source(padding_color)
+            cr:fill()
+        end,
+        bottom_border = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source(padding_color)
+            cr:fill()
+            cr:rectangle(0, height - outer_padding_width - border_width, width, border_width)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+        end,
+        bottom_right_border = function (self, context, cr, width, height)
+            cr:rotate(math.pi)
+            cr:translate(-width, -height)
+
+            cutted_rect_corner_path(cr, width, height, br_cut + outer_padding_width * cutting_factor)
+            cr:set_source(padding_color)
+            cr:fill()
+            cr:translate(outer_padding_width, outer_padding_width)
+            cutted_rect_corner_path(cr, width - outer_padding_width, height - outer_padding_width, br_cut)
+            cr:set_source(gcolor(context.focus and beautiful.border_focus or beautiful.border_normal))
+            cr:fill()
+            cr:translate(border_width, border_width)
+            cutted_rect_corner_path(cr, width - outer_padding_width - border_width, height - outer_padding_width - border_width, br_cut - border_width * cutting_factor)
+            cr:set_source(padding_color)
+            cr:fill()
+        end,
+        top_left_shape = function (self, context, cr, width, height)
+            cutted_rect_corner_path(cr, width, height, tl_cut - (border_width + inner_padding_width) * cutting_factor)
+            cr:set_source_rgb(0, 0, 0)
+            cr:fill()
+        end,
+        top_shape = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source_rgb(0, 0, 0)
+            cr:fill()
+        end,
+        top_right_shape = function (self, context, cr, width, height)
+            cr:rotate(math.pi / 2)
+            width, height = height, width
+            cr:translate(0, -height)
+
+            cutted_rect_corner_path(cr, width, height, tr_cut - (border_width + inner_padding_width) * cutting_factor)
+            cr:set_source_rgb(0, 0, 0)
+            cr:fill()
+        end,
+        left_shape = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source_rgb(0, 0, 0)
+            cr:fill()
+        end,
+        right_shape = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source_rgb(0, 0, 0)
+            cr:fill()
+        end,
+        bottom_left_shape = function (self, context, cr, width, height)
+            cr:rotate(-math.pi / 2)
+            width, height = height, width
+            cr:translate(-width, 0)
+
+            cutted_rect_corner_path(cr, width, height, bl_cut - (border_width + inner_padding_width) * cutting_factor)
+            cr:set_source_rgb(0, 0, 0)
+            cr:fill()
+        end,
+        bottom_shape = function (self, context, cr, width, height)
+            cr:rectangle(0, 0, width, height)
+            cr:set_source_rgb(0, 0, 0)
+            cr:fill()
+        end,
+        bottom_right_shape = function (self, context, cr, width, height)
+            cr:rotate(math.pi)
+            cr:translate(-width, -height)
+
+            cutted_rect_corner_path(cr, width, height, br_cut - (border_width + inner_padding_width) * cutting_factor)
+            cr:set_source_rgb(0, 0, 0)
+            cr:fill()
+        end,
+        top_space = border_width + inner_padding_width + outer_padding_width + top_radius,
+        bottom_space = border_width + inner_padding_width + outer_padding_width + bottom_radius,
+        left_space = border_width + inner_padding_width + outer_padding_width + left_radius,
+        right_space = border_width + inner_padding_width + outer_padding_width + right_radius,
+        top_size = top_radius,
+        bottom_size = bottom_radius,
+        left_size = left_radius,
+        right_size = right_radius,
+    }
+end
+
 function module.presets.soft_relief(args)
     local shade_light_r, shade_light_g, shade_light_b, shade_light_a =
         gcolor.parse_color(args.light_shade)
@@ -194,7 +512,7 @@ function module.presets.soft_relief(args)
     local padding_width = args.padding_width or 0
 
     return module.create{
-        top_left_border = function (self, context, cr, _is_shape, width, _height)
+        top_left_border = function (self, context, cr, width, _height)
             local color_pattern = cairo.Pattern.create_mesh()
             local ctrl_length = width * 0.2652
             local mid_length = width * 0.7071
@@ -251,7 +569,7 @@ function module.presets.soft_relief(args)
                 cr:fill()
             end
         end,
-        top_border = function (self, context, cr, _is_shape, width, height)
+        top_border = function (self, context, cr, width, height)
             local pattern = cairo.Pattern.create_linear(0, height, 0, 0)
             pattern:add_color_stop_rgba(0.5, shade_light_r, shade_light_g, shade_light_b, shade_light_a)
             pattern:add_color_stop_rgba(1, shade_light_r, shade_light_g, shade_light_b, 0)
@@ -269,7 +587,7 @@ function module.presets.soft_relief(args)
                 cr:fill()
             end
         end,
-        top_right_border = function (self, context, cr, _is_shape, width, _height)
+        top_right_border = function (self, context, cr, width, _height)
             local color_pattern = cairo.Pattern.create_mesh()
             -- local ctrl_length = width * 0.5523
             -- color_pattern:begin_patch()
@@ -341,7 +659,7 @@ function module.presets.soft_relief(args)
                 cr:fill()
             end
         end,
-        left_border = function (self, context, cr, _is_shape, width, height)
+        left_border = function (self, context, cr, width, height)
             local pattern = cairo.Pattern.create_linear(width, 0, 0, 0)
             pattern:add_color_stop_rgba(0.5, shade_light_r, shade_light_g, shade_light_b, shade_light_a)
             pattern:add_color_stop_rgba(1, shade_light_r, shade_light_g, shade_light_b, 0)
@@ -359,7 +677,7 @@ function module.presets.soft_relief(args)
                 cr:fill()
             end
         end,
-        right_border = function (self, context, cr, _is_shape, width, height)
+        right_border = function (self, context, cr, width, height)
             local pattern = cairo.Pattern.create_linear(0, 0, width, 0)
             pattern:add_color_stop_rgba(0.5, shade_dark_r, shade_dark_g, shade_dark_b, shade_dark_a)
             pattern:add_color_stop_rgba(1, shade_dark_r, shade_dark_g, shade_dark_b, 0)
@@ -377,7 +695,7 @@ function module.presets.soft_relief(args)
                 cr:fill()
             end
         end,
-        bottom_left_border = function (self, context, cr, _is_shape, width, _height)
+        bottom_left_border = function (self, context, cr, width, _height)
             local color_pattern = cairo.Pattern.create_mesh()
             -- local ctrl_length = width * 0.5523
             -- color_pattern:begin_patch()
@@ -450,7 +768,7 @@ function module.presets.soft_relief(args)
                 cr:fill()
             end
         end,
-        bottom_border = function (self, context, cr, _is_shape, width, height)
+        bottom_border = function (self, context, cr, width, height)
             local pattern = cairo.Pattern.create_linear(shade_dark_r, shade_dark_g, shade_dark_b, height)
             pattern:add_color_stop_rgba(0.5, shade_dark_r, shade_dark_g, shade_dark_b, shade_dark_a)
             pattern:add_color_stop_rgba(1, shade_dark_r, shade_dark_g, shade_dark_b, 0)
@@ -468,7 +786,7 @@ function module.presets.soft_relief(args)
                 cr:fill()
             end
         end,
-        bottom_right_border = function (self, context, cr, _is_shape, width, _height)
+        bottom_right_border = function (self, context, cr, width, _height)
             local color_pattern = cairo.Pattern.create_mesh()
             local ctrl_length = width * 0.2652
             local mid_length = width * 0.7071
@@ -534,45 +852,45 @@ function module.presets.soft_relief(args)
                 cr:fill()
             end
         end,
-        top_left_shape = function (self, context, cr, _is_shape, width, _height)
+        top_left_shape = function (self, context, cr, width, _height)
             cr:set_source_rgb(0, 0, 0)
             cr:move_to(width, width)
             cr:arc(width, width, width, -math.pi, -math.pi / 2)
             cr:fill()
         end,
-        top_shape = function (self, context, cr, _is_shape, width, height)
+        top_shape = function (self, context, cr, width, height)
             cr:set_source_rgb(0, 0, 0)
             cr:rectangle(0, 0, width, height)
             cr:fill()
         end,
-        top_right_shape = function (self, context, cr, _is_shape, width, _height)
+        top_right_shape = function (self, context, cr, width, _height)
             cr:set_source_rgb(0, 0, 0)
             cr:move_to(0, width)
             cr:arc(0, width, width, -math.pi / 2, 0)
             cr:fill()
         end,
-        left_shape = function (self, context, cr, _is_shape, width, height)
+        left_shape = function (self, context, cr, width, height)
             cr:set_source_rgb(0, 0, 0)
             cr:rectangle(0, 0, width, height)
             cr:fill()
         end,
-        right_shape = function (self, context, cr, _is_shape, width, height)
+        right_shape = function (self, context, cr, width, height)
             cr:set_source_rgb(0, 0, 0)
             cr:rectangle(0, 0, width, height)
             cr:fill()
         end,
-        bottom_left_shape = function (self, context, cr, _is_shape, width, _height)
+        bottom_left_shape = function (self, context, cr, width, _height)
             cr:set_source_rgb(0, 0, 0)
             cr:move_to(width, 0)
             cr:arc(width, 0, width, math.pi / 2, math.pi)
             cr:fill()
         end,
-        bottom_shape = function (self, context, cr, _is_shape, width, height)
+        bottom_shape = function (self, context, cr, width, height)
             cr:set_source_rgb(0, 0, 0)
             cr:rectangle(0, 0, width, height)
             cr:fill()
         end,
-        bottom_right_shape = function (self, context, cr, _is_shape, width, _height)
+        bottom_right_shape = function (self, context, cr, width, _height)
             cr:set_source_rgb(0, 0, 0)
             cr:move_to(0, 0)
             cr:arc(0, 0, width, 0, math.pi / 2)
