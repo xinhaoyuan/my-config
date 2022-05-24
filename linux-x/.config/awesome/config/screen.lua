@@ -970,14 +970,14 @@ local function setup_screen(scr)
        clock = wibox.widget{
            {
                {
-                   format = "%m<b>%d</b>",
+                   format = "%m/%d",
                    widget = wibox.widget.textclock,
                },
                fg_function = {"minor_"},
                widget = cbg,
            },
            {
-               format = "%H<b>%M</b>",
+               format = "%H:%M",
                widget = wibox.widget.textclock,
            },
            spacing = beautiful.bar_rows == 1 and beautiful.sep_small_size or 0,
