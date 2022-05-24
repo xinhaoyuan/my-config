@@ -12,9 +12,9 @@
 ---------------------------------------------------------------------------
 
 local capi = {
-   client = client,
-   screen = screen,
-   tag = tag,
+    client = client,
+    screen = screen,
+    tag = tag,
 }
 
 local awful = require("awful")
@@ -23,39 +23,39 @@ local gtimer = require("gears.timer")
 local fts = require("hotpot").focus_timestamp
 
 local find_alternative_focus = function (prev, s)
-    print("find_alternative_focus", prev, s)
-   local clients = {}
-   for c in awful_client.iterate(
-       function (c)
-           return c:isvisible() and (c.type == "desktop" or awful_client.focus.filter(c))
-       end
-   ) do
-      clients[#clients + 1] = c
-   end
-   table.sort(
-      clients,
-      function (a, b)
-          if a.type == "desktop" then
-              return false
-          elseif b.type == "desktop" then
-              return true
-          else
-              return fts.get(a) > fts.get(b)
-          end
-      end
-   )
-   if #clients == 0 then
-       print("no client found, returning nil")
-      return nil
-   end
-   for _, c in ipairs(clients) do
-       if c.screen == s then
-           print("returning", c)
-           return c
-       end
-   end
-   print("returning fallback", clients[1])
-   return clients[1]
+    print("find_alternative_focus", prev and prev.valid and tostring(prev), s)
+    local clients = {}
+    for c in awful_client.iterate(
+        function (c)
+            return c:isvisible() and (c.type == "desktop" or awful_client.focus.filter(c))
+        end
+    ) do
+        clients[#clients + 1] = c
+    end
+    table.sort(
+        clients,
+        function (a, b)
+            if a.type == "desktop" then
+                return false
+            elseif b.type == "desktop" then
+                return true
+            else
+                return fts.get(a) > fts.get(b)
+            end
+        end
+    )
+    if #clients == 0 then
+        print("no client found, returning nil")
+        return nil
+    end
+    for _, c in ipairs(clients) do
+        if c.screen == s then
+            print("returning", c)
+            return c
+        end
+    end
+    print("returning fallback", clients[1])
+    return clients[1]
 end
 
 local managed_counter = 0
@@ -73,21 +73,21 @@ local function check_focus(prev, s)
     if not s or not s.valid then return end
     -- When no visible client has the focus...
     if not capi.client.focus or not capi.client.focus:isvisible() or not awful_client.focus.filter(capi.client.focus) then
-      local c = autofocus.find_alternative_focus(prev, s)
-      if c then
-         awful_client.focus.history.disable_tracking()
-         c:emit_signal("request::activate", "autofocus.check_focus",
-                       {raise=false})
-         c:raise()
-         awful_client.focus.history.enable_tracking()
-      end
-   end
+        local c = autofocus.find_alternative_focus(prev, s)
+        if c then
+            awful_client.focus.history.disable_tracking()
+            c:emit_signal("request::activate", "autofocus.check_focus",
+                          {raise=false})
+            c:raise()
+            awful_client.focus.history.enable_tracking()
+        end
+    end
 end
 
 --- Check client focus (delayed).
 -- @param obj An object that should have a .screen property.
 local function check_focus_delayed(obj)
-   gtimer.delayed_call(check_focus, obj, obj.screen)
+    gtimer.delayed_call(check_focus, obj, obj.screen)
 end
 
 --- Give focus on tag selection change.
@@ -112,9 +112,9 @@ function autofocus.unmanage_focus(s)
 end
 
 capi.tag.connect_signal(
-   "property::selected", function (t)
-      gtimer.delayed_call(check_focus_tag, t)
-end)
+    "property::selected", function (t)
+        gtimer.delayed_call(check_focus_tag, t)
+    end)
 
 capi.client.connect_signal("unfocus",             check_focus_delayed)
 capi.client.connect_signal("unmanage",            function (c) check_focus(c, c.screen) end)
