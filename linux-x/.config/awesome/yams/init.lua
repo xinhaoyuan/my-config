@@ -10,6 +10,7 @@ local beautiful = require("beautiful")
 local wibox = require("wibox")
 local awful = require("awful")
 local fts = require("hotpot").focus_timestamp
+local debug_trap = require("debug_trap")
 local lgi = require("lgi")
 local dpi = require("beautiful.xresources").apply_dpi
 local border = require("border-theme")
@@ -25,6 +26,15 @@ local function activate_client(c)
     -- Do not raise the window to preserve the stacking order.
     c:emit_signal("request::activate", "switch", {raise=false})
 end
+
+-- TODO diagnose this bug...
+local expected_focus = nil
+capi.client.connect_signal("focus", function (c)
+                               if expected_focus and c ~= expected_focus then
+                                   debug_trap("unexpected focus "..tostring(c))
+                                   capi.client.focus = expected_focus
+                               end
+                           end)
 
 -- the default filter will get all focusable client with any selected tags or are sticky
 local function default_filter(c)
@@ -191,6 +201,8 @@ local function create(config)
                 screen.tasklist_clients = saved_tasklist_clients
                 capi.client.emit_signal("list")
             end
+
+            expected_focus = nil
         end
 
         local function draw_info(context, cr, width, height)
@@ -271,6 +283,7 @@ local function create(config)
                 cc.opacity = config.opacity_selected
                 cc.minimized = false
                 cc.above = true
+                expected_focus = tablist[tablist_index]
                 activate_client(tablist[tablist_index])
             end
         end
