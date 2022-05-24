@@ -888,150 +888,151 @@ awful.placement.centered_with_full_size_on_new = placement_skip_existing(
 )
 
 require("awful.rules").rules = {
-   {
-      rule = { },
-      properties = {
-         focus = true,
-         size_hints_honor = true,
-         keys = client_keys,
-         buttons = client_buttons,
-         border_width = 0,
-         screen = function(c) return capi.awesome.startup and c.screen or awful.screen.focused() end,
-         floating = shared.vars.floating_by_default,
-         placement = awful.placement.centered_on_new,
-         titlebar_style = "none",
-      }
-   },
-   {
-      rule = { class = "Synapse" },
-      properties = {
-         ontop = true,
-      },
-   },
-   {
-       rule = { class = "Rofi" },
-       properties = {
-           floating = true,
-           placement = awful.placement.centered_on_new,
-           skip_taskbar = true,
-           respect_titlebar_request = true,
-           callback = function (c)
-               c:connect_signal("unfocus", function() c:kill() end)
-           end,
-       },
-   },
-   {
-       rule = { class = "Firefox", role = "Popup" },
-       properties = {
-           borderless = true,
-           has_xtitlebar = false,
-       },
-   },
-   {
-       rule = { class = "Firefox" },
-       properties = {
-           fake_fullscreen = true,
-       },
-   },
-   {
-       rule = { class = "Firefox", role = "PictureInPicture" },
-       properties = {
-           above = false,
-       },
-   },
-   {
-       rule = { type = "dialog" },
-       properties = {
-           floating = true,
-           titlebar_style = "full_top",
-           callback = function (c)
-               if c.transient_for and c.transient_for.type == "desktop" then
-                   c.above = true
-               end
-           end,
-       },
-   },
-   {
-      rule = { type = "dock" },
-      properties = {
-         floating = true,
-         sticky = true,
-         ontop = true,
-         focusable = false,
-         below = false,
-         has_client_input_shape = true,
-         borderless = true,
-      },
-   },
-   {
-      rule = { class = "Conky" },
-      properties = {
-         floating = true,
-         sticky = true,
-         ontop = false,
-         below = true,
-         focus = false,
-         borderless = true,
-         focusable = false,
-      }
-   },
-   {
-       rule = { type = "desktop" },
-       properties = {
-           borderless = true,
-           sticky = true,
-           fullscreen = false,
-           placement = awful.placement.fullscreen,
-       },
-   },
-   {
-       rule = { class = "tabbed" },
-       properties = {
-           placement = awful.placement.centered_with_half_size_on_new,
-       },
-   },
-   {
-       rule = { class = "mpv" },
-       properties = {
-           size_hints_honor = false,
-       },
-   },
-   {
-       rule = { class = "Steam" },
-       properties = {
-           borderless = true,
-           callback = function (c)
-               -- c:deny("geometry", "ewmh")
-           end,
-       },
-   },
-   {
-       rule = { class = "discord" },
-       properties = {
-           size_hints_honor = false,
-           tasklist_icon_only = true,
-       },
-   },
-   {
-       rule = { class = "TelegramDesktop" },
-       properties = {
-           size_hints_honor = false,
-           tasklist_icon_only = true,
-       },
-   },
-   {
-       rule = { class = "Xephyr" },
-       properties = {
-           floating = true,
-           titlebar_style = "full_top",
-       },
-   },
-   {
-       rule = { class = "qBittorrent", type = "normal" },
-       properties = {
-           tasklist_icon_only = true,
-       },
-   },
+    {
+        rule = { },
+        properties = {
+            focus = true,
+            size_hints_honor = true,
+            keys = client_keys,
+            buttons = client_buttons,
+            border_width = 0,
+            screen = function(c) return capi.awesome.startup and c.screen or awful.screen.focused() end,
+            floating = shared.vars.floating_by_default,
+            placement = awful.placement.centered_on_new,
+            titlebar_style = "none",
+        }
+    },
+    {
+        rule = { class = "Synapse" },
+        properties = {
+            ontop = true,
+        },
+    },
+    {
+        rule = { class = "Rofi" },
+        properties = {
+            floating = true,
+            placement = awful.placement.centered_on_new,
+            skip_taskbar = true,
+            respect_titlebar_request = true,
+            callback = function (c)
+                c:connect_signal("unfocus", function() c:kill() end)
+            end,
+        },
+    },
+    {
+        rule = { class = "Firefox", role = "Popup" },
+        properties = {
+            borderless = true,
+            has_xtitlebar = false,
+        },
+    },
+    {
+        rule = { class = "Firefox" },
+        properties = {
+            fake_fullscreen = true,
+        },
+    },
+    {
+        rule = { class = "Firefox", role = "PictureInPicture" },
+        properties = {
+            above = false,
+        },
+    },
+    {
+        rule = { type = "dialog" },
+        properties = {
+            floating = true,
+            titlebar_style = "full_top",
+            callback = function (c)
+                if c.transient_for and c.transient_for.type == "desktop" then
+                    c.above = true
+                end
+            end,
+        },
+    },
+    {
+        rule = { type = "dock" },
+        properties = {
+            floating = true,
+            sticky = true,
+            ontop = true,
+            focusable = false,
+            below = false,
+            has_client_input_shape = true,
+            borderless = true,
+        },
+    },
+    {
+        rule = { class = "Conky" },
+        properties = {
+            floating = true,
+            sticky = true,
+            ontop = false,
+            below = true,
+            focus = false,
+            borderless = true,
+            focusable = false,
+        }
+    },
+    {
+        rule = { type = "desktop" },
+        properties = {
+            borderless = true,
+            sticky = true,
+            fullscreen = false,
+            placement = awful.placement.fullscreen,
+        },
+    },
+    {
+        rule = { class = "tabbed" },
+        properties = {
+            tasklist_icon_only = false,
+            placement = awful.placement.centered_with_half_size_on_new,
+        },
+    },
+    {
+        rule = { class = "mpv" },
+        properties = {
+            size_hints_honor = false,
+        },
+    },
+    {
+        rule = { class = "Steam" },
+        properties = {
+            borderless = true,
+            callback = function (c)
+                -- c:deny("geometry", "ewmh")
+            end,
+        },
+    },
+    {
+        rule = { class = "discord" },
+        properties = {
+            size_hints_honor = false,
+            tasklist_icon_only = true,
+        },
+    },
+    {
+        rule = { class = "TelegramDesktop" },
+        properties = {
+            size_hints_honor = false,
+            tasklist_icon_only = true,
+        },
+    },
+    {
+        rule = { class = "Xephyr" },
+        properties = {
+            floating = true,
+            titlebar_style = "full_top",
+        },
+    },
+    {
+        rule = { class = "qBittorrent", type = "normal" },
+        properties = {
+            tasklist_icon_only = true,
+        },
+    },
 }
 
 client.disconnect_signal("request::geometry", awful.ewmh.geometry)
