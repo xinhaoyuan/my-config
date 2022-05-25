@@ -160,7 +160,8 @@ function orgenda.reset()
     orgenda.data.items = items
     naughty.notify{
         skip_notix = true,
-        title = "Orgenda reloaded."
+        title = "Orgenda reloaded.",
+        timeout = 3,
     }
 end
 

@@ -2,6 +2,7 @@ local capi = { mouse = mouse, client = client }
 local theme_assets = require("beautiful.theme_assets")
 local awful = require("awful")
 local wibox = require("wibox")
+local naughty = require("naughty")
 local beautiful = require("beautiful")
 local xresources = require("beautiful.xresources")
 local gfs = require("gears.filesystem")
@@ -73,10 +74,6 @@ theme.sep_big_size = dpi(12)
 
 -- Disabling the native border.
 theme.border_width = 0
-
-theme.decorator_shade_width = 0 -- dpi(10)
-theme.decorator_border_width = 3
-theme.decorator_padding_width = 2
 
 theme.xborder_width  = 8
 theme.xborder_outer_space = 6
@@ -558,6 +555,9 @@ else
     theme.rect_with_corners = gshape.rectangle
 end
 
+theme.decorator_shade_width = 0 -- dpi(10)
+theme.decorator_border_width = 3
+theme.decorator_padding_width = 2
 -- theme.decorator = decorator.presets.soft_relief{
 --     light_shade = "#ffffff40",
 --     high_light_shade = "#ffffff80",
@@ -583,72 +583,82 @@ local function dispose_pattern(pattern)
         s:finish()
     end
 end
-theme.apply_border_to_widget = function(args)
+theme.apply_border_to_widget_template = function(args)
     args = args or {}
     -- args.bottom = false
     local decorator = beautiful.decorator
-    local widget
-    widget = wibox.widget {
-        {
-            args.widget,
-            top = args.top and decorator.top_space - decorator.top_size or 0,
-            left = args.left and decorator.left_space - decorator.left_size or 0,
-            right = args.right and decorator.right_space - decorator.right_size or 0,
-            bottom = args.bottom and decorator.bottom_space - decorator.bottom_size or 0,
-            draw_empty = args.draw_empty,
-            widget = fixed_margin,
-            before_draw_children = function (self, context, cr, width, height)
-                if width <= 0 or height <= 0 then return end
-                cr:push_group_with_content(cairo.Content.COLOR_ALPHA)
-                cr:save()
-                cr:set_source(gcolor(beautiful.bg_normal))
-                cr:paint()
-                cr:restore()
-            end,
-            after_draw_children = function (self, context, cr, width, height)
-                if width <= 0 or height <= 0 then return end
-                cr:push_group_with_content(cairo.Content.ALPHA)
-                local top = args.top and decorator.top_space or 0
-                local left = args.left and decorator.left_space or 0
-                local right = args.right and decorator.right_space or 0
-                local bottom = args.bottom and decorator.bottom_space or 0
-                cr:translate(self._private.left, self._private.top)
-                decorator:draw({}, cr, true,
-                               width - self._private.left - self._private.right,
-                               height - self._private.top - self._private.bottom,
-                               {
-                                   top = widget.widget.top > 0,
-                                   left = widget.widget.left > 0,
-                                   right = widget.widget.right > 0,
-                                   bottom = widget.widget.bottom > 0,
-                               })
-                local mask = cr:pop_group()
-                local source = cr:pop_group()
-
-                cr:save()
-                cr:set_source(source)
-                cr:mask(mask)
-                cr:restore()
-
-                dispose_pattern(source)
-                dispose_pattern(mask)
-            end,
-        },
-        bgimage = function (context, cr, width, height)
+    return {
+        args.widget,
+        top = args.top and decorator.top_space - decorator.top_size or 0,
+        left = args.left and decorator.left_space - decorator.left_size or 0,
+        right = args.right and decorator.right_space - decorator.right_size or 0,
+        bottom = args.bottom and decorator.bottom_space - decorator.bottom_size or 0,
+        draw_empty = args.draw_empty,
+        widget = fixed_margin,
+        before_draw_children = function (self, context, cr, width, height)
             if width <= 0 or height <= 0 then return end
-            local new_context = setmetatable({focus = true}, {__index = context})
-            decorator:draw(new_context, cr, false, width, height,
+            decorator:draw(setmetatable({focus = true}, {__index = context}),
+                           cr, false, width, height,
                            {
-                                   top = widget.widget.top > 0,
-                                   left = widget.widget.left > 0,
-                                   right = widget.widget.right > 0,
-                                   bottom = widget.widget.bottom > 0,
+                               top = self._private.top > 0,
+                               left = self._private.left > 0,
+                               right = self._private.right > 0,
+                               bottom = self._private.bottom > 0,
                            })
+            cr:push_group_with_content(cairo.Content.COLOR_ALPHA)
+            cr:save()
+            cr:set_source(gcolor(beautiful.bg_normal))
+            cr:paint()
+            cr:restore()
         end,
-        widget = wibox.container.background
+        after_draw_children = function (self, context, cr, width, height)
+            if width <= 0 or height <= 0 then return end
+            cr:push_group_with_content(cairo.Content.ALPHA)
+            local top = args.top and decorator.top_space or 0
+            local left = args.left and decorator.left_space or 0
+            local right = args.right and decorator.right_space or 0
+            local bottom = args.bottom and decorator.bottom_space or 0
+            cr:translate(self._private.left, self._private.top)
+            decorator:draw({}, cr, true,
+                           width - self._private.left - self._private.right,
+                           height - self._private.top - self._private.bottom,
+                           {
+                               top = self._private.top > 0,
+                               left = self._private.left > 0,
+                               right = self._private.right > 0,
+                               bottom = self._private.bottom > 0,
+                           })
+            local mask = cr:pop_group()
+            local source = cr:pop_group()
+
+            cr:save()
+            cr:set_source(source)
+            cr:mask(mask)
+            cr:restore()
+
+            dispose_pattern(source)
+            dispose_pattern(mask)
+        end,
     }
-    return widget
 end
+theme.apply_border_to_widget = function (args)
+    return wibox.widget(theme.apply_border_to_widget_template(args))
+end
+
+naughty.connect_signal(
+    "request::display", function (notif)
+        naughty.layout.box{
+            notification = notif,
+            widget_template = theme.apply_border_to_widget_template{
+                widget = require("config.notif_template"),
+                top = true,
+                bottom = true,
+                left = true,
+                right = true,
+            },
+            bg = "#00000000",
+        }
+    end)
 
 do
     local function orgenda_icon(outer_color, inner_color)
