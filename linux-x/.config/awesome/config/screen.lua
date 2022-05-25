@@ -1511,15 +1511,15 @@ awful.screen.connect_for_each_screen(
 local gears = require("gears")
 local gsurf = require("gears.surface")
 local cairo = require("lgi").cairo
-function shared.screen.xkcd(num)
-    local cmd = {"xkcd_fetcher.py", "--recolor="..beautiful.fg_normal.."-"..beautiful.bg_normal}
-    if num ~= nil then
-        cmd[#cmd + 1] = "-n"
-        cmd[#cmd + 1] = tostring(num)
+function shared.screen.fetch_wallpaper(input)
+    local cmd = {"wallpaper_fetcher.py", "--recolor="..beautiful.fg_normal.."-"..beautiful.bg_normal}
+    if input ~= nil then
+        cmd[#cmd + 1] = "-i"
+        cmd[#cmd + 1] = input
     end
     awful.spawn.easy_async(cmd, function (stdout, stderr, reason, code)
             if reason ~= "exit" or code ~= 0 then
-                print("Failed to fetch xkcd. reason: "..reason..", code: "..tostring(code))
+                print("Failed to fetch wallpaper. reason: "..reason..", code: "..tostring(code))
                 print("Stdout:", stdout)
                 print("Stderr:", stderr)
                 return
