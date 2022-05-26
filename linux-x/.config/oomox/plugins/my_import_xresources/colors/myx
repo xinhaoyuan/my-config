@@ -1,0 +1,72 @@
+# -*- mode: python -*-
+
+from colour import Color
+
+def mix(c1, c2, weight):
+    return Color(rgb=(c1.red * (1 - weight) + c2.red * weight,
+                      c1.green * (1 - weight) + c2.green * weight,
+                      c1.blue * (1 - weight) + c2.blue * weight))
+
+def adjust_lum(c, delta):
+    c = Color(c)
+    c.luminance += delta
+    return c
+
+def get_theme_from_xrdb(settings, xrdb_colors):
+    fg = Color(xrdb_colors['foreground'])
+    bg = Color(xrdb_colors['background'])
+    c = []
+    for i in range(16):
+        c.append(Color(xrdb_colors['color{}'.format(i)]))
+    light_mode = bg.luminance > fg.luminance
+    tint = c[settings['MYX_THEME_COLOR']]
+    sel = mix(tint, bg, 0.3)
+    border = mix(fg, bg, 0.8)
+    return [
+        (k, v.hex_l[1:] if isinstance(v, Color) else v)
+        for k, v in
+        {
+            'THEME_STYLE': 'arc',
+            # 'ICONS_STYLE': 'archdroid',
+            'ICONS_STYLE': 'papirus_icons',
+            'BG'                  : bg,
+            'FG'                  : fg,
+            'TXT_BG'              : c[15 if light_mode else 0],
+            'TXT_FG'              : fg,
+            'SEL_BG'              : sel,
+            'SEL_FG'              : c[15],
+            'MENU_BG'             : bg,
+            'MENU_FG'             : fg,
+            'BTN_BG'              : bg,
+            'BTN_FG'              : fg,
+            'HDR_BTN_BG'          : bg,
+            'HDR_BTN_FG'          : fg,
+            'ARC_WIDGET_BORDER_COLOR': border,
+            # For papirus
+            'ICONS_LIGHT_FOLDER'  : adjust_lum(tint, 0.1),
+            'ICONS_LIGHT'         : adjust_lum(tint, 0.1),
+            'ICONS_MEDIUM'        : tint,
+            'ICONS_DARK'          : adjust_lum(tint, -0.1),
+            # For archroid
+            'ICONS_ARCHDROID'     : c[12],
+            'TERMINAL_THEME_MODE' : 'manual',
+            'TERMINAL_BACKGROUND' : bg,
+            'TERMINAL_FOREGROUND' : fg,
+            'TERMINAL_COLOR0'     : c[0],
+            'TERMINAL_COLOR1'     : c[1],
+            'TERMINAL_COLOR2'     : c[2],
+            'TERMINAL_COLOR3'     : c[3],
+            'TERMINAL_COLOR4'     : c[4],
+            'TERMINAL_COLOR5'     : c[5],
+            'TERMINAL_COLOR6'     : c[6],
+            'TERMINAL_COLOR7'     : c[7],
+            'TERMINAL_COLOR8'     : c[8],
+            'TERMINAL_COLOR9'     : c[9],
+            'TERMINAL_COLOR10'    : c[10],
+            'TERMINAL_COLOR11'    : c[11],
+            'TERMINAL_COLOR12'    : c[12],
+            'TERMINAL_COLOR13'    : c[13],
+            'TERMINAL_COLOR14'    : c[14],
+            'TERMINAL_COLOR15'    : c[15],
+        }.items()
+    ]
