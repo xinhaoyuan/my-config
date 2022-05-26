@@ -213,7 +213,33 @@ for signal, properties in pairs(signal_watched_properties) do
         end)
 end
 
-local function sync_client_info(client_info, client)
+local function sanitize_geometry(tag, info, client)
+    local x = info.x or client.x
+    if x < tag.screen.workarea.x then
+        x = tag.screen.workarea.x
+    end
+    info.x = x
+
+    local width = info.width or client.width
+    if x + width > tag.screen.workarea.x + tag.screen.workarea.width then
+        width = tag.screen.workarea.x + tag.screen.workarea.width - x
+    end
+    info.width = width
+
+    local y = info.y or client.y
+    if y < tag.screen.workarea.y then
+        y = tag.screen.workarea.y
+    end
+    info.y = y
+
+    local height = info.height or client.height
+    if y + height > tag.screen.workarea.y + tag.screen.workarea.height then
+        height = tag.screen.workarea.y + tag.screen.workarea.height - y
+    end
+    info.height = height
+end
+
+local function sync_client_info(tag, client_info, client)
     local info = client_info[client]
     if info == nil then
         info = {}
@@ -225,6 +251,7 @@ local function sync_client_info(client_info, client)
         end
         client_info[client] = info
     else
+        sanitize_geometry(tag, info, client)
         for _, property in ipairs(properties) do
             -- Avoid unnecessary hooks.
             if ((property == "x" or property == "width") and
@@ -265,7 +292,7 @@ local function client_tagged_callback(client)
     if module.log_level >= logging_info then
         print("Syncing client info", client, tag.name, tag.screen.index, layout)
     end
-    sync_client_info(data.client_info, client)
+    sync_client_info(tag, data.client_info, client)
 end
 capi.client.connect_signal(
     "tagged", function (client, tag)
@@ -303,7 +330,7 @@ local function screen_refresh(s)
         if module.log_level >= logging_info then
             print("Syncing client info", client, tag.name, tag.screen.index, layout)
         end
-        sync_client_info(data.client_info, client)
+        sync_client_info(tag, data.client_info, client)
     end
     during_screen_refresh = false
 end
