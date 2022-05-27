@@ -943,6 +943,7 @@ local function setup_screen(scr)
                capi.awesome.emit_signal(
                    "show_main_waffle", {
                        anchor = anchor,
+                       screen = scr,
                        autohide = 0.5,
                        autohide_locking_callback = locking_callback,
                    })
@@ -1101,6 +1102,7 @@ local function setup_screen(scr)
                capi.awesome.emit_signal(
                    "show_calendar_waffle", {
                        anchor = anchor,
+                       screen = scr,
                        autohide = 0.5,
                        autohide_locking_callback = locking_callback,
                    })
