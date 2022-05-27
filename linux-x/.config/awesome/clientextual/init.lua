@@ -215,27 +215,32 @@ end
 
 local function sanitize_geometry(tag, info, client)
     local x = info.x or client.x
+    local width = info.width or client.width
+
+    if x + width > tag.screen.workarea.x + tag.screen.workarea.width then
+        x = tag.screen.workarea.x + tag.screen.workarea.width - width
+    end
     if x < tag.screen.workarea.x then
         x = tag.screen.workarea.x
     end
-    info.x = x
-
-    local width = info.width or client.width
     if x + width > tag.screen.workarea.x + tag.screen.workarea.width then
         width = tag.screen.workarea.x + tag.screen.workarea.width - x
     end
+    info.x = x
     info.width = width
 
     local y = info.y or client.y
+    local height = info.height or client.height
+    if y + height > tag.screen.workarea.y + tag.screen.workarea.height then
+        y = tag.screen.workarea.y + tag.screen.workarea.height - height
+    end
     if y < tag.screen.workarea.y then
         y = tag.screen.workarea.y
     end
-    info.y = y
-
-    local height = info.height or client.height
     if y + height > tag.screen.workarea.y + tag.screen.workarea.height then
         height = tag.screen.workarea.y + tag.screen.workarea.height - y
     end
+    info.y = y
     info.height = height
 end
 
