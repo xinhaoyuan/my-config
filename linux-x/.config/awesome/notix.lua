@@ -28,7 +28,7 @@ local notif_objects = {}
 
 local remove_unpinned -- forward function desc
 
-local notix_counter_header = wibox.widget.textbox("Notifications")
+local notix_counter_header = wibox.widget.textbox("<span size='large'>Notifications</span>")
 local notix_header_bar = wibox.widget{
     {
         {
@@ -40,8 +40,8 @@ local notix_header_bar = wibox.widget{
                         image = gcolor.recolor_image(icons.remove, beautiful.fg_normal),
                         widget = masked_imagebox,
                     },
-                    forced_height = beautiful.bar_icon_size,
-                    forced_width = beautiful.bar_icon_size,
+                    forced_height = beautiful.icon_size,
+                    forced_width = beautiful.icon_size,
                     margins = beautiful.sep_small_size / 2,
                     widget = wibox.container.margin,
                 },

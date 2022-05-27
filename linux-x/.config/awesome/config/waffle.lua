@@ -1866,7 +1866,7 @@ do
         {
             nil,
             {
-                text = "TODO",
+                markup = "<span size='large'>TODO</span>",
                 widget = wibox.widget.textbox,
             },
             {
@@ -1979,7 +1979,7 @@ waffle_calendar_view = view {
                             end,
                             widget = wibox.container.background,
                         },
-                        fill_vertical = true,
+                        fill_vertical = false,
                         content_fill_horizontal = true,
                         content_fill_vertical = true,
                         widget = fixed_place,
