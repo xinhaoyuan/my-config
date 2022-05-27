@@ -35,7 +35,7 @@ local fts = require("hotpot").focus_timestamp
 local dpi = require("beautiful.xresources").apply_dpi
 
 local waffle_width = beautiful.waffle_panel_width or dpi(240)
-local calendar_waffle_width = dpi(220)
+local calendar_waffle_width = waffle_width
 local button_height = beautiful.waffle_item_height or dpi(20)
 local button_padding = beautiful.sep_small_size or dpi(4)
 local panel_padding = beautiful.sep_big_size or dpi(10)
@@ -174,55 +174,55 @@ end
 
 
 local function button(args)
-   local label = args.label_widget or
-      wibox.widget {
-         markup = args.markup,
-         text = args.text,
-         font = font_normal,
-         forced_height = button_height,
-         align = "center",
-         valign = "center",
-         widget = wibox.widget.textbox,
-      }
+    local label = args.label_widget or
+        wibox.widget {
+                markup = args.markup,
+                text = args.text,
+                font = font_normal,
+                forced_height = button_height,
+                align = "center",
+                valign = "center",
+                widget = wibox.widget.textbox,
+        }
 
-   args.width = args.width or waffle_width
+    args.width = args.width or waffle_width
 
-   args.widget = wibox.widget {
-       args.icon_widget or (
-           args.icon and
-               wibox.widget {
-                   {
-                       image = args.icon,
-                       resize = true,
-                       forced_width = args.icon_size or button_height,
-                       forced_height = args.icon_size or button_height,
-                       widget = masked_imagebox,
-                   },
-                   halign = "center",
-                   valign = "center",
-                   widget = wibox.container.place,
-               }
-                           ),
-       label,
-       args.indicator and {
-               {
-                   text = args.indicator,
-                   font = font_normal,
-                   align = "center",
-                   valign = "center",
-                   widget = wibox.widget.textbox,
-               },
-           fg_function = {"special_"},
-           widget = cbg
-                          },
-       expand = "inside",
-       layout = args.button_layout or fixed_align.horizontal,
-   }
+    args.widget = wibox.widget {
+        args.icon_widget or (
+            args.icon and
+            wibox.widget {
+                    {
+                        image = args.icon,
+                        resize = true,
+                        forced_width = args.icon_size or button_height,
+                        forced_height = args.icon_size or button_height,
+                        widget = masked_imagebox,
+                    },
+                    halign = "center",
+                    valign = "center",
+                    widget = wibox.container.place,
+            }
+        ),
+        label,
+        args.indicator and {
+            {
+                text = args.indicator,
+                font = font_normal,
+                align = "center",
+                valign = "center",
+                widget = wibox.widget.textbox,
+            },
+            fg_function = {"special_"},
+            widget = cbg
+        },
+        expand = "inside",
+        layout = args.button_layout or fixed_align.horizontal,
+    }
 
-   local ret = simple_button(args)
-   ret.label = label
+    local ret = simple_button(args)
+    ret.label = label
 
-   return ret
+    return ret
 end
 
 local sep_color = gcolor(acolor(beautiful.fg_normal):blend_with(acolor(beautiful.bg_normal), 0.75):to_string())
@@ -1458,9 +1458,180 @@ local waffle_root_status_widget = decorate_panel {
     }
 }
 
-local waffle_root_action_widget = decorate_panel {
+local function icon_label(icon)
+    return wibox.widget{
+        {
+            image = icon,
+            resize = true,
+            widget = masked_imagebox,
+        },
+        halign = "center",
+        valign = "center",
+        widget = wibox.container.place,
+    }
+end
+
+local grid_height = dpi(48)
+local grid_width = dpi(64)
+local grid_button_layout = fixed_align.vertical
+local waffle_root_action_grid_widget = decorate_panel {
     top_sep = true,
     widget = {
+        {
+            button{
+                height = grid_height,
+                width = grid_width,
+                button_layout = grid_button_layout,
+                label_widget = icon_label(gcolor.recolor_image(icons.launcher, beautiful.fg_normal)),
+                indicator = em("r"),
+                key = "r",
+                action = function (alt)
+                    if alt then
+                        shared.action.app_finder()
+                    else
+                        shared.action.launcher()
+                    end
+                    waffle:hide()
+                end,
+            },
+            button{
+                height = grid_height,
+                width = grid_width,
+                button_layout = grid_button_layout,
+                label_widget = icon_label(gcolor.recolor_image(icons.terminal, beautiful.fg_normal)),
+                markup = "Terminal",
+                indicator = em("↵"),
+                key = "Return",
+                action = function (alt)
+                    if alt then
+                        awful.spawn("xterm")
+                    else
+                        shared.action.terminal()
+                    end
+                    waffle:hide()
+                end
+            },
+            button{
+                height = grid_height,
+                width = grid_width,
+                button_layout = grid_button_layout,
+                label_widget = icon_label(gcolor.recolor_image(icons.browser, beautiful.fg_normal)),
+                markup = "Web",
+                indicator = em("w"),
+                key = "w",
+                action = function (alt)
+                    shared.action.web_browser()
+                    waffle:hide()
+                end
+            },
+            button{
+                height = grid_height,
+                width = grid_width,
+                button_layout = grid_button_layout,
+                label_widget = icon_label(gcolor.recolor_image(icons.file_manager, beautiful.fg_normal)),
+                markup = "Files",
+                indicator = em("e"),
+                key = "e",
+                action = function (alt)
+                    shared.action.file_manager()
+                    waffle:hide()
+                end
+            },
+            button{
+                height = grid_height,
+                width = grid_width,
+                button_layout = grid_button_layout,
+                label_widget = icon_label(gcolor.recolor_image(icons.dots, beautiful.fg_normal)),
+                markup = "Tray",
+                indicator = em("y"),
+                key = "y",
+                action = function (alt)
+                    show_tray_view()
+                end,
+            },
+            button{
+                height = grid_height,
+                width = grid_width,
+                button_layout = grid_button_layout,
+                label_widget = icon_label(gcolor.recolor_image(icons.fortune, beautiful.fg_normal)),
+                markup = "Fortune",
+                indicator = em("f"),
+                key = "f",
+                action = function (alt)
+                    if alt then
+                        shared.screen.xkcd()
+                    else
+                        local fortune = shared.screen.get_fortune()
+                        if fortune then
+                            shared.action.web_browser("? " .. fortune)
+                        end
+                    end
+                    waffle:hide()
+                end
+            },
+            button{
+                height = grid_height,
+                width = grid_width,
+                button_layout = grid_button_layout,
+                label_widget = icon_label(gcolor.recolor_image(icons.setup, beautiful.fg_normal)),
+                markup = "Settings",
+                indicator = em("s"),
+                key = "s",
+                action = function (alt)
+                    waffle:show(waffle_settings_view, { mode = "push" })
+                end,
+            },
+            button{
+                height = grid_height,
+                width = grid_width,
+                button_layout = grid_button_layout,
+                label_widget = icon_label(gcolor.recolor_image(icons.lock, beautiful.fg_normal)),
+                markup = "Lock",
+                indicator = em("l"),
+                key = "l",
+                action = function (alt)
+                    shared.action.screen_locker()
+                    waffle:hide()
+                end
+            },
+            button{
+                height = grid_height,
+                width = grid_width,
+                button_layout = grid_button_layout,
+                label_widget = icon_label(gcolor.recolor_image(icons.poweroff, beautiful.fg_normal)),
+                markup = "Power",
+                indicator = em("u"),
+                key = "u",
+                action = function (alt)
+                    waffle:show(waffle_shutdown_view, { mode = "push" })
+                end
+            },
+            homogeneous   = true,
+            forced_num_cols = 3,
+            layout = wibox.layout.grid,
+        },
+        widget = wibox.container.place,
+    },
+}
+
+local waffle_root_action_list_widget = decorate_panel {
+    top_sep = true,
+    widget = {
+        button {
+            icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
+            label_widget = wibox.widget {
+                volumebar_widget,
+                widget = wibox.container.place
+            },
+            buttons = volumebar_buttons,
+            indicator = em("v"),
+            key = "v",
+            action = function (alt)
+                local cmd = {"pavucontrol"}
+                awful.spawn(cmd)
+                waffle:hide()
+            end,
+        },
         button {
             icon = gcolor.recolor_image(icons.calendar_todo, beautiful.fg_normal),
             label_widget = wibox.widget {
@@ -1479,154 +1650,16 @@ local waffle_root_action_widget = decorate_panel {
                 end
             end,
         },
-        button {
-            icon = gcolor.recolor_image(icons.launcher, beautiful.fg_normal),
-            markup = "Launcher",
-            indicator = em("r"),
-            key = "r",
-            action = function (alt)
-                if alt then
-                    shared.action.app_finder()
-                else
-                    shared.action.launcher()
-                end
-                waffle:hide()
-            end
-        },
-        button({
-                icon = gcolor.recolor_image(icons.terminal, beautiful.fg_normal),
-                markup = "Terminal",
-                indicator = em("↵"),
-                key = "Return",
-                action = function (alt)
-                    if alt then
-                        awful.spawn("xterm")
-                    else
-                        shared.action.terminal()
-                    end
-                    waffle:hide()
-                end
-        }),
-        button({
-                icon = gcolor.recolor_image(icons.browser, beautiful.fg_normal),
-                markup = "Web",
-                indicator = em("w"),
-                key = "w",
-                action = function (alt)
-                    shared.action.web_browser()
-                    waffle:hide()
-                end
-        }),
-        button({
-                icon = gcolor.recolor_image(icons.file_manager, beautiful.fg_normal),
-                markup = "Files",
-                indicator = em("e"),
-                key = "e",
-                action = function (alt)
-                    shared.action.file_manager()
-                    waffle:hide()
-                end
-        }),
-        button({
-                icon = gcolor.recolor_image(icons.dots, beautiful.fg_normal),
-                markup = "Tray",
-                indicator = em("y"),
-                key = "y",
-                action = function (alt)
-                    show_tray_view()
-                end,
-        }),
-        button({
-                icon = gcolor.recolor_image(icons.fortune, beautiful.fg_normal),
-                markup = "Fortune",
-                indicator = em("f"),
-                key = "f",
-                action = function (alt)
-                    if alt then
-                        shared.screen.xkcd()
-                    else
-                        local fortune = shared.screen.get_fortune()
-                        if fortune then
-                            shared.action.web_browser("? " .. fortune)
-                        end
-                    end
-                    waffle:hide()
-                end
-        }),
-        button({
-                icon = gcolor.recolor_image(icons.setup, beautiful.fg_normal),
-                markup = "Settings",
-                indicator = em("s"),
-                key = "s",
-                action = function (alt)
-                    waffle:show(waffle_settings_view, { mode = "push" })
-                end,
-        }),
-        layout = wibox.layout.fixed.vertical,
-    }
-}
-
-local waffle_root_audio_widget = decorate_panel {
-    top_sep = true,
-    widget = button {
-        icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
-        label_widget = wibox.widget {
-            volumebar_widget,
-            widget = wibox.container.place
-        },
-        buttons = volumebar_buttons,
-        indicator = em("v"),
-        key = "v",
-        action = function (alt)
-            local cmd = {"pavucontrol"}
-            awful.spawn(cmd)
-            waffle:hide()
-        end,
-    },
-}
-
-local waffle_root_music_widget = decorate_panel {
-    top_sep = true,
-    widget = {
         music_widget,
-        draw_empty = false,
-        layout = fixed_margin,
-    },
-}
-
-local waffle_root_admin_widget = decorate_panel {
-    top_sep = true,
-    widget = {
-        button {
-            icon = gcolor.recolor_image(icons.lock, beautiful.fg_normal),
-            markup = "Lock",
-            indicator = em("l"),
-            key = "l",
-            action = function (alt)
-                shared.action.screen_locker()
-                waffle:hide()
-            end
-        },
-        button {
-            icon = gcolor.recolor_image(icons.poweroff, beautiful.fg_normal),
-            markup = "Power",
-            indicator = em("u"),
-            key = "u",
-            action = function (alt)
-                waffle:show(waffle_shutdown_view, { mode = "push" })
-            end
-        },
         layout = wibox.layout.fixed.vertical,
-    }
+    },
 }
 
 local waffle_root_view = view {
     root = decorate_waffle {
         waffle_root_status_widget,
-        waffle_root_audio_widget,
-        waffle_root_music_widget,
-        waffle_root_action_widget,
-        waffle_root_admin_widget,
+        waffle_root_action_grid_widget,
+        waffle_root_action_list_widget,
         layout = wibox.layout.fixed.vertical,
     },
     key_filter = function (mod, key, event)
