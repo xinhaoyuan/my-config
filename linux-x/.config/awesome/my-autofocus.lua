@@ -22,8 +22,15 @@ local awful_client = require("awful.client")
 local gtimer = require("gears.timer")
 local fts = require("hotpot").focus_timestamp
 
-local find_alternative_focus = function (prev, s)
-    print("find_alternative_focus", prev and prev.valid and tostring(prev), s)
+local module = {
+    debug = false,
+    enabled = true,
+}
+
+function module.find_alternative_focus(prev, s)
+    if module.debug then
+        print("== DEBUG == called find_alternative_focus", prev and prev.valid and tostring(prev), s)
+    end
     local clients = {}
     for c in awful_client.iterate(
         function (c)
@@ -44,36 +51,40 @@ local find_alternative_focus = function (prev, s)
             end
         end
     )
-    if #clients == 0 then
-        print("no client found, returning nil")
-        return nil
-    end
-    for _, c in ipairs(clients) do
-        if c.screen == s then
-            print("returning", c)
-            return c
+    if module.debug then
+        print("== DEBUG == alternative focus candidate")
+        for i, c in ipairs(clients) do
+            print("== DEBUG ==", i, "fts", fts.get(c), "type", c.type, "screen", c.screen, "client", c)
         end
     end
-    print("returning fallback", clients[1])
-    return clients[1]
+    if #clients == 0 then
+        return nil
+    end
+    local ret_index = 1
+    for i, c in ipairs(clients) do
+        if c.screen == s then
+            ret_index = i
+            break
+        end
+    end
+    if module.debug then
+        print("== DEBUG == alternative focus index ", ret_index)
+    end
+    return clients[ret_index]
 end
 
 local managed_counter = 0
-
-local autofocus = {
-    find_alternative_focus = find_alternative_focus,
-}
 
 --- Give focus when clients appear/disappear.
 --
 -- @param prev the previous focus client, may not be valid now
 -- @param s the screen of prev, in case prev.screen is not accessible now
 local function check_focus(prev, s)
-    if managed_counter > 0 then return end
+    if managed_counter > 0 or not module.enabled then return end
     if not s or not s.valid then return end
     -- When no visible client has the focus...
     if not capi.client.focus or not capi.client.focus:isvisible() or not awful_client.focus.filter(capi.client.focus) then
-        local c = autofocus.find_alternative_focus(prev, s)
+        local c = module.find_alternative_focus(prev, s)
         if c then
             awful_client.focus.history.disable_tracking()
             c:emit_signal("request::activate", "autofocus.check_focus",
@@ -98,11 +109,11 @@ local function check_focus_tag(t)
     check_focus(nil, t.screen)
 end
 
-function autofocus.manage_focus(s)
+function module.manage_focus(s)
     managed_counter = managed_counter + 1
 end
 
-function autofocus.unmanage_focus(s)
+function module.unmanage_focus(s)
     if managed_counter > 0 then
         managed_counter = managed_counter - 1
         if managed_counter == 0 then
@@ -124,6 +135,6 @@ capi.client.connect_signal("property::hidden",    check_focus_delayed)
 capi.client.connect_signal("property::minimized", check_focus_delayed)
 capi.client.connect_signal("property::sticky",    check_focus_delayed)
 
-return autofocus
+return module
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
