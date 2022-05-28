@@ -1472,7 +1472,7 @@ local function icon_label(icon)
 end
 
 local grid_height = dpi(48)
-local grid_width = dpi(64)
+local grid_width = dpi(70)
 local grid_button_layout = fixed_align.vertical
 local waffle_root_action_grid_widget = decorate_panel {
     top_sep = true,
