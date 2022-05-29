@@ -1,0 +1,5 @@
+#!/bin/bash
+
+update-rofi-config
+echo 'require("config.shared").action.reload_theme()' | awesome-client
+
