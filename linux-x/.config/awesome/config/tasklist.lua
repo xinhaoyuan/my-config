@@ -263,8 +263,6 @@ local tasklist_template = {
                                 text = "",
                                 align = "right",
                                 valign = "bottom",
-                                outline_color = beautiful.bg_normal,
-                                outline_color_focus = beautiful.bg_focus,
                                 outline_size = dpi(2),
                                 widget = outlined_textbox,
                             },

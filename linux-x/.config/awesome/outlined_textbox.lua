@@ -12,7 +12,7 @@ function mod:draw(context, cr, width, height)
     local outline_size = self._private.outline_size or 0
     local outline_color
     if context["focus"] then
-        outline_color = self._private.outline_color_focus and gcolor(self._private.outline_color_focus)
+        outline_color = self._private.outline_color_focus and gcolor(self._private.outline_color_focus) or gcolor(beautiful.bg_focus)
     else
         outline_color = self._private.outline_color and gcolor(self._private.outline_color) or gcolor(beautiful.bg_normal)
     end
