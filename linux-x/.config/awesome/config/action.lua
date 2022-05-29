@@ -1,4 +1,7 @@
 local shared = require((...):match("(.-)[^%.]+$") .. "shared")
+local capi = {
+    awesome = awesome,
+}
 
 local awful  = require("awful")
 local be     = require("beautiful")
@@ -114,6 +117,14 @@ shared.action = {
         -- cantata does not respect startup on the activating existing window
         awful.spawn("cantata", false)
     end,
+    reload_theme = function ()
+        if beautiful.theme_path then
+            beautiful.init(beautiful.theme_path.."/theme.lua")
+            capi.awesome.emit_signal("wallpaper_changed")
+        else
+            print("Theme path not found - not reloading the theme.")
+        end
+    end
 }
 
 return nil

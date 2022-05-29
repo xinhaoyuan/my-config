@@ -602,7 +602,7 @@ local function get_mini_titlebar(c)
                 },
                 halign = "center",
                 valign = "center",
-                widget = wibox.container.background,
+                widget = wibox.container.place,
             },
             forced_height = beautiful.mini_titlebar_size,
             forced_width = beautiful.mini_titlebar_width,
@@ -729,7 +729,7 @@ local function decorate(c)
                            size = decorator.top_space,
                            bg = "#00000000",
                            bgimage = function (context, cr, width, height)
-                               decorator:draw(setmetatable({focus = capi.client.focus == c}, {__index=context}),
+                               beautiful.decorator:draw(setmetatable({focus = capi.client.focus == c}, {__index=context}),
                                               cr, false, width, height, {["top"] = true, ["left"] = true, ["right"] = true})
                            end,
                        })
@@ -740,7 +740,7 @@ local function decorate(c)
                            size = decorator.bottom_space,
                            bg = "#00000000",
                            bgimage = function (context, cr, width, height)
-                               decorator:draw(setmetatable({focus = capi.client.focus == c}, {__index=context}),
+                               beautiful.decorator:draw(setmetatable({focus = capi.client.focus == c}, {__index=context}),
                                                cr, false, width, height, {["bottom"] = true, ["left"] = true, ["right"] = true})
                            end,
                        })
@@ -751,7 +751,7 @@ local function decorate(c)
                            size = decorator.left_space,
                            bg = "#00000000",
                            bgimage = function (context, cr, width, height)
-                               decorator:draw(setmetatable({focus = capi.client.focus == c}, {__index=context}),
+                               beautiful.decorator:draw(setmetatable({focus = capi.client.focus == c}, {__index=context}),
                                               cr, false, width, height, {["left"] = true})
                            end,
                        })
@@ -762,7 +762,7 @@ local function decorate(c)
                            size = decorator.right_space,
                            bg = "#00000000",
                            bgimage = function (context, cr, width, height)
-                               decorator:draw(setmetatable({focus = capi.client.focus == c}, {__index=context}),
+                               beautiful.decorator:draw(setmetatable({focus = capi.client.focus == c}, {__index=context}),
                                               cr, false, width, height, {["right"] = true})
                            end,
                        })

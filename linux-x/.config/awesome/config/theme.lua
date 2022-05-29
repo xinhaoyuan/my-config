@@ -8,7 +8,6 @@ local xresources = require("beautiful.xresources")
 local gfs = require("gears.filesystem")
 local themes_path = gfs.get_themes_dir()
 local dpi   = xresources.apply_dpi
-local xrdb  = xresources.get_current_theme()
 local gears = require("gears")
 local gcolor = require("gears.color")
 local gshape = require("gears.shape")
@@ -24,6 +23,24 @@ local icons = require("icons")
 local cairo = lgi.cairo
 local decorator = require("decorator")
 
+local xrdb = {}
+do
+    xrdb_filter = {
+        foreground = true,
+        background = true,
+        color0 = true,  color1 = true,  color2 = true,  color3 = true,
+        color4 = true,  color5 = true,  color6 = true,  color7 = true,
+        color8 = true,  color9 = true,  color10 = true, color11 = true,
+        color12 = true, color13 = true, color14 = true, color15 = true,
+    }
+    for line in io.popen('xrdb -query'):lines() do
+        local key, value = line:match("^[*.]*(.+):%s+(.+)$")
+        if key and value and xrdb_filter[key] then
+            xrdb[key] = value
+        end
+    end
+end
+
 local c_normal = { xrdb.foreground, xrdb.background }
 local c_black  = { xrdb.color0, xrdb.color8 }
 local c_red    = { xrdb.color1, xrdb.color9 }
@@ -37,6 +54,8 @@ local c_white  = { xrdb.color7, xrdb.color15 }
 -- Copied from theme/xresource
 
 local theme = dofile(themes_path.."default/theme.lua")
+
+theme.layout_machi = require("layout-machi").icon_raw
 
 local function is_light_color(color)
     return acolor(color):lightness() > 0.7
@@ -176,6 +195,8 @@ theme.special_normal = is_light_color(theme.bg_normal) and c_red[1] or c_yellow[
 theme.special_focus = is_light_color(theme.bg_focus) and c_red[1] or c_yellow[2]
 -- custom property color
 theme.minor_normal = acolor(theme.fg_normal):blend_with(acolor(theme.bg_normal), 0.3):to_string()
+theme.graph_fg = acolor.from_string(theme.bg_focus):blend_with(theme.bg_normal, 0.25):to_string()
+theme.progressbar_fg = theme.graph_fg
 -- custom property color
 theme.minor_focus = acolor(theme.fg_focus):blend_with(acolor(theme.bg_focus), 0.3):to_string()
 -- custom property boolean
@@ -321,10 +342,10 @@ theme.bar_style = "auto"
 theme.bar_styles = {"simple", "split", "auto"}
 theme.tasklist_plain_task_name = true
 
-local sep_color = gcolor(acolor(theme.fg_normal):blend_with(acolor(theme.bg_normal), 0.75):to_string())
+theme.sep_color = gcolor(acolor(theme.fg_normal):blend_with(acolor(theme.bg_normal), 0.75):to_string())
 function theme.draw_separator(cr, width, height)
     local dot_r = dpi(1)
-    cr:set_source(sep_color)
+    cr:set_source(beautiful.sep_color)
     cr:set_line_cap("ROUND")
     if width < height then
         -- cr:move_to(width / 2, height / 4)
@@ -345,7 +366,6 @@ function theme.draw_separator(cr, width, height)
     cr:stroke()
 end
 theme.sep_widget = wibox.widget {
-    background = theme.bg_normal,
     bgimage = function(context, cr, width, height)
         theme.draw_separator(cr, width, height)
     end,
@@ -588,7 +608,12 @@ theme.apply_border_to_widget_template = function(args)
     -- args.bottom = false
     local decorator = beautiful.decorator
     return {
-        args.widget,
+        {
+            args.widget,
+            fg_function = {"fg_"},
+            bg_function = {"bg_"},
+            widget = cbg,
+        },
         top = args.top and decorator.top_space - decorator.top_size or 0,
         left = args.left and decorator.left_space - decorator.left_size or 0,
         right = args.right and decorator.right_space - decorator.right_size or 0,
@@ -597,7 +622,7 @@ theme.apply_border_to_widget_template = function(args)
         widget = fixed_margin,
         before_draw_children = function (self, context, cr, width, height)
             if width <= 0 or height <= 0 then return end
-            decorator:draw(setmetatable({focus = true}, {__index = context}),
+            beautiful.decorator:draw(setmetatable({focus = true}, {__index = context}),
                            cr, false, width, height,
                            {
                                top = self._private.top > 0,
@@ -619,7 +644,7 @@ theme.apply_border_to_widget_template = function(args)
             local right = args.right and decorator.right_space or 0
             local bottom = args.bottom and decorator.bottom_space or 0
             cr:translate(self._private.left, self._private.top)
-            decorator:draw({}, cr, true,
+            beautiful.decorator:draw({}, cr, true,
                            width - self._private.left - self._private.right,
                            height - self._private.top - self._private.bottom,
                            {
@@ -644,21 +669,6 @@ end
 theme.apply_border_to_widget = function (args)
     return wibox.widget(theme.apply_border_to_widget_template(args))
 end
-
-naughty.connect_signal(
-    "request::display", function (notif)
-        naughty.layout.box{
-            notification = notif,
-            widget_template = theme.apply_border_to_widget_template{
-                widget = require("config.notif_template"),
-                top = true,
-                bottom = true,
-                left = true,
-                right = true,
-            },
-            bg = "#00000000",
-        }
-    end)
 
 do
     local function orgenda_icon(outer_color, inner_color)

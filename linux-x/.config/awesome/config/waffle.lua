@@ -42,9 +42,6 @@ local panel_padding = beautiful.sep_big_size or dpi(10)
 local font_normal = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_normal)
 local font_info = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small)
 local font_info_mono = beautiful.fontname_mono.." "..tostring(beautiful.fontsize_small)
-local graph_background = "#00000000"
-local graph_normal_color = acolor.from_string(beautiful.bg_focus):blend_with(beautiful.bg_normal, 0.25):to_string()
-local graph_color = graph_normal_color -- "linear:0,0:0,22:0,#FF0000:0.5," .. graph_normal_color
 local update_interval_s = 2
 
 local function em(t)
@@ -394,19 +391,17 @@ local cpu_widget
 do
    local cpu_graph_widget = wibox.widget {
       max_value = 100,
-      background_color = graph_background,
+      background_color = "#00000000",
       forced_height = button_height / 2,
       step_width = dpi(2),
       step_spacing = dpi(1),
       widget = wibox.widget.graph,
-      color = graph_color
    }
 
    local cpu_text_widget = wibox.widget {
        forced_height = button_height,
        align = "center",
        point = {x = 0, y = 0},
-       outline_color = beautiful.bg_normal,
        outline_size = dpi(2),
        widget = outlined_textbox,
    }
@@ -509,19 +504,17 @@ local ram_widget
 do
    local ram_graph_widget = wibox.widget {
       max_value = 100,
-      background_color = graph_background,
+      background_color = "#00000000",
       forced_height = button_height / 2,
       step_width = dpi(2),
       step_spacing = dpi(1),
       widget = wibox.widget.graph,
-      color = graph_color
    }
 
    local ram_text_widget = wibox.widget {
        forced_height = button_height,
        align = "center",
        point = {x = 0, y = 0},
-       outline_color = beautiful.bg_normal,
        outline_size = dpi(2),
        widget = outlined_textbox,
    }
@@ -594,20 +587,18 @@ local net_has_vpn
 local net_has_wifi
 do
     local netgraph_rx_widget = wibox.widget {
-        background_color = graph_background,
+        background_color = "#00000000",
         forced_height = button_height / 2,
         step_width = dpi(2),
         step_spacing = dpi(1),
         widget = wibox.widget.graph,
         -- scale = true,
-        color = graph_color
     }
 
     local rx_text_widget = wibox.widget {
         forced_height = button_height,
         align = "center",
         point = {x = 0, y = 0},
-        outline_color = beautiful.bg_normal,
         outline_size = dpi(2),
         widget = outlined_textbox,
     }
@@ -640,20 +631,18 @@ do
     }
 
     local netgraph_tx_widget = wibox.widget {
-        background_color = graph_background,
+        background_color = "#00000000",
         forced_height = button_height / 2,
         step_width = dpi(2),
         step_spacing = dpi(1),
         widget = wibox.widget.graph,
         -- scale = true,
-        color = graph_color
     }
 
     local tx_text_widget = wibox.widget {
         forced_height = button_height,
         align = "center",
         point = { x = 0, y = 0 },
-        outline_color = beautiful.bg_normal,
         outline_size = dpi(2),
         widget = outlined_textbox,
     }
@@ -794,20 +783,18 @@ local disk_widget_width = (waffle_width - button_height - button_padding * 4) / 
 local disk_widget
 do
     local diskgraph_rd_widget = wibox.widget {
-        background_color = graph_background,
+        background_color = "#00000000",
         forced_height = button_height / 2,
         step_width = dpi(2),
         step_spacing = dpi(1),
         widget = wibox.widget.graph,
         -- scale = true,
-        color = graph_color
     }
 
     local rd_text_widget = wibox.widget {
         forced_height = button_height,
         align = "center",
         point = {x = 0, y = 0},
-        outline_color = beautiful.bg_normal,
         outline_size = dpi(2),
         widget = outlined_textbox,
     }
@@ -840,20 +827,18 @@ do
     }
 
     local diskgraph_wr_widget = wibox.widget {
-        background_color = graph_background,
+        background_color = "#00000000",
         forced_height = button_height / 2,
         step_width = dpi(2),
         step_spacing = dpi(1),
         widget = wibox.widget.graph,
         -- scale = true,
-        color = graph_color
     }
 
     local wr_text_widget = wibox.widget {
         forced_height = button_height,
         align = "center",
         point = { x = 0, y = 0 },
-        outline_color = beautiful.bg_normal,
         outline_size = dpi(2),
         widget = outlined_textbox,
     }
@@ -959,7 +944,6 @@ end
 local battery_widget_width = waffle_width - button_height - button_padding * 3
 local battery_widget
 do
-   local bar_color = graph_normal_color
    local charging_color = acolor.from_string(beautiful.special_normal):blend_with(beautiful.bg_normal, 0.25):to_string()
    local background_color = beautiful.border_normal
 
@@ -979,8 +963,7 @@ do
       forced_height = dpi(2),
       paddings = 0,
       border_width = 0,
-      color = bar_color,
-      background_color = background_color,
+      background_color = "#00000000",
       shape = gshape.bar,
       clip = true,
       widget = wibox.widget.progressbar
@@ -1028,7 +1011,7 @@ do
        local status = parse_battery_output(stdout)
        battery_widget.visible = true
        battery_percentage_widget.value = status.value
-       battery_percentage_widget.color = status.charging and charging_color or bar_color
+       battery_percentage_widget.color = status.charging and charging_color or nil
        battery_status_widget:set_text(status.state..": "..status.remaining)
    end
 
@@ -1057,7 +1040,6 @@ do
 end
 
 
-local volumebar_widget_width = waffle_width - button_height
 local volumebar_widget
 local volumebar_buttons
 do
@@ -1066,36 +1048,29 @@ do
    local DEC_VOLUME_CMD = 'amixer -D pulse sset Master 5%-'
    local TOG_VOLUME_CMD = 'amixer -D pulse sset Master toggle'
 
-   local bar_color = graph_normal_color
-   local mute_color = beautiful.special_normal
-   local background_color = beautiful.border_normal
-
-   volumebar_widget = wibox.widget {
-      max_value = 1,
-      forced_width = waffle_width,
-      forced_height = dpi(2),
-      paddings = 0,
-      border_width = 0,
-      color = bar_color,
-      background_color = background_color,
-      shape = gshape.bar,
-      clip = true,
-      margins = {
-         left = button_padding,
-         right = button_padding,
-      },
-      widget = wibox.widget.progressbar
+   volumebar_widget = wibox.widget{
+       max_value = 1,
+       forced_height = dpi(2),
+       paddings = 0,
+       border_width = 0,
+       color = bar_color,
+       background_color = "#00000000",
+       shape = gshape.bar,
+       clip = true,
+       margins = {
+           left = button_padding,
+           right = button_padding,
+       },
+       widget = wibox.widget.progressbar
    }
+
 
    local update_graphic = function (widget, stdout)
       local mute = string.match(stdout, "%[(o%D%D?)%]")
       local volume = string.match(stdout, "(%d?%d?%d)%%")
       volume = tonumber(string.format("% 3d", volume))
 
-      widget.value = volume / 100;
-      widget.color = mute == "off" and mute_color
-         or bar_color
-
+      widget.value = mute == "off" and 0 or volume / 100;
    end
 
    local function spawn_and_update_volumebar(cmd)
@@ -1179,7 +1154,6 @@ do
         text = "",
         forced_height = button_height,
         font = beautiful.fontname_normal.." 14",
-        -- outline_color = beautiful.bg_normal,
         -- outline_size = dpi(2),
         -- widget = outlined_textbox
         widget = wibox.widget.textbox
@@ -1204,8 +1178,7 @@ do
         max_value     = 1,
         value         = 0,
         forced_height = dpi(2),
-        color = graph_normal_color,
-        background_color = beautiful.border_normal,
+        background_color = "#00000000",
         widget        = wibox.widget.progressbar,
     }
 
@@ -1754,8 +1727,8 @@ local cal_widget = wibox.widget {
             widget.font = font_info
             widget = wibox.widget{
                 widget,
-                fg = beautiful.minor_normal,
-                widget = wibox.container.background,
+                fg_function = {"minor_"},
+                widget = cbg,
             }
         end
 
@@ -1797,8 +1770,8 @@ local cal_widget = wibox.widget {
                         beautiful.rect_with_corners(cr, width, height)
                     end
                 end,
-                fg = beautiful.fg_focus,
-                bg = beautiful.bg_focus,
+                fg_function = function () return beautiful.fg_focus end,
+                bg_function = function () return beautiful.bg_focus end,
                 context_transform_function = function (context)
                     context.inverted = true
                 end,
@@ -2119,6 +2092,15 @@ waffle_settings_view = view{
                     end
                 },
                 button{
+                    markup = "Reload theme",
+                    indicator = em("t"),
+                    key = "t",
+                    action = function (alt)
+                        shared.action.reload_theme()
+                        waffle:hide()
+                    end
+                },
+                button{
                     markup = "Screen layout",
                     indicator = em("s"),
                     key = "s",
@@ -2205,7 +2187,6 @@ local waffle_client_icon_container = wibox.widget {
 
 local waffle_client_pid_label = wibox.widget{
     align = "center",
-    outline_color = beautiful.bg_normal,
     outline_size = dpi(2),
     widget = outlined_textbox,
 }

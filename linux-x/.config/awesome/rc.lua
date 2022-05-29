@@ -48,6 +48,7 @@ os.execute(HOME_DIR .. "/.xdesktoprc")
 require("clientextual"){}
 local config = require("config")
 local beautiful = require("beautiful")
+local naughty = require("naughty")
 local gstring = require("gears.string")
 require("my-autofocus")
 local gcal_org_path = os.getenv("HOME").."/.cache/gcal.org"
@@ -65,7 +66,22 @@ require("orgenda").config.files = {
         rank = 1,
     },
     gcal_org_path,
-                                  }
+}
+naughty.connect_signal(
+    "request::display", function (notif)
+        naughty.layout.box{
+            notification = notif,
+            widget_template = beautiful.apply_border_to_widget_template{
+                widget = require("config.notif_template"),
+                top = true,
+                bottom = true,
+                left = true,
+                right = true,
+            },
+            bg = "#00000000",
+        }
+    end)
+
 local hotpot = require("hotpot")
 local fts = hotpot.focus_timestamp
 local gtimer = require("gears.timer")

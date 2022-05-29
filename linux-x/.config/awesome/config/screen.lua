@@ -73,7 +73,6 @@ local gravity_index = shared.gravity_index
 
 local machi = require("layout-machi")
 local tabber = require("tabber")
-beautiful.layout_machi = machi.get_icon()
 local xlayout = tabber{
     layout = require("external.equalarea"),
     bar_size = beautiful.bar_height + 2 * beautiful.xborder_width,
@@ -1139,8 +1138,8 @@ local function setup_screen(scr)
        scr.widgets.bar.middle_margin_expanded = with_border {
            widget = {
                tasklist_with_fallback,
-               bg = beautiful.bg_normal,
-               widget = wibox.container.background,
+               bg_function = {"bg_"},
+               widget = cbg,
            },
            draw_empty = false,
            top = true
@@ -1161,8 +1160,8 @@ local function setup_screen(scr)
        scr.widgets.bar.middle_margin_splitted = with_border {
            widget = {
                tasklist_with_fallback,
-               bg = beautiful.bg_normal,
-               widget = wibox.container.background,
+               bg_function = {"bg_"},
+               widget = cbg,
            },
            draw_empty = false,
            top = true, left = true, right = true,
