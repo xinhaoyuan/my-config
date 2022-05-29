@@ -3,6 +3,7 @@ local shared = require((...):match("(.-)[^%.]+$") .. "shared")
 local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
+local cbg = require("contextual_background")
 
 local module = {}
 
@@ -34,6 +35,62 @@ local direction_index = shared.direction_index
 local dual_direction_index = shared.dual_direction_index
 local gravity_index = shared.gravity_index
 
+local function taglist_update_function(widget, tag, index, objects)
+    local background_widget = widget:get_children_by_id("background_role")[1]
+    background_widget:set_context_transform_function{
+        focus = tag == tag.screen.selected_tag
+    }
+end
+
+local function taglist_create_function(widget, c, index, objects)
+    taglist_update_function(widget, c, index, objects)
+end
+
+local taglist_template = {
+    {
+        {
+            id = "text_role",
+            widget = wibox.widget.textbox,
+        },
+        halign = "center",
+        valign = "center",
+        forced_width = beautiful.bar_height / beautiful.bar_rows,
+        forced_height = beautiful.bar_height / beautiful.bar_rows,
+        widget = wibox.container.place
+    },
+    id = "background_role",
+    fg_function = function (context)
+        if context.selected then
+            return beautiful.fg_focus
+        elseif context.focus then
+            return beautiful.fg_focus
+        elseif context.minimized then
+            return beautiful.fg_minimize
+        else
+            return beautiful.fg_normal
+        end
+    end,
+    bg_function = function (context)
+        local ret
+        if context.selected then
+            return beautiful.bg_focus
+        elseif context.focus then
+            ret = beautiful.bg_focus
+        elseif context.minimized then
+            ret = beautiful.bg_minimize
+        else
+            ret = beautiful.bg_normal
+        end
+        -- if context.is_odd and not context.focus then
+        --     ret = alt_color(ret)
+        -- end
+        return ret
+    end,
+    widget = cbg,
+    create_callback = taglist_create_function,
+    update_callback = taglist_update_function,
+}
+
 function module.create(screen)
     return awful.widget.taglist{
         screen = screen,
@@ -44,21 +101,7 @@ function module.create(screen)
         style = {
             font = "DejaVu Sans 10",
         },
-        widget_template = {
-            {
-                {
-                    id = "text_role",
-                    widget = wibox.widget.textbox,
-                },
-                halign = "center",
-                valign = "center",
-                forced_width = beautiful.bar_height / beautiful.bar_rows,
-                forced_height = beautiful.bar_height / beautiful.bar_rows,
-                widget = wibox.container.place
-            },
-            id = "background_role",
-            widget = wibox.container.background,
-        }
+        widget_template = taglist_template,
     }
 end
 
