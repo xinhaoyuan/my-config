@@ -29,6 +29,7 @@ local fixed_align = require("fixed_align")
 local masked_imagebox = require("masked_imagebox")
 local debug_container = require("debug_container")
 local tasklist = require("config.tasklist")
+local taglist = require("config.taglist")
 local cbg = require("contextual_background")
 local fts = require("hotpot").focus_timestamp
 local aux = require("aux")
@@ -201,15 +202,6 @@ end
 
 -- Screen bar
 
-local function switch_or_restore(tag)
-    local screen = tag.screen
-    if #screen.selected_tags == 1 and screen.selected_tag == tag then
-        awful.tag.history.restore(screen)
-    else
-        tag:view_only()
-    end
-end
-
 local my_bars = {}
 local my_tray
 my_tray = wibox.widget.systray()
@@ -229,15 +221,6 @@ end
 function shared.screen.attach_tray_widget()
     bar_tray_wrapper.widget = my_tray
 end
-
-local my_tag_list_buttons = awful.util.table.join(
-   awful.button({ }, 1, switch_or_restore),
-   awful.button({ "Mod4" }, 1, awful.client.movetotag),
-   awful.button({ }, 3, awful.tag.viewtoggle),
-   awful.button({ "Mod4" }, 3, awful.client.toggletag),
-   awful.button({ }, 4, function(t) awful.tag.viewnext(awful.tag.getscreen(t)) end),
-   awful.button({ }, 5, function(t) awful.tag.viewprev(awful.tag.getscreen(t)) end)
-)
 
 local current_screen = nil
 local primary_screen = nil
@@ -844,32 +827,7 @@ local function setup_screen(scr)
        widget = fallback,
    }
 
-   scr.widgets.tag_list = awful.widget.taglist {
-       screen = scr,
-       filter = function (t) return true end,
-       buttons = my_tag_list_buttons,
-       -- layout = wibox.layout.fixed[direction_index[shared.vars.bar_position]],
-       layout = wibox.layout.grid[direction_index[shared.vars.bar_position]](beautiful.bar_rows),
-       style = {
-           font = "DejaVu Sans 10",
-       },
-       widget_template = {
-           {
-               {
-                   id = "text_role",
-                   widget = wibox.widget.textbox,
-               },
-               halign = "center",
-               valign = "center",
-               forced_width = beautiful.bar_height / beautiful.bar_rows,
-               forced_height = beautiful.bar_height / beautiful.bar_rows,
-               widget = wibox.container.place
-           },
-           id = "background_role",
-           widget = wibox.container.background,
-       }
-   }
-
+   scr.widgets.tag_list = taglist.create(scr)
    scr.widgets.bar_placeholder = awful.wibar({
          screen = scr,
          ontop = false,
@@ -1485,7 +1443,7 @@ for i = 1, #shared.screen.tags do
     local key = tostring(i)
     global_keys =
         table_join(
-            awful.key({ "Mod4" }, tostring(i), function () switch_or_restore(awful.screen.focused().tags[i]) end),
+            awful.key({ "Mod4" }, tostring(i), function () taglist.switch_or_restore(awful.screen.focused().tags[i]) end),
             awful.key({ "Mod4", "Control" }, tostring(i), function () awful.tag.viewtoggle(awful.screen.focused().tags[i]) end),
             awful.key({ "Mod4", "Shift" }, tostring(i), function ()
                     local c = capi.client.focus
