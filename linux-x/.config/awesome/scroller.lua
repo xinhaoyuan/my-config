@@ -37,11 +37,6 @@ function scroller:fit(context, width, height)
     return w, h
 end
 
-local inactive_color
-do
-    local _, r, g, b, _ = gcolor(beautiful.fg_normal):get_rgba()
-    inactive_color = lgi.cairo.SolidPattern.create_rgba(r, g, b, 0.25)
-end
 function scroller:draw(context, cr, width, height)
     local w, h
     if not self._private.widget then
@@ -52,7 +47,8 @@ function scroller:draw(context, cr, width, height)
     w, h = base.fit_widget(self, context, self._private.widget, content_width, huge_height)
 
     if h <= height then
-        cr:set_source(inactive_color)
+        local _, r, g, b, _ = gcolor(beautiful.fg_normal):get_rgba()
+        cr:set_source_rgba(r, g, b, 0.25)
         cr:rectangle(content_width, 0, self._private.scrollbar_width, height)
         cr:fill()
     else
