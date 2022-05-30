@@ -12,6 +12,9 @@ local gtimer = require("gears.timer")
 local gdebug = require("gears.debug")
 local gstring = require("gears.string")
 local naughty = require("naughty")
+local masked_imagebox = require("masked_imagebox")
+local contextual_background = require("contextual_background")
+local beautiful = require("beautiful")
 local orgenda = {
     config = {
         files = {}
@@ -192,6 +195,21 @@ function orgenda.save_priority_status(item)
     awful.spawn.easy_async(cmd, function () end)
 end
 
+local orgenda_fg_functions = {
+    [1] = {
+        [false] = function() return beautiful.orgenda_color_p1_todo end,
+        [true] = function() return beautiful.orgenda_color_p1_done end,
+    },
+    [2] = {
+        [false] = function() return beautiful.orgenda_color_p2_todo end,
+        [true] = function() return beautiful.orgenda_color_p2_done end,
+    },
+    [3] = {
+        [false] = function() return beautiful.orgenda_color_p3_todo end,
+        [true] = function() return beautiful.orgenda_color_p3_done end,
+    },
+}
+
 function orgenda.widget(args)
     args = args or {}
 
@@ -220,10 +238,14 @@ function orgenda.widget(args)
                     {
                         {
                             {
-                                image = get_mark(item),
-                                forced_width = beautiful.icon_size,
-                                forced_height = beautiful.icon_size,
-                                widget = wibox.widget.imagebox,
+                                {
+                                    image = get_mark(item),
+                                    forced_width = beautiful.icon_size,
+                                    forced_height = beautiful.icon_size,
+                                    widget = masked_imagebox,
+                                },
+                                fg_function = orgenda_fg_functions[item.priority][item.done],
+                                widget = contextual_background,
                             },
                             valign = "top",
                             widget = wibox.container.place

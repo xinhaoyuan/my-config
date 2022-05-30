@@ -726,10 +726,10 @@ orgenda.data:connect_signal(
                     end
                 end
             end
-            if high > 0 then high = "<span foreground='"..beautiful.special_normal.."'><b>"..tostring(high).."</b></span>" else high = "" end
+            if high > 0 then high = "<b>"..tostring(high).."</b>" else high = "" end
             if mid > 0 then mid = "<b>"..tostring(mid).."</b>" else mid = "" end
             if low > 0 then low = tostring(low) else low = "" end
-            orgenda_counter_text_widget.markup = high..((#high > 0 and #mid + #low > 0) and "/" or "")..mid..((#mid > 0 and #low > 0) and "/" or "")..low
+            orgenda_counter_text_widget.markup = high..((#high > 0 and #mid + #low > 0) and "!" or "")..mid..((#mid > 0 and #low > 0) and "/" or "")..low
         else
             orgenda_counter_widget.visible = false
         end

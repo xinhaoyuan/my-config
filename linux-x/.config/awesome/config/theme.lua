@@ -705,6 +705,12 @@ do
     theme.orgenda_mark_p2_done = orgenda_icon(c_yellow[1])
     theme.orgenda_mark_p3_todo = orgenda_icon(c_red[1], "clear")
     theme.orgenda_mark_p3_done = orgenda_icon(c_red[1])
+    theme.orgenda_color_p1_todo = c_green[1]
+    theme.orgenda_color_p1_done = c_green[1]
+    theme.orgenda_color_p2_todo = c_yellow[1]
+    theme.orgenda_color_p2_done = c_yellow[1]
+    theme.orgenda_color_p3_todo = c_red[1]
+    theme.orgenda_color_p3_done = c_red[1]
 end
 
 return theme
