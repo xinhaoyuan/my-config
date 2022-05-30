@@ -37,7 +37,7 @@ local notix_header_bar = wibox.widget{
             {
                 {
                     {
-                        image = gcolor.recolor_image(icons.remove, beautiful.fg_normal),
+                        image = icons.remove,
                         widget = masked_imagebox,
                     },
                     forced_height = beautiful.icon_size,
@@ -182,7 +182,7 @@ function config.create_notif_widget(notif)
                                 widget = naughty.widget.icon,
                             },
                             {
-                                image = gcolor.recolor_image(icons.notification, beautiful.fg_normal),
+                                image = icons.notification,
                                 widget = masked_imagebox,
                             },
                             widget = fallback,
