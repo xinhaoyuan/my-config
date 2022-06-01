@@ -46,6 +46,7 @@ local HOME_DIR = os.getenv("HOME")
 os.execute(HOME_DIR .. "/.xdesktoprc")
 
 require("clientextual"){}
+require("onion")
 local config = require("config")
 local beautiful = require("beautiful")
 local naughty = require("naughty")

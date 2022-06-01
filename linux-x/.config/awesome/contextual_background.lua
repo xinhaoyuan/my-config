@@ -6,40 +6,40 @@ local gmath = require("gears.math")
 local gtable = require("gears.table")
 local gcolor = require("gears.color")
 local beautiful = require("beautiful")
+local onion = require("onion")
 local unpack = unpack or table.unpack
 
 local mod = {mt = {}}
 
 function mod:before_draw_children(context, cr, width, height)
+    local contextack = onion.contextack.get(context)
     if self._private.ctf ~= nil then
-        self._private.saved_context = gtable.clone(context, false)
-        self:apply_ctf(self._private.ctf, context)
+        self._private.saved_contextack = onion.contextack.push(contextack)
+        self:apply_ctf(self._private.ctf, contextack)
     end
     if self._private.bgf ~= nil then
         self._private.saved_background = self._private.background
-        self._private.background = gcolor(self:apply_bgf(self._private.bgf, context))
+        self._private.background = gcolor(self:apply_bgf(self._private.bgf, contextack))
     end
     if self._private.fgf ~= nil then
         self._private.saved_foreground = self._private.foreground
-        self._private.foreground = gcolor(self:apply_fgf(self._private.fgf, context))
+        self._private.foreground = gcolor(self:apply_fgf(self._private.fgf, contextack))
     end
-    bg.before_draw_children(self, context, cr, width, height)
+    bg.before_draw_children(self, contextack, cr, width, height)
 end
 
 function mod:after_draw_children(context, cr, width, height)
-    bg.after_draw_children(self, context, cr, width, height)
-    if self._private.saved_context ~= nil then
-        gtable.crush(context, self._private.saved_context)
-        for k, v in pairs(context) do
-            context[k] = self._private.saved_context[k]
-        end
-        self._private.saved_context = nil
+    local contextack = onion.contextack.get(context)
+    bg.after_draw_children(self, contextack, cr, width, height)
+    if self._private.ctf ~= nil then
+        onion.contextack.pop(contextack, self._private.saved_contextack)
+        self._private.saved_contextack = nil
     end
-    if self._private.saved_background then
+    if self._private.bgf ~= nil then
         self._private.background = self._private.saved_background
         self._private.saved_background = nil
     end
-    if self._private.saved_foreground then
+    if self._private.fgf ~= nil then
         self._private.foreground = self._private.saved_foreground
         self._private.saved_foreground = nil
     end
