@@ -30,7 +30,8 @@ local masked_imagebox = require("masked_imagebox")
 local debug_container = require("debug_container")
 local tasklist = require("config.tasklist")
 local taglist = require("config.taglist")
-local cbg = require("contextual_background")
+local ocontainer = require("onion.container")
+local opicker = require("onion.picker")
 local fts = require("hotpot").focus_timestamp
 local aux = require("aux")
 local icons = require("icons")
@@ -406,84 +407,7 @@ local function update_next_todo()
         end
     end
 end
-
--- Calendar popup
-
-local today = os.date("*t")
 local last_mid_update_timestamp = nil
-local active_dates = {}
-local cal_widget = wibox.widget {
-    date = os.date('*t'),
-    font = beautiful.font_mono,
-    week_numbers = true,
-    -- start_sunday = true,
-    long_weekdays = true,
-    spacing = 0,
-    fn_embed = function (widget, flag, date)
-        if flag == "header" then
-            widget.font = beautiful.fontname_normal..' 12'
-            widget = wibox.widget{
-                widget,
-                fg = beautiful.fg_focus,
-                bg = beautiful.bg_focus,
-                widget = wibox.container.background,
-            }
-            return widget
-        elseif flag == "month" then
-            return widget
-        end
-
-        local inverted = false
-
-        if flag == "normal" or flag == "focus" then
-            if today.year == date.year and today.month == date.month and today.day == date.day then
-                inverted = true
-            end
-
-            if active_dates[date.year] and active_dates[date.year][date.month] and active_dates[date.year][date.month][date.day] then
-                widget = wibox.widget {
-                    widget,
-                    fg_function = function(context)
-                        return beautiful[context.inverted and "special_focus" or "special_normal"]
-                    end,
-                    widget = cbg,
-                }
-            end
-        end
-        widget = wibox.widget{
-            widget,
-            halign = "center",
-            widget = wibox.container.place,
-        }
-
-        if inverted then
-            return wibox.widget {
-                {
-                    widget,
-                    margins = dpi(2),
-                    widget = wibox.container.margin
-                },
-                shape = function (cr, width, height)
-                    beautiful.rect_with_corners(cr, width, height, true, true, true, true,
-                                                beautiful.xborder_radius / 2)
-                end,
-                fg = beautiful.fg_focus,
-                bg = beautiful.bg_focus,
-                context_transform_function = function (context)
-                    context.inverted = true
-                end,
-                widget = cbg,
-            }
-        else
-            return wibox.widget {
-                widget,
-                margins = dpi(2),
-                widget = wibox.container.margin
-            }
-        end
-    end,
-    widget = mycalendar.month
-}
 gtimer {
     timeout = 10,
     autostart = true,
@@ -495,195 +419,6 @@ gtimer {
             last_mid_update_timestamp = timestamp
             update_next_todo()
         end
-    end
-}
-
-local orgenda_header
-do
-    local refresh_button = wibox.widget{
-        {
-            {
-                text = "Reload",
-                font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
-                widget = wibox.widget.textbox,
-            },
-            margins = beautiful.sep_small_size,
-            widget = wibox.container.margin,
-        },
-        fg_function = {"fg_"},
-        bg_function = {"bg_"},
-        context_transform_function = {focus = false},
-        widget = cbg,
-    }
-    refresh_button:connect_signal(
-        "mouse::enter",
-        function ()
-            refresh_button.context_transform_function = {focus = true}
-        end
-    )
-    refresh_button:connect_signal(
-        "mouse::leave",
-        function ()
-            refresh_button.context_transform_function = {focus = false}
-        end
-    )
-    refresh_button:connect_signal(
-        "button::release",
-        function ()
-            capi.awesome.emit_signal("orgenda::request_reset")
-        end
-    )
-    orgenda_header = wibox.widget{
-        {
-            {
-                text = "TODOs:",
-                widget = wibox.widget.textbox,
-            },
-            left = beautiful.sep_small_size,
-            widget = wibox.container.margin,
-        },
-        nil,
-        refresh_button,
-        layout = wibox.layout.align.horizontal,
-    }
-end
-
-local cal_switch
-orgenda.data:connect_signal(
-    "property::items",
-    function ()
-        active_dates = {}
-        for _, item in ipairs(orgenda.data.items) do
-            if item.timestamp and not item.done then
-                local date = os.date("*t", item.timestamp)
-                local y = active_dates[date.year] or {}
-                local m = y[date.month] or {}
-                m[date.day] = true
-                y[date.month] = m
-                active_dates[date.year] = y
-            end
-        end
-        update_next_todo()
-        if cal_switch then cal_switch{} end
-    end
-)
-
-local orgenda_widget = wibox.widget{
-    orgenda_header,
-    orgenda.widget{
-        item_margin = beautiful.sep_small_size,
-    },
-    layout = wibox.layout.fixed.vertical,
-}
-
-orgenda_widget.visible = shared.vars.show_notes
-shared.vars:connect_signal(
-    "property::show_notes",
-    function(_, value)
-        orgenda_widget.visible = value
-    end
-)
-
-local cal_popup_width = dpi(240)
-local cal_popup = awful.popup {
-    widget = wibox.widget {
-        with_border {
-            widget = {
-                {
-                    cal_widget,
-                    {
-                        {
-                            orgenda_widget,
-                            draw_empty = false,
-                            top = beautiful.sep_big_size,
-                            widget = fixed_margin,
-                        },
-                        bgimage = function(context, cr, width, height)
-                            height = beautiful.sep_big_size
-                            beautiful.draw_separator(cr, width, height)
-                        end,
-                        widget = wibox.container.background
-                    },
-                    {
-                        {
-                            notix.widget,
-                            draw_empty = false,
-                            top = beautiful.sep_big_size,
-                            widget = fixed_margin,
-                        },
-                        bgimage = function(context, cr, width, height)
-                            height = beautiful.sep_big_size
-                            beautiful.draw_separator(cr, width, height)
-                        end,
-                        widget = wibox.container.background
-                    },
-                    layout = wibox.layout.fixed.vertical,
-                },
-                width = cal_popup_width,
-                strategy = "exact",
-                widget = wibox.container.constraint,
-            },
-            top = true,
-            bottom = true,
-            left = true,
-            right = true,
-        },
-        margins = beautiful.useless_gap,
-        widget = wibox.container.margin
-    },
-    bg = "#00000000",
-    ontop = true,
-    visible = false,
-}
-
-local function cal_reset()
-    cal_widget:set_date(nil)
-    cal_widget:set_date(os.date('*t'))
-end
-
-local cal_popup_pinned = false
-local cal_popup_auto_hide = true
-local cal_popup_auto_hide_timer
-
-local function cal_popup_show()
-    local screen = mouse.screen
-    cal_reset()
-    cal_popup.placement = function (d)
-        if screen.valid then
-            awful.placement["bottom_right"](cal_popup, {bounding_rect=screen.workarea})
-        end
-    end
-    cal_popup.visible = true
-    cal_popup_auto_hide_timer:again()
-end
-
-local function cal_popup_hide()
-    cal_popup.visible = false
-end
-
-function cal_switch(delta)
-    local date = cal_widget:get_date()
-    if delta.day ~= nil then date.day = date.day + delta.day end
-    if delta.month ~= nil then date.month = date.month + delta.month end
-    if delta.year ~= nil then date.year = date.year + delta.year end
-    cal_widget:set_date(nil)
-    cal_widget:set_date(date)
-end
-
-local cal_popup_mouse_present_last = false
-cal_popup_auto_hide_timer = gtimer{
-    timeout = 0.5,
-    callback = function()
-        if not cal_popup_auto_hide or cal_popup_pinned then
-            cal_popup_mouse_present_last = true
-            return
-        end
-        local mouse_present_now = mouse.current_wibox == cal_popup
-        if not mouse_present_now and not cal_popup_mouse_present_last then
-            cal_popup_hide()
-            cal_popup_auto_hide_timer:stop()
-        end
-        cal_popup_mouse_present_last = mouse_present_now
     end
 }
 
@@ -868,9 +603,9 @@ local function setup_screen(scr)
            layoutbox,
            widget = fallback,
        },
-       fg_function = {"fg_"},
-       bg_function = {"bg_"},
-       widget = cbg
+       fg_picker = opicker.beautiful{"fg_", opicker.focus_switcher},
+       bg_picker = opicker.beautiful{"bg_", opicker.focus_switcher},
+       widget = ocontainer,
    }
    scr.widgets.indicator:buttons(
       awful.util.table.join(
@@ -931,8 +666,8 @@ local function setup_screen(scr)
                    format = "%m/%d",
                    widget = wibox.widget.textclock,
                },
-               fg_function = {"minor_"},
-               widget = cbg,
+               fg_picker = opicker.beautiful{"minor_", opicker.focus_switcher},
+               widget = ocontainer,
            },
            {
                format = "%H:%M",
@@ -949,8 +684,8 @@ local function setup_screen(scr)
                    format = "%m<b>%d</b>",
                    widget = wibox.widget.textclock,
                },
-               fg_function = {"minor_"},
-               widget = cbg,
+               fg_picker = opicker.beautiful{"minor_", opicker.focus_switcher},
+               widget = ocontainer,
            },
            {
                format = "%H<b>%M</b>",
@@ -987,34 +722,16 @@ local function setup_screen(scr)
            },
            layout = wibox.layout.fixed.horizontal
        },
-       fg_function = {"fg_"},
-       bg_function = {"bg_"},
-       context_transform_function = {focus = false},
-       widget = cbg,
+       fg_picker = opicker.beautiful{"fg_", opicker.focus_switcher},
+       bg_picker = opicker.beautiful{"bg_", opicker.focus_switcher},
+       context_transformation = {focus = false},
+       widget = ocontainer,
    }
    local clock_area_focused
    function scr.actions.set_clock_area_focus(f)
-       clock_area:set_context_transform_function({focus = f})
+       clock_area.context_transformation = {focus = f}
        clock_area_focused = f
    end
-   -- function scr.actions.activate_clock_area()
-   --     if cal_popup_pinned then
-   --         if cal_popup.screen == scr then
-   --             cal_popup_pinned = false
-   --             cal_popup_hide()
-   --             clock_area:set_context_transform_function({focus = false})
-   --         else
-   --             cal_popup.screen.widgets.
-   --                 clock_area:set_context_transform_function({focus = false})
-   --             cal_popup_show()
-   --             clock_area:set_context_transform_function({focus = true})
-   --         end
-   --     else
-   --         cal_popup_show()
-   --         cal_popup_pinned = true
-   --         clock_area:set_context_transform_function({focus = true})
-   --     end
-   -- end
    clock_area:buttons(
        awful.util.table.join(
            awful.button({         }, 1, function()
@@ -1033,12 +750,7 @@ local function setup_screen(scr)
                                 )
                             end
                         end),
-           awful.button({         }, 2, function() cal_reset() end),
-           awful.button({         }, 3, function() notix.remove_unpinned() end),
-           awful.button({         }, 4, function() cal_switch({ month =  -1 }) end),
-           awful.button({         }, 5, function() cal_switch({ month =   1 }) end),
-           awful.button({ 'Shift' }, 4, function() cal_switch({ year = -1 }) end),
-           awful.button({ 'Shift' }, 5, function() cal_switch({ year =  1 }) end)
+           awful.button({         }, 3, function() notix.remove_unpinned() end)
        )
    )
    clock_area:connect_signal(
@@ -1096,8 +808,8 @@ local function setup_screen(scr)
        scr.widgets.bar.middle_margin_expanded = with_border {
            widget = {
                tasklist_with_fallback,
-               bg_function = {"bg_"},
-               widget = cbg,
+               bg_picker = opicker.beautiful{"bg_", opicker.focus_switcher},
+               widget = ocontainer,
            },
            draw_empty = false,
            top = true
@@ -1118,8 +830,8 @@ local function setup_screen(scr)
        scr.widgets.bar.middle_margin_splitted = with_border {
            widget = {
                tasklist_with_fallback,
-               bg_function = {"bg_"},
-               widget = cbg,
+               bg_picker = opicker.beautiful{"bg_", opicker.focus_switcher},
+               widget = ocontainer,
            },
            draw_empty = false,
            top = true, left = true, right = true,
@@ -1292,9 +1004,9 @@ gtimer {
         local nscreen = capi.mouse.screen
         if nscreen ~= current_screen then
             if current_screen ~= nil then
-                current_screen.widgets.indicator:set_context_transform_function(nil)
+                current_screen.widgets.indicator.context_transformation = (nil)
             end
-            nscreen.widgets.indicator:set_context_transform_function({focus = true})
+            nscreen.widgets.indicator.context_transformation = {focus = true}
             -- switch active screen
             current_screen = nscreen
         end

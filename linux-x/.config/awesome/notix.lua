@@ -11,7 +11,8 @@ local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local fixed_margin = require("fixed_margin")
 local masked_imagebox = require("masked_imagebox")
-local cbg = require("contextual_background")
+local ocontainer = require("onion.container")
+local opicker = require("onion.picker")
 local fallback = require("fallback")
 local naughty = require("naughty")
 local icons = require("icons")
@@ -54,23 +55,23 @@ local notix_header_bar = wibox.widget{
         left = beautiful.sep_small_size,
         widget = wibox.container.margin,
     },
-    fg_function = {"fg_"},
-    bg_function = {"bg_"},
-    context_transform_function = {focus = false},
+    fg_picker = opicker.beautiful{"fg_", opicker.focus_switcher},
+    bg_picker = opicker.beautiful{"bg_", opicker.focus_switcher},
+    context_transformation = {focus = false},
     visible = false,
-    widget = cbg,
+    widget = ocontainer,
 }
 
 notix_header_bar:connect_signal(
     "mouse::enter",
     function ()
-        notix_header_bar.context_transform_function = {focus = true}
+        notix_header_bar.context_transformation = {focus = true}
     end
 )
 notix_header_bar:connect_signal(
     "mouse::leave",
     function ()
-        notix_header_bar.context_transform_function = {focus = false}
+        notix_header_bar.context_transformation = {focus = false}
     end
 )
 notix_header_bar:connect_signal(
@@ -218,10 +219,10 @@ function config.create_notif_widget(notif)
             },
             layout = wibox.layout.fixed.horizontal,
         },
-        fg_function = {"fg_"},
-        bg_function = {"bg_"},
-        context_transform_function = {focus = false},
-        widget = cbg,
+        fg_picker = opicker.beautiful{"fg_", opicker.focus_switcher},
+        bg_picker = opicker.beautiful{"bg_", opicker.focus_switcher},
+        context_transformation = {focus = false},
+        widget = ocontainer,
     }
     content_widget:connect_signal(
         "button::release",
@@ -254,13 +255,13 @@ function config.create_notif_widget(notif)
     content_widget:connect_signal(
         "mouse::enter",
         function (w)
-            w:set_context_transform_function({focus = true})
+            w.context_transformation = {focus = true}
         end
     )
     content_widget:connect_signal(
         "mouse::leave",
         function (w)
-            w:set_context_transform_function({focus = false})
+            w.context_transformation = {focus = false}
         end
     )
 
@@ -283,21 +284,21 @@ function config.create_button(name, callback)
             margins = beautiful.sep_small_size,
             widget = wibox.container.margin,
         },
-        fg_function = {"fg_"},
-        bg_function = {"bg_"},
-        context_transform_function = {focus = false},
-        widget = cbg,
+        fg_picker = opicker.beautiful{"fg_", opicker.focus_switcher},
+        bg_picker = opicker.beautiful{"bg_", opicker.focus_switcher},
+        context_transformation = {focus = false},
+        widget = ocontainer,
     }
     widget:connect_signal(
         "mouse::enter",
         function (w)
-            w:set_context_transform_function({focus = true})
+            w.context_transformation = {focus = true}
         end
     )
     widget:connect_signal(
         "mouse::leave",
         function (w)
-            w:set_context_transform_function({focus = false})
+            w.context_transformation = {focus = false}
         end
     )
     widget:connect_signal(

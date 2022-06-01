@@ -22,7 +22,6 @@ local fixed_margin = require("fixed_margin")
 local fixed_align = require("fixed_align")
 local fixed_place = require("fixed_place")
 local outlined_textbox = require("outlined_textbox")
-local cbg = require("contextual_background")
 local debug_container = require("debug_container")
 local masked_imagebox = require("masked_imagebox")
 local acolor = require("aux").color
@@ -33,6 +32,8 @@ local scroller = require("scroller")
 local notix = require("notix")
 local fts = require("hotpot").focus_timestamp
 local dpi = require("beautiful.xresources").apply_dpi
+local ocontainer = require("onion.container")
+local opicker = require("onion.picker")
 
 local waffle_width = beautiful.waffle_panel_width or dpi(240)
 local calendar_waffle_width = waffle_width
@@ -128,22 +129,22 @@ local function simple_button(args)
       },
       forced_width = args.width,
       forced_height = args.height,
-      fg_function = {"fg_"},
-      bg_function = {"bg_", "_button"},
-      widget = cbg
+      fg_picker = opicker.beautiful{"fg_", opicker.switch{"focus", "focus", "normal"}},
+      bg_picker = opicker.switch{"focus", opicker.beautiful{"bg_focus"}, opicker.none},
+      widget = ocontainer,
    }
 
    ret:connect_signal(
       "mouse::enter",
       function ()
-          ret:set_context_transform_function({focus = true})
+          ret:set_context_transformation({focus = true})
       end
    )
 
    ret:connect_signal(
       "mouse::leave",
       function ()
-          ret:set_context_transform_function(nil)
+          ret:set_context_transformation(nil)
       end
    )
 
@@ -209,8 +210,8 @@ local function button(args)
                 valign = "center",
                 widget = wibox.widget.textbox,
             },
-            fg_function = {"special_"},
-            widget = cbg
+            fg_picker = opicker.beautiful{"special_", opicker.switch{"focus", "focus", "normal"}},
+            widget = ocontainer,
         },
         expand = "inside",
         layout = args.button_layout or fixed_align.horizontal,
@@ -679,7 +680,7 @@ do
             forced_width = button_height,
             widget = masked_imagebox,
         },
-        widget = cbg,
+        widget = ocontainer,
     }
 
     net_widget = wibox.widget {
@@ -749,10 +750,10 @@ do
         if has_vpn ~= net_has_vpn then
             net_has_vpn = has_vpn
             if has_vpn then
-                net_widget_icon_container.fg_function = {"special_"}
+                net_widget_icon_container.fg_picker = opicker.beautiful{"special_", opicker.focus_switcher}
             else
                 -- Need to investigate why nil does not work.
-                net_widget_icon_container.fg_function = {"fg_"}
+                net_widget_icon_container.fg_picker = nil
             end
         end
 
@@ -1194,14 +1195,9 @@ do
                 forced_height = button_height,
                 widget = masked_imagebox,
             },
-            fg_function = function (context)
-                if context.focus then
-                    return beautiful.fg_focus
-                else
-                    return beautiful.fg_normal
-                end
-            end,
-            widget = cbg
+            fg_picker = opicker.beautiful{
+                "fg_", opicker.focus_switcher},
+            widget = ocontainer,
         }
 
     mpc_gobject:connect_signal(
@@ -1727,8 +1723,8 @@ local cal_widget = wibox.widget {
             widget.font = font_info
             widget = wibox.widget{
                 widget,
-                fg_function = {"minor_"},
-                widget = cbg,
+                fg_picker = opicker.beautiful{"minor_", opicker.focus_switcher},
+                widget = ocontainer,
             }
         end
 
@@ -1742,10 +1738,9 @@ local cal_widget = wibox.widget {
             if active_dates[date.year] and active_dates[date.year][date.month] and active_dates[date.year][date.month][date.day] then
                 widget = wibox.widget {
                     widget,
-                    fg_function = function(context)
-                        return beautiful[context.inverted and "special_focus" or "special_normal"]
-                    end,
-                    widget = cbg,
+                    fg_picker = opicker.beautiful{
+                        "special_", opicker.switch{"inverted", "focus", "normal"}},
+                    widget = onion,
                 }
             end
         end
@@ -1770,12 +1765,10 @@ local cal_widget = wibox.widget {
                         beautiful.rect_with_corners(cr, width, height)
                     end
                 end,
-                fg_function = function () return beautiful.fg_focus end,
-                bg_function = function () return beautiful.bg_focus end,
-                context_transform_function = function (context)
-                    context.inverted = true
-                end,
-                widget = cbg,
+                fg_picker = opicker.beautiful{"fg_focus"},
+                bg_picker = opicker.beautiful{"bg_focus"},
+                context_transformation = {inverted = true},
+                widget = ocontainer,
             }
         else
             return wibox.widget {
@@ -1860,21 +1853,21 @@ do
             expand = "outside",
             layout = wibox.layout.align.horizontal,
         },
-        fg_function = {"fg_"},
-        bg_function = {"bg_"},
-        context_transform_function = {focus = false},
-        widget = cbg,
+        fg_picker = opicker.beautiful{"fg_", opicker.focus_switcher},
+        bg_picker = opicker.beautiful{"bg_", opicker.focus_switcher},
+        context_transformation = {focus = false},
+        widget = ocontainer,
     }
     orgenda_header:connect_signal(
         "mouse::enter",
         function ()
-            orgenda_header.context_transform_function = {focus = true}
+            orgenda_header.context_transformation = {focus = true}
         end
     )
     orgenda_header:connect_signal(
         "mouse::leave",
         function ()
-            orgenda_header.context_transform_function = {focus = false}
+            orgenda_header.context_transformation = {focus = false}
         end
     )
     orgenda_header:connect_signal(
@@ -2203,13 +2196,9 @@ local waffle_client_pid_button = button{
                 align = "center",
                 widget = wibox.widget.textbox
             },
-            fg_function = function (ctx)
-                if ctx.focus then return beautiful.special_focus else return "#00000000" end
-            end,
-            bg_function = function (ctx)
-                if ctx.focus then return beautiful.bg_focus else return "#00000000" end
-            end,
-            widget = cbg,
+            fg_picker = opicker.switch{
+                "focus", opicker.beautiful{"special_focus"}, "#00000000"},
+            widget = ocontainer,
         },
         layout = fixed_align.vertical
     },

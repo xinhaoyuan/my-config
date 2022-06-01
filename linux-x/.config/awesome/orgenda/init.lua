@@ -13,7 +13,8 @@ local gdebug = require("gears.debug")
 local gstring = require("gears.string")
 local naughty = require("naughty")
 local masked_imagebox = require("masked_imagebox")
-local contextual_background = require("contextual_background")
+local ocontainer = require("onion.container")
+local opicker = require("onion.picker")
 local beautiful = require("beautiful")
 local orgenda = {
     config = {
@@ -195,7 +196,7 @@ function orgenda.save_priority_status(item)
     awful.spawn.easy_async(cmd, function () end)
 end
 
-local orgenda_fg_functions = {
+local orgenda_fg_pickers = {
     [1] = {
         [false] = function() return beautiful.orgenda_color_p1_todo end,
         [true] = function() return beautiful.orgenda_color_p1_done end,
@@ -218,7 +219,6 @@ function orgenda.widget(args)
     local wibox = require("wibox")
     local fixed_margin = require("fixed_margin")
     local beautiful = require("beautiful")
-    local cbg = require("contextual_background")
 
     local todo_item_container = wibox.widget {
         widget = wibox.layout.fixed.vertical
@@ -244,8 +244,8 @@ function orgenda.widget(args)
                                     forced_height = beautiful.icon_size,
                                     widget = masked_imagebox,
                                 },
-                                fg_function = orgenda_fg_functions[item.priority][item.done],
-                                widget = contextual_background,
+                                fg_picker = orgenda_fg_pickers[item.priority][item.done],
+                                widget = ocontainer,
                             },
                             valign = "top",
                             widget = wibox.container.place
@@ -282,21 +282,21 @@ function orgenda.widget(args)
                     },
                     layout = wibox.layout.fixed.horizontal
                 },
-                fg_function = {"fg_"},
-                bg_function = {"bg_"},
-                context_transform_function = {focus = false},
-                widget = cbg,
+                fg_picker = opicker.beautiful{"fg_", opicker.focus_switcher},
+                bg_picker = opicker.beautiful{"bg_", opicker.focus_switcher},
+                context_transformation = {focus = false},
+                widget = ocontainer,
             }
             widget:connect_signal(
                 "mouse::enter",
                 function (w)
-                    w:set_context_transform_function{ focus = true }
+                    w.context_transformation = {focus = true}
                 end
             )
             widget:connect_signal(
                 "mouse::leave",
                 function (w)
-                    w:set_context_transform_function{ focus = false }
+                    w.context_transformation = {focus = false}
                 end
             )
             widget:connect_signal(

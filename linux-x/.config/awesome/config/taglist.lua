@@ -3,7 +3,7 @@ local shared = require((...):match("(.-)[^%.]+$") .. "shared")
 local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
-local cbg = require("contextual_background")
+local ocontainer = require("onion.container")
 
 local module = {}
 
@@ -39,7 +39,7 @@ local function taglist_update_function(widget, tag, index, objects)
     local text_widget = widget:get_children_by_id("my_text_role")[1]
     local background_widget = widget:get_children_by_id("background_role")[1]
     text_widget.text = tag.name
-    background_widget:set_context_transform_function{
+    background_widget.context_transformation = {
         selected = tag == tag.screen.selected_tag
     }
 end
@@ -61,21 +61,21 @@ local taglist_template = {
         widget = wibox.container.place
     },
     id = "background_role",
-    fg_function = function (context)
+    fg_picker = function (context)
         if context.selected then
             return beautiful.fg_focus
         else
             return beautiful.fg_normal
         end
     end,
-    bg_function = function (context)
+    bg_picker = function (context)
         if context.selected then
             return beautiful.bg_focus
         else
             return beautiful.bg_normal
         end
     end,
-    widget = cbg,
+    widget = ocontainer,
     create_callback = taglist_create_function,
     update_callback = taglist_update_function,
 }

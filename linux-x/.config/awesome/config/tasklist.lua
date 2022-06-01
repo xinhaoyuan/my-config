@@ -14,7 +14,7 @@ local dpi = require("beautiful.xresources").apply_dpi
 local wibox  = require("wibox")
 local masked_imagebox = require("masked_imagebox")
 local fallback = require("fallback")
-local cbg = require("contextual_background")
+local ocontainer = require("onion.container")
 local border = require("border-theme")
 local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
@@ -211,7 +211,7 @@ local function tasklist_update_function(widget, c, index, objects)
         if status_widget then status_widget.text = status_text end
         if inline_status_widget and #inline_status_widget.text > 0 then inline_status_widget.text = "" end
     end
-    background_widget:set_context_transform_function{
+    background_widget.context_transformation = {
         focus = client.focus == c or (shared.waffle_selected_client == c and not waffle:autohide()),
         minimized = (c.cgroup and c.cgroup.current_client or c).minimized,
         is_odd = index % 2 == 1
@@ -293,14 +293,14 @@ local tasklist_template = {
                             direction = direction_index[shared.vars.bar_position] == "horizontal" and "north" or "west",
                             widget = wibox.container.rotate
                         },
-                        fg_function = function (context)
+                        fg_picker = function (context)
                             if context.selected or context.focus or context.minimized then
                                 return beautiful.special_focus
                             else
                                 return beautiful.special_normal
                             end
                         end,
-                        widget = cbg
+                        widget = ocontainer,
                     },
                     layout = wibox.layout.align[direction_index[shared.vars.bar_position]],
                 },
@@ -314,7 +314,7 @@ local tasklist_template = {
         layout = wibox.layout.stack,
     },
     id     = "my_background_role",
-    fg_function = function (context)
+    fg_picker = function (context)
         if context.selected then
             return beautiful.fg_focus
         elseif context.focus then
@@ -325,7 +325,7 @@ local tasklist_template = {
             return beautiful.fg_normal
         end
     end,
-    bg_function = function (context)
+    bg_picker = function (context)
         local ret
         if context.selected then
             return beautiful.bg_focus
@@ -341,7 +341,7 @@ local tasklist_template = {
         -- end
         return ret
     end,
-    widget = cbg,
+    widget = ocontainer,
     create_callback = tasklist_create_function,
     update_callback = tasklist_update_function,
 }

@@ -17,7 +17,8 @@ local masked_imagebox = require("masked_imagebox")
 local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
 local acolor = require("aux").color
-local cbg = require("contextual_background")
+local ocontainer = require("onion.container")
+local opicker = require("onion.picker")
 local lgi   = require("lgi")
 local icons = require("icons")
 local cairo = lgi.cairo
@@ -610,9 +611,9 @@ theme.apply_border_to_widget_template = function(args)
     return {
         {
             args.widget,
-            fg_function = {"fg_"},
-            bg_function = {"bg_"},
-            widget = cbg,
+            fg_picker = opicker.beautiful{"fg_", opicker.focus_switcher},
+            bg_picker = opicker.beautiful{"bg_", opicker.focus_switcher},
+            widget = ocontainer,
         },
         top = args.top and decorator.top_space - decorator.top_size or 0,
         left = args.left and decorator.left_space - decorator.left_size or 0,
