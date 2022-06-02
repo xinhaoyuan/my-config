@@ -991,6 +991,14 @@ require("awful.rules").rules = {
         },
     },
     {
+        rule = { class = "St" },
+        properties = {
+            tasklist_icon_only = false,
+            size_hints_honor = false,
+            placement = awful.placement.centered_with_half_size_on_new,
+        },
+    },
+    {
         rule = { class = "mpv" },
         properties = {
             size_hints_honor = false,

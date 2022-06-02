@@ -24,7 +24,7 @@ do
         term_prog = "x-termninal-emulator"
         print("Warning: no suitable terminal program found. Fallback to x-terminal-emulator.")
     end
-    local has_tabbed = os.execute("command -v tabbed")
+    local has_tabbed = false -- os.execute("command -v tabbed")
 
     if has_tabbed and term_prog == "st" then
         term_cmd = {"tabbed", "-kc", "-F", beautiful.fontname_normal .. ":size=10", "-M", beautiful.fg_normal, "-m", beautiful.bg_normal, "-T", beautiful.fg_focus, "-t", beautiful.bg_focus, "-r", "2", "--", "st", "-w", "--"}
