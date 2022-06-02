@@ -537,10 +537,12 @@ local function setup_screen(scr)
                       if (a.cgroup and a.cgroup.current_client or a).minimized ~= (b.cgroup and b.cgroup.current_client or b).minimized then
                           return (b.cgroup and b.cgroup.current_client or b).minimized
                       end
+                      --[[
                       -- Maximized windows first
                       if (a.cgroup and a.cgroup.current_client or a).maximized ~= (b.cgroup and b.cgroup.current_client or b).maximized then
                           return (a.cgroup and a.cgroup.current_client or a).maximized
                       end
+                      ]]--
                       local a_ticket = a.cgroup and ticket[a.cgroup] or a.manage_ticket
                       local b_ticket = b.cgroup and ticket[b.cgroup] or b.manage_ticket
                       if a_ticket == b_ticket then
