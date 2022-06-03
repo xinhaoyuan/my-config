@@ -75,41 +75,42 @@ function module.constructors.just(value)
     end
 end
 
+local function eval_string(components, constack)
+    local ret = ""
+    for _, component in ipairs(components) do
+        component = eval_exhaustively(component, constack)
+        if component == nil then
+            return nil
+        elseif type(component) == "string" then
+            ret = ret..component
+        else
+            print("WARNING: ignoring unknown string component "
+                  ..tostring(component))
+        end
+    end
+    return ret
+end
+
+function module.constructors.concat(...)
+    local components = {...}
+    return function (constack)
+        return eval_string(components, constack)
+    end
+end
+
 function module.constructors.beautiful(...)
     local components = {...}
     return function (constack)
-        local ret = ""
-        for _, component in ipairs(components) do
-            component = eval_exhaustively(component, constack)
-            if component == nil then
-                return nil
-            elseif type(component) == "string" then
-                ret = ret..component
-            else
-                print("ERROR: ignoring unknown beautiful key component "
-                      ..tostring(component))
-            end
-        end
-        return beautiful[ret]
+        local ret = eval_string(components, constack)
+        return ret and beautiful[ret]
     end
 end
 
 function module.constructors.constack(...)
     local components = {...}
     return function (constack)
-        local ret = ""
-        for _, component in ipairs(components) do
-            component = eval_exhaustively(component, constack)
-            if component == nil then
-                return nil
-            elseif type(component) == "string" then
-                ret = ret..component
-            else
-                print("ERROR: ignoring unknown constack key component "
-                      ..tostring(component))
-            end
-        end
-        return constack[ret]
+        local ret = eval_string(components, constack)
+        return ret and constack[ret]
     end
 end
 
