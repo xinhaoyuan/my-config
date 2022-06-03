@@ -15,6 +15,7 @@ local wibox  = require("wibox")
 local masked_imagebox = require("masked_imagebox")
 local fallback = require("fallback")
 local ocontainer = require("onion.container")
+local opicker = require("onion.picker")
 local border = require("border-theme")
 local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
@@ -293,13 +294,12 @@ local tasklist_template = {
                             direction = direction_index[shared.vars.bar_position] == "horizontal" and "north" or "west",
                             widget = wibox.container.rotate
                         },
-                        fg_picker = function (context)
-                            if context.selected or context.focus or context.minimized then
-                                return beautiful.special_focus
-                            else
-                                return beautiful.special_normal
-                            end
-                        end,
+                        fg_picker = opicker.switch{
+                            {"selected", opicker.beautiful{"special_focus"}},
+                            {"focus", opicker.beautiful{"special_focus"}},
+                            {"minimized", opicker.beautiful{"special_focus"}},
+                            opicker.beautiful{"special_normal"}
+                        },
                         widget = ocontainer,
                     },
                     layout = wibox.layout.align[direction_index[shared.vars.bar_position]],
@@ -314,33 +314,18 @@ local tasklist_template = {
         layout = wibox.layout.stack,
     },
     id     = "my_background_role",
-    fg_picker = function (context)
-        if context.selected then
-            return beautiful.fg_focus
-        elseif context.focus then
-            return beautiful.fg_focus
-        elseif context.minimized then
-            return beautiful.fg_minimize
-        else
-            return beautiful.fg_normal
-        end
-    end,
-    bg_picker = function (context)
-        local ret
-        if context.selected then
-            return beautiful.bg_focus
-        elseif context.focus then
-            ret = beautiful.bg_focus
-        elseif context.minimized then
-            ret = beautiful.bg_minimize
-        else
-            ret = beautiful.bg_normal
-        end
-        -- if context.is_odd and not context.focus then
-        --     ret = alt_color(ret)
-        -- end
-        return ret
-    end,
+    fg_picker = opicker.switch{
+        {"selected", opicker.beautiful{"fg_focus"}},
+        {"focus", opicker.beautiful{"fg_focus"}},
+        {"minimized", opicker.beautiful{"fg_minimize"}},
+        opicker.beautiful{"fg_normal"}
+    },
+    bg_picker = opicker.switch{
+        {"selected", opicker.beautiful{"bg_focus"}},
+        {"focus", opicker.beautiful{"bg_focus"}},
+        {"minimized", opicker.beautiful{"bg_minimize"}},
+        opicker.beautiful{"bg_normal"}
+    },
     widget = ocontainer,
     create_callback = tasklist_create_function,
     update_callback = tasklist_update_function,

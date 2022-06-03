@@ -4,6 +4,7 @@ local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local ocontainer = require("onion.container")
+local opicker = require("onion.picker")
 
 local module = {}
 
@@ -61,20 +62,10 @@ local taglist_template = {
         widget = wibox.container.place
     },
     id = "background_role",
-    fg_picker = function (context)
-        if context.selected then
-            return beautiful.fg_focus
-        else
-            return beautiful.fg_normal
-        end
-    end,
-    bg_picker = function (context)
-        if context.selected then
-            return beautiful.bg_focus
-        else
-            return beautiful.bg_normal
-        end
-    end,
+    fg_picker = opicker.branch{
+        "selected", opicker.beautiful{"fg_focus"}, opicker.beautiful{"fg_normal"}},
+    bg_picker = opicker.branch{
+        "selected", opicker.beautiful{"bg_focus"}, opicker.beautiful{"bg_normal"}},
     widget = ocontainer,
     create_callback = taglist_create_function,
     update_callback = taglist_update_function,

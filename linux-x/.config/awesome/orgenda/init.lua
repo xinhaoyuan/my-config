@@ -198,16 +198,16 @@ end
 
 local orgenda_fg_pickers = {
     [1] = {
-        [false] = function() return beautiful.orgenda_color_p1_todo end,
-        [true] = function() return beautiful.orgenda_color_p1_done end,
+        [false] = opicker.beautiful{"orgenda_color_p1_todo"},
+        [true] = opicker.beautiful{"orgenda_color_p1_done"},
     },
     [2] = {
-        [false] = function() return beautiful.orgenda_color_p2_todo end,
-        [true] = function() return beautiful.orgenda_color_p2_done end,
+        [false] = opicker.beautiful{"orgenda_color_p2_todo"},
+        [true] = opicker.beautiful{"orgenda_color_p2_done"},
     },
     [3] = {
-        [false] = function() return beautiful.orgenda_color_p3_todo end,
-        [true] = function() return beautiful.orgenda_color_p3_done end,
+        [false] = opicker.beautiful{"orgenda_color_p3_todo"},
+        [true] = opicker.beautiful{"orgenda_color_p3_done"},
     },
 }
 

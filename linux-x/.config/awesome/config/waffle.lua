@@ -129,8 +129,8 @@ local function simple_button(args)
       },
       forced_width = args.width,
       forced_height = args.height,
-      fg_picker = opicker.beautiful{"fg_", opicker.switch{"focus", "focus", "normal"}},
-      bg_picker = opicker.switch{"focus", opicker.beautiful{"bg_focus"}, opicker.none},
+      fg_picker = opicker.beautiful{"fg_", opicker.branch{"focus", "focus", "normal"}},
+      bg_picker = opicker.branch{"focus", opicker.beautiful{"bg_focus"}, opicker.none},
       widget = ocontainer,
    }
 
@@ -210,7 +210,7 @@ local function button(args)
                 valign = "center",
                 widget = wibox.widget.textbox,
             },
-            fg_picker = opicker.beautiful{"special_", opicker.switch{"focus", "focus", "normal"}},
+            fg_picker = opicker.beautiful{"special_", opicker.branch{"focus", "focus", "normal"}},
             widget = ocontainer,
         },
         expand = "inside",
@@ -1739,7 +1739,7 @@ local cal_widget = wibox.widget {
                 widget = wibox.widget {
                     widget,
                     fg_picker = opicker.beautiful{
-                        "special_", opicker.switch{"inverted", "focus", "normal"}},
+                        "special_", opicker.branch{"inverted", "focus", "normal"}},
                     widget = onion,
                 }
             end
@@ -2196,7 +2196,7 @@ local waffle_client_pid_button = button{
                 align = "center",
                 widget = wibox.widget.textbox
             },
-            fg_picker = opicker.switch{
+            fg_picker = opicker.branch{
                 "focus", opicker.beautiful{"special_focus"}, "#00000000"},
             widget = ocontainer,
         },

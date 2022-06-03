@@ -4,7 +4,7 @@ local textbox = require("wibox.widget.textbox")
 local gtable = require("gears.table")
 local gcolor = require("gears.color")
 local beautiful = require("beautiful")
-local ocontextack = require("onion.contextack")
+local oconstack = require("onion.constack")
 local lgi = require("lgi")
 
 local mod = {mt = {}}
@@ -12,7 +12,7 @@ local mod = {mt = {}}
 function mod:draw(context, cr, width, height)
     local outline_size = self._private.outline_size or 0
     local outline_color
-    if ocontextack.get(context)["focus"] then
+    if oconstack.get(context)["focus"] then
         outline_color = self._private.outline_color_focus and gcolor(self._private.outline_color_focus) or gcolor(beautiful.bg_focus)
     else
         outline_color = self._private.outline_color and gcolor(self._private.outline_color) or gcolor(beautiful.bg_normal)
