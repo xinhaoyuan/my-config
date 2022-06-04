@@ -54,18 +54,32 @@ function module:process_colors_after(constack)
     end
 end
 
+function module:get_margins(constack)
+    local l, r, b, t
+    if self._private.margins_picker then
+        local margins = opicker.eval_exhaustively(self._private.margins_picker, constack)
+        l = margins.left or 0
+        r = margins.right or 0
+        b = margins.bottom or 0
+        t = margins.top or 0
+    else
+        l = self._private[directions.left]
+        if l then l = opicker.eval_exhaustively(l, constack) else l = 0 end
+        r = self._private[directions.right]
+        if r then r = opicker.eval_exhaustively(r, constack) else r = 0 end
+        t = self._private[directions.top]
+        if t then t = opicker.eval_exhaustively(t, constack) else t = 0 end
+        b = self._private[directions.bottom]
+        if b then b = opicker.eval_exhaustively(b, constack) else b = 0 end
+    end
+    return l, r, t, b
+end
+
 function module:layout(context, width, height)
     if self._private.widget then
         local constack = oconstack.get(context)
         self:process_constack_before(constack)
-        local l = self._private[directions.left]
-        if l then l = opicker.eval_exhaustively(l, constack) else l = 0 end
-        local r = self._private[directions.right]
-        if r then r = opicker.eval_exhaustively(r, constack) else r = 0 end
-        local t = self._private[directions.top]
-        if t then t = opicker.eval_exhaustively(t, constack) else t = 0 end
-        local b = self._private[directions.bottom]
-        if b then b = opicker.eval_exhaustively(b, constack) else b = 0 end
+        local l, r, t, b = self:get_margins(constack)
         self:process_constack_after(constack)
 
         local resulting_width = width - l - r
@@ -81,20 +95,9 @@ end
 function module:fit(context, width, height)
     local constack = oconstack.get(context)
     self:process_constack_before(constack)
-    local extra_w = 0
-    if self._private[directions.left] then
-        extra_w = extra_w + opicker.eval_exhaustively(self._private[directions.left], constack)
-    end
-    if self._private[directions.right] then
-        extra_w = extra_w + opicker.eval_exhaustively(self._private[directions.right], constack)
-    end
-    local extra_h = 0
-    if self._private[directions.top] then
-        extra_h = extra_h + opicker.eval_exhaustively(self._private[directions.top], constack)
-    end
-    if self._private[directions.bottom] then
-        extra_h = extra_h + opicker.eval_exhaustively(self._private[directions.bottom], constack)
-    end
+    local l, r, t, b = self:get_margins(constack)
+    local extra_w = l + r
+    local extra_h = t + b
     local w, h = 0, 0
     if self._private.widget then
         w, h = base.fit_widget(self, oconstack.get_last_layer(constack), self._private.widget, width - extra_w, height - extra_h)
@@ -152,8 +155,10 @@ end
 
 for dir, key in pairs(directions) do
     module["set_"..key] = function(self, picker)
+        assert(picker == nil or opicker.is_picker(picker))
         if self._private[key] ~= picker then
             self._private[key] = picker
+            self._private.margins_picker = nil
             self:emit_signal("widget::layout_changed")
         end
     end
@@ -162,6 +167,17 @@ function module:set_margin_pickers(o)
     assert(type(o) == "table")
     for dir, key in pairs(directions) do
         self[key] = o[dir]
+    end
+end
+
+function module:set_margins_picker(picker)
+    assert(picker == nil or opicker.is_picker(picker))
+    if self._private.margins_picker ~= picker then
+        self._private.margins_picker = picker
+        for dir, key in pairs(directions) do
+            self._private[key] = nil
+        end
+        self:emit_signal("widget::layout_changed")
     end
 end
 

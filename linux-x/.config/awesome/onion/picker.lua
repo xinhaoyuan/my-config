@@ -1,4 +1,4 @@
-local gcache = require("gears.cache")
+local pcache = require((...):match("(.-)[^%.]+$").."pcache")
 local beautiful = require("beautiful")
 local unpack = unpack or table.unpack
 
@@ -6,7 +6,7 @@ local module = {}
 
 local is_cached_picker = setmetatable({}, {__mode = "k"})
 local picker_cache
-picker_cache = gcache.new(
+picker_cache = pcache.new(
     function (type_ctor, ...)
         assert(type(type_ctor) == "function", "not a type constructor")
         local ret = type_ctor(...)
@@ -62,7 +62,7 @@ local function make_picker(value)
     return picker_cache:get(unpack(value))
 end
 
-local constructor_cache = gcache.new(
+local constructor_cache = pcache.new(
     function (name)
         return function (args, ...)
             assert(type(args) == "table" and #{...} == 0,
@@ -141,7 +141,7 @@ end
 module.constructors.switch = {
     preprocessor = function (value)
         local result = {}
-        for i = 2, #value do
+        for i = 1, #value do
             assert(type(value[i]) == "table" and #value[i] == 2,
                    "must have 2-pair for a branch")
                 result[#result + 1] = value[i][1]
@@ -213,7 +213,7 @@ module.constructors.table = {
             local ret = {}
             for i = 1, #args, 2 do
                 local key = eval_exhaustively(args[i], constack)
-                local value = args[i + 1]
+                local value = eval_exhaustively(args[i + 1], constack)
                 ret[key] = value
             end
             return ret
@@ -221,14 +221,25 @@ module.constructors.table = {
     end,
 }
 
-function module.constructors.wrap(f)
+function module.constructors.wrap(f, ...)
+    local args = {...}
+    return function (constack)
+        local args_eval = {}
+        for i, arg in ipairs(args) do
+            args_eval[i] = eval_exhaustively(arg, constack)
+        end
+        return f(unpack(args_eval))
+    end
+end
+
+function module.constructors.wrap_raw(f)
     return function (constack)
         return f(constack)
     end
 end
 
 module.none = get_constructor("just"){nil}
-module.focus_switcher = get_constructor("branch"){"focus", "focus", "normal"}
+module.highlighted_switcher = get_constructor("branch"){"highlighted", "focus", "normal"}
 
 return setmetatable(
     module, {

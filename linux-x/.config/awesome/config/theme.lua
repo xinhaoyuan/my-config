@@ -611,8 +611,8 @@ theme.apply_border_to_widget_template = function(args)
     return {
         {
             args.widget,
-            fg_picker = opicker.beautiful{"fg_", opicker.focus_switcher},
-            bg_picker = opicker.beautiful{"bg_", opicker.focus_switcher},
+            fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
+            bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
             widget = ocontainer,
         },
         top = args.top and decorator.top_space - decorator.top_size or 0,

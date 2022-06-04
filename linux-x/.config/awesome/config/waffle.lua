@@ -108,10 +108,6 @@ local function view(args)
     return view
 end
 
-local function context_focused(context)
-    context.focus = true
-end
-
 local function simple_button(args)
    local button_action = args.button_action or args.action
    local key_action = args.key_action or args.action
@@ -119,34 +115,86 @@ local function simple_button(args)
    local ret = wibox.widget {
       {
          args.widget,
-         buttons = args.buttons or
-            (button_action and
-                awful.util.table.join(
-                   awful.button({ }, 1, function () button_action(false) end),
-                   awful.button({ }, 3, function () button_action(true) end))),
+         buttons = args.buttons,
          margins = button_padding,
          widget = wibox.container.margin,
       },
       forced_width = args.width,
       forced_height = args.height,
-      fg_picker = opicker.beautiful{"fg_", opicker.branch{"focus", "focus", "normal"}},
-      bg_picker = opicker.branch{"focus", opicker.beautiful{"bg_focus"}, opicker.none},
+      fg_picker = opicker.beautiful{
+          "fg_", opicker.switch{
+              {"active", "normal"},
+              {"hover", "focus"},
+              default = "normal",
+          },
+      },
+      bg_picker = opicker.beautiful{
+          "bg_", opicker.switch{
+              {"active", "focus"},
+              {"hover", "focus"},
+              default = "normal",
+          },
+      },
+      margins_picker = opicker.table{
+          top = opicker.branch{"active", dpi(2), 0},
+          bottom = opicker.branch{"active", -dpi(2), 0},
+          left = opicker.branch{"active", dpi(2), 0},
+          right = opicker.branch{"active", -dpi(2), 0},
+      },
       widget = ocontainer,
    }
 
+   local function update_context_transfromation()
+       ret.context_transformation = {
+           hover = ret.hover,
+           active = ret.active,
+           highlighted = ret.hover or ret.active,
+       }
+   end
+
    ret:connect_signal(
       "mouse::enter",
-      function ()
-          ret:set_context_transformation({focus = true})
+      function (...)
+          ret.hover = true
+          for i, b in ipairs(capi.mouse.coords().buttons) do
+              if b then
+                  ret.active = true
+                  break
+              end
+          end
+          update_context_transfromation()
       end
    )
 
    ret:connect_signal(
       "mouse::leave",
       function ()
-          ret:set_context_transformation(nil)
+          ret.hover = nil
+          ret.active = nil
+          update_context_transfromation()
       end
    )
+
+   ret:connect_signal(
+      "button::press",
+      function ()
+          ret.active = true
+          update_context_transfromation()
+      end
+   )
+
+   ret:connect_signal(
+      "button::release",
+      function (_widget, _x, _y, button)
+          if ret.active and button_action then
+              button_action(button ~= 1)
+          end
+          ret.active = nil
+          update_context_transfromation()
+      end
+   )
+
+   update_context_transfromation()
 
    if args.key ~= nil and key_action then
       local function cb(mod, _, event)
@@ -210,7 +258,7 @@ local function button(args)
                 valign = "center",
                 widget = wibox.widget.textbox,
             },
-            fg_picker = opicker.beautiful{"special_", opicker.branch{"focus", "focus", "normal"}},
+            fg_picker = opicker.beautiful{"special_", opicker.highlighted_switcher},
             widget = ocontainer,
         },
         expand = "inside",
@@ -750,7 +798,7 @@ do
         if has_vpn ~= net_has_vpn then
             net_has_vpn = has_vpn
             if has_vpn then
-                net_widget_icon_container.fg_picker = opicker.beautiful{"special_", opicker.focus_switcher}
+                net_widget_icon_container.fg_picker = opicker.beautiful{"special_", opicker.highlighted_switcher}
             else
                 -- Need to investigate why nil does not work.
                 net_widget_icon_container.fg_picker = nil
@@ -1196,7 +1244,7 @@ do
                 widget = masked_imagebox,
             },
             fg_picker = opicker.beautiful{
-                "fg_", opicker.focus_switcher},
+                "fg_", opicker.highlighted_switcher},
             widget = ocontainer,
         }
 
@@ -1723,7 +1771,7 @@ local cal_widget = wibox.widget {
             widget.font = font_info
             widget = wibox.widget{
                 widget,
-                fg_picker = opicker.beautiful{"minor_", opicker.focus_switcher},
+                fg_picker = opicker.beautiful{"minor_", opicker.highlighted_switcher},
                 widget = ocontainer,
             }
         end
@@ -1853,21 +1901,21 @@ do
             expand = "outside",
             layout = wibox.layout.align.horizontal,
         },
-        fg_picker = opicker.beautiful{"fg_", opicker.focus_switcher},
-        bg_picker = opicker.beautiful{"bg_", opicker.focus_switcher},
-        context_transformation = {focus = false},
+        fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
+        bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+        context_transformation = {highlighted = false},
         widget = ocontainer,
     }
     orgenda_header:connect_signal(
         "mouse::enter",
         function ()
-            orgenda_header.context_transformation = {focus = true}
+            orgenda_header.context_transformation = {highlighted = true}
         end
     )
     orgenda_header:connect_signal(
         "mouse::leave",
         function ()
-            orgenda_header.context_transformation = {focus = false}
+            orgenda_header.context_transformation = {highlighted = false}
         end
     )
     orgenda_header:connect_signal(

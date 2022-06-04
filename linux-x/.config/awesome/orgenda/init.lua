@@ -282,21 +282,21 @@ function orgenda.widget(args)
                     },
                     layout = wibox.layout.fixed.horizontal
                 },
-                fg_picker = opicker.beautiful{"fg_", opicker.focus_switcher},
-                bg_picker = opicker.beautiful{"bg_", opicker.focus_switcher},
-                context_transformation = {focus = false},
+                fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
+                bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+                context_transformation = {highlighted = false},
                 widget = ocontainer,
             }
             widget:connect_signal(
                 "mouse::enter",
                 function (w)
-                    w.context_transformation = {focus = true}
+                    w.context_transformation = {highlighted = true}
                 end
             )
             widget:connect_signal(
                 "mouse::leave",
                 function (w)
-                    w.context_transformation = {focus = false}
+                    w.context_transformation = {highlighted = false}
                 end
             )
             widget:connect_signal(

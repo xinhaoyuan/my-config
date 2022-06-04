@@ -426,7 +426,7 @@ gtimer {
 -- Orgenda
 local orgenda_counter_data = {}
 local orgenda_counter_text_widget = wibox.widget{
-    markup_picker = opicker.wrap{
+    markup_picker = opicker.wrap_raw{
         function (context)
             local high = orgenda_counter_data.high or 0
             local mid = orgenda_counter_data.mid or 0
@@ -621,8 +621,8 @@ local function setup_screen(scr)
            layoutbox,
            widget = fallback,
        },
-       fg_picker = opicker.beautiful{"fg_", opicker.focus_switcher},
-       bg_picker = opicker.beautiful{"bg_", opicker.focus_switcher},
+       fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
+       bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
        widget = ocontainer,
    }
    scr.widgets.indicator:buttons(
@@ -684,7 +684,7 @@ local function setup_screen(scr)
                    format = "%m/%d",
                    widget = wibox.widget.textclock,
                },
-               fg_picker = opicker.beautiful{"minor_", opicker.focus_switcher},
+               fg_picker = opicker.beautiful{"minor_", opicker.highlighted_switcher},
                widget = ocontainer,
            },
            {
@@ -702,7 +702,7 @@ local function setup_screen(scr)
                    format = "%m<b>%d</b>",
                    widget = wibox.widget.textclock,
                },
-               fg_picker = opicker.beautiful{"minor_", opicker.focus_switcher},
+               fg_picker = opicker.beautiful{"minor_", opicker.highlighted_switcher},
                widget = ocontainer,
            },
            {
@@ -740,14 +740,14 @@ local function setup_screen(scr)
            },
            layout = wibox.layout.fixed.horizontal
        },
-       fg_picker = opicker.beautiful{"fg_", opicker.focus_switcher},
-       bg_picker = opicker.beautiful{"bg_", opicker.focus_switcher},
-       context_transformation = {focus = false},
+       fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
+       bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+       context_transformation = {highlighted = false},
        widget = ocontainer,
    }
    local clock_area_focused
    function scr.actions.set_clock_area_focus(f)
-       clock_area.context_transformation = {focus = f}
+       clock_area.context_transformation = {highlighted = f}
        clock_area_focused = f
    end
    clock_area:buttons(
@@ -826,7 +826,7 @@ local function setup_screen(scr)
        scr.widgets.bar.middle_margin_expanded = with_border {
            widget = {
                tasklist_with_fallback,
-               bg_picker = opicker.beautiful{"bg_", opicker.focus_switcher},
+               bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
                widget = ocontainer,
            },
            draw_empty = false,
@@ -848,7 +848,7 @@ local function setup_screen(scr)
        scr.widgets.bar.middle_margin_splitted = with_border {
            widget = {
                tasklist_with_fallback,
-               bg_picker = opicker.beautiful{"bg_", opicker.focus_switcher},
+               bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
                widget = ocontainer,
            },
            draw_empty = false,
@@ -1024,7 +1024,7 @@ gtimer {
             if current_screen ~= nil then
                 current_screen.widgets.indicator.context_transformation = (nil)
             end
-            nscreen.widgets.indicator.context_transformation = {focus = true}
+            nscreen.widgets.indicator.context_transformation = {highlighted = true}
             -- switch active screen
             current_screen = nscreen
         end

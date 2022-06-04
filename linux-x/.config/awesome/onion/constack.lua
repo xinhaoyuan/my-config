@@ -1,5 +1,5 @@
 local wibox = require("wibox")
-local gcache = require("gears.cache")
+local pcache = require((...):match("(.-)[^%.]+$").."pcache")
 local picker = require((...):match("(.-)[^%.]+$").."picker")
 local module = {}
 local setmetatable = setmetatable
@@ -56,7 +56,7 @@ local function create_layer(last_layer)
     return new_layer
 end
 
-local constack_layer_cache = gcache.new(
+local constack_layer_cache = pcache.new(
     function(base_layer, transfromation_picker)
         assert(picker.is_picker(transfromation_picker))
         local modification = picker.eval_exhaustively(transfromation_picker, base_layer)
