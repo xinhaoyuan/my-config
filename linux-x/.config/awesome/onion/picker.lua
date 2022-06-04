@@ -25,11 +25,22 @@ end
 module.is_picker = is_picker
 
 local function eval_exhaustively(maybe_picker, constack, resolver)
+    local before_cycle_tracking = module.debug_eval_loop_count_before_cycle_tracking
+    local reached
     while true do
         if not is_picker(maybe_picker) and resolver ~= nil then
             maybe_picker = resolver(maybe_picker)
         end
         if is_picker(maybe_picker) then
+            if before_cycle_tracking then
+                if before_cycle_tracking <= 0 then
+                    if reached == nil then reached = {} end
+                    assert(not reached[maybe_picker], "cycle detected when evaluating picker")
+                    reached[maybe_picker] = true
+                else
+                    before_cycle_tracking = before_cycle_tracking - 1
+                end
+            end
             maybe_picker = maybe_picker(constack)
         else
             break
@@ -131,15 +142,13 @@ module.constructors.switch = {
     preprocessor = function (value)
         local result = {}
         for i = 2, #value do
-            if type(value[i]) == "table" then
-                assert(#value[i] == 2, "must have 2-pair for a branch")
+            assert(type(value[i]) == "table" and #value[i] == 2,
+                   "must have 2-pair for a branch")
                 result[#result + 1] = value[i][1]
                 result[#result + 1] = value[i][2]
-            else
-                assert(i == #value, "single value must be the last value")
-                result[#result + 1] = value[i]
-                break
-            end
+        end
+        if value.default ~= nil then
+            result[#result + 1] = value.default
         end
         return result
     end,
@@ -179,6 +188,40 @@ module.constructors.fallback = {
                 local ret = eval_exhaustively(option, constack)
                 if ret ~= nil then return ret end
             end
+        end
+    end,
+}
+
+module.constructors.table = {
+    preprocessor = function (value)
+        assert(type(value) == "table")
+        local keys = {}
+        for k, _ in pairs(value) do
+            keys[#keys + 1] = k
+        end
+        table.sort(keys)
+        local result = {}
+        for i = 1, #keys do
+            result[#result + 1] = keys[i]
+            result[#result + 1] = value[keys[i]]
+        end
+        return result
+    end,
+    constructor = function (...)
+        local args = {...}
+        return function (constack)
+            local ret = {}
+            for i = 1, #args, 2 do
+                local key = eval_exhaustively(args[i], constack)
+                local value = eval_exhaustively(args[i + 1], constack)
+                if value == nil then
+                    -- TODO export the tomb value.
+                    ret[key] = value
+                else
+                    ret[key] = value
+                end
+            end
+            return ret
         end
     end,
 }

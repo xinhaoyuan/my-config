@@ -298,7 +298,7 @@ local tasklist_template = {
                             {"selected", opicker.beautiful{"special_focus"}},
                             {"focus", opicker.beautiful{"special_focus"}},
                             {"minimized", opicker.beautiful{"special_focus"}},
-                            opicker.beautiful{"special_normal"}
+                            default = opicker.beautiful{"special_normal"},
                         },
                         widget = ocontainer,
                     },
@@ -318,13 +318,13 @@ local tasklist_template = {
         {"selected", opicker.beautiful{"fg_focus"}},
         {"focus", opicker.beautiful{"fg_focus"}},
         {"minimized", opicker.beautiful{"fg_minimize"}},
-        opicker.beautiful{"fg_normal"}
+        default = opicker.beautiful{"fg_normal"},
     },
     bg_picker = opicker.switch{
         {"selected", opicker.beautiful{"bg_focus"}},
         {"focus", opicker.beautiful{"bg_focus"}},
         {"minimized", opicker.beautiful{"bg_minimize"}},
-        opicker.beautiful{"bg_normal"}
+        default = opicker.beautiful{"bg_normal"},
     },
     widget = ocontainer,
     create_callback = tasklist_create_function,

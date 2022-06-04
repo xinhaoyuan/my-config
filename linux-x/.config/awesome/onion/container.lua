@@ -9,21 +9,34 @@ local unpack = unpack or table.unpack
 
 local module = {}
 
-function module:process_constack_before_children(constack)
+local directions = {
+    top    = "margin_top_picker",
+    bottom = "margin_bottom_picker",
+    left   = "margin_left_picker",
+    right  = "margin_right_picker",
+}
+function has_layout_related_picker(o)
+    for dir, key in pairs(directions) do
+        if o[key] then return true end
+    end
+    return false
+end
+
+function module:process_constack_before(constack)
     if self._private.context_transformation ~= nil then
-        self._private.saved_constack = oconstack.push(constack)
-        self:_apply_context_transformation(self._private.context_transformation, constack)
+        self._private.saved_constack = oconstack.cached_push_and_transform(
+            constack, self._private.context_transformation)
     end
 end
 
-function module:process_constack_after_children(constack)
+function module:process_constack_after(constack)
     if self._private.context_transformation ~= nil then
-        oconstack.pop(constack, self._private.saved_constack)
+        oconstack.restore(constack, self._private.saved_constack)
         self._private.saved_constack = nil
     end
 end
 
-function module:process_colors_before_children(constack)
+function module:process_colors_before(constack)
     if self._private.bg_picker ~= nil then
         self._private.saved_background = self._private.background
         local background = opicker.eval_exhaustively(self._private.bg_picker, constack)
@@ -36,7 +49,7 @@ function module:process_colors_before_children(constack)
     end
 end
 
-function module:process_colors_after_children(constack)
+function module:process_colors_after(constack)
     if self._private.bg_picker ~= nil then
         self._private.background = self._private.saved_background
         self._private.saved_background = nil
@@ -47,70 +60,118 @@ function module:process_colors_after_children(constack)
     end
 end
 
-function module:_apply_context_transformation(f, constack)
-    if type(f) == "function" then
-        f(constack)
-    elseif type(f) == "table" then
-        local target = self._private.context_transformation_has_picker and {} or constack
-        for k, v in pairs(f) do
-            if opicker.is_picker(v) then
-                target[k] = opicker.eval_exhaustively(v, constack)
-            else
-                target[k] = v
-            end
-        end
-        if target ~= constack then
-            for k, v in pairs(target) do
-                constack[k] = v
-            end
-        end
+function module:layout(context, width, height)
+    if self._private.widget then
+        local constack = oconstack.get(context)
+        self:process_constack_before(constack)
+        local l = self._private[directions.left]
+        if l then l = opicker.eval_exhaustively(l, constack) else l = 0 end
+        local r = self._private[directions.right]
+        if r then r = opicker.eval_exhaustively(r, constack) else r = 0 end
+        local t = self._private[directions.top]
+        if t then t = opicker.eval_exhaustively(t, constack) else t = 0 end
+        local b = self._private[directions.bottom]
+        if b then b = opicker.eval_exhaustively(b, constack) else b = 0 end
+        self:process_constack_after(constack)
+
+        local resulting_width = width - l - r
+        local resulting_height = height - t - b
+
+        return {base.place_widget_at(self._private.widget,
+                                     l, t,
+                                     math.max(0, resulting_width),
+                                     math.max(0, resulting_height))}
     end
+end
+
+function module:fit(context, width, height)
+    local constack = oconstack.get(context)
+    self:process_constack_before(constack)
+    local extra_w = 0
+    if self._private[directions.left] then
+        extra_w = extra_w + opicker.eval_exhaustively(self._private[directions.left], constack)
+    end
+    if self._private[directions.right] then
+        extra_w = extra_w + opicker.eval_exhaustively(self._private[directions.right], constack)
+    end
+    local extra_h = 0
+    if self._private[directions.top] then
+        extra_h = extra_h + opicker.eval_exhaustively(self._private[directions.top], constack)
+    end
+    if self._private[directions.bottom] then
+        extra_h = extra_h + opicker.eval_exhaustively(self._private[directions.bottom], constack)
+    end
+    local w, h = 0, 0
+    if self._private.widget then
+        w, h = base.fit_widget(self, oconstack.get_last_layer(constack), self._private.widget, width - extra_w, height - extra_h)
+    end
+    self:process_constack_after(constack)
+    if self._private.draw_empty == false and (w == 0 or h == 0) then
+        return 0, 0
+    end
+    return w + extra_w, h + extra_h
 end
 
 function module:before_draw_children(context, cr, width, height)
     local constack = oconstack.get(context)
-    self:process_constack_before_children(constack)
-    self:process_colors_before_children(constack)
+    self:process_constack_before(constack)
+    self:process_colors_before(constack)
     bg.before_draw_children(self, constack, cr, width, height)
 end
 
 function module:after_draw_children(context, cr, width, height)
     local constack = oconstack.get(context)
     bg.after_draw_children(self, constack, cr, width, height)
-    self:process_colors_after_children(constack)
-    self:process_constack_after_children(constack)
+    self:process_colors_after(constack)
+    self:process_constack_after(constack)
 end
 
-function module:set_bg_picker(bg_picker)
-    assert(bg_picker == nil or opicker.is_picker(bg_picker))
-    if self._private.bg_picker ~= bg_picker then
-        self._private.bg_picker = bg_picker
+function module:set_bg_picker(picker)
+    assert(picker == nil or opicker.is_picker(picker))
+    if self._private.bg_picker ~= picker then
+        self._private.bg_picker = picker
         self:emit_signal("widget::redraw_needed")
     end
 end
 
-function module:set_fg_picker(fg_picker)
-    assert(fg_picker == nil or opicker.is_picker(fg_picker))
-    if self._private.fg_picker ~= fg_picker then
-        self._private.fg_picker = fg_picker
+function module:set_fg_picker(picker)
+    assert(picker == nil or opicker.is_picker(picker))
+    if self._private.fg_picker ~= picker then
+        self._private.fg_picker = picker
         self:emit_signal("widget::redraw_needed")
     end
 end
 
-function module:set_context_transformation(context_transformation)
-    if self._private.context_transformation ~= context_transformation then
-        self._private.context_transformation = context_transformation
-        self._private.context_transformation_has_picker = nil
-        if type(context_transformation) == "table" then
-            for k, v in pairs(context_transformation) do
-                if opicker.is_picker(v) then
-                    self._private.context_transformation_has_picker = true
-                    break
-                end
-            end
+function module:set_context_transformation(transformation)
+    assert(transformation == nil or
+           opicker.is_picker(transformation) or
+           type(transformation) == "table")
+    if type(transformation) == "table" and not opicker.is_picker(transformation) then
+        transformation = opicker.table(transformation)
+    end
+    if self._private.context_transformation ~= transformation then
+        self._private.context_transformation = transformation
+        if has_layout_related_picker(self._private) then
+            self:emit_signal("widget::layout_changed")
+            self:emit_signal("widget::redraw_needed")
+        else
+            self:emit_signal("widget::redraw_needed")
         end
-        self:emit_signal("widget::redraw_needed")
-        -- self:emit_signal("widget::layout_changed")
+    end
+end
+
+for dir, key in pairs(directions) do
+    module["set_"..key] = function(self, picker)
+        if self._private[key] ~= picker then
+            self._private[key] = picker
+            self:emit_signal("widget::layout_changed")
+        end
+    end
+end
+function module:set_margin_pickers(o)
+    assert(type(o) == "table")
+    for dir, key in pairs(directions) do
+        self[key] = o[dir]
     end
 end
 
