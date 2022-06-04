@@ -213,13 +213,8 @@ module.constructors.table = {
             local ret = {}
             for i = 1, #args, 2 do
                 local key = eval_exhaustively(args[i], constack)
-                local value = eval_exhaustively(args[i + 1], constack)
-                if value == nil then
-                    -- TODO export the tomb value.
-                    ret[key] = value
-                else
-                    ret[key] = value
-                end
+                local value = args[i + 1]
+                ret[key] = value
             end
             return ret
         end

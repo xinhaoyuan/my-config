@@ -65,11 +65,7 @@ local constack_layer_cache = gcache.new(
             if picker.is_picker(v) then
                 v = picker.eval_exhaustively(v, base)
             end
-            if v == nil then
-                new_layer[k] = constack_value_tomb
-            else
-                new_layer[k] = v
-            end
+            new_layer[k] = v
         end
         return new_layer
     end)
