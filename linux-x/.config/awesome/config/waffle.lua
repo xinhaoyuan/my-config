@@ -123,7 +123,7 @@ local function simple_button(args)
       forced_height = args.height,
       fg_picker = opicker.beautiful{
           "fg_", opicker.switch{
-              {"active", "normal"},
+              {"active", "focus"},
               {"hover", "focus"},
               default = "normal",
           },
@@ -132,7 +132,6 @@ local function simple_button(args)
           "bg_", opicker.switch{
               {"active", "focus"},
               {"hover", "focus"},
-              default = "normal",
           },
       },
       margins_picker = opicker.table{
@@ -2245,7 +2244,7 @@ local waffle_client_pid_button = button{
                 widget = wibox.widget.textbox
             },
             fg_picker = opicker.branch{
-                "focus", opicker.beautiful{"special_focus"}, "#00000000"},
+                "highlighted", opicker.beautiful{"special_focus"}, "#00000000"},
             widget = ocontainer,
         },
         layout = fixed_align.vertical

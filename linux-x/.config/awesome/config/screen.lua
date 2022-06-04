@@ -431,7 +431,7 @@ local orgenda_counter_text_widget = wibox.widget{
             local high = orgenda_counter_data.high or 0
             local mid = orgenda_counter_data.mid or 0
             local low = orgenda_counter_data.low or 0
-            if high > 0 then high = "<span color='"..(context.focus and beautiful.special_focus or beautiful.special_normal).."'><b>"..tostring(high).."</b></span>" else high = "" end
+            if high > 0 then high = "<span color='"..(context.highlighted and beautiful.special_focus or beautiful.special_normal).."'><b>"..tostring(high).."</b></span>" else high = "" end
             if mid > 0 then mid = "<b>"..tostring(mid).."</b>" else mid = "" end
             if low > 0 then low = tostring(low) else low = "" end
             return high..((#high > 0 and #mid + #low > 0) and "!" or "")..mid..((#mid > 0 and #low > 0) and "/" or "")..low

@@ -213,7 +213,7 @@ local function tasklist_update_function(widget, c, index, objects)
         if inline_status_widget and #inline_status_widget.text > 0 then inline_status_widget.text = "" end
     end
     background_widget.context_transformation = {
-        focus = client.focus == c or (shared.waffle_selected_client == c and not waffle:autohide()),
+        highlighted = client.focus == c or (shared.waffle_selected_client == c and not waffle:autohide()),
         minimized = (c.cgroup and c.cgroup.current_client or c).minimized,
         is_odd = index % 2 == 1
     }
@@ -295,8 +295,7 @@ local tasklist_template = {
                             widget = wibox.container.rotate
                         },
                         fg_picker = opicker.switch{
-                            {"selected", opicker.beautiful{"special_focus"}},
-                            {"focus", opicker.beautiful{"special_focus"}},
+                            {"highlighted", opicker.beautiful{"special_focus"}},
                             {"minimized", opicker.beautiful{"special_focus"}},
                             default = opicker.beautiful{"special_normal"},
                         },
@@ -315,14 +314,12 @@ local tasklist_template = {
     },
     id     = "my_background_role",
     fg_picker = opicker.switch{
-        {"selected", opicker.beautiful{"fg_focus"}},
-        {"focus", opicker.beautiful{"fg_focus"}},
+        {"highlighted", opicker.beautiful{"fg_focus"}},
         {"minimized", opicker.beautiful{"fg_minimize"}},
         default = opicker.beautiful{"fg_normal"},
     },
     bg_picker = opicker.switch{
-        {"selected", opicker.beautiful{"bg_focus"}},
-        {"focus", opicker.beautiful{"bg_focus"}},
+        {"highlighted", opicker.beautiful{"bg_focus"}},
         {"minimized", opicker.beautiful{"bg_minimize"}},
         default = opicker.beautiful{"bg_normal"},
     },
