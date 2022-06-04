@@ -15,12 +15,6 @@ local directions = {
     left   = "margin_left_picker",
     right  = "margin_right_picker",
 }
-function has_layout_related_picker(o)
-    for dir, key in pairs(directions) do
-        if o[key] then return true end
-    end
-    return false
-end
 
 function module:process_constack_before(constack)
     if self._private.context_transformation ~= nil then
