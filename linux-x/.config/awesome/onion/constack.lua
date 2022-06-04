@@ -2,6 +2,7 @@ local wibox = require("wibox")
 local gcache = require("gears.cache")
 local picker = require((...):match("(.-)[^%.]+$").."picker")
 local module = {}
+local setmetatable = setmetatable
 
 local constack_value_tomb = {}
 local constack_last_layer = setmetatable({}, {__mode = "k"})

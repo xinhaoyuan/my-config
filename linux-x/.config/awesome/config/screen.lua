@@ -32,6 +32,7 @@ local tasklist = require("config.tasklist")
 local taglist = require("config.taglist")
 local ocontainer = require("onion.container")
 local opicker = require("onion.picker")
+local otextbox = require("onion.textbox")
 local fts = require("hotpot").focus_timestamp
 local aux = require("aux")
 local icons = require("icons")
@@ -423,8 +424,20 @@ gtimer {
 }
 
 -- Orgenda
-
-local orgenda_counter_text_widget = wibox.widget.textbox()
+local orgenda_counter_data = {}
+local orgenda_counter_text_widget = wibox.widget{
+    markup_picker = opicker.wrap{
+        function (context)
+            local high = orgenda_counter_data.high or 0
+            local mid = orgenda_counter_data.mid or 0
+            local low = orgenda_counter_data.low or 0
+            if high > 0 then high = "<span color='"..(context.focus and beautiful.special_focus or beautiful.special_normal).."'><b>"..tostring(high).."</b></span>" else high = "" end
+            if mid > 0 then mid = "<b>"..tostring(mid).."</b>" else mid = "" end
+            if low > 0 then low = tostring(low) else low = "" end
+            return high..((#high > 0 and #mid + #low > 0) and "!" or "")..mid..((#mid > 0 and #low > 0) and "/" or "")..low
+        end},
+    widget = otextbox,
+}
 local orgenda_counter_widget = wibox.widget {
     {
         {
@@ -461,10 +474,13 @@ orgenda.data:connect_signal(
                     end
                 end
             end
-            if high > 0 then high = "<b>"..tostring(high).."</b>" else high = "" end
-            if mid > 0 then mid = "<b>"..tostring(mid).."</b>" else mid = "" end
-            if low > 0 then low = tostring(low) else low = "" end
-            orgenda_counter_text_widget.markup = high..((#high > 0 and #mid + #low > 0) and "!" or "")..mid..((#mid > 0 and #low > 0) and "/" or "")..low
+            orgenda_counter_data = {
+                high = high,
+                mid = mid,
+                low = low,
+            }
+            orgenda_counter_text_widget:emit_signal("widget::layout_changed")
+            orgenda_counter_text_widget:emit_signal("widget::redraw_needed")
         else
             orgenda_counter_widget.visible = false
         end

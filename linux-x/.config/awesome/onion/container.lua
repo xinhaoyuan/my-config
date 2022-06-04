@@ -151,12 +151,8 @@ function module:set_context_transformation(transformation)
     end
     if self._private.context_transformation ~= transformation then
         self._private.context_transformation = transformation
-        if has_layout_related_picker(self._private) then
-            self:emit_signal("widget::layout_changed")
-            self:emit_signal("widget::redraw_needed")
-        else
-            self:emit_signal("widget::redraw_needed")
-        end
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("widget::redraw_needed")
     end
 end
 
