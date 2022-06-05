@@ -998,11 +998,9 @@ capi.screen.connect_signal("list", schedule_reset_widgets)
 capi.screen.connect_signal("list", schedule_fix_client_geometries)
 capi.screen.connect_signal("primary_changed", schedule_reset_widgets)
 
-capi.root.keys(
-   awful.util.table.join(
-      capi.root.keys(),
-      awful.key({ }, "XF86Launch1", function () capi.awesome.emit_signal("show_main_waffle", {anchor = "screen"}) end),
-      awful.key({ "Mod4" }, ";",
+awful.keyboard.append_global_keybindings{
+    awful.key({ }, "XF86Launch1", function () capi.awesome.emit_signal("show_main_waffle", {anchor = "screen"}) end),
+    awful.key({ "Mod4" }, ";",
          function ()
             awful.prompt.run {
                prompt       = "Run Lua code: ",
@@ -1013,7 +1011,7 @@ capi.root.keys(
             }
          end,
          {description = "lua execute prompt", group = "awesome"})
-))
+}
 
 gtimer {
     timeout = 0.5,
@@ -1032,7 +1030,7 @@ gtimer {
 }
 
 -- base keys and buttons
-local global_keys = table_join(
+local global_keys = {
    awful.key({ "Mod1" }, "Tab",
       function ()
           yams_switcher.start{}
@@ -1159,8 +1157,8 @@ local global_keys = table_join(
    --       end
    -- end),
    awful.key({ "Mod4", "Control" }, "r",      capi.awesome.restart),
-   awful.key({ "Mod4", "Control" }, "Escape", capi.awesome.quit)
-)
+   awful.key({ "Mod4", "Control" }, "Escape", capi.awesome.quit),
+}
 
 -- tags and layouts
 
@@ -1173,17 +1171,19 @@ for i = 1, #shared.screen.tags do
     local key = tostring(i)
     global_keys =
         table_join(
-            awful.key({ "Mod4" }, tostring(i), function () taglist.switch_or_restore(awful.screen.focused().tags[i]) end),
-            awful.key({ "Mod4", "Control" }, tostring(i), function () awful.tag.viewtoggle(awful.screen.focused().tags[i]) end),
-            awful.key({ "Mod4", "Shift" }, tostring(i), function ()
-                    local c = capi.client.focus
-                    if c == nil then return end
-                    c:toggle_tag(c.screen.tags[i])
-            end),
+            {
+                awful.key({ "Mod4" }, tostring(i), function () taglist.switch_or_restore(awful.screen.focused().tags[i]) end),
+                awful.key({ "Mod4", "Control" }, tostring(i), function () awful.tag.viewtoggle(awful.screen.focused().tags[i]) end),
+                awful.key({ "Mod4", "Shift" }, tostring(i), function ()
+                              local c = capi.client.focus
+                              if c == nil then return end
+                              c:toggle_tag(c.screen.tags[i])
+                          end),
+            },
             global_keys)
 end
 
-capi.root.keys(table_join(capi.root.keys(), global_keys))
+awful.keyboard.append_global_keybindings(global_keys)
 
 -- initialize tags for each screen
 
