@@ -56,22 +56,6 @@ local function create_layer(last_layer)
     return new_layer
 end
 
-local constack_layer_cache = pcache.new(
-    function(base_layer, transfromation_picker)
-        assert(picker.is_picker(transfromation_picker))
-        local modification = picker.eval_exhaustively(transfromation_picker, base_layer)
-        assert(type(modification) == "table")
-        local new_layer = create_layer(base_layer)
-        for k, v in pairs(modification) do
-            if picker.is_picker(v) then
-                v = picker.eval_exhaustively(v, base)
-            end
-            new_layer[k] = v
-        end
-        return new_layer
-    end)
-
-
 local constack_base_layer = setmetatable({}, {__mode = "k"})
 local constack_from_layer = setmetatable({}, {__mode = "k"})
 
@@ -92,27 +76,52 @@ function module.get_last_layer(c)
     return constack_last_layer[c]
 end
 
-function module.cached_push_and_transform(constack, transfromation_picker)
+local data_constack_layer_cache = setmetatable({}, {__mode = "k"})
+local function get_constack_layer_cache(data)
+    local data_key = data == nil and constack_value_tomb or data
+    local cache = data_constack_layer_cache[data_key]
+    if cache == nil then
+        cache = pcache.new(
+            function(base_layer, transfromation_picker)
+                assert(picker.is_picker(transfromation_picker))
+                local modification = picker.eval_exhaustively(transfromation_picker, base_layer, data)
+                assert(type(modification) == "table")
+                local new_layer = create_layer(base_layer)
+                for k, v in pairs(modification) do
+                    if picker.is_picker(v) then
+                        v = picker.eval_exhaustively(v, base_layer, data)
+                    end
+                    new_layer[k] = v
+                end
+                return new_layer
+            end)
+        data_constack_layer_cache[data_key] = cache
+    end
+    return cache
+end
+function module.clear_constack_layer_cache(data)
+    data_constack_layer_cache[data == nil and constack_value_tomb or data] = nil
+end
+
+function module.cached_push_and_transform(constack, data, transfromation_picker)
     local top_layer = constack_last_layer[constack]
-    local new_top = constack_layer_cache:get(top_layer, transfromation_picker)
+    local new_top = get_constack_layer_cache(data):get(top_layer, transfromation_picker)
     constack_last_layer[constack] = new_top
     constack_from_layer[new_top] = constack
     return top_layer, new_top
 end
 
-function module.restore(constack, to_layer)
-    assert(constack_from_layer[to_layer] == constack, "cannot pop to layer not belonging to the constack")
-    constack_last_layer[constack] = to_layer
-end
-
 function module.push(constack)
     local ret = constack_last_layer[constack]
     local new_layer = create_layer(ret)
-    constack_layer_storage[new_layer] = {}
-    constack_last_layer[new_layer] = ret
     constack_last_layer[constack] = new_layer
     constack_from_layer[new_layer] = constack
     return ret, new_layer
+end
+
+function module.restore(constack, to_layer)
+    assert(constack_from_layer[to_layer] == constack, "cannot pop to layer not belonging to the constack")
+    constack_last_layer[constack] = to_layer
 end
 
 function module.pop(constack)

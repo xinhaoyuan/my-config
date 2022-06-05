@@ -13,11 +13,11 @@ function module:update_with_picker(constack)
     if self._private.markup_picker ~= nil then
         textbox.set_markup(
             self, opicker.eval_exhaustively(
-                self._private.markup_picker, constack))
+                self._private.markup_picker, constack, self))
     elseif self._private.text_picker ~= nil then
         textbox.set_text(
             self, opicker.eval_exhaustively(
-                self._private.text_picker, constack))
+                self._private.text_picker, constack, self))
     end
     rawset(self, "emit_signal", es)
 end

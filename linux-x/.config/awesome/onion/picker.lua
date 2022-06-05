@@ -4,19 +4,19 @@ local unpack = unpack or table.unpack
 
 local module = {}
 
-local is_cached_picker = setmetatable({}, {__mode = "k"})
+local picker_info = setmetatable({}, {__mode = "k"})
 local picker_cache
 picker_cache = pcache.new(
     function (type_ctor, ...)
         assert(type(type_ctor) == "function", "not a type constructor")
-        local ret = type_ctor(...)
+        local ret, info = type_ctor(...)
         assert(type(ret) == "table" or type(ret) == "function",
                "constructed picker must be a (callable) table or a function")
-        is_cached_picker[ret] = true
+        picker_info[ret] = info or true
         return ret
     end)
 local function is_picker(value)
-    if value ~= nil and is_cached_picker[value] then
+    if value ~= nil and picker_info[value] then
         return true
     else
         return false
@@ -24,7 +24,7 @@ local function is_picker(value)
 end
 module.is_picker = is_picker
 
-local function eval_exhaustively(maybe_picker, constack, resolver)
+local function eval_exhaustively(maybe_picker, constack, data, resolver)
     local before_cycle_tracking = module.debug_eval_loop_count_before_cycle_tracking
     local reached
     while true do
@@ -41,7 +41,7 @@ local function eval_exhaustively(maybe_picker, constack, resolver)
                     before_cycle_tracking = before_cycle_tracking - 1
                 end
             end
-            maybe_picker = maybe_picker(constack)
+            maybe_picker = maybe_picker(constack, data)
         else
             break
         end
@@ -86,10 +86,10 @@ function module.constructors.just(value)
     end
 end
 
-local function eval_string(components, constack)
+local function eval_string(components, constack, data)
     local ret = ""
     for _, component in ipairs(components) do
-        component = eval_exhaustively(component, constack)
+        component = eval_exhaustively(component, constack, data)
         if component == nil then
             return nil
         elseif type(component) == "string" then
@@ -104,31 +104,41 @@ end
 
 function module.constructors.concat(...)
     local components = {...}
-    return function (constack)
-        return eval_string(components, constack)
+    return function (constack, data)
+        return eval_string(components, constack, data)
     end
 end
 
 function module.constructors.beautiful(...)
     local components = {...}
-    return function (constack)
-        local ret = eval_string(components, constack)
+    return function (constack, data)
+        local ret = eval_string(components, constack, data)
         return ret and beautiful[ret]
     end
 end
 
 function module.constructors.constack(...)
     local components = {...}
-    return function (constack)
-        local ret = eval_string(components, constack)
+    return function (constack, data)
+        local ret = eval_string(components, constack, data)
         return ret and constack[ret]
     end
 end
 
+function module.constructors.data(...)
+    local components = {...}
+    return function (constack, data)
+        if #components == 0 then return data end
+        if type(data) ~= "table" then return nil end
+        local ret = eval_string(components, constack, data)
+        return ret and data[ret]
+    end
+end
+
 function module.constructors.branch(cond, true_branch, false_branch)
-    return function (constack)
+    return function (constack, data)
         local value = eval_exhaustively(
-            cond, constack, function (value)
+            cond, constack, data, function (value)
                 if type(value) == "string" then
                     return constack[value]
                 end
@@ -154,10 +164,10 @@ module.constructors.switch = {
     end,
     constructor = function (...)
         local args = {...}
-        return function (constack)
+        return function (constack, data)
             for i = 1, #args, 2 do
                 local cond = eval_exhaustively(
-                    args[i], constack, function (value)
+                    args[i], constack, data, function (value)
                         if type(value) == "string" then
                             return constack[value]
                         end
@@ -183,9 +193,9 @@ module.constructors.fallback = {
     end,
     constructor = function (...)
         local options = {...}
-        return function (constack)
+        return function (constack, data)
             for _, option in ipairs(options) do
-                local ret = eval_exhaustively(option, constack)
+                local ret = eval_exhaustively(option, constack, data)
                 if ret ~= nil then return ret end
             end
         end
@@ -209,11 +219,11 @@ module.constructors.table = {
     end,
     constructor = function (...)
         local args = {...}
-        return function (constack)
+        return function (constack, data)
             local ret = {}
             for i = 1, #args, 2 do
-                local key = eval_exhaustively(args[i], constack)
-                local value = eval_exhaustively(args[i + 1], constack)
+                local key = eval_exhaustively(args[i], constack, data)
+                local value = eval_exhaustively(args[i + 1], constack, data)
                 ret[key] = value
             end
             return ret
@@ -223,18 +233,18 @@ module.constructors.table = {
 
 function module.constructors.wrap(f, ...)
     local args = {...}
-    return function (constack)
+    return function (constack, data)
         local args_eval = {}
         for i, arg in ipairs(args) do
-            args_eval[i] = eval_exhaustively(arg, constack)
+            args_eval[i] = eval_exhaustively(arg, constack, data)
         end
         return f(unpack(args_eval))
     end
 end
 
 function module.constructors.wrap_raw(f)
-    return function (constack)
-        return f(constack)
+    return function (constack, data)
+        return f(constack, data)
     end
 end
 

@@ -19,7 +19,7 @@ local directions = {
 function module:process_constack_before(constack)
     if self._private.context_transformation ~= nil then
         self._private.saved_constack = oconstack.cached_push_and_transform(
-            constack, self._private.context_transformation)
+            constack, self._private.data, self._private.context_transformation)
     end
 end
 
@@ -33,12 +33,12 @@ end
 function module:process_colors_before(constack)
     if self._private.bg_picker ~= nil then
         self._private.saved_background = self._private.background
-        local background = opicker.eval_exhaustively(self._private.bg_picker, constack)
+        local background = opicker.eval_exhaustively(self._private.bg_picker, constack, self)
         self._private.background = background and gcolor(background)
     end
     if self._private.fg_picker ~= nil then
         self._private.saved_foreground = self._private.foreground
-        local foreground = opicker.eval_exhaustively(self._private.fg_picker, constack)
+        local foreground = opicker.eval_exhaustively(self._private.fg_picker, constack, self)
         self._private.foreground = foreground and gcolor(foreground)
     end
 end
@@ -57,20 +57,20 @@ end
 function module:get_margins(constack)
     local l, r, b, t
     if self._private.margins_picker then
-        local margins = opicker.eval_exhaustively(self._private.margins_picker, constack)
+        local margins = opicker.eval_exhaustively(self._private.margins_picker, constack, self)
         l = margins.left or 0
         r = margins.right or 0
         b = margins.bottom or 0
         t = margins.top or 0
     else
         l = self._private[directions.left]
-        if l then l = opicker.eval_exhaustively(l, constack) else l = 0 end
+        if l then l = opicker.eval_exhaustively(l, constack, self) else l = 0 end
         r = self._private[directions.right]
-        if r then r = opicker.eval_exhaustively(r, constack) else r = 0 end
+        if r then r = opicker.eval_exhaustively(r, constack, self) else r = 0 end
         t = self._private[directions.top]
-        if t then t = opicker.eval_exhaustively(t, constack) else t = 0 end
+        if t then t = opicker.eval_exhaustively(t, constack, self) else t = 0 end
         b = self._private[directions.bottom]
-        if b then b = opicker.eval_exhaustively(b, constack) else b = 0 end
+        if b then b = opicker.eval_exhaustively(b, constack, self) else b = 0 end
     end
     return l, r, t, b
 end
@@ -179,6 +179,19 @@ function module:set_margins_picker(picker)
         end
         self:emit_signal("widget::layout_changed")
     end
+end
+
+function module:set_data(data)
+    self._private.data = data
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::redraw_needed")
+end
+
+function module:invalidate_data()
+    if type(self._private.data) == "table" then
+        oconstack.clear_constack_layer_cache(self._private.data)
+    end
+    self:set_data(self._private.data)
 end
 
 function module:new(...)
