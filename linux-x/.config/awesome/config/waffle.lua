@@ -185,7 +185,7 @@ local function simple_button(args)
    ret:connect_signal(
       "button::release",
       function (_widget, _x, _y, button)
-          if ret.active and button_action then
+          if ret.active and button_action and (button == 1 or button == 3) then
               button_action(button ~= 1)
           end
           ret.active = nil
