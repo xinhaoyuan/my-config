@@ -1,8 +1,3 @@
--- orgenda: a Awesome WM module of org-mode integration.
---
--- Author: Xinhao Yuan <xinhaoyuan@gmail.com>
--- License: MIT license, see LICENSE file.
-
 local capi = {
     awesome = awesome,
 }
@@ -12,18 +7,33 @@ local gtimer = require("gears.timer")
 local gdebug = require("gears.debug")
 local gstring = require("gears.string")
 local naughty = require("naughty")
-local masked_imagebox = require("masked_imagebox")
-local ocontainer = require("onion.container")
-local opicker = require("onion.picker")
+local wibox = require("wibox")
+local dpi = require("beautiful.xresources").apply_dpi
 local beautiful = require("beautiful")
+local glib = require("lgi").GLib
 local orgenda = {
     config = {
-        files = {}
+        files = {
+            -- Entry can be a table, e.g.
+            -- {
+            --   path = [SOME PATH STRING],
+            --   rank = [SOME NUMBER FOR ORDERING ITEMS IN TIES],
+            -- }
+            -- or simply a path, where the rank will be 0.
+        },
+        watch_files = true,
+        show_notifications = false,
+        reset_merge_threshold_sec = 0.1,
+        reset_max_delay_sec = 0.5,
+        expiration_scan_interval_sec = 300,
+        -- Default values for keys below will be set up later in the module.
+        compare_items_cb = nil,
+        widget_item_template = nil,
     },
     data = gobject{
         class = {},
         enable_properties = true,
-        enable_auto_signals = true
+        enable_auto_signals = true,
     },
 }
 
@@ -45,21 +55,29 @@ local function parse_todo_match(todo_match, decorator)
     ret.implicit_priority = priority == nil
     ret.priority = ret.implicit_priority and 2 or 3 + string.byte("A") - string.byte(priority)
     local text_begin = priority_end == nil and 1 or priority_end + 1
-    local tag_begin, tag_end = todo_match:find("%s+[A-Z]*:.*")
-    local tag_length = tag_begin == nil and 0 or tag_end - tag_begin + 1
-    local text = tag_begin == nil and
+    local tags_begin, tags_end, tags_text = todo_match:find("%s*:([^%s<>]+):%s*$")
+    local tags_length = tags_begin == nil and 0 or tags_end - tags_begin + 1
+    local text = tags_begin == nil and
         todo_match:sub(text_begin) or
-        todo_match:sub(text_begin, -tag_length)
+        todo_match:sub(text_begin, -1 - tags_length)
     ret.text = decorator(text)
+    if tags_text ~= nil then
+        local tags = {}
+        for tag in string.gmatch(tags_text, "[^:]+") do
+            tags[tag] = true
+        end
+        ret.tags_text = tags_text
+        ret.tags = tags
+    end
     return ret
 end
 
-local function parse_attributes(line, todo_item)
+local function parse_timestamps(line, todo_item)
     local match_begin = 1
     while true do
-        local tag_begin, tag_end, name, timestamp = line:find("([A-Z]+):%s*<([^>]+)>", match_begin)
-        if tag_begin == nil then break end
-        match_begin = tag_end + 1
+        local name_begin, name_end, name, timestamp = line:find("([A-Z]+):%s*<([^>]+)>", match_begin)
+        if name_begin == nil then break end
+        match_begin = name_end + 1
 
         if name == "SCHEDULED" or name == "DEADLINE" then
             todo_item.timestamp, todo_item.has_time = parse_timestamp(timestamp)
@@ -67,7 +85,7 @@ local function parse_attributes(line, todo_item)
     end
 end
 
-function orgenda.compare_todo_items(a, b)
+function orgenda.config.compare_items_cb(a, b)
     if a.priority ~= b.priority then
         return a.priority > b.priority
     end
@@ -115,7 +133,7 @@ local function parse_file(file_info, items)
             local header_text = line:match("^%s*[*]+%s*(.+)$")
             if header_text == nil then
                 if todo_item ~= nil then
-                    parse_attributes(line, todo_item)
+                    parse_timestamps(line, todo_item)
                 end
             else
                 if todo_item ~= nil then
@@ -140,20 +158,30 @@ local function parse_file(file_info, items)
 end
 
 -- Merge multiple reset requests to improve performance.
-orgenda._reset_timer = gtimer {
-    timeout = 0.1,
-    single_shot = true,
-    callback = function ()
-        orgenda._reset_scheduled = false
-        orgenda.reset()
-    end,
-}
+
+local reset_timer
+local reset_reschedule_deadline
 function orgenda.schedule_reset()
-    if orgenda._reset_scheduled then
+    local now = glib.get_monotonic_time()
+    if reset_timer then
+        if now < reset_reschedule_deadline then
+            reset_timer:again()
+        end
         return
     end
-    orgenda._reset_timer:again()
-    orgenda._reset_scheduled = true
+    reset_reschedule_deadline = now
+        + (orgenda.config.reset_max_delay_sec
+           - orgenda.config.reset_merge_threshold_sec)
+        * 1000000
+    reset_timer = gtimer{
+        timeout = orgenda.config.reset_merge_threshold_sec,
+        single_shot = true,
+        autostart = true,
+        callback = function ()
+            reset_timer = nil
+            orgenda.reset()
+        end,
+    }
 end
 
 function orgenda.reset()
@@ -162,11 +190,12 @@ function orgenda.reset()
         parse_file(file_info, items)
     end
     orgenda.data.items = items
-    naughty.notify{
-        skip_notix = true,
-        title = "Orgenda reloaded.",
-        timeout = 3,
-    }
+    if orgenda.config.show_notifications then
+        naughty.notify{
+            title = "Orgenda reloaded.",
+            timeout = 3,
+        }
+    end
 end
 
 function orgenda.hide(item)
@@ -193,168 +222,147 @@ function orgenda.save_priority_status(item)
                       (item.priority == 2 and item.implicit_priority and "" or
                        " [#"..pri_char.."]")..
                       " /", "-i", item.source }
-    awful.spawn.easy_async(cmd, function () end)
+    awful.spawn.easy_async(cmd, orgenda.schedule_reset)
 end
 
-local orgenda_fg_pickers = {
-    [1] = {
-        [false] = opicker.beautiful{"orgenda_color_p1_todo"},
-        [true] = opicker.beautiful{"orgenda_color_p1_done"},
+orgenda.config.widget_item_template = {
+    {
+        {
+            {
+                id = "icon_role",
+                widget = wibox.widget.imagebox,
+                forced_width = dpi(20),
+                forced_height = dpi(20),
+            },
+            valign = "top",
+            widget = wibox.container.place,
+        },
+        right = dpi(5),
+        widget = wibox.container.margin,
     },
-    [2] = {
-        [false] = opicker.beautiful{"orgenda_color_p2_todo"},
-        [true] = opicker.beautiful{"orgenda_color_p2_done"},
+    {
+        {
+            {
+                id = "timestamp_role",
+                ellipsize = "none",
+                align = "left",
+                valign = "center",
+                wrap = "word_char",
+                widget = wibox.widget.textbox,
+            },
+            {
+                {
+                    id = "text_role",
+                    ellipsize = "none",
+                    align = "left",
+                    valign = "center",
+                    wrap = "word_char",
+                    widget = wibox.widget.textbox
+                },
+                fill_horizontal = true,
+                content_fill_horizontal = true,
+                widget = wibox.container.place,
+            },
+            layout = wibox.layout.fixed.vertical,
+        },
+        valign = "center",
+        widget = wibox.container.place,
     },
-    [3] = {
-        [false] = opicker.beautiful{"orgenda_color_p3_todo"},
-        [true] = opicker.beautiful{"orgenda_color_p3_done"},
-    },
+    layout = wibox.layout.fixed.horizontal,
 }
+
+function orgenda.get_icon(item)
+    return beautiful["orgenda_icon_p"..tostring(item.priority).."_"..(item.done and "done" or "todo")]
+end
 
 function orgenda.widget(args)
     args = args or {}
-
+    local create_item_widget = args.create_item_widget_cb or function (item)
+        local widget = wibox.widget.base.make_widget_from_value(orgenda.config.widget_item_template)
+        local icon = widget:get_children_by_id("icon_role")
+        if #icon > 0 then icon[1].image = orgenda.get_icon(item) end
+        local text = widget:get_children_by_id("text_role")
+        if #text > 0 then text[1].markup = item.text end
+        widget:connect_signal(
+            "button::release",
+            function (w, _x, _y, button)
+                if button == 1 then
+                    orgenda.toggle_done(item)
+                elseif button == 2 then
+                    orgenda.hide(item)
+                elseif button == 3 then
+                    orgenda.promote(item)
+                end
+            end
+        )
+        return widget
+    end
     local orgenda_widget
 
-    local wibox = require("wibox")
-    local fixed_margin = require("fixed_margin")
-    local beautiful = require("beautiful")
-
     local todo_item_container = wibox.widget {
-        widget = wibox.layout.fixed.vertical
+        layout = args.layout or wibox.layout.fixed.vertical,
     }
     orgenda_widget = todo_item_container
 
-    local function get_mark(item)
-        return beautiful["orgenda_mark_p"..tostring(item.priority).."_"..(item.done and "done" or "todo")]
-    end
+    local widget_by_item_key = {}
+    local item_by_widget = setmetatable({}, {__mode="k"})
 
-    local todo_item_widget_cache = {}
-
-    local function get_todo_item_widget(item, cache_key)
-        if todo_item_widget_cache[cache_key] == nil then
-            local widget = wibox.widget{
-                {
-                    {
-                        {
-                            {
-                                {
-                                    image = get_mark(item),
-                                    forced_width = beautiful.icon_size,
-                                    forced_height = beautiful.icon_size,
-                                    widget = masked_imagebox,
-                                },
-                                fg_picker = orgenda_fg_pickers[item.priority][item.done],
-                                widget = ocontainer,
-                            },
-                            valign = "top",
-                            widget = wibox.container.place
-                        },
-                        right = beautiful.sep_small_size,
-                        widget = wibox.container.margin,
-                    },
-                    {
-                        {
-                            item.timestamp and {
-                                id = "timestamp",
-                                -- text will be updated by the following function.
-                                font = args.font,
-                                widget = wibox.widget.textbox
-                            },
-                            {
-                                {
-                                    markup = item.text,
-                                    font = args.font,
-                                    ellipsize = "none",
-                                    align = "left",
-                                    valign = "center",
-                                    wrap = "word_char",
-                                    widget = wibox.widget.textbox
-                                },
-                                fill_horizontal = true,
-                                content_fill_horizontal = true,
-                                widget = wibox.container.place,
-                            },
-                            layout = wibox.layout.fixed.vertical
-                        },
-                        valign = "center",
-                        widget = wibox.container.place,
-                    },
-                    layout = wibox.layout.fixed.horizontal
-                },
-                fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-                bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
-                context_transformation = {highlighted = false},
-                widget = ocontainer,
-            }
-            widget:connect_signal(
-                "mouse::enter",
-                function (w)
-                    w.context_transformation = {highlighted = true}
-                end
-            )
-            widget:connect_signal(
-                "mouse::leave",
-                function (w)
-                    w.context_transformation = {highlighted = false}
-                end
-            )
-            widget:connect_signal(
-                "button::release",
-                function (w, _x, _y, button)
-                    if button == 1 then
-                        orgenda.toggle_done(w.item)
-                    elseif button == 2 then
-                        orgenda.hide(w.item)
-                    elseif button == 3 then
-                        orgenda.promote(w.item)
-                    end
-                end
-            )
-            todo_item_widget_cache[cache_key] = widget
+    local function get_todo_item_widget(item, item_key)
+        local widget = widget_by_item_key[item_key]
+        if widget_by_item_key[item_key] == nil then
+            widget = create_item_widget(item)
+            widget_by_item_key[item_key] = widget
         end
-        todo_item_widget_cache[cache_key].item = item
-        return todo_item_widget_cache[cache_key]
+        if widget then
+            item_by_widget[widget] = item
+        end
+        return widget
     end
 
     local function scan_for_expired_items()
         local time = os.time()
         local date = os.date("%Y%m%d", time)
-        for _, widget in pairs(todo_item_widget_cache) do
-            local item = widget.item
+        for _, widget in pairs(widget_by_item_key) do
+            local item = item_by_widget[widget]
             local expired = false
+            local timestamp_children = widget:get_children_by_id("timestamp_role")
             if item.has_time and item.timestamp <= time then
                 expired = true
             elseif item.timestamp ~= nil then
                 local item_date = os.date("%Y%m%d", item.timestamp)
                 expired = item_date < date
             end
-            if expired then
-                widget:get_children_by_id("timestamp")[1].markup = '<span strikethrough="true"><b>['..os.date(item.has_time and "%Y-%m-%d %a %H:%M" or "%Y-%m-%d %a", item.timestamp)..']</b></span>'
-            elseif item.timestamp ~= nil then
-                widget:get_children_by_id("timestamp")[1].markup = '<b>['..os.date(item.has_time and "%Y-%m-%d %a %H:%M" or "%Y-%m-%d %a", item.timestamp)..']</b>'
+            if #timestamp_children > 0 then
+                if expired then
+                    timestamp_children[1].markup = '<span strikethrough="true"><b>['..os.date(item.has_time and "%Y-%m-%d %a %H:%M" or "%Y-%m-%d %a", item.timestamp)..']</b></span>'
+                elseif item.timestamp ~= nil then
+                    timestamp_children[1].markup = '<b>['..os.date(item.has_time and "%Y-%m-%d %a %H:%M" or "%Y-%m-%d %a", item.timestamp)..']</b>'
+                end
             end
         end
     end
 
-    local function get_cache_key(item)
-        return tostring(item.timestamp)..':'..(item.done and "!" or "?")..tostring(item.priority)..':'..item.text
+    local function get_item_key(item)
+        return tostring(item.timestamp)..':'..(item.done and "!" or "?")..tostring(item.priority)..':'..item.text..':'..(item.tags_text or '')
     end
 
     orgenda.data:connect_signal(
         "property::items",
         function ()
-            table.sort(orgenda.data.items, orgenda.compare_todo_items)
+            table.sort(orgenda.data.items, orgenda.config.compare_items_cb)
             todo_item_container:reset()
-            local cache_keys = {}
+            local item_keys = {}
             for index, item in ipairs(orgenda.data.items) do
-                local cache_key = get_cache_key(item)
-                cache_keys[cache_key] = true
-                todo_item_container:add(get_todo_item_widget(item, cache_key))
+                local item_key = get_item_key(item)
+                item_keys[item_key] = true
+                local widget = get_todo_item_widget(item, item_key)
+                if widget then
+                    todo_item_container:add(widget)
+                end
             end
-            for k, v in pairs(todo_item_widget_cache) do
-                if not cache_keys[k] then
-                    todo_item_widget_cache[k] = nil
+            for k, v in pairs(widget_by_item_key) do
+                if not item_keys[k] then
+                    widget_by_item_key[k] = nil
                 end
             end
             scan_for_expired_items()
@@ -362,7 +370,7 @@ function orgenda.widget(args)
     )
 
     gtimer {
-        timeout = 300,
+        timeout = orgenda.config.expiration_scan_interval_sec,
         autostart = true,
         callback = scan_for_expired_items,
     }
@@ -370,30 +378,44 @@ function orgenda.widget(args)
     return orgenda_widget
 end
 
-capi.awesome.connect_signal("orgenda::request_reset", orgenda.schedule_reset)
+local init_flag = false
+function orgenda.init(config)
+    if init_flag then return orgenda else init_flag = true end
 
-gtimer.delayed_call(
-    function ()
-        if #orgenda.config.files == 0 then
-            gdebug.print_warning("orgenda: no files to watch - will do nothing.")
-            return
+    if config then
+        assert(type(config) == "table")
+        for k, v in pairs(config) do
+            orgenda.config[k] = v
         end
-        local cmd = {"fswatch", "-x", "--event=Updated", "--event=AttributeModified"}
-        for _, file_info in ipairs(orgenda.config.files) do
-            local path = type(file_info) == "table" and file_info.path or file_info
-            table.insert(cmd, path)
-        end
-        awful.spawn.with_line_callback(
-            cmd,
-            {
-                stdout = function(line)
-                    -- gdebug.print_warning("Got fswatch line: "..line)
-                    orgenda.schedule_reset()
-                end
-            }
-        )
-        orgenda.reset()
     end
-)
+
+    if orgenda.config.watch_files then
+        gtimer.delayed_call(
+            function ()
+                if #orgenda.config.files == 0 then
+                    gdebug.print_warning("orgenda: no files to watch - will do nothing.")
+                    return
+                end
+                local cmd = {"fswatch", "-x", "--event=Updated", "--event=AttributeModified"}
+                for _, file_info in ipairs(orgenda.config.files) do
+                    local path = type(file_info) == "table" and file_info.path or file_info
+                    table.insert(cmd, path)
+                end
+                awful.spawn.with_line_callback(
+                    cmd,
+                    {
+                        stdout = function(line)
+                            -- gdebug.print_warning("Got fswatch line: "..line)
+                            orgenda.schedule_reset()
+                        end
+                    }
+                )
+                orgenda.reset()
+            end
+        )
+    end
+
+    return orgenda
+end
 
 return orgenda

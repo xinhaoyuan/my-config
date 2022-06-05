@@ -57,17 +57,6 @@ os.execute("touch "..gcal_org_path)
 local notix_org_path = os.getenv("HOME").."/org/notix.org"
 os.execute("touch "..notix_org_path)
 require("notix").config.org_file_for_pin = notix_org_path
-require("orgenda").config.files = {
-    {
-        path = os.getenv("HOME").."/org/TODO.org",
-        rank = 0,
-    },
-    {
-        path = notix_org_path,
-        rank = 1,
-    },
-    gcal_org_path,
-}
 naughty.connect_signal(
     "request::display", function (notif)
         naughty.layout.box{
@@ -82,6 +71,19 @@ naughty.connect_signal(
             bg = "#00000000",
         }
     end)
+require("orgenda").init{
+    files = {
+        {
+            path = os.getenv("HOME").."/org/TODO.org",
+            rank = 0,
+        },
+        {
+            path = notix_org_path,
+            rank = 1,
+        },
+        gcal_org_path,
+    },
+}
 
 local hotpot = require("hotpot")
 local fts = hotpot.focus_timestamp

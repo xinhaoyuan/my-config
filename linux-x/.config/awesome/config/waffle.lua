@@ -1920,7 +1920,7 @@ do
     orgenda_header:connect_signal(
         "button::release",
         function ()
-            capi.awesome.emit_signal("orgenda::request_reset")
+            orgenda.schedule_reset()
         end
     )
 end
@@ -1942,26 +1942,126 @@ orgenda.data:connect_signal(
     end
 )
 
+local organda_color_func = function (priority, done)
+    local key = "orgenda_color_p"..tostring(priority)..(done and "_done" or "_todo")
+    return beautiful[key]
+end
 local orgenda_widget = wibox.widget{
-    orgenda_header,
     {
-        {
-            orgenda.widget{
-                item_margin = beautiful.sep_small_size,
-            },
-            widget = scroller,
-        },
+        orgenda_header,
         {
             {
-                markup = "<span size='large' foreground='"..beautiful.minor_normal.."'>Wow!\nNo TODOs!\nSo clean!</span>",
-                align = "center",
-                widget = wibox.widget.textbox,
+                orgenda.widget{
+                    create_item_widget_cb = function (item)
+                        local widget = wibox.widget{
+                            {
+                                {
+                                    {
+                                        {
+                                            {
+                                                image = orgenda.get_icon(item),
+                                                forced_width = beautiful.icon_size,
+                                                forced_height = beautiful.icon_size,
+                                                widget = masked_imagebox,
+                                            },
+                                            fg_picker = opicker.wrap{
+                                                organda_color_func,
+                                                item.priority,
+                                                item.done,
+                                            },
+                                            widget = ocontainer,
+                                        },
+                                        valign = "top",
+                                        widget = wibox.container.place
+                                    },
+                                    right = beautiful.sep_small_size,
+                                    widget = wibox.container.margin,
+                                },
+                                {
+                                    {
+                                        {
+                                            item.timestamp and {
+                                                id = "timestamp_role",
+                                                widget = wibox.widget.textbox
+                                            },
+                                            -- item.tags_text and {
+                                            --     markup = "<span size='small'>:"..item.tags_text..":</span>",
+                                            --     ellipsize = "none",
+                                            --     valign = "center",
+                                            --     wrap = "word_char",
+                                            --     widget = wibox.widget.textbox
+                                            -- },
+                                            layout = wibox.layout.fixed.horizontal,
+                                        },
+                                        {
+                                            {
+                                                markup = item.text,
+                                                ellipsize = "none",
+                                                align = "left",
+                                                valign = "center",
+                                                wrap = "word_char",
+                                                widget = wibox.widget.textbox
+                                            },
+                                            fill_horizontal = true,
+                                            content_fill_horizontal = true,
+                                            widget = wibox.container.place,
+                                        },
+                                        layout = wibox.layout.fixed.vertical
+                                    },
+                                    valign = "center",
+                                    widget = wibox.container.place,
+                                },
+                                layout = wibox.layout.fixed.horizontal
+                            },
+                            fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
+                            bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+                            context_transformation = {highlighted = false},
+                            widget = ocontainer,
+                        }
+                        widget:connect_signal(
+                            "mouse::enter",
+                            function (w)
+                                w.context_transformation = {highlighted = true}
+                            end
+                        )
+                        widget:connect_signal(
+                            "mouse::leave",
+                            function (w)
+                                w.context_transformation = {highlighted = false}
+                            end
+                        )
+                        widget:connect_signal(
+                            "button::release",
+                            function (w, _x, _y, button)
+                                if button == 1 then
+                                    orgenda.toggle_done(item)
+                                elseif button == 2 then
+                                    orgenda.hide(item)
+                                elseif button == 3 then
+                                    orgenda.promote(item)
+                                end
+                            end
+                        )
+                        return widget
+                    end,
+                },
+                widget = scroller,
             },
-            widget = wibox.container.place,
+            {
+                {
+                    markup = "<span size='large' foreground='"..beautiful.minor_normal.."'>Wow!\nNo TODOs!\nSo clean!</span>",
+                    align = "center",
+                    widget = wibox.widget.textbox,
+                },
+                widget = wibox.container.place,
+            },
+            widget = fallback,
         },
-        widget = fallback,
+        layout = wibox.layout.align.vertical,
     },
-    layout = wibox.layout.align.vertical,
+    fill_vertical = true,
+    valign = "top",
+    widget = fixed_place,
 }
 
 orgenda_widget.visible = shared.vars.show_notes
@@ -1980,22 +2080,16 @@ waffle_calendar_view = view {
                     cal_widget,
                     {
                         {
-                            {
-                                orgenda_widget,
-                                top = beautiful.sep_big_size,
-                                draw_empty = false,
-                                widget = fixed_margin,
-                            },
-                            bgimage = function(context, cr, width, height)
-                                height = beautiful.sep_big_size
-                                beautiful.draw_separator(cr, width, height)
-                            end,
-                            widget = wibox.container.background,
+                            orgenda_widget,
+                            top = beautiful.sep_big_size,
+                            draw_empty = false,
+                            widget = fixed_margin,
                         },
-                        fill_vertical = false,
-                        content_fill_horizontal = true,
-                        content_fill_vertical = true,
-                        widget = fixed_place,
+                        bgimage = function(context, cr, width, height)
+                            height = beautiful.sep_big_size
+                            beautiful.draw_separator(cr, width, height)
+                        end,
+                        widget = wibox.container.background,
                     },
                     layout = wibox.layout.align.vertical,
                 },
