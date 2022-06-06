@@ -1087,62 +1087,62 @@ do
    }
 end
 
-
-local volumebar_widget
-local volumebar_buttons
+local audiosink_name_widget
+local audiosink_bar_widget
+local audiosink_buttons
+local audiosink_toggle_mute
 do
-   local GET_VOLUME_CMD = 'amixer -D pulse sget Master'
-   local INC_VOLUME_CMD = 'amixer -D pulse sset Master 5%+'
-   local DEC_VOLUME_CMD = 'amixer -D pulse sset Master 5%-'
-   local TOG_VOLUME_CMD = 'amixer -D pulse sset Master toggle'
+    local GET_VOLUME_CMD = [[pacmd list-sinks | awk -- '/^\s*\* index/{f=1} /^\s*index/{f=0} f==1&&match($0, /device.description = "([^"]*)"$/, m){print "name="m[1]} f==1&&match($0, /^\s*volume:.*\/\s*([0-9]*)%/, m){print "volume="m[1]} f==1&&match($0,/^\s*muted:\s*(.*)$/,m){print "muted="m[1]}']]
+    local INC_VOLUME_CMD = 'pactl set-sink-volume @DEFAULT_SINK@ +5%'
+    local DEC_VOLUME_CMD = 'pactl set-sink-volume @DEFAULT_SINK@ -5%'
+    local TOG_VOLUME_CMD = 'pactl set-sink-mute @DEFAULT_SINK@ toggle'
 
-   volumebar_widget = wibox.widget{
+    audiosink_name_widget = wibox.widget{
+        ellipsize = "start",
+        align = "center",
+        valign = "center",
+        outline_size = dpi(2),
+        widget = outlined_textbox,
+    }
+
+    audiosink_bar_widget = wibox.widget{
        max_value = 1,
        forced_height = dpi(2),
-       paddings = 0,
        border_width = 0,
-       color = bar_color,
        background_color = "#00000000",
        shape = gshape.bar,
        clip = true,
-       margins = {
-           left = button_padding,
-           right = button_padding,
-       },
        widget = wibox.widget.progressbar
-   }
+    }
 
+    local update_graphic = function (stdout)
+        local data = {}
+        for k, v in string.gmatch(stdout, "([^\n\r]*)=([^\n\r]*)") do
+            data[k] = v
+        end
+        audiosink_name_widget.text = data.name
+        audiosink_bar_widget.value = tonumber(data.volume) / 100
+    end
 
-   local update_graphic = function (widget, stdout)
-      local mute = string.match(stdout, "%[(o%D%D?)%]")
-      local volume = string.match(stdout, "(%d?%d?%d)%%")
-      volume = tonumber(string.format("% 3d", volume))
-
-      widget.value = mute == "off" and 0 or volume / 100;
-   end
-
-   local function spawn_and_update_volumebar(cmd)
+   local function spawn_and_update_audiosink(cmd)
        awful.spawn.easy_async_with_shell(
            cmd .. ">/dev/null&&" .. GET_VOLUME_CMD,
            function (stdout, stderr, exitreason, exitcode)
-               update_graphic(volumebar_widget, stdout, stderr, exitreason, exitcode)
+               update_graphic(stdout, stderr, exitreason, exitcode)
            end
        )
    end
 
-   volumebar_buttons = awful.util.table.join(
-       awful.button({ }, 1, function ()
-               awful.spawn({"pavucontrol"})
-               waffle:hide()
-       end),
-       awful.button({ }, 3, function ()
-               spawn_and_update_volumebar(TOG_VOLUME_CMD)
-       end),
+   function audiosink_toggle_mute()
+       spawn_and_update_audiosink(TOG_VOLUME_CMD)
+   end
+
+   audiosink_buttons = awful.util.table.join(
        awful.button({ }, 4, function ()
-               spawn_and_update_volumebar(INC_VOLUME_CMD)
+               spawn_and_update_audiosink(INC_VOLUME_CMD)
        end),
        awful.button({ }, 5, function ()
-               spawn_and_update_volumebar(DEC_VOLUME_CMD)
+               spawn_and_update_audiosink(DEC_VOLUME_CMD)
        end)
    )
 
@@ -1151,21 +1151,21 @@ do
        call_now = true,
        autostart = true,
        callback = function ()
-           awful.spawn.easy_async(GET_VOLUME_CMD,
+           awful.spawn.easy_async_with_shell(GET_VOLUME_CMD,
                                   function (stdout)
-                                      update_graphic(volumebar_widget, stdout)
+                                      update_graphic(stdout)
                                   end
            )
        end,
    }
 
-   volumebar_widget.keys = {
+   audiosink_name_widget.keys = {
        ["-"] = function (mod, _, event)
            if event == "release" then return end
            awful.spawn.easy_async_with_shell(
                DEC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
                function (stdout, stderr, exitreason, exitcode)
-                   update_graphic(volumebar_widget, stdout, stderr, exitreason, exitcode)
+                   update_graphic(stdout, stderr, exitreason, exitcode)
                end
            )
        end,
@@ -1174,7 +1174,7 @@ do
            awful.spawn.easy_async_with_shell(
                TOG_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
                function (stdout, stderr, exitreason, exitcode)
-                   update_graphic(volumebar_widget, stdout, stderr, exitreason, exitcode)
+                   update_graphic(stdout, stderr, exitreason, exitcode)
                end
            )
        end,
@@ -1183,7 +1183,110 @@ do
            awful.spawn.easy_async_with_shell(
                INC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
                function (stdout, stderr, exitreason, exitcode)
-                   update_graphic(volumebar_widget, stdout, stderr, exitreason, exitcode)
+                   update_graphic(stdout, stderr, exitreason, exitcode)
+               end
+           )
+       end,
+   }
+end
+
+local audiosource_name_widget
+local audiosource_bar_widget
+local audiosource_buttons
+local audiosource_toggle_mute
+do
+    local GET_VOLUME_CMD = [[pacmd list-sources | awk -- '/^\s*\* index/{f=1} /^\s*index/{f=0} f==1&&match($0, /device.description = "([^"]*)"$/, m){print "name="m[1]} f==1&&match($0, /^\s*volume:.*\/\s*([0-9]*)%/, m){print "volume="m[1]} f==1&&match($0,/^\s*muted:\s*(.*)$/,m){print "muted="m[1]}']]
+    local INC_VOLUME_CMD = 'pactl set-source-volume @DEFAULT_SOURCE@ +5%'
+    local DEC_VOLUME_CMD = 'pactl set-source-volume @DEFAULT_SOURCE@ -5%'
+    local TOG_VOLUME_CMD = 'pactl set-source-mute @DEFAULT_SOURCE@ toggle'
+
+    audiosource_name_widget = wibox.widget{
+        ellipsize = "start",
+        align = "center",
+        valign = "center",
+        outline_size = dpi(2),
+        widget = outlined_textbox,
+    }
+
+    audiosource_bar_widget = wibox.widget{
+       max_value = 1,
+       forced_height = dpi(2),
+       border_width = 0,
+       background_color = "#00000000",
+       shape = gshape.bar,
+       clip = true,
+       widget = wibox.widget.progressbar
+    }
+
+    local update_graphic = function (stdout)
+        local data = {}
+        for k, v in string.gmatch(stdout, "([^\n\r]*)=([^\n\r]*)") do
+            data[k] = v
+        end
+        audiosource_name_widget.text = data.name
+        audiosource_bar_widget.value = tonumber(data.volume) / 100
+    end
+
+   local function spawn_and_update_audiosource(cmd)
+       awful.spawn.easy_async_with_shell(
+           cmd .. ">/dev/null&&" .. GET_VOLUME_CMD,
+           function (stdout, stderr, exitreason, exitcode)
+               update_graphic(stdout, stderr, exitreason, exitcode)
+           end
+       )
+   end
+
+   function audiosource_toggle_mute()
+       spawn_and_update_audiosource(TOG_VOLUME_CMD)
+   end
+
+   audiosource_buttons = awful.util.table.join(
+       awful.button({ }, 4, function ()
+               spawn_and_update_audiosource(INC_VOLUME_CMD)
+       end),
+       awful.button({ }, 5, function ()
+               spawn_and_update_audiosource(DEC_VOLUME_CMD)
+       end)
+   )
+
+   gtimer {
+       timeout = update_interval_s,
+       call_now = true,
+       autostart = true,
+       callback = function ()
+           awful.spawn.easy_async_with_shell(GET_VOLUME_CMD,
+                                  function (stdout)
+                                      update_graphic(stdout)
+                                  end
+           )
+       end,
+   }
+
+   audiosource_name_widget.keys = {
+       ["-"] = function (mod, _, event)
+           if event == "release" then return end
+           awful.spawn.easy_async_with_shell(
+               DEC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
+               function (stdout, stderr, exitreason, exitcode)
+                   update_graphic(stdout, stderr, exitreason, exitcode)
+               end
+           )
+       end,
+       ["_"] = function (_mod, _key, event)
+           if event == "press" then return end
+           awful.spawn.easy_async_with_shell(
+               TOG_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
+               function (stdout, stderr, exitreason, exitcode)
+                   update_graphic(stdout, stderr, exitreason, exitcode)
+               end
+           )
+       end,
+       ["="] = function (_mod, _key, event)
+           if event == "release" then return end
+           awful.spawn.easy_async_with_shell(
+               INC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
+               function (stdout, stderr, exitreason, exitcode)
+                   update_graphic(stdout, stderr, exitreason, exitcode)
                end
            )
        end,
@@ -1635,17 +1738,58 @@ local waffle_root_action_list_widget = decorate_panel {
     widget = {
         button {
             icon = icons.audio,
-            label_widget = wibox.widget {
-                volumebar_widget,
+            label_widget = wibox.widget{
+                {
+                    {
+                        audiosink_name_widget,
+                        audiosink_bar_widget,
+                        layout = wibox.layout.fixed.vertical,
+                    },
+                    width = waffle_width - beautiful.icon_size * 2 - button_padding * 2,
+                    height = button_height * 2,
+                    strategy = "max",
+                    widget = wibox.container.constraint,
+                },
                 widget = wibox.container.place
             },
-            buttons = volumebar_buttons,
+            buttons = audiosink_buttons,
             indicator = em("v"),
             key = "v",
             action = function (alt)
-                local cmd = {"pavucontrol"}
-                awful.spawn(cmd)
-                waffle:hide()
+                if alt then
+                    audiosink_toggle_mute()
+                else
+                    awful.spawn({"pavucontrol"})
+                    waffle:hide()
+                end
+            end,
+        },
+        button {
+            icon = icons.mic,
+            label_widget = wibox.widget{
+                {
+                    {
+                        audiosource_name_widget,
+                        audiosource_bar_widget,
+                        layout = wibox.layout.fixed.vertical,
+                    },
+                    width = waffle_width - beautiful.icon_size * 2 - button_padding * 2,
+                    height = button_height * 2,
+                    strategy = "max",
+                    widget = wibox.container.constraint,
+                },
+                widget = wibox.container.place
+            },
+            buttons = audiosource_buttons,
+            indicator = em("v"),
+            key = "v",
+            action = function (alt)
+                if alt then
+                    audiosource_toggle_mute()
+                else
+                    awful.spawn({"pavucontrol"})
+                    waffle:hide()
+                end
             end,
         },
         button {
