@@ -322,7 +322,7 @@ local waffle_shutdown_view = view {
         decorate_panel {
             widget = {
                 button {
-                    -- icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
+                    -- icon = icons.sleep,
                     markup = "Suspend",
                     indicator = em("s"),
                     key = "s",
@@ -332,7 +332,7 @@ local waffle_shutdown_view = view {
                     end
                 },
                 button {
-                    -- icon = gcolor.recolor_image(icons.sleep, beautiful.fg_normal),
+                    -- icon = icons.sleep,
                     markup = "Hibernate",
                     indicator = em("h"),
                     key = "h",
@@ -351,7 +351,7 @@ local waffle_shutdown_view = view {
                     end
                 },
                 button {
-                    -- icon = gcolor.recolor_image(icons.poweroff, beautiful.fg_normal),
+                    -- icon = icons.poweroff,
                     markup = "Power off",
                     indicator = em("p"),
                     key = "p",
@@ -807,9 +807,9 @@ do
         if has_wifi ~= net_has_wifi then
             net_has_wifi = has_wifi
             if has_wifi then
-                net_widget_icon_container.widget.image = gcolor.recolor_image(icons.wifi, beautiful.fg_normal)
+                net_widget_icon_container.widget.image = icons.wifi
             else
-                net_widget_icon_container.widget.image = gcolor.recolor_image(icons.ethernet, beautiful.fg_normal)
+                net_widget_icon_container.widget.image = icons.ethernet
             end
         end
     end
@@ -919,7 +919,7 @@ do
 
     disk_widget = wibox.widget {
         {
-            image = gcolor.recolor_image(icons.disk, beautiful.fg_normal),
+            image = icons.disk,
             forced_height = button_height,
             forced_width = button_height,
             widget = masked_imagebox,
@@ -1019,7 +1019,7 @@ do
 
    battery_widget = wibox.widget {
        {
-           image = gcolor.recolor_image(icons.battery_full, beautiful.fg_normal),
+           image = icons.battery_full,
            forced_height = button_height,
            forced_width = button_height,
            widget = wibox.widget.imagebox
@@ -1236,7 +1236,7 @@ do
     local mpd_icon_widget =
         wibox.widget {
             {
-                image = gcolor.recolor_image(icons.music, beautiful.fg_normal),
+                image = icons.music,
                 resize = true,
                 forced_width = button_height,
                 forced_height = button_height,
@@ -1400,7 +1400,7 @@ local waffle_root_status_widget = decorate_panel {
                 label_widget = {
                     {
                         {
-                            image = gcolor.recolor_image(icons.cpu, beautiful.fg_normal),
+                            image = icons.cpu,
                             forced_height = button_height,
                             forced_width = button_height,
                             widget = masked_imagebox,
@@ -1415,7 +1415,7 @@ local waffle_root_status_widget = decorate_panel {
                     },
                     {
                         {
-                            image = gcolor.recolor_image(icons.ram, beautiful.fg_normal),
+                            image = icons.ram,
                             forced_height = button_height,
                             forced_width = button_height,
                             widget = masked_imagebox,
@@ -1498,7 +1498,7 @@ local waffle_root_action_grid_widget = decorate_panel {
                 height = grid_height,
                 width = grid_width,
                 button_layout = grid_button_layout,
-                label_widget = icon_label(gcolor.recolor_image(icons.launcher, beautiful.fg_normal)),
+                label_widget = icon_label(icons.launcher),
                 indicator = em("r"),
                 key = "r",
                 action = function (alt)
@@ -1514,7 +1514,7 @@ local waffle_root_action_grid_widget = decorate_panel {
                 height = grid_height,
                 width = grid_width,
                 button_layout = grid_button_layout,
-                label_widget = icon_label(gcolor.recolor_image(icons.terminal, beautiful.fg_normal)),
+                label_widget = icon_label(icons.terminal),
                 markup = "Terminal",
                 indicator = em("↵"),
                 key = "Return",
@@ -1531,7 +1531,7 @@ local waffle_root_action_grid_widget = decorate_panel {
                 height = grid_height,
                 width = grid_width,
                 button_layout = grid_button_layout,
-                label_widget = icon_label(gcolor.recolor_image(icons.browser, beautiful.fg_normal)),
+                label_widget = icon_label(icons.browser),
                 markup = "Web",
                 indicator = em("w"),
                 key = "w",
@@ -1544,7 +1544,7 @@ local waffle_root_action_grid_widget = decorate_panel {
                 height = grid_height,
                 width = grid_width,
                 button_layout = grid_button_layout,
-                label_widget = icon_label(gcolor.recolor_image(icons.file_manager, beautiful.fg_normal)),
+                label_widget = icon_label(icons.file_manager),
                 markup = "Files",
                 indicator = em("e"),
                 key = "e",
@@ -1557,7 +1557,7 @@ local waffle_root_action_grid_widget = decorate_panel {
                 height = grid_height,
                 width = grid_width,
                 button_layout = grid_button_layout,
-                label_widget = icon_label(gcolor.recolor_image(icons.dots, beautiful.fg_normal)),
+                label_widget = icon_label(icons.dots),
                 markup = "Tray",
                 indicator = em("y"),
                 key = "y",
@@ -1569,7 +1569,7 @@ local waffle_root_action_grid_widget = decorate_panel {
                 height = grid_height,
                 width = grid_width,
                 button_layout = grid_button_layout,
-                label_widget = icon_label(gcolor.recolor_image(icons.fortune, beautiful.fg_normal)),
+                label_widget = icon_label(icons.fortune),
                 markup = "Fortune",
                 indicator = em("f"),
                 key = "f",
@@ -1589,7 +1589,7 @@ local waffle_root_action_grid_widget = decorate_panel {
                 height = grid_height,
                 width = grid_width,
                 button_layout = grid_button_layout,
-                label_widget = icon_label(gcolor.recolor_image(icons.setup, beautiful.fg_normal)),
+                label_widget = icon_label(icons.setup),
                 markup = "Settings",
                 indicator = em("s"),
                 key = "s",
@@ -1601,7 +1601,7 @@ local waffle_root_action_grid_widget = decorate_panel {
                 height = grid_height,
                 width = grid_width,
                 button_layout = grid_button_layout,
-                label_widget = icon_label(gcolor.recolor_image(icons.lock, beautiful.fg_normal)),
+                label_widget = icon_label(icons.lock),
                 markup = "Lock",
                 indicator = em("l"),
                 key = "l",
@@ -1614,7 +1614,7 @@ local waffle_root_action_grid_widget = decorate_panel {
                 height = grid_height,
                 width = grid_width,
                 button_layout = grid_button_layout,
-                label_widget = icon_label(gcolor.recolor_image(icons.poweroff, beautiful.fg_normal)),
+                label_widget = icon_label(icons.poweroff),
                 markup = "Power",
                 indicator = em("u"),
                 key = "u",
@@ -1634,7 +1634,7 @@ local waffle_root_action_list_widget = decorate_panel {
     top_sep = true,
     widget = {
         button {
-            icon = gcolor.recolor_image(icons.audio, beautiful.fg_normal),
+            icon = icons.audio,
             label_widget = wibox.widget {
                 volumebar_widget,
                 widget = wibox.container.place
@@ -1649,7 +1649,7 @@ local waffle_root_action_list_widget = decorate_panel {
             end,
         },
         button {
-            icon = gcolor.recolor_image(icons.calendar_todo, beautiful.fg_normal),
+            icon = icons.calendar_todo,
             label_widget = wibox.widget {
                 align = "center",
                 format = "%Y-%m-%d %a %H:%M",
@@ -1885,7 +1885,7 @@ do
             {
                 {
                     {
-                        image = gcolor.recolor_image(icons.refresh, beautiful.fg_normal),
+                        image = icons.refresh,
                         resize = true,
                         forced_height = button_height,
                         forced_width = button_height,

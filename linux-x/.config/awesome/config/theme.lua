@@ -214,7 +214,7 @@ theme.orgenda_indent_width = dpi(25)
 theme.titlebar_size = dpi(20)
 theme.mini_titlebar_size = theme.bar_height
 theme.mini_titlebar_width = theme.bar_height
-theme.client_default_icon = gcolor.recolor_image(icons.hexagon, theme.fg_normal)
+theme.client_default_icon = icons.hexagon
 
 local function shape_to_surface(shape, fill_color, stroke_color, outer_size, inner_size)
     shape = shape or

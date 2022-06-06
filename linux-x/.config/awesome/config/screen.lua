@@ -368,7 +368,7 @@ capi.awesome.connect_signal(
 local next_todo_counter = wibox.widget.textbox()
 local next_todo_widget = wibox.widget {
     {
-        image = gcolor.recolor_image(icons.alert, beautiful.fg_normal),
+        image = icons.alert,
         forced_height = beautiful.bar_height / beautiful.bar_rows,
         forced_width = beautiful.bar_height / beautiful.bar_rows,
         widget = masked_imagebox,
@@ -441,7 +441,7 @@ local orgenda_counter_text_widget = wibox.widget{
 local orgenda_counter_widget = wibox.widget {
     {
         {
-            image = gcolor.recolor_image(icons.calendar_todo, beautiful.fg_normal),
+            image = icons.calendar_todo,
             forced_height = beautiful.bar_height / beautiful.bar_rows,
             forced_width = beautiful.bar_height / beautiful.bar_rows,
             widget = masked_imagebox,
@@ -491,7 +491,7 @@ orgenda.data:connect_signal(
 
 local notix_counter_widget = wibox.widget{
     {
-        image = gcolor.recolor_image(icons.notification, beautiful.fg_normal),
+        image = icons.notification,
         forced_height = beautiful.bar_height / beautiful.bar_rows,
         forced_width = beautiful.bar_height / beautiful.bar_rows,
         widget = masked_imagebox,
@@ -513,7 +513,7 @@ capi.awesome.connect_signal(
 
 local waffle_indicator = wibox.widget{
     {
-        image = gcolor.recolor_image(icons.waffle, beautiful.fg_normal),
+        image = icons.waffle,
         forced_height = beautiful.bar_icon_size,
         forced_width = beautiful.bar_icon_size,
         widget = masked_imagebox,

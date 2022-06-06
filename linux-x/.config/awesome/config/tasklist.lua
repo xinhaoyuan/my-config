@@ -255,7 +255,7 @@ local tasklist_template = {
                                 {
                                     id = "default_icon",
                                     image = beautiful.client_default_icon,
-                                    widget = wibox.widget.imagebox,
+                                    widget = masked_imagebox,
                                 },
                                 widget = fallback,
                             },
