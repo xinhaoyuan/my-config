@@ -1169,7 +1169,7 @@ do
                end
            )
        end,
-       ["_"] = function (_mod, _key, event)
+       ["0"] = function (_mod, _key, event)
            if event == "press" then return end
            awful.spawn.easy_async_with_shell(
                TOG_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
@@ -1263,7 +1263,7 @@ do
    }
 
    audiosource_name_widget.keys = {
-       ["-"] = function (mod, _, event)
+       ["_"] = function (mod, _, event)
            if event == "release" then return end
            awful.spawn.easy_async_with_shell(
                DEC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
@@ -1272,7 +1272,7 @@ do
                end
            )
        end,
-       ["_"] = function (_mod, _key, event)
+       [")"] = function (_mod, _key, event)
            if event == "press" then return end
            awful.spawn.easy_async_with_shell(
                TOG_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
@@ -1281,7 +1281,7 @@ do
                end
            )
        end,
-       ["="] = function (_mod, _key, event)
+       ["+"] = function (_mod, _key, event)
            if event == "release" then return end
            awful.spawn.easy_async_with_shell(
                INC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
@@ -1753,8 +1753,8 @@ local waffle_root_action_list_widget = decorate_panel {
                 widget = wibox.container.place
             },
             buttons = audiosink_buttons,
-            indicator = em("v"),
-            key = "v",
+            indicator = em("p"),
+            key = "p",
             action = function (alt)
                 if alt then
                     audiosink_toggle_mute()
@@ -1781,8 +1781,8 @@ local waffle_root_action_list_widget = decorate_panel {
                 widget = wibox.container.place
             },
             buttons = audiosource_buttons,
-            indicator = em("v"),
-            key = "v",
+            indicator = em("i"),
+            key = "i",
             action = function (alt)
                 if alt then
                     audiosource_toggle_mute()
