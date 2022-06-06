@@ -1108,6 +1108,7 @@ local global_keys = {
    awful.key({ "Mod4" }, "d",               function ()
          local clients = {}
          local has_visible = false
+         awful.client.focus.history.disable_tracking()
          for _, c in ipairs(capi.client.get()) do
             if c:isvisible() and awful.client.focus.filter(c) then
                c.orig_minimized = c.minimized
@@ -1124,19 +1125,12 @@ local global_keys = {
                end
             end
 
-            -- I thought I should put newer client later. Turned out to be the reversed way.
-            table.sort(
-               clients,
-               function (a, b)
-                   return fts.get(a) < fts.get(b)
-               end
-            )
-
             for _, c in ipairs(clients) do
                c.minimized = c.orig_minimized
                c.orig_minimized = nil
             end
          end
+         awful.client.focus.history.enable_tracking()
    end),
    -- awful.key({ "Mod4" }, "q",               function ()
    --       local to_restore = true
