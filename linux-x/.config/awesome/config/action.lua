@@ -34,11 +34,12 @@ do
         term_cmd = {term_prog}
     end
 
-    if os.execute("command -v luakit") then
-        browser_cmd = {"luakit"}
-    else
-        browser_cmd = {"firefox"}
-    end
+    browser_cmd = {"firefox-esr"}
+    -- if os.execute("command -v luakit") then
+    --     browser_cmd = {"luakit"}
+    -- else
+    --     browser_cmd = {"firefox"}
+    -- end
 end
 
 shared.action = {
