@@ -7,8 +7,9 @@ Author: Xinhao Yuan <xinhaoyuan@gmail.com>
 ## Features
 
   - Read progress (TODO/DONE), priorities ([#A/B/C]), tags (:some:tags:), and timestamps.
-  - Supports updating progress and priority in the UI.
   - Auto-refreshs using `fswatch`.
+  - Supports updating progress and priority in the UI.
+  - Handles timestamp expiration (optionally).
 
 ## Usage
 

@@ -1931,7 +1931,7 @@ local cal_widget = wibox.widget {
                     widget,
                     fg_picker = opicker.beautiful{
                         "special_", opicker.branch{"inverted", "focus", "normal"}},
-                    widget = onion,
+                    widget = ocontainer,
                 }
             end
         end
@@ -1997,9 +1997,9 @@ cal_widget:connect_signal(
     function (_, x, y, button)
         if button == 2 then
             cal_reset()
-        elseif button == 4 then
+        elseif button == 1 or button == 4 then
             cal_switch{month = -1}
-        elseif button == 5 then
+        elseif button == 3 or button == 5 then
             cal_switch{month = 1}
         end
     end)
@@ -2083,12 +2083,16 @@ orgenda.data:connect_signal(
                 active_dates[date.year] = y
             end
         end
+        cal_refresh()
     end
 )
 
 local organda_color_func = function (priority, done)
     local key = "orgenda_color_p"..tostring(priority)..(done and "_done" or "_todo")
     return beautiful[key]
+end
+function orgenda_get_icon(item)
+    return beautiful["orgenda_icon_p"..tostring(item.priority).."_"..(item.done and "done" or "todo")]
 end
 local orgenda_widget = wibox.widget{
     {
@@ -2103,7 +2107,7 @@ local orgenda_widget = wibox.widget{
                                     {
                                         {
                                             {
-                                                image = orgenda.get_icon(item),
+                                                image = orgenda_get_icon(item),
                                                 forced_width = beautiful.icon_size,
                                                 forced_height = beautiful.icon_size,
                                                 widget = masked_imagebox,
@@ -2204,6 +2208,7 @@ local orgenda_widget = wibox.widget{
         layout = wibox.layout.align.vertical,
     },
     fill_vertical = true,
+    content_fill_vertical = true,
     valign = "top",
     widget = fixed_place,
 }
@@ -2661,20 +2666,25 @@ local client_waffle = view {
                                 end
                                 shared.client.start_switcher(client, false)
                             end,
-                            button_action = function (alt)
-                                local client = shared.waffle_selected_client
-                                waffle:hide()
-                                if not client.valid then
-                                    return
-                                end
-                                if alt then
-                                    awful.mouse.client.resize(client, "bottom_right")
-                                else
-                                    local geo = client:geometry()
-                                    mouse.coords({ x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 })
-                                    awful.mouse.client.move(client)
-                                end
-                            end
+                            buttons = awful.util.table.join(
+                                awful.button({ }, 1, function ()
+                                                 local client = shared.waffle_selected_client
+                                                 waffle:hide()
+                                                 if not client.valid then
+                                                     return
+                                                 end
+                                                 local geo = client:geometry()
+                                                 mouse.coords({ x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 })
+                                                 awful.mouse.client.move(client)
+                                             end),
+                                awful.button({ }, 3, function ()
+                                                 local client = shared.waffle_selected_client
+                                                 waffle:hide()
+                                                 if not client.valid then
+                                                     return
+                                                 end
+                                                 awful.mouse.client.resize(client, "bottom_right")
+                                             end)),
                     }),
                     button({
                                width = dpi(64),
@@ -2721,7 +2731,10 @@ local client_waffle = view {
             gtimer.delayed_call(function () c:emit_signal("request::activate", "switch", {raise=true}) end)
         end
         client_waffle_transient = false
-        shared.waffle_selected_client:emit_signal("property::name")
+        -- TODO check why I did this.
+        -- if shared.waffle_selected_client and shared.waffle_selected_client.valid then
+        --     shared.waffle_selected_client:emit_signal("property::name")
+        -- end
         shared.waffle_selected_client = nil
     end,
     key_filter = function (mod, key, event)

@@ -229,10 +229,14 @@ orgenda.config.widget_item_template = {
     {
         {
             {
-                id = "icon_role",
-                widget = wibox.widget.imagebox,
-                forced_width = dpi(20),
-                forced_height = dpi(20),
+                {
+                    id = "status_role",
+                    align = "center",
+                    widget = wibox.widget.textbox,
+                },
+                width = dpi(40),
+                strategy = "exact",
+                widget = wibox.container.constraint,
             },
             valign = "top",
             widget = wibox.container.place,
@@ -271,16 +275,20 @@ orgenda.config.widget_item_template = {
     layout = wibox.layout.fixed.horizontal,
 }
 
-function orgenda.get_icon(item)
-    return beautiful["orgenda_icon_p"..tostring(item.priority).."_"..(item.done and "done" or "todo")]
+function get_status(item)
+    if item.done then return "[X]" end
+    return "["..(item.implicit_priority and " " or tostring(item.priority)).."]"
 end
 
 function orgenda.widget(args)
     args = args or {}
+    local handle_expired_items = args.handle_expired_items
+    if handle_expired_items == nil then handle_expired_items = true end
+
     local create_item_widget = args.create_item_widget_cb or function (item)
         local widget = wibox.widget.base.make_widget_from_value(orgenda.config.widget_item_template)
-        local icon = widget:get_children_by_id("icon_role")
-        if #icon > 0 then icon[1].image = orgenda.get_icon(item) end
+        local status = widget:get_children_by_id("status_role")
+        if #status > 0 then status[1].text = get_status(item)  end
         local text = widget:get_children_by_id("text_role")
         if #text > 0 then text[1].markup = item.text end
         widget:connect_signal(
@@ -320,30 +328,31 @@ function orgenda.widget(args)
     end
 
     local function scan_for_expired_items()
+        if not handle_expired_items then return end
         local time = os.time()
         local date = os.date("%Y%m%d", time)
         for _, widget in pairs(widget_by_item_key) do
             local item = item_by_widget[widget]
             local expired = false
             local timestamp_children = widget:get_children_by_id("timestamp_role")
-            if item.has_time and item.timestamp <= time then
-                expired = true
-            elseif item.timestamp ~= nil then
-                local item_date = os.date("%Y%m%d", item.timestamp)
-                expired = item_date < date
-            end
             if #timestamp_children > 0 then
-                if expired then
-                    timestamp_children[1].markup = '<span strikethrough="true"><b>['..os.date(item.has_time and "%Y-%m-%d %a %H:%M" or "%Y-%m-%d %a", item.timestamp)..']</b></span>'
+                if item.has_time and item.timestamp <= time then
+                    expired = true
                 elseif item.timestamp ~= nil then
-                    timestamp_children[1].markup = '<b>['..os.date(item.has_time and "%Y-%m-%d %a %H:%M" or "%Y-%m-%d %a", item.timestamp)..']</b>'
+                    local item_date = os.date("%Y%m%d", item.timestamp)
+                    expired = item_date < date
+                end
+                if expired then
+                    timestamp_children[1].markup = "<span strikethrough='true'><b>["..os.date(item.has_time and "%Y-%m-%d %a %H:%M" or "%Y-%m-%d %a", item.timestamp).."]</b></span>"
+                elseif item.timestamp ~= nil then
+                    timestamp_children[1].markup = "<b>["..os.date(item.has_time and "%Y-%m-%d %a %H:%M" or "%Y-%m-%d %a", item.timestamp).."]</b>"
                 end
             end
         end
     end
 
     local function get_item_key(item)
-        return tostring(item.timestamp)..':'..(item.done and "!" or "?")..tostring(item.priority)..':'..item.text..':'..(item.tags_text or '')
+        return tostring(item.timestamp)..":"..(item.done and "!" or "?")..tostring(item.priority)..":"..item.text..":"..(item.tags_text or "")
     end
 
     orgenda.data:connect_signal(
@@ -369,11 +378,13 @@ function orgenda.widget(args)
         end
     )
 
-    gtimer {
-        timeout = orgenda.config.expiration_scan_interval_sec,
-        autostart = true,
-        callback = scan_for_expired_items,
-    }
+    if handle_expired_items then
+        gtimer {
+            timeout = orgenda.config.expiration_scan_interval_sec,
+            autostart = true,
+            callback = scan_for_expired_items,
+        }
+    end
 
     return orgenda_widget
 end
