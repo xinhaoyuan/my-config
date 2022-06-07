@@ -159,7 +159,7 @@ alayout.layouts = {
 -- Define the tag list upfront for keybindings
 
 local root_buttons = awful.util.table.join(
-    awful.button({ }, 3, function () capi.awesome.emit_signal("show_main_waffle", {anchor = "mouse"}) end),
+    awful.button({ }, 3, nil, function () capi.awesome.emit_signal("show_main_waffle", {anchor = "mouse"}) end),
     capi.root.buttons()
 )
 
