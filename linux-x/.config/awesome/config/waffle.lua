@@ -1091,6 +1091,10 @@ local audiosink_name_widget
 local audiosink_bar_widget
 local audiosink_buttons
 local audiosink_toggle_mute
+local function audiosink_choose_default()
+    awful.spawn.with_shell(
+        [[pactl set-default-sink "$(pacmd list-sinks | awk 'match($0,/index:\s*([0-9]*)/,m){id=m[1]} match($0,/device.description = "([^"]*)"/,m){print id"\t"m[1]}' | rofi -dmenu -normal-window | cut -f 1)"]])
+end
 do
     local GET_VOLUME_CMD = [[pacmd list-sinks | awk -- '/^\s*\* index/{f=1} /^\s*index/{f=0} f==1&&match($0, /device.description = "([^"]*)"$/, m){print "name="m[1]} f==1&&match($0, /^\s*volume:.*\/\s*([0-9]*)%/, m){print "volume="m[1]} f==1&&match($0,/^\s*muted:\s*(.*)$/,m){print "muted="m[1]}']]
     local INC_VOLUME_CMD = 'pactl set-sink-volume @DEFAULT_SINK@ +5%'
@@ -1194,6 +1198,9 @@ local audiosource_name_widget
 local audiosource_bar_widget
 local audiosource_buttons
 local audiosource_toggle_mute
+local function audiosource_choose_default()
+    awful.spawn.with_shell([[pactl set-default-source "$(pacmd list-sources | awk 'match($0,/index:\s*([0-9]*)/,m){id=m[1]} match($0,/device.description = "([^"]*)"/,m){print id"\t"m[1]}' | rofi -dmenu -normal-window | cut -f 1)"]])
+end
 do
     local GET_VOLUME_CMD = [[pacmd list-sources | awk -- '/^\s*\* index/{f=1} /^\s*index/{f=0} f==1&&match($0, /device.description = "([^"]*)"$/, m){print "name="m[1]} f==1&&match($0, /^\s*volume:.*\/\s*([0-9]*)%/, m){print "volume="m[1]} f==1&&match($0,/^\s*muted:\s*(.*)$/,m){print "muted="m[1]}']]
     local INC_VOLUME_CMD = 'pactl set-source-volume @DEFAULT_SOURCE@ +5%'
@@ -1227,7 +1234,7 @@ do
         audiosource_bar_widget.value = tonumber(data.volume) / 100
     end
 
-   local function spawn_and_update_audiosource(cmd)
+    local function spawn_and_update_audiosource(cmd)
        awful.spawn.easy_async_with_shell(
            cmd .. ">/dev/null&&" .. GET_VOLUME_CMD,
            function (stdout, stderr, exitreason, exitcode)
@@ -1756,11 +1763,11 @@ local waffle_root_action_list_widget = decorate_panel {
             indicator = em("p"),
             key = "p",
             action = function (alt)
+                waffle:hide()
                 if alt then
-                    audiosink_toggle_mute()
-                else
                     awful.spawn({"pavucontrol"})
-                    waffle:hide()
+                else
+                    audiosink_choose_default()
                 end
             end,
         },
@@ -1784,11 +1791,11 @@ local waffle_root_action_list_widget = decorate_panel {
             indicator = em("i"),
             key = "i",
             action = function (alt)
+                waffle:hide()
                 if alt then
-                    audiosource_toggle_mute()
-                else
                     awful.spawn({"pavucontrol"})
-                    waffle:hide()
+                else
+                    audiosource_choose_default()
                 end
             end,
         },
