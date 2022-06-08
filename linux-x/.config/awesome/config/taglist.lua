@@ -41,7 +41,7 @@ local function taglist_update_function(widget, tag, index, objects)
     local background_widget = widget:get_children_by_id("background_role")[1]
     text_widget.text = tag.name
     background_widget.context_transformation = {
-        selected = tag == tag.screen.selected_tag
+        selected = tag.selected
     }
 end
 

@@ -50,13 +50,20 @@ end
 local table_join = awful.util.table.join
 local delayed = gtimer.delayed_call
 
-local function go_by_direction(dir, with_client)
-    if with_client then
+local function go_screen_by_direction(dir, with_object)
+    if with_object == "client" then
         local c = capi.client.focus
         if not c then return end
         awful.screen.focus_bydirection(dir, c.screen)
         c:move_to_screen(capi.mouse.screen.index)
         c:emit_signal("request::activate", "mouse.resize", {raise = true})
+    elseif with_object == "tag" then
+        local s = awful.screen.focused()
+        if #s.selected_tags == 1 then
+            local t = awful.screen.focused().selected_tag
+            awful.screen.focus_bydirection(dir)
+            t:swap(awful.screen.focused().selected_tag)
+        end
     else
         awful.screen.focus_bydirection(dir)
     end
@@ -1080,14 +1087,18 @@ local global_keys = {
    awful.key({ "Mod4" }, "/",               function () machi.default_editor.start_interactive() end),
    awful.key({ "Mod4" }, "[",               function () alayout.inc(alayout.layouts, -1) end),
    awful.key({ "Mod4" }, "]",               function () alayout.inc(alayout.layouts, 1) end),
-   awful.key({ "Mod4" }, "Up",              function () go_by_direction("up") end),
-   awful.key({ "Mod4" }, "Left",            function () go_by_direction("left") end),
-   awful.key({ "Mod4" }, "Down",            function () go_by_direction("down") end),
-   awful.key({ "Mod4" }, "Right",           function () go_by_direction("right") end),
-   awful.key({ "Control", "Mod4" }, "Up",   function () go_by_direction("up", true) end),
-   awful.key({ "Control", "Mod4" }, "Left", function () go_by_direction("left", true) end),
-   awful.key({ "Control", "Mod4" }, "Down", function () go_by_direction("down", true) end),
-   awful.key({ "Control", "Mod4" }, "Right",function () go_by_direction("right", true) end),
+   awful.key({ "Mod4" }, "Up",              function () go_screen_by_direction("up") end),
+   awful.key({ "Mod4" }, "Left",            function () go_screen_by_direction("left") end),
+   awful.key({ "Mod4" }, "Down",            function () go_screen_by_direction("down") end),
+   awful.key({ "Mod4" }, "Right",           function () go_screen_by_direction("right") end),
+   awful.key({ "Shift", "Mod4" }, "Up",     function () go_screen_by_direction("up", "client") end),
+   awful.key({ "Shift", "Mod4" }, "Left",   function () go_screen_by_direction("left", "client") end),
+   awful.key({ "Shift", "Mod4" }, "Down",   function () go_screen_by_direction("down", "client") end),
+   awful.key({ "Shift", "Mod4" }, "Right",  function () go_screen_by_direction("right", "client") end),
+   awful.key({ "Control", "Mod4" }, "Up",   function () go_screen_by_direction("up", "tag") end),
+   awful.key({ "Control", "Mod4" }, "Left", function () go_screen_by_direction("left", "tag") end),
+   awful.key({ "Control", "Mod4" }, "Down", function () go_screen_by_direction("down", "tag") end),
+   awful.key({ "Control", "Mod4" }, "Right",function () go_screen_by_direction("right", "tag") end),
    awful.key({ }, "XF86AudioLowerVolume",   function () shared.action.audio_setup("volume-adjust", -5) end),
    awful.key({ }, "XF86AudioRaiseVolume",   function () shared.action.audio_setup("volume-adjust",  5) end),
    awful.key({ }, "XF86AudioMute",          function () shared.action.audio_setup("mute-toggle") end),
@@ -1166,8 +1177,19 @@ for i = 1, #shared.screen.tags do
     global_keys =
         table_join(
             {
-                awful.key({ "Mod4" }, tostring(i), function () taglist.switch_or_restore(awful.screen.focused().tags[i]) end),
-                awful.key({ "Mod4", "Control" }, tostring(i), function () awful.tag.viewtoggle(awful.screen.focused().tags[i]) end),
+                awful.key({ "Mod4" }, tostring(i), function ()
+                              taglist.switch_or_restore(awful.screen.focused().tags[i])
+                          end),
+                awful.key({ "Mod4", "Control" }, tostring(i), function ()
+                              local s = awful.screen.focused()
+                              if #s.selected_tags == 1 then
+                                  s.selected_tag:swap(s.tags[i])
+                              end
+                          end),
+                awful.key({ "Mod4", "Mod1" }, tostring(i), function ()
+                              local s = awful.screen.focused()
+                              awful.tag.viewtoggle(s.tags[i])
+                          end),
                 awful.key({ "Mod4", "Shift" }, tostring(i), function ()
                               local c = capi.client.focus
                               if c == nil then return end
