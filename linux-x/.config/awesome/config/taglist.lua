@@ -17,6 +17,10 @@ function module.switch_or_restore(tag)
     end
 end
 
+function module.swap_tags(a, b)
+    a:swap(b)
+end
+
 local my_tag_list_buttons = awful.util.table.join(
     awful.button({ }, 1, module.switch_or_restore),
     awful.button({ "Mod4" }, 1, awful.client.movetotag),
@@ -39,7 +43,7 @@ local gravity_index = shared.gravity_index
 local function taglist_update_function(widget, tag, index, objects)
     local text_widget = widget:get_children_by_id("my_text_role")[1]
     local background_widget = widget:get_children_by_id("background_role")[1]
-    text_widget.text = tag.name
+    text_widget.text = shared.screen.tags[tag.index]
     background_widget.context_transformation = {
         selected = tag.selected
     }
@@ -53,6 +57,7 @@ local taglist_template = {
     {
         {
             id = "my_text_role",
+            font = "DejaVu Sans Mono:style=Book 10",
             widget = wibox.widget.textbox,
         },
         halign = "center",

@@ -311,13 +311,16 @@ capi.client.connect_signal(
 -- This is needed since `tagged` may be called after some client properties were synced, which is too late.
 capi.client.connect_signal(
     "property::screen", function (client)
+        -- TODO multiple tags?
         local tag = client.screen.selected_tag
         if client_tagged_callback_tags[client] == nil then
             client_tagged_callback_tags[client] = {}
             -- print("trigger client tagged callback", client)
             gtimer.delayed_call(client_tagged_callback, client)
         end
-        client_tagged_callback_tags[client][tag] = true
+        if tag then
+            client_tagged_callback_tags[client][tag] = true
+        end
     end)
 
 local screen_last_refreshed_data = setmetatable({}, {__mode = "k"})

@@ -60,9 +60,15 @@ local function go_screen_by_direction(dir, with_object)
     elseif with_object == "tag" then
         local s = awful.screen.focused()
         if #s.selected_tags == 1 then
-            local t = awful.screen.focused().selected_tag
+            local t = s.selected_tag
             awful.screen.focus_bydirection(dir)
-            t:swap(awful.screen.focused().selected_tag)
+            local s2 = awful.screen.focused()
+            if s ~= s2 then
+                local t2 = s2.selected_tag or s2.tags[t.index]
+                taglist.swap_tags(t, t2)
+                t:view_only()
+                t2:view_only()
+            end
         end
     else
         awful.screen.focus_bydirection(dir)
@@ -1183,7 +1189,7 @@ for i = 1, #shared.screen.tags do
                 awful.key({ "Mod4", "Control" }, tostring(i), function ()
                               local s = awful.screen.focused()
                               if #s.selected_tags == 1 then
-                                  s.selected_tag:swap(s.tags[i])
+                                  taglist.swap_tags(s.selected_tag, s.tags[i])
                               end
                           end),
                 awful.key({ "Mod4", "Mod1" }, tostring(i), function ()
