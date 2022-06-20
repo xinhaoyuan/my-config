@@ -39,11 +39,11 @@ local icons = require("icons")
 local orgenda = require("orgenda")
 local tapdancer = require("tapdancer")
 local notix = require("notix")
-require("manage_ticket")
-
 notix.config.filter = function (notif)
     return notif.app_name ~= "pasystray"
 end
+require("manage_ticket")
+
 
 -- helper functions
 
@@ -172,11 +172,9 @@ alayout.layouts = {
 -- Define the tag list upfront for keybindings
 
 local root_buttons = awful.util.table.join(
-    awful.button({ }, 3, nil, function () capi.awesome.emit_signal("show_main_waffle", {anchor = "mouse"}) end),
-    capi.root.buttons()
+    awful.button({ }, 3, nil, function () capi.awesome.emit_signal("show_main_waffle", {anchor = "mouse"}) end)
 )
-
-capi.root.buttons(root_buttons)
+awful.mouse.append_global_mousebinding(root_buttons)
 
 local fortune_widget = wibox.widget {
     {
@@ -1370,5 +1368,21 @@ function shared.screen.silhouette(filename)
         surf:finish()
     end
 end
+
+local launcher
+awful.keyboard.append_global_keybindings{
+    awful.key({ "Mod4", "Shift" }, "r", function ()
+                  if launcher == nil then
+                      launcher = require("bling.widget.app_launcher"){
+                          prompt_icon = "🚀",
+                          app_width = dpi(80),
+                          app_height = dpi(80),
+                          apps_per_column = 3,
+                          apps_per_row = 3,
+                      }
+                  end
+                  launcher:show()
+              end),
+}
 
 return nil

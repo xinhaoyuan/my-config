@@ -2,7 +2,6 @@ local capi = { mouse = mouse, client = client }
 local theme_assets = require("beautiful.theme_assets")
 local awful = require("awful")
 local wibox = require("wibox")
-local naughty = require("naughty")
 local beautiful = require("beautiful")
 local xresources = require("beautiful.xresources")
 local gfs = require("gears.filesystem")
