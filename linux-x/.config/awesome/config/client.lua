@@ -1005,6 +1005,13 @@ require("awful.rules").rules = {
         },
     },
     {
+        rule = { class = "Awexygen", type = "dialog" },
+        properties = {
+            borderless = true,
+            skip_taskbar = true,
+        },
+    },
+    {
         rule = { class = "Steam" },
         properties = {
             borderless = true,
