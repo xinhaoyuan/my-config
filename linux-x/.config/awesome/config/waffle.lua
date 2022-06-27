@@ -973,8 +973,9 @@ local waffle_root_action_list_widget = decorate_panel {
             indicator = em("p"),
             key = "p",
             action = function (alt)
-                waffle:hide()
-                cwidget.audio_sink_widget:execute(alt)
+                if cwidget.audio_sink_widget:execute(alt) then
+                    waffle:hide()
+                end
             end,
         },
         button {
@@ -992,8 +993,9 @@ local waffle_root_action_list_widget = decorate_panel {
             indicator = em("i"),
             key = "i",
             action = function (alt)
-                waffle:hide()
-                cwidget.audio_source_widget:execute(alt)
+                if cwidget.audio_source_widget:execute(alt) then
+                    waffle:hide()
+                end
             end,
         },
         button {

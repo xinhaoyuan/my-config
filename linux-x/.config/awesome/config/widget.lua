@@ -567,7 +567,7 @@ do
         call_now = true,
         autostart = true,
         callback = function ()
-            awful.spawn.easy_async_with_shell("cat /proc/diskstats", on_output)
+            awful.spawn.easy_async({"cat", "/proc/diskstats"}, on_output)
         end,
     }
 end
@@ -584,9 +584,10 @@ do
     end
 
     local GET_VOLUME_CMD = [[pacmd list-sinks | awk -- '/^\s*\* index/{f=1} /^\s*index/{f=0} f==1&&match($0, /device.description = "([^"]*)"$/, m){print "name="m[1]} f==1&&match($0, /^\s*volume:.*\/\s*([0-9]*)%/, m){print "volume="m[1]} f==1&&match($0,/^\s*muted:\s*(.*)$/,m){print "muted="m[1]}']]
-    local INC_VOLUME_CMD = 'pactl set-sink-volume @DEFAULT_SINK@ +5%'
-    local DEC_VOLUME_CMD = 'pactl set-sink-volume @DEFAULT_SINK@ -5%'
-    local TOG_VOLUME_CMD = 'pactl set-sink-mute @DEFAULT_SINK@ toggle'
+    local SET_VOLUME_CMD = "pactl set-sink-volume @DEFAULT_SINK@"
+    local INC_VOLUME_CMD = SET_VOLUME_CMD.." +5%"
+    local DEC_VOLUME_CMD = SET_VOLUME_CMD.." -5%"
+    local TOG_VOLUME_CMD = "pactl set-sink-mute @DEFAULT_SINK@ toggle"
 
     audio_sink_name_widget = wibox.widget{
         ellipsize = "start",
@@ -611,7 +612,11 @@ do
         for k, v in string.gmatch(stdout, "([^\n\r]*)=([^\n\r]*)") do
             data[k] = v
         end
-        audio_sink_name_widget.text = data.name
+        if data.muted == "yes" then
+            audio_sink_name_widget.text = data.name.." [MUTED]"
+        else
+            audio_sink_name_widget.text = data.name
+        end
         audio_sink_bar_widget.value = tonumber(data.volume) / 100
     end
 
@@ -678,18 +683,29 @@ do
    }
 
    audio_sink_widget:connect_signal(
-       "button::press", function (_w, _x, _y, b)
-           if b == 4 then
-               spawn_and_update_audio_sink(INC_VOLUME_CMD)
-           elseif b == 5 then
-               spawn_and_update_audio_sink(DEC_VOLUME_CMD)
+       "button::press", function (_widget, x, y, b, _mods, info)
+           if b == 2 then
+               awful.spawn.easy_async_with_shell(
+                   TOG_VOLUME_CMD..">/dev/null&&" .. GET_VOLUME_CMD,
+                   function (stdout, stderr, exitreason, exitcode)
+                       update_graphic(stdout, stderr, exitreason, exitcode)
+                   end)
+           elseif b == 3 then
+               local value = math.floor(x / info.width * 100 + 0.5)
+               awful.spawn.easy_async_with_shell(
+                   SET_VOLUME_CMD.." "..tostring(value).."% >/dev/null&&" .. GET_VOLUME_CMD,
+                   function (stdout, stderr, exitreason, exitcode)
+                       update_graphic(stdout, stderr, exitreason, exitcode)
+                   end)
            end
        end)
    function audio_sink_widget:execute(alt)
        if alt then
-           awful.spawn({"pavucontrol"})
+           -- awful.spawn({"pavucontrol"})
+           return false
        else
            audio_sink_choose_default()
+           return true
        end
    end
 end
@@ -705,9 +721,10 @@ do
     end
 
     local GET_VOLUME_CMD = [[pacmd list-sources | awk -- '/^\s*\* index/{f=1} /^\s*index/{f=0} f==1&&match($0, /device.description = "([^"]*)"$/, m){print "name="m[1]} f==1&&match($0, /^\s*volume:.*\/\s*([0-9]*)%/, m){print "volume="m[1]} f==1&&match($0,/^\s*muted:\s*(.*)$/,m){print "muted="m[1]}']]
-    local INC_VOLUME_CMD = 'pactl set-source-volume @DEFAULT_SOURCE@ +5%'
-    local DEC_VOLUME_CMD = 'pactl set-source-volume @DEFAULT_SOURCE@ -5%'
-    local TOG_VOLUME_CMD = 'pactl set-source-mute @DEFAULT_SOURCE@ toggle'
+    local SET_VOLUME_CMD = "pactl set-source-volume @DEFAULT_SOURCE@"
+    local INC_VOLUME_CMD = SET_VOLUME_CMD.." +5%"
+    local DEC_VOLUME_CMD = SET_VOLUME_CMD.." -5%"
+    local TOG_VOLUME_CMD = "pactl set-source-mute @DEFAULT_SOURCE@ toggle"
 
     audio_source_name_widget = wibox.widget{
         ellipsize = "start",
@@ -732,7 +749,11 @@ do
         for k, v in string.gmatch(stdout, "([^\n\r]*)=([^\n\r]*)") do
             data[k] = v
         end
-        audio_source_name_widget.text = data.name
+        if data.muted == "yes" then
+            audio_source_name_widget.text = data.name.." [MUTED]"
+        else
+            audio_source_name_widget.text = data.name
+        end
         audio_source_bar_widget.value = tonumber(data.volume) / 100
     end
 
@@ -799,18 +820,29 @@ do
    }
 
    audio_source_widget:connect_signal(
-       "button::press", function (_w, _x, _y, b)
-           if b == 4 then
-               spawn_and_update_audio_source(INC_VOLUME_CMD)
-           elseif b == 5 then
-               spawn_and_update_audio_source(DEC_VOLUME_CMD)
+       "button::press", function (_widget, x, y, b, _mods, info)
+           if b == 2 then
+               awful.spawn.easy_async_with_shell(
+                   TOG_VOLUME_CMD..">/dev/null&&" .. GET_VOLUME_CMD,
+                   function (stdout, stderr, exitreason, exitcode)
+                       update_graphic(stdout, stderr, exitreason, exitcode)
+                   end)
+           elseif b == 3 then
+               local value = math.floor(x / info.width * 100 + 0.5)
+               awful.spawn.easy_async_with_shell(
+                   SET_VOLUME_CMD.." "..tostring(value).."% >/dev/null&&" .. GET_VOLUME_CMD,
+                   function (stdout, stderr, exitreason, exitcode)
+                       update_graphic(stdout, stderr, exitreason, exitcode)
+                   end)
            end
        end)
    function audio_source_widget:execute(alt)
        if alt then
-           awful.spawn({"pavucontrol"})
+           -- awful.spawn({"pavucontrol"})
+           return false
        else
            audio_source_choose_default()
+           return true
        end
    end
 end
