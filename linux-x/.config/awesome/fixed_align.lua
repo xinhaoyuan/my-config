@@ -263,23 +263,45 @@ end
 function align:fit(context, orig_width, orig_height)
     local used_in_dir = 0
     local used_in_other = 0
+    local is_dir_y = self._private.dir == "y"
+    local layout = self:layout(context, orig_width, orig_height)
+    for _, l in ipairs(layout) do
+        local w, h = base.fit_widget(self, context, l._widget, l._width, l._height)
 
-    for _, v in pairs{self._private.first, self._private.second, self._private.third} do
-        local w, h = base.fit_widget(self, context, v, orig_width, orig_height)
-
-        local max = self._private.dir == "y" and w or h
+        local max = is_dir_y and w or h
         if max > used_in_other then
             used_in_other = max
         end
 
-        used_in_dir = used_in_dir + (self._private.dir == "y" and h or w)
+        used_in_dir = used_in_dir + (is_dir_y and h or w)
     end
 
-    if self._private.dir == "y" then
+    if is_dir_y then
         return used_in_other, used_in_dir
     end
     return used_in_dir, used_in_other
 end
+---- Bad version
+-- function align:fit(context, orig_width, orig_height)
+--     local used_in_dir = 0
+--     local used_in_other = 0
+
+--     for _, v in pairs{self._private.first, self._private.second, self._private.third} do
+--         local w, h = base.fit_widget(self, context, v, orig_width, orig_height)
+
+--         local max = self._private.dir == "y" and w or h
+--         if max > used_in_other then
+--             used_in_other = max
+--         end
+
+--         used_in_dir = used_in_dir + (self._private.dir == "y" and h or w)
+--     end
+
+--     if self._private.dir == "y" then
+--         return used_in_other, used_in_dir
+--     end
+--     return used_in_dir, used_in_other
+-- end
 
 --- Set the expand mode which determines how sub widgets expand to take up
 -- unused space.
