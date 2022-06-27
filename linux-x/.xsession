@@ -1,8 +1,3 @@
-. $HOME/.path_profile
-. $HOME/.xprofile
-
-python3 -m pywal -R
-
 touch $HOME/.restore-awesome-if-this-file-exists
 while [ -e $HOME/.restore-awesome-if-this-file-exists ]; do
     awesome

@@ -1,7 +1,10 @@
+. "$HOME/.path_profile"
+. "$HOME/.xprofile"
+
 export $(dbus-launch)
 export QT_QPA_PLATFORMTHEME=qt5ct
 
-$HOME/bin/set_dpi.py --fallback-dpi 144 --min-dpi 96 --max-dpi 192
+set_dpi.py --fallback-dpi 144 --min-dpi 96 --max-dpi 144
 
 export HIDPI_SCALE="$(xrdb -query | grep 'hidpi.scaling:' | sed 's/hidpi.scaling:\s\+//g')"
 
@@ -24,3 +27,5 @@ if [ -z "$HIDPI" ]; then
 else
     xrdb -merge $HOME/.Xresources.d/hidpi
 fi
+
+python3 -m pywal -R

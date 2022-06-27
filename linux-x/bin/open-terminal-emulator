@@ -16,7 +16,8 @@ termtitle="T-$desktop"
 unset TMUX
 
 xdotool search --name "$termtitle" windowactivate windowraise windowfocus || \
-    exec urxvt -title "$termtitle" -name "$classname" -e \
+#    exec urxvt -title "$termtitle" -name "$classname" -e \
+    exec st -t "$termtitle" -c "$classname" -e \
     tmux new-session -AD -s "$sessionname"
 # xdotool search --name "$termtitle" windowraise windowfocus || \
 #     exec gnome-terminal --title "$termtitle" --name "$classname" -e \
