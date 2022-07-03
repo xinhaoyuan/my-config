@@ -35,6 +35,8 @@ local fts = require("hotpot").focus_timestamp
 local dpi = require("beautiful.xresources").apply_dpi
 local ocontainer = require("onion.container")
 local opicker = require("onion.picker")
+local source = require("awemni.source")
+local lunchbox = require("awemni.lunchbox")
 
 local waffle_width = beautiful.waffle_panel_width or dpi(240)
 local calendar_waffle_width = waffle_width
@@ -258,7 +260,7 @@ local function button(args)
                 valign = "center",
                 widget = wibox.widget.textbox,
             },
-            fg_picker = opicker.beautiful{"special_", opicker.highlighted_switcher},
+            fg_picker = opicker.beautiful{opicker.branch{"inactive_hotkey", "minor_", "special_"}, opicker.highlighted_switcher},
             widget = ocontainer,
         },
         expand = "inside",
@@ -710,7 +712,9 @@ do
     end
 end
 
-local waffle_root_status_widget = decorate_panel {
+local waffle_root_view
+local waffle_dashboard_view
+local waffle_dashboard_status_widget = decorate_panel {
     widget = {
         {
             button {
@@ -815,7 +819,7 @@ end
 local grid_height = dpi(48)
 local grid_width = dpi(70)
 local grid_button_layout = fixed_align.vertical
-local waffle_root_action_grid_widget = decorate_panel {
+local waffle_dashboard_action_grid_widget = decorate_panel {
     top_sep = true,
     widget = {
         {
@@ -827,12 +831,10 @@ local waffle_root_action_grid_widget = decorate_panel {
                 indicator = em("r"),
                 key = "r",
                 action = function (alt)
-                    if alt then
-                        shared.action.app_finder()
-                    else
-                        shared.action.launcher()
+                    if waffle:is_in_view(waffle_root_view) then
+                        waffle_root_view.set_source_mode(nil)
+                        waffle_dashboard_view.widget.visible = false
                     end
-                    waffle:hide()
                 end,
             },
             button{
@@ -955,7 +957,7 @@ local waffle_root_action_grid_widget = decorate_panel {
     },
 }
 
-local waffle_root_action_list_widget = decorate_panel {
+local waffle_dashboard_action_list_widget = decorate_panel {
     top_sep = true,
     widget = {
         button {
@@ -973,8 +975,12 @@ local waffle_root_action_list_widget = decorate_panel {
             indicator = em("p"),
             key = "p",
             action = function (alt)
-                if cwidget.audio_sink_widget:execute(alt) then
-                    waffle:hide()
+                -- if cwidget.audio_sink_widget:execute(alt) then
+                --     waffle:hide()
+                -- end
+                if not alt and waffle:is_in_view(waffle_root_view) then
+                    waffle_root_view.set_source_mode("audio_sink")
+                    waffle_dashboard_view.widget.visible = false
                 end
             end,
         },
@@ -993,8 +999,12 @@ local waffle_root_action_list_widget = decorate_panel {
             indicator = em("i"),
             key = "i",
             action = function (alt)
-                if cwidget.audio_source_widget:execute(alt) then
-                    waffle:hide()
+                -- if cwidget.audio_source_widget:execute(alt) then
+                --     waffle:hide()
+                -- end
+                if not alt and waffle:is_in_view(waffle_root_view) then
+                    waffle_root_view.set_source_mode("audio_source")
+                    waffle_dashboard_view.widget.visible = false
                 end
             end,
         },
@@ -1021,13 +1031,14 @@ local waffle_root_action_list_widget = decorate_panel {
     },
 }
 
-local waffle_root_view = view {
-    root = decorate_waffle {
-        waffle_root_status_widget,
-        waffle_root_action_grid_widget,
-        waffle_root_action_list_widget,
+waffle_dashboard_view = view {
+    root = wibox.widget{
+        waffle_dashboard_status_widget,
+        waffle_dashboard_action_grid_widget,
+        waffle_dashboard_action_list_widget,
         layout = wibox.layout.fixed.vertical,
     },
+    no_margin = true,
     key_filter = function (_self, mod, key, event)
         if event ~= "press" then return true end
         if key:find("^XF86Launch.*") then
@@ -1042,6 +1053,192 @@ local waffle_root_view = view {
         end
         return true
     end,
+}
+
+local gio = require("lgi").Gio
+
+function get_apps_widget_source()
+    local apps = {}
+    for _, ai in ipairs(gio.AppInfo.get_all()) do
+        if ai:should_show() then
+            apps[#apps + 1] = {
+                ai = ai,
+                name = ai:get_display_name(),
+            }
+        end
+    end
+    table.sort(apps, function (a, b) return a.name < b.name end)
+    local apps_source = source.filter{
+        upstream = source.from_array(apps),
+        filter_cb = function (f, e)
+            if f == nil then return true end
+            f = f:lower()
+            return e.name:lower():find(f) ~= nil
+        end,
+        post_filter_cb = function (e)
+            local w = wibox.widget{
+                {
+                    {
+                        {
+                            text = e.name,
+                            widget = wibox.widget.textbox,
+                        },
+                        {
+                            id = "desc",
+                            {
+                                {
+                                    font = font_info,
+                                    text = e.ai:get_description(),
+                                    widget = wibox.widget.textbox,
+                                },
+                                height = 60,
+                                strategy = "max",
+                                widget = wibox.container.constraint,
+                            },
+                            top = dpi(2),
+                            left = dpi(2),
+                            right = dpi(2),
+                            draw_empty = false,
+                            widget = wibox.container.margin,
+                        },
+                        layout = wibox.layout.fixed.vertical,
+                    },
+                    margins = dpi(2),
+                    widget = wibox.container.margin,
+                },
+                fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
+                bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+                widget = ocontainer,
+            }
+            function w:execute()
+                awful.spawn(e.ai:get_executable())
+                waffle:hide()
+            end
+            function w:set_focused(v)
+                self.context_transformation = {highlighted = v}
+            end
+            return w
+        end,
+    }
+    return apps_source
+end
+
+function get_audio_sink_switch_source()
+    local ret = source.filter{
+        upstream = source.dummy,
+        filter_cb = function (f, e)
+            if f == nil then return true end
+            f = f:lower()
+            return e.name:lower():find(f) ~= nil
+        end,
+        post_filter_cb = function (e)
+            local w = wibox.widget{
+                {
+                    {
+                        text = e.name,
+                        widget = wibox.widget.textbox,
+                    },
+                    margins = dpi(2),
+                    widget = wibox.container.margin,
+                },
+                fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
+                bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+                widget = ocontainer,
+            }
+            function w:execute()
+                awful.spawn({"pactl", "set-default-sink", tostring(e.id)})
+                waffle:hide()
+            end
+            function w:set_focused(v)
+                self.context_transformation = {highlighted = v}
+            end
+            return w
+        end,
+    }
+    ret:reset()
+    awful.spawn.easy_async_with_shell(
+        [[pacmd list-sinks | awk 'match($0,/index:\s*([0-9]*)/,m){id=m[1]} match($0,/device.description = "([^"]*)"/,m){print id"="m[1]}']],
+        function (stdout, _stderr, _exitreason, _exitcode)
+            for id, name in string.gmatch(stdout, "([^\n\r]*)=([^\n\r]*)") do
+                ret:on_upstream_next_data{id = id, name = name}
+            end
+            ret:on_upstream_next_data(nil)
+        end
+    )
+    return ret
+end
+
+function get_audio_source_switch_source()
+    local ret = source.filter{
+        upstream = source.dummy,
+        filter_cb = function (f, e)
+            if f == nil then return true end
+            f = f:lower()
+            return e.name:lower():find(f) ~= nil
+        end,
+        post_filter_cb = function (e)
+            local w = wibox.widget{
+                {
+                    {
+                        text = e.name,
+                        widget = wibox.widget.textbox,
+                    },
+                    margins = dpi(2),
+                    widget = wibox.container.margin,
+                },
+                fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
+                bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+                widget = ocontainer,
+            }
+            function w:execute()
+                awful.spawn({"pactl", "set-default-source", tostring(e.id)})
+                waffle:hide()
+            end
+            function w:set_focused(v)
+                self.context_transformation = {highlighted = v}
+            end
+            return w
+        end,
+    }
+    ret:reset()
+    awful.spawn.easy_async_with_shell(
+        [[pacmd list-sources | awk 'match($0,/index:\s*([0-9]*)/,m){id=m[1]} match($0,/device.description = "([^"]*)"/,m){print id"="m[1]}']],
+        function (stdout, _stderr, _exitreason, _exitcode)
+            for id, name in string.gmatch(stdout, "([^\n\r]*)=([^\n\r]*)") do
+                ret:on_upstream_next_data{id = id, name = name}
+            end
+            ret:on_upstream_next_data(nil)
+        end
+    )
+    return ret
+end
+
+function get_source(mode)
+    if mode == "audio_sink" then
+        return get_audio_sink_switch_source()
+    elseif mode == "audio_source" then
+        return get_audio_source_switch_source()
+    end
+    return get_apps_widget_source()
+end
+
+waffle_root_view = lunchbox{
+    container = wibox.widget{
+        beautiful.apply_border_to_widget_template{
+            widget = {
+                id = "lunchbox_container",
+                widget = wibox.container.background,
+            },
+            top = true,
+            bottom = true,
+            left = true,
+            right = true,
+        },
+        margins = beautiful.useless_gap,
+        widget = wibox.container.margin,
+    },
+    dashboard = waffle_dashboard_view,
+    source_generator = get_source,
 }
 
 waffle:set_root_view(waffle_root_view)
