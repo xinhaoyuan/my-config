@@ -6,7 +6,8 @@ local capi = {
    root = root,
 }
 
-local shared = require((...):match("(.-)[^%.]+$") .. "shared")
+local prefix = (...):match("(.-)[^%.]+$")
+local shared = require(prefix .. "shared")
 shared.screen = {}
 
 local awful  = require("awful")

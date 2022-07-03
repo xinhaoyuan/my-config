@@ -1,7 +1,7 @@
 -- Dashboard/launcher hybrid.
-
-local lister = require("awemni.lister")
-local scrlist = require("awemni.scrlist")
+local prefix = (...):match("(.-)[^%.]+$")
+local lister = require(prefix.."lister")
+local scrlist = require(prefix.."scrlist")
 local wibox = require("wibox")
 local gio = require("lgi").Gio
 local beautiful = require("beautiful")
