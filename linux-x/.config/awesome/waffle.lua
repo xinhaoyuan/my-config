@@ -147,14 +147,14 @@ function waffle:set_gravity(gravity)
     end
 end
 
-function waffle:set_view(view, call_open)
+function waffle:set_view(view, is_new_view)
     if self.view_ and self.view_.on_close then
         self.view_:on_close()
     end
     self.view_ = view
     if view then
-        if call_open and view.on_open then
-            view:on_open(self.wibox_.screen)
+        if view.on_open then
+            view:on_open(self.wibox_.screen, is_new_view)
         end
         self.widget_container.widget = view.widget
     end
@@ -249,7 +249,7 @@ function waffle:disconnect_button_signals()
     capi.drawable.disconnect_signal("button::press", on_drawable_button_press)
 end
 
--- args.mode in {"push", "set", "set_top"}
+-- args.mode in {"push", "set", "pop"}
 function waffle:show(view, args)
     args = args or {}
     local mode = args.mode or "set"
@@ -305,7 +305,7 @@ function waffle:show(view, args)
         table.insert(self.stack_, self.view_)
     end
 
-    self:set_view(view, mode ~= "set_top")
+    self:set_view(view, mode ~= "pop")
 
     if mode == "set" then
         self:clear_stack()
@@ -342,7 +342,7 @@ function waffle:show(view, args)
                 if #key == 1 then
                     key = key:lower()
                 end
-                if self.view_.key_handler and self.view_.key_handler(mod, key, event) then
+                if self.view_.key_handler and self.view_:key_handler(mod, key, event) then
                     -- pass
                 elseif key == "Escape" then
                     if event == "release" then
@@ -367,7 +367,7 @@ function waffle:go_back()
     if headpos >= 1 then
         local last = self.stack_[headpos]
         table.remove(self.stack_, headpos)
-        self:show(last, { mode = "set_top" })
+        self:show(last, { mode = "pop" })
     else
         self:hide()
     end

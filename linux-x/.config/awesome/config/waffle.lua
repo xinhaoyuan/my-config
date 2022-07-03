@@ -81,19 +81,19 @@ local function view(args)
         end
     end
 
-    view.widget = wibox.widget {
+    view.widget = args.no_margin and root or wibox.widget {
         root,
         margins = beautiful.useless_gap,
         widget = wibox.container.margin,
     }
-    view.key_handler = args.key_handler or function (mod, key, event)
-        if args.key_filter and not args.key_filter(mod, key, event) then
+    view.key_handler = args.key_handler or function (self, mods, key, event)
+        if args.key_filter and not args.key_filter(self, mods, key, event) then
             return
         elseif view.keys[key] then
-            view.keys[key](mod, key, event)
+            view.keys[key](mods, key, event)
             return true
         elseif args.default_key_handler then
-            return args.default_key_handler(mod, key, event)
+            return args.default_key_handler(self, mods, key, event)
         else
             return false
         end
@@ -1028,7 +1028,7 @@ local waffle_root_view = view {
         waffle_root_action_list_widget,
         layout = wibox.layout.fixed.vertical,
     },
-    key_filter = function (mod, key, event)
+    key_filter = function (_self, mod, key, event)
         if event ~= "press" then return true end
         if key:find("^XF86Launch.*") then
             waffle:hide()
@@ -1476,7 +1476,7 @@ waffle_calendar_view = view {
         strategy = "max",
         widget = wibox.container.constraint,
     },
-    default_key_handler = function (mod, key, event)
+    default_key_handler = function (_self, mod, key, event)
         if event == "press" then return end
         if key == "n" then
             notix.remove_unpinned()
@@ -1943,13 +1943,13 @@ local client_waffle = view {
         -- end
         shared.waffle_selected_client = nil
     end,
-    key_filter = function (mod, key, event)
+    key_filter = function (_self, mod, key, event)
         for i = 1, #mod do
             if mod[i] == "Control" then return false end
         end
         return true
     end,
-    default_key_handler = function (mod, key, event)
+    default_key_handler = function (_self, mod, key, event)
         if event ~= "press" then return end
         if key == "Return" then
             client_waffle_attached = true
