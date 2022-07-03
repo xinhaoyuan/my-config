@@ -7,11 +7,15 @@ for p in /sys/class/hwmon/*; do
             label=$(cat "$n")
             case "$label" in
                  Package*)
-                     echo ${n%_label}_input
+                     echo "${n%_label}_input"
                      break
                      ;;
             esac
         done
+        break
+    elif [ "$name" = "k10temp" ]; then
+        # It is a relative reading with arbitary scale, but at least that is some number.
+        echo "$p/temp1_input"
         break
     fi
 done
