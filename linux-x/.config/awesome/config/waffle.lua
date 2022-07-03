@@ -43,9 +43,8 @@ local calendar_waffle_width = waffle_width
 local button_height = beautiful.waffle_item_height or dpi(20)
 local button_padding = beautiful.sep_small_size or dpi(4)
 local panel_padding = beautiful.sep_big_size or dpi(10)
-local font_normal = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_normal)
-local font_info = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small)
-local font_info_mono = beautiful.fontname_mono.." "..tostring(beautiful.fontsize_small)
+local font_normal = beautiful.font
+local font_info = beautiful.font_minor
 local update_interval_s = 2
 
 local function em(t)
@@ -423,7 +422,7 @@ do
         align = "center",
         forced_width = battery_widget_width,
         forced_height = button_height - dpi(2),
-        font = font_info_mono,
+        font = font_info,
         widget = wibox.widget.textbox
     }
 
@@ -520,7 +519,7 @@ do
     local mpd_status_widget = wibox.widget {
         text = "",
         forced_height = button_height,
-        font = beautiful.fontname_normal.." 14",
+        font = font_normal,
         -- outline_size = dpi(2),
         -- widget = outlined_textbox
         widget = wibox.widget.textbox
@@ -536,7 +535,7 @@ do
     local mpd_meta_widget = wibox.widget {
         text = "",
         ellipsize = "end",
-        font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
+        font = font_info,
         forced_height = button_height,
         widget = wibox.widget.textbox
     }
@@ -817,7 +816,7 @@ local function icon_label(icon)
 end
 
 local grid_height = dpi(48)
-local grid_width = dpi(70)
+local grid_width = waffle_width / 3
 local grid_button_layout = fixed_align.vertical
 local waffle_dashboard_action_grid_widget = decorate_panel {
     top_sep = true,
@@ -1292,7 +1291,7 @@ local cal_widget = wibox.widget {
             else
                 sign = date.year < today.year and -1 or 1
             end
-            widget.font = beautiful.fontname_normal..' 12'
+            widget.font = beautiful.font_name_normal..' 12'
             widget = wibox.widget{
                 sign > 0 and {
                     text = " <<",

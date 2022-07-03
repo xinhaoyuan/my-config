@@ -13,7 +13,7 @@ local gshape = require("gears.shape")
 local update_interval_s = 1
 -- TODO dedpu with waffle.lua
 local button_padding = beautiful.sep_small_size or dpi(4)
-local font_info_mono = beautiful.fontname_mono.." "..tostring(beautiful.fontsize_small)
+local font_info = beautiful.font_minor
 
 local units = {" ", "k", "m", "g", "t", "p"}
 local function format_size(s, fill)
@@ -82,24 +82,31 @@ do
       widget = wibox.container.constraint,
    }
 
-   local cpu_total_prev = 0
-   local cpu_idle_prev = 0
+   local cpu_total_prev = {}
+   local cpu_idle_prev = {}
    local function on_output (stdout)
-       local cpu_usage, cpu_temp, cpu_freq_list
+       local cpu_overall_usage, cpu_max_usage, cpu_temp, cpu_freq_list
        cpu_freq_list = {}
 
        for line in stdout:gmatch("[^\r\n]*") do
            if line:find("^usage:") then
-               local user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice =
-                   line:match('(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)')
+               local cpu_id, user, nice, system, idle, iowait, irq, softirq, steal, guest, guest_nice =
+                   line:match('(cpu%d*)%s+(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)%s(%d+)')
                local total = user + nice + system + idle + iowait + irq + softirq + steal
-               local diff_idle = idle - cpu_idle_prev
-               local diff_total = total - cpu_total_prev
+               local diff_idle = idle - (cpu_idle_prev[cpu_id] or 0)
+               local diff_total = total - (cpu_total_prev[cpu_id] or 0)
 
-               cpu_usage = (1000 * (diff_total - diff_idle) / diff_total + 5) / 10
+               if cpu_id == "cpu" then
+                   cpu_overall_usage = (1000 * (diff_total - diff_idle) / diff_total + 5) / 10
+               else
+                   local cpu_usage = (1000 * (diff_total - diff_idle) / diff_total + 5) / 10
+                   if cpu_max_usage == nil or cpu_max_usage < cpu_usage then
+                       cpu_max_usage = cpu_usage
+                   end
+               end
 
-               cpu_total_prev = total
-               cpu_idle_prev = idle
+               cpu_total_prev[cpu_id] = total
+               cpu_idle_prev[cpu_id] = idle
            elseif line:find("^temp:") then
                local temp_str = line:match("%d+")
                cpu_temp = math.floor(tonumber(temp_str) / 1000 + 0.5)
@@ -121,9 +128,13 @@ do
            end
        end
 
-       local markup = "<span font_desc='"..font_info_mono.."'>"..string.format("%3d", math.floor(cpu_usage)).. "% "..string.format("%3d", math.floor(cpu_temp)).."℃ "..format_size(cpu_freq_min).."-"..format_size(cpu_freq_max).."Hz</span>"
+       local markup = "<span font_desc='"..font_info.."'>"..
+           string.format("%3d", math.floor(cpu_overall_usage)).. "%A "..
+           string.format("%3d", math.floor(cpu_max_usage)).."%S "..
+           string.format("%3d", math.floor(cpu_temp)).."℃ "..format_size(cpu_freq_min).."-"..format_size(cpu_freq_max)..
+           "Hz</span>"
        cpu_text_widget:set_markup(markup)
-       cpu_graph_widget:add_value(cpu_usage)
+       cpu_graph_widget:add_value(cpu_overall_usage)
    end
 
    local cpu_temp_cmd = ""
@@ -144,7 +155,7 @@ do
        autostart = true,
        callback = function ()
            awful.spawn.easy_async_with_shell(string.format([[
-echo -n "usage:"; grep -e "^cpu " /proc/stat
+grep -e "^cpu" /proc/stat | sed -e 's/^/usage:/g'
 grep -e "cpu MHz" /proc/cpuinfo | sed -e 's/^/freq:/g'
 %s
 ]], cpu_temp_cmd), on_output)
@@ -213,7 +224,7 @@ do
        local used = total - mem["MemFree"] - cached_or_buffered
        local usage = math.floor(used / total * 100 + 0.5)
 
-       local markup = "<span font_desc='" .. font_info_mono .. "'>"..format_size(used * 1024, false).."B "..format_size(cached_or_buffered * 1024, false).."B "..format_duration(uptime).."</span>"
+       local markup = "<span font_desc='" .. font_info .. "'>"..format_size(used * 1024, false).."B "..format_size(cached_or_buffered * 1024, false).."B "..format_duration(uptime).."</span>"
        ram_text_widget:set_markup(markup)
        ram_graph_widget:add_value(usage)
    end
@@ -372,7 +383,7 @@ do
 
         if prev_recv ~= nil then
             local rx = (recv - prev_recv) / update_interval_s
-            local markup = "<span font_desc='" .. font_info_mono .. "'>R " .. format_size(rx) .. "B/s</span>"
+            local markup = "<span font_desc='" .. font_info .. "'>R " .. format_size(rx) .. "B/s</span>"
             rx_text_widget:set_markup(markup)
             netgraph_rx_widget.max_value = 256 * 1024
             netgraph_rx_widget:add_value(rx)
@@ -380,7 +391,7 @@ do
         prev_recv = recv
         if prev_send ~= nil then
             local tx = (send - prev_send) / update_interval_s
-            local markup = "<span font_desc='" .. font_info_mono .. "'>T " .. format_size(tx) .. "B/s</span>"
+            local markup = "<span font_desc='" .. font_info .. "'>T " .. format_size(tx) .. "B/s</span>"
             tx_text_widget:set_markup(markup)
             netgraph_tx_widget.max_value = 256 * 1024
             netgraph_tx_widget:add_value(tx)
@@ -546,7 +557,7 @@ do
 
         if prev_rd ~= nil then
             local rd = (rd - prev_rd) / update_interval_s
-            local markup = "<span font_desc='" .. font_info_mono .. "'>R " .. format_size(rd) .. "B/s</span>"
+            local markup = "<span font_desc='" .. font_info .. "'>R " .. format_size(rd) .. "B/s</span>"
             rd_text_widget:set_markup(markup)
             diskgraph_rd_widget.max_value = 1024 * 1024
             diskgraph_rd_widget:add_value(rd)
@@ -554,7 +565,7 @@ do
         prev_rd = rd
         if prev_wr ~= nil then
             local wr = (wr - prev_wr) / update_interval_s
-            local markup = "<span font_desc='" .. font_info_mono .. "'>W " .. format_size(wr) .. "B/s</span>"
+            local markup = "<span font_desc='" .. font_info .. "'>W " .. format_size(wr) .. "B/s</span>"
             wr_text_widget:set_markup(markup)
             diskgraph_wr_widget.max_value = 1024 * 1024
             diskgraph_wr_widget:add_value(wr)

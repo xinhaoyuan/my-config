@@ -27,9 +27,9 @@ do
     local has_tabbed = false -- os.execute("command -v tabbed")
 
     if has_tabbed and term_prog == "st" then
-        term_cmd = {"tabbed", "-kc", "-F", beautiful.fontname_normal .. ":size=10", "-M", beautiful.fg_normal, "-m", beautiful.bg_normal, "-T", beautiful.fg_focus, "-t", beautiful.bg_focus, "-r", "2", "--", "st", "-w", "--"}
+        term_cmd = {"tabbed", "-kc", "-F", beautiful.font_name_normal..":size="..tostring(beautiful.font_size_normal), "-M", beautiful.fg_normal, "-m", beautiful.bg_normal, "-T", beautiful.fg_focus, "-t", beautiful.bg_focus, "-r", "2", "--", "st", "-w", "--"}
     elseif has_tabbed and term_prog == "urxvt" then
-        term_cmd = {"tabbed", "-kc", "-F", beautiful.fontname_normal .. ":size=10", "-M", beautiful.fg_normal, "-m", beautiful.bg_normal, "-T", beautiful.fg_focus, "-t", beautiful.bg_focus, "-r", "2", "--", "urxvt", "-embed", "--"}
+        term_cmd = {"tabbed", "-kc", "-F", beautiful.font_name_normal..":size="..tostring(beautiful.font_size_normal), "-M", beautiful.fg_normal, "-m", beautiful.bg_normal, "-T", beautiful.fg_focus, "-t", beautiful.bg_focus, "-r", "2", "--", "urxvt", "-embed", "--"}
     else
         term_cmd = {term_prog}
     end

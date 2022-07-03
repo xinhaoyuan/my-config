@@ -171,15 +171,17 @@ theme.notification_icon_size = dpi(48)
 
 -- custom property string
 -- Interesting fonts: Hack, Iosevka SS08 (or SS03), Lato, Quicksand, Lobster Two, Purisa, Dosis
-theme.fontname_normal = "Iosevka XY Sans UI"
+theme.font_name_normal = "Iosevka XY Sans UI"
 -- custom property string
-theme.fontname_mono = "Iosevka XY Sans UI"
+theme.font_name_mono = "Iosevka XY Sans UI"
 -- custom property number
-theme.fontsize_normal = 10
-theme.fontsize_small = 9
-theme.font = theme.fontname_normal.." "..tostring(theme.fontsize_normal)
+theme.font_size_normal = 10
+theme.font_size_small = 9
+theme.font = theme.font_name_normal.." "..tostring(theme.font_size_normal)
 -- custom property string font descriptor
-theme.font_mono = theme.fontname_mono.." "..tostring(theme.fontsize_normal)
+theme.font_minor = theme.font_name_mono.." "..tostring(theme.font_size_small)
+-- custom property string font descriptor
+theme.font_mono = theme.font_name_mono.." "..tostring(theme.font_size_normal)
 theme.useless_gap = dpi(4)
 -- custom property number
 theme.bar_rows = 2
@@ -204,7 +206,7 @@ theme.waffle_use_entire_screen = true
 -- custom property color
 theme.waffle_background = "#00000000"
 -- custom property number
-theme.waffle_panel_width = dpi(210)
+theme.waffle_panel_width = dpi(240)
 -- custom_property number
 theme.waffle_item_height = dpi(20)
 theme.orgenda_indent_width = dpi(25)
