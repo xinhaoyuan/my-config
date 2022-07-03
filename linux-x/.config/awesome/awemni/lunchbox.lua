@@ -225,10 +225,12 @@ function lunchbox:new(args)
                     return true
                 end
                 if key == " " then
-                    dashboard_container.context_transformation = {
-                        inactive_hotkey = false
-                    }
-                    pass_through_to_dashboard = true
+                    if event == "release" then
+                        pass_through_to_dashboard = not pass_through_to_dashboard
+                        dashboard_container.context_transformation = {
+                            inactive_hotkey = not pass_through_to_dashboard
+                        }
+                    end
                     return true
                 else
                     local pass = #key > 1 or pass_through_to_dashboard
