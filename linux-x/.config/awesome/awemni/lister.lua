@@ -209,10 +209,6 @@ function lister:new(args)
             end
             return
         end
-        if index == state.executing_index then
-            widget:execute()
-            return
-        end
         while #state.scrlist.children < index do
             local current_index = #state.scrlist.children + 1
             local container = wibox.widget{
@@ -239,10 +235,13 @@ function lister:new(args)
             table.insert(state.scrlist.children, container)
         end
         state.scrlist.children[index].child = widget
+        state.scrlist:emit_signal("property::children")
         if index == state.focused_index then
             widget.focused = true
         end
-        state.scrlist:emit_signal("property::children")
+        if index == state.executing_index then
+            return widget:execute()
+        end
     end
 
     function ret.container_on_draw(container)

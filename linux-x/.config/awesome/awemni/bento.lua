@@ -38,10 +38,10 @@ function lunchbox:new(args)
     local list_layout = wibox.widget{
         layout = scrlist.top,
     }
-    local bento_lister = lister{
-        scrlist = list_layout,
-        fetch_size = args.fetch_size,
-    }
+    local bento_lister = lister(
+        setmetatable(
+            {scrlist = list_layout},
+            {__index = args}))
 
     local function go_up()
         local f = bento_lister.focus

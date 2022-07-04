@@ -1616,10 +1616,13 @@ local orgenda_items_widget = orgenda.widget{
             widget = ocontainer,
         }
         function widget:set_focused(f)
+            self._private.focused = f
             self.context_transformation = {highlighted = f}
         end
         function widget:execute()
-            orgenda.toggle_done(self.item)
+            if self._private.focused then
+                orgenda.toggle_done(self.item)
+            end
         end
         widget:connect_signal(
             "button::release",
