@@ -36,7 +36,7 @@ local dpi = require("beautiful.xresources").apply_dpi
 local ocontainer = require("onion.container")
 local opicker = require("onion.picker")
 local source = require("awemni.source")
-local lunchbox = require("awemni.lunchbox")
+local bento = require("awemni.bento")
 
 local waffle_width = beautiful.waffle_panel_width or dpi(240)
 local calendar_waffle_width = waffle_width
@@ -712,6 +712,7 @@ do
 end
 
 local waffle_root_view
+local waffle_root_source_mode
 local waffle_dashboard_view
 local waffle_dashboard_status_widget = decorate_panel {
     widget = {
@@ -831,8 +832,9 @@ local waffle_dashboard_action_grid_widget = decorate_panel {
                 key = "r",
                 action = function (alt)
                     if waffle:is_in_view(waffle_root_view) then
-                        waffle_root_view.set_source_mode(nil)
-                        waffle_dashboard_view.widget.visible = false
+                        waffle_root_source_mode = nil
+                        waffle_root_view:reload_source()
+                        waffle_dashboard_view.active = false
                     end
                 end,
             },
@@ -978,8 +980,9 @@ local waffle_dashboard_action_list_widget = decorate_panel {
                 --     waffle:hide()
                 -- end
                 if not alt and waffle:is_in_view(waffle_root_view) then
-                    waffle_root_view.set_source_mode("audio_sink")
-                    waffle_dashboard_view.widget.visible = false
+                    waffle_root_source_mode = "audio_sink"
+                    waffle_root_view:reload_source()
+                    waffle_dashboard_view.active = false
                 end
             end,
         },
@@ -1002,8 +1005,9 @@ local waffle_dashboard_action_list_widget = decorate_panel {
                 --     waffle:hide()
                 -- end
                 if not alt and waffle:is_in_view(waffle_root_view) then
-                    waffle_root_view.set_source_mode("audio_source")
-                    waffle_dashboard_view.widget.visible = false
+                    waffle_root_source_mode = "audio_source"
+                    waffle_root_view:reload_source()
+                    waffle_dashboard_view.active = false
                 end
             end,
         },
@@ -1032,10 +1036,16 @@ local waffle_dashboard_action_list_widget = decorate_panel {
 
 waffle_dashboard_view = view {
     root = wibox.widget{
-        waffle_dashboard_status_widget,
-        waffle_dashboard_action_grid_widget,
-        waffle_dashboard_action_list_widget,
-        layout = wibox.layout.fixed.vertical,
+        {
+            waffle_dashboard_status_widget,
+            waffle_dashboard_action_grid_widget,
+            waffle_dashboard_action_list_widget,
+            layout = wibox.layout.fixed.vertical,
+        },
+        context_transformation = {
+            inactive_hotkey = true,
+        },
+        widget = ocontainer,
     },
     no_margin = true,
     key_filter = function (_self, mod, key, event)
@@ -1212,21 +1222,82 @@ function get_audio_source_switch_source()
     return ret
 end
 
-function get_source(mode)
-    if mode == "audio_sink" then
+function get_source()
+    if waffle_root_source_mode == "audio_sink" then
         return get_audio_sink_switch_source()
-    elseif mode == "audio_source" then
+    elseif waffle_root_source_mode == "audio_source" then
         return get_audio_source_switch_source()
     end
     return get_apps_widget_source()
 end
 
-waffle_root_view = lunchbox{
+waffle_dashboard_view._private = {
+    active = true,
+    direct_hotkey = false,
+}
+setmetatable(waffle_dashboard_view,
+             { __index = function (self, index)
+                   return self._private[index]
+               end,
+               __newindex = function (self, index, value)
+                   if self._private[index] == value then return end
+                   if index == "active" then
+                       self.widget.visible = value
+                       if value then
+                           waffle_root_source_mode = nil
+                       end
+                   elseif index == "direct_hotkey" then
+                       self.widget.context_transformation = {
+                           inactive_hotkey = not value
+                       }
+                   end
+                   self._private[index] = value
+               end,
+             })
+
+waffle_root_view = bento{
     container = wibox.widget{
         beautiful.apply_border_to_widget_template{
             widget = {
-                id = "lunchbox_container",
-                widget = wibox.container.background,
+                waffle_dashboard_view.widget,
+                {
+                    {
+                        {
+                            {
+                                {
+                                    {
+                                        {
+                                            id = "input_widget",
+                                            align = "center",
+                                            widget = wibox.widget.textbox,
+                                        },
+                                        margins = dpi(2),
+                                        widget = wibox.container.margin,
+                                    },
+                                    bg_picker = opicker.concat{opicker.beautiful{"fg_normal"}, "20"},
+                                    widget = ocontainer,
+                                },
+                                {
+                                    id = "list_container",
+                                    top = dpi(4),
+                                    draw_empty = false,
+                                    widget = fixed_margin,
+                                },
+                                layout = fixed_align.vertical
+                            },
+                            margins = dpi(4),
+                            widget = wibox.container.margin,
+                        },
+                        bg = beautiful.bg_normal,
+                        fg = beautiful.fg_normal,
+                        widget = wibox.container.background,
+                    },
+                    width = dpi(500),
+                    height = dpi(400),
+                    strategy = "exact",
+                    widget = wibox.container.constraint,
+                },
+                layout = fallback,
             },
             top = true,
             bottom = true,
@@ -1236,7 +1307,7 @@ waffle_root_view = lunchbox{
         margins = beautiful.useless_gap,
         widget = wibox.container.margin,
     },
-    dashboard = waffle_dashboard_view,
+    cover = waffle_dashboard_view,
     source_generator = get_source,
 }
 
