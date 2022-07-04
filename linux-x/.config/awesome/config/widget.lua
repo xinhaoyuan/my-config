@@ -668,7 +668,7 @@ do
            )
        end,
        ["0"] = function (_mod, _key, event)
-           if event == "press" then return end
+           if event == "release" then return end
            awful.spawn.easy_async_with_shell(
                TOG_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
                function (stdout, stderr, exitreason, exitcode)

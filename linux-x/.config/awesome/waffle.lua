@@ -345,11 +345,11 @@ function waffle:show(view, args)
                 if self.view_.key_handler and self.view_:key_handler(mod, key, event) then
                     -- pass
                 elseif key == "Escape" then
-                    if event == "release" then
+                    if event == "press" then
                         self:hide()
                     end
                 elseif key == "BackSpace" then
-                    if event == "release" then
+                    if event == "press" then
                         self:go_back()
                     end
                 end

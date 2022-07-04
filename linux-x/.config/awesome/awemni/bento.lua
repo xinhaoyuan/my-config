@@ -87,6 +87,7 @@ function lunchbox:new(args)
         bento_lister.input = ""
         if cover then
             cover.active = true
+            cover.direct_hotkey = false
         end
     end
     local prompt = prompter{
@@ -113,36 +114,23 @@ function lunchbox:new(args)
         end,
     }
 
-    local should_swallow_next_release = true
     local function key_handler(mods, key, event)
         if (key == "Escape" or key == "BackSpace") and
             (bento_lister.input == nil or bento_lister.input == "") then
             if cover and not cover.active and cover.key_handler and event == "press" then
                 reset_input()
-                should_swallow_next_release = true
-                return true
-            elseif event == "press" then
-                should_swallow_next_release = false
-                return true
-            elseif should_swallow_next_release then
-                should_swallow_next_release = false
                 return true
             else
                 return false
             end
         end
         if cover and cover.active and cover.key_handler then
-            if should_swallow_next_release then
-                should_swallow_next_release = false
-                if event == "release" then return true end
-            end
             if cover.direct_hotkey then
                 return cover:key_handler(mods, key, event)
             else
                 if cover:key_handler(mods, key, event) then return true end
             end
         end
-        should_swallow_next_release = true
         if event == "press" then
             if key == "Return" then
                 bento_lister:execute()
@@ -190,7 +178,6 @@ function lunchbox:new(args)
         end,
         on_open = function (_self, ...)
             bento_lister.source = args.source_generator()
-            should_swallow_next_release = true
             if cover and cover.on_open then cover:on_open(...) end
         end,
         on_close = function (_self, ...)

@@ -202,7 +202,7 @@ local function simple_button(args)
          for _, m in ipairs(mod) do
             mod[m] = true
          end
-         if event == "release" then
+         if event == "press" then
             key_action(mod["Shift"])
          end
       end
@@ -301,22 +301,6 @@ local function decorate_waffle(widget)
         left = true,
         right = true,
     }
-end
-
-
-local hide_key_pressed = false
-local function hide_after_release(mod, key, event)
-    if event == "press" and not hide_after_pressed then
-        hide_after_pressed = true
-    elseif event == "release" and hide_after_pressed then
-        gtimer.start_new(
-            0.03, -- Fixing xscape emulating the key case the waffle to show again.
-            function ()
-                hide_after_pressed = false
-                waffle:hide()
-            end
-        )
-    end
 end
 
 local waffle_shutdown_view = view {
@@ -1250,11 +1234,12 @@ setmetatable(waffle_dashboard_view,
              })
 local dashboard_key_handler = waffle_dashboard_view.key_handler
 waffle_dashboard_view.key_handler = function (self, mods, key, event)
-    if key == "Super_L" or key == "Super_R" then
+    if key == "Super_L" or key == "Super_R" or key == "Alt_L" or key == "Alt_R" then
+        print(event)
         self.direct_hotkey = event == "press"
         return true
     elseif key == " " then
-        if event == "release" then
+        if event == "press" then
             self.direct_hotkey = not self.direct_hotkey
         end
         return true
