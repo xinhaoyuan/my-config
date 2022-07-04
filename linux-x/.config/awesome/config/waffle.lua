@@ -1858,8 +1858,10 @@ waffle_calendar_view = bento{
         }
     end,
 }
-orgenda_items_widget:connect_signal(
-    "property::children", function ()
+-- At this point, this callback should be invoked after the items widget is updated.
+orgenda.data:connect_signal(
+    "property::items", function ()
+        waffle_calendar_view:reload_source()
     end)
 
 -- Settings
