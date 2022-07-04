@@ -1231,10 +1231,7 @@ function get_source()
     return get_apps_widget_source()
 end
 
-waffle_dashboard_view._private = {
-    active = true,
-    direct_hotkey = false,
-}
+waffle_dashboard_view._private = {}
 setmetatable(waffle_dashboard_view,
              { __index = function (self, index)
                    return self._private[index]
@@ -1243,9 +1240,6 @@ setmetatable(waffle_dashboard_view,
                    if self._private[index] == value then return end
                    if index == "active" then
                        self.widget.visible = value
-                       if value then
-                           waffle_root_source_mode = nil
-                       end
                    elseif index == "direct_hotkey" then
                        self.widget.context_transformation = {
                            inactive_hotkey = not value
@@ -1254,6 +1248,23 @@ setmetatable(waffle_dashboard_view,
                    self._private[index] = value
                end,
              })
+local dashboard_key_handler = waffle_dashboard_view.key_handler
+waffle_dashboard_view.key_handler = function (self, mods, key, event)
+    if key == "Super_L" or key == "Super_R" then
+        self.direct_hotkey = event == "press"
+        return true
+    elseif key == " " then
+        if event == "release" then
+            self.direct_hotkey = not self.direct_hotkey
+        end
+        return true
+    end
+    local pass = #key > 1 or self.direct_hotkey
+    return pass and dashboard_key_handler(self, mods, key, event)
+end
+waffle_dashboard_view.on_close = function (self)
+    self.direct_hotkey = false
+end
 
 waffle_root_view = bento{
     container = wibox.widget{
@@ -1567,105 +1578,93 @@ end
 function orgenda_get_icon(item)
     return beautiful["orgenda_icon_p"..tostring(item.priority).."_"..(item.done and "done" or "todo")]
 end
+local orgenda_items_widget = orgenda.widget{
+    create_item_widget_cb = function ()
+        local widget = wibox.widget{
+            {
+                {
+                    {
+                        {
+                            id = "icon_role",
+                            {
+                                forced_width = beautiful.icon_size,
+                                forced_height = beautiful.icon_size,
+                                widget = masked_imagebox,
+                            },
+                            widget = ocontainer,
+                        },
+                        valign = "top",
+                        widget = wibox.container.place
+                    },
+                    right = beautiful.sep_small_size,
+                    widget = wibox.container.margin,
+                },
+                {
+                    {
+                        {
+                            id = "timestamp_role",
+                            widget = wibox.widget.textbox
+                        },
+                        {
+                            {
+                                id = "text_role",
+                                ellipsize = "none",
+                                align = "left",
+                                valign = "center",
+                                wrap = "word_char",
+                                widget = wibox.widget.textbox
+                            },
+                            fill_horizontal = true,
+                            content_fill_horizontal = true,
+                            widget = wibox.container.place,
+                        },
+                        layout = wibox.layout.fixed.vertical
+                    },
+                    valign = "center",
+                    widget = wibox.container.place,
+                },
+                layout = wibox.layout.fixed.horizontal
+            },
+            fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
+            bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+            context_transformation = {highlighted = false},
+            widget = ocontainer,
+        }
+        function widget:set_focused(f)
+            self.context_transformation = {highlighted = f}
+        end
+        function widget:execute()
+            orgenda.toggle_done(self.item)
+        end
+        widget:connect_signal(
+            "button::release",
+            function (self, _x, _y, button)
+                if button == 2 then
+                    orgenda.hide(self.item)
+                elseif button == 3 then
+                    orgenda.promote(self.item)
+                end
+            end
+        )
+        return widget
+    end,
+    update_item_widget_cb = function (widget, item)
+        widget:get_children_by_id("icon_role")[1].widget.image = orgenda_get_icon(item)
+        widget:get_children_by_id("icon_role")[1].fg_picker = opicker.wrap{
+            organda_color_func,
+            item.priority,
+            item.done,
+        }
+        widget:get_children_by_id("text_role")[1].markup = item.decorated_text
+        widget.item = item
+    end,
+}
 local orgenda_widget = wibox.widget{
     {
         orgenda_header,
         {
             {
-                orgenda.widget{
-                    create_item_widget_cb = function (item)
-                        local widget = wibox.widget{
-                            {
-                                {
-                                    {
-                                        {
-                                            {
-                                                image = orgenda_get_icon(item),
-                                                forced_width = beautiful.icon_size,
-                                                forced_height = beautiful.icon_size,
-                                                widget = masked_imagebox,
-                                            },
-                                            fg_picker = opicker.wrap{
-                                                organda_color_func,
-                                                item.priority,
-                                                item.done,
-                                            },
-                                            widget = ocontainer,
-                                        },
-                                        valign = "top",
-                                        widget = wibox.container.place
-                                    },
-                                    right = beautiful.sep_small_size,
-                                    widget = wibox.container.margin,
-                                },
-                                {
-                                    {
-                                        {
-                                            item.timestamp and {
-                                                id = "timestamp_role",
-                                                widget = wibox.widget.textbox
-                                            },
-                                            -- item.tags_text and {
-                                            --     markup = "<span size='small'>:"..item.tags_text..":</span>",
-                                            --     ellipsize = "none",
-                                            --     valign = "center",
-                                            --     wrap = "word_char",
-                                            --     widget = wibox.widget.textbox
-                                            -- },
-                                            layout = wibox.layout.fixed.horizontal,
-                                        },
-                                        {
-                                            {
-                                                markup = item.text,
-                                                ellipsize = "none",
-                                                align = "left",
-                                                valign = "center",
-                                                wrap = "word_char",
-                                                widget = wibox.widget.textbox
-                                            },
-                                            fill_horizontal = true,
-                                            content_fill_horizontal = true,
-                                            widget = wibox.container.place,
-                                        },
-                                        layout = wibox.layout.fixed.vertical
-                                    },
-                                    valign = "center",
-                                    widget = wibox.container.place,
-                                },
-                                layout = wibox.layout.fixed.horizontal
-                            },
-                            fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-                            bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
-                            context_transformation = {highlighted = false},
-                            widget = ocontainer,
-                        }
-                        widget:connect_signal(
-                            "mouse::enter",
-                            function (w)
-                                w.context_transformation = {highlighted = true}
-                            end
-                        )
-                        widget:connect_signal(
-                            "mouse::leave",
-                            function (w)
-                                w.context_transformation = {highlighted = false}
-                            end
-                        )
-                        widget:connect_signal(
-                            "button::release",
-                            function (w, _x, _y, button)
-                                if button == 1 then
-                                    orgenda.toggle_done(item)
-                                elseif button == 2 then
-                                    orgenda.hide(item)
-                                elseif button == 3 then
-                                    orgenda.promote(item)
-                                end
-                            end
-                        )
-                        return widget
-                    end,
-                },
+                orgenda_items_widget,
                 widget = scroller,
             },
             {
@@ -1694,67 +1693,174 @@ shared.vars:connect_signal(
     end
 )
 
-waffle_calendar_view = view {
-    root = decorate_waffle{
-        {
-            {
+-- waffle_calendar_view = view {
+--     root = decorate_waffle{
+--         {
+--             {
+--                 {
+--                     cal_widget,
+--                     {
+--                         {
+--                             orgenda_widget,
+--                             top = beautiful.sep_big_size,
+--                             draw_empty = false,
+--                             widget = fixed_margin,
+--                         },
+--                         bgimage = function(context, cr, width, height)
+--                             height = beautiful.sep_big_size
+--                             beautiful.draw_separator(cr, width, height)
+--                         end,
+--                         widget = wibox.container.background,
+--                     },
+--                     layout = wibox.layout.align.vertical,
+--                 },
+--                 width = calendar_waffle_width,
+--                 strategy = "exact",
+--                 widget = wibox.container.constraint,
+--             },
+--             {
+--                 {
+--                     {
+--                         notix.widget,
+--                         width = waffle_width,
+--                         strategy = "exact",
+--                         widget = wibox.container.constraint,
+--                     },
+--                     left = beautiful.sep_big_size,
+--                     draw_empty = false,
+--                     widget = fixed_margin,
+--                 },
+--                 bgimage = function(context, cr, width, height)
+--                     width = beautiful.sep_big_size
+--                     beautiful.draw_separator(cr, width, height)
+--                 end,
+--                 widget = wibox.container.background,
+--             },
+--             layout = wibox.layout.fixed.horizontal,
+--         },
+--         height = calendar_waffle_width * 2,
+--         strategy = "max",
+--         widget = wibox.container.constraint,
+--     },
+--     default_key_handler = function (_self, mod, key, event)
+--         if event == "press" then return end
+--         if key == "n" then
+--             notix.remove_unpinned()
+--         end
+--     end,
+--     on_close = function (_)
+--         for s in screen do
+--             s.actions.set_clock_area_focus(false)
+--         end
+--     end,
+-- }
+
+waffle_calendar_view = bento{
+    container = wibox.widget{
+        beautiful.apply_border_to_widget_template{
+            widget = {
                 {
-                    cal_widget,
                     {
+                        cal_widget,
                         {
-                            orgenda_widget,
-                            top = beautiful.sep_big_size,
-                            draw_empty = false,
-                            widget = fixed_margin,
+                            forced_height = beautiful.sep_big_size,
+                            bgimage = function(context, cr, width, height)
+                                height = beautiful.sep_big_size
+                                beautiful.draw_separator(cr, width, height)
+                            end,
+                            widget = wibox.container.background,
                         },
-                        bgimage = function(context, cr, width, height)
-                            height = beautiful.sep_big_size
-                            beautiful.draw_separator(cr, width, height)
-                        end,
-                        widget = wibox.container.background,
+                        {
+                            {
+                                {
+                                    {
+                                        {
+                                            id = "input_widget",
+                                            align = "center",
+                                            widget = wibox.widget.textbox,
+                                        },
+                                        margins = dpi(2),
+                                        widget = wibox.container.margin,
+                                    },
+                                    bg_picker = opicker.concat{opicker.beautiful{"fg_normal"}, "20"},
+                                    widget = ocontainer,
+                                },
+                                {
+                                    id = "list_container",
+                                    top = dpi(4),
+                                    draw_empty = false,
+                                    widget = fixed_margin,
+                                },
+                                layout = wibox.layout.fixed.vertical,
+                            },
+                            left = dpi(4),
+                            right = dpi(4),
+                            bottom = dpi(4),
+                            widget = wibox.container.margin,
+                        },
+                        layout = wibox.layout.fixed.vertical,
                     },
-                    layout = wibox.layout.align.vertical,
+                    height = calendar_waffle_width * 2,
+                    width = calendar_waffle_width,
+                    strategy = "exact",
+                    widget = wibox.container.constraint,
                 },
-                width = calendar_waffle_width,
-                strategy = "exact",
-                widget = wibox.container.constraint,
+                layout = wibox.layout.fixed.horizontal,
             },
-            {
-                {
-                    {
-                        notix.widget,
-                        width = waffle_width,
-                        strategy = "exact",
-                        widget = wibox.container.constraint,
-                    },
-                    left = beautiful.sep_big_size,
-                    draw_empty = false,
-                    widget = fixed_margin,
-                },
-                bgimage = function(context, cr, width, height)
-                    width = beautiful.sep_big_size
-                    beautiful.draw_separator(cr, width, height)
-                end,
-                widget = wibox.container.background,
-            },
-            layout = wibox.layout.fixed.horizontal,
+            top = true,
+            bottom = true,
+            left = true,
+            right = true,
         },
-        height = calendar_waffle_width * 2,
-        strategy = "max",
-        widget = wibox.container.constraint,
+        margins = beautiful.useless_gap,
+        widget = wibox.container.margin,
     },
-    default_key_handler = function (_self, mod, key, event)
-        if event == "press" then return end
-        if key == "n" then
-            notix.remove_unpinned()
-        end
-    end,
-    on_close = function (_)
-        for s in screen do
-            s.actions.set_clock_area_focus(false)
-        end
+    cover = setmetatable(
+        {
+            -- key_handler = function (_self, mods, key, event)
+            --     if key == "n" then
+            --         if event == "release" then
+            --             notix.remove_unpinned()
+            --         end
+            --         return true
+            --     end
+            -- end,
+            on_close = function (_)
+                for s in screen do
+                    s.actions.set_clock_area_focus(false)
+                end
+            end,
+            _readonly = {
+                active = true,
+                direct_hotkey = false,
+            },
+        },
+        {
+            __index = function (self, index)
+                return self._readonly[index]
+            end,
+            __newindex = function (self, index, value)
+                if self._readonly[index] ~= nil then return end
+                rawset(self, index, value)
+            end,
+        }),
+    source_generator = function ()
+        local children = orgenda_items_widget.children
+        local items = {}
+        for i = 1, #children do items[i] = children[i] end
+        return source.filter{
+            upstream = source.from_array(items),
+            filter_cb = function (f, e)
+                if f == nil then return true end
+                f = f:lower()
+                return e.item.text:lower():find(f) ~= nil
+            end,
+        }
     end,
 }
+orgenda_items_widget:connect_signal(
+    "property::children", function ()
+    end)
 
 -- Settings
 

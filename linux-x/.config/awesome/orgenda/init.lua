@@ -60,7 +60,8 @@ local function parse_todo_match(todo_match, decorator)
     local text = tags_begin == nil and
         todo_match:sub(text_begin) or
         todo_match:sub(text_begin, -1 - tags_length)
-    ret.text = decorator(text)
+    ret.text = text
+    ret.decorated_text = decorator(text)
     if tags_text ~= nil then
         local tags = {}
         for tag in string.gmatch(tags_text, "[^:]+") do
@@ -284,26 +285,29 @@ function orgenda.widget(args)
     args = args or {}
     local handle_expired_items = args.handle_expired_items
     if handle_expired_items == nil then handle_expired_items = true end
+    local item_by_widget = setmetatable({}, {__mode="k"})
 
-    local create_item_widget = args.create_item_widget_cb or function (item)
+    local create_item_widget = args.create_item_widget_cb or function ()
         local widget = wibox.widget.base.make_widget_from_value(orgenda.config.widget_item_template)
-        local status = widget:get_children_by_id("status_role")
-        if #status > 0 then status[1].text = get_status(item)  end
-        local text = widget:get_children_by_id("text_role")
-        if #text > 0 then text[1].markup = item.text end
         widget:connect_signal(
             "button::release",
             function (w, _x, _y, button)
                 if button == 1 then
-                    orgenda.toggle_done(item)
+                    orgenda.toggle_done(item_by_widget[w])
                 elseif button == 2 then
-                    orgenda.hide(item)
+                    orgenda.hide(item_by_widget[w])
                 elseif button == 3 then
-                    orgenda.promote(item)
+                    orgenda.promote(item_by_widget[w])
                 end
             end
         )
         return widget
+    end
+    local update_item_widget = args.update_item_widget_cb or function (widget, item)
+        local status = widget:get_children_by_id("status_role")
+        if #status > 0 then status[1].text = get_status(item)  end
+        local text = widget:get_children_by_id("text_role")
+        if #text > 0 then text[1].markup = item.decorated_text end
     end
     local orgenda_widget
 
@@ -313,15 +317,15 @@ function orgenda.widget(args)
     orgenda_widget = todo_item_container
 
     local widget_by_item_key = {}
-    local item_by_widget = setmetatable({}, {__mode="k"})
 
-    local function get_todo_item_widget(item, item_key)
+    local function get_todo_item_widget(item, item_key) --
         local widget = widget_by_item_key[item_key]
         if widget_by_item_key[item_key] == nil then
             widget = create_item_widget(item)
             widget_by_item_key[item_key] = widget
         end
         if widget then
+            update_item_widget(widget, item)
             item_by_widget[widget] = item
         end
         return widget
@@ -352,16 +356,19 @@ function orgenda.widget(args)
     end
 
     local function get_item_key(item)
-        return tostring(item.timestamp)..":"..(item.done and "!" or "?")..tostring(item.priority)..":"..item.text..":"..(item.tags_text or "")
+        -- return tostring(item.timestamp)..":"..(item.done and "!" or "?")..tostring(item.priority)..":"..item.decorated_text..":"..(item.tags_text or "")
+        return item.line_number
     end
 
     orgenda.data:connect_signal(
         "property::items",
         function ()
-            table.sort(orgenda.data.items, orgenda.config.compare_items_cb)
+            local items = {}
+            for i = 1, #orgenda.data.items do items[i] = orgenda.data.items[i] end
+            table.sort(items, orgenda.config.compare_items_cb)
             todo_item_container:reset()
             local item_keys = {}
-            for index, item in ipairs(orgenda.data.items) do
+            for index, item in ipairs(items) do
                 local item_key = get_item_key(item)
                 item_keys[item_key] = true
                 local widget = get_todo_item_widget(item, item_key)
