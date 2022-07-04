@@ -1248,6 +1248,7 @@ waffle_dashboard_view.key_handler = function (self, mods, key, event)
     return pass and dashboard_key_handler(self, mods, key, event)
 end
 waffle_dashboard_view.on_close = function (self)
+    waffle_root_source_mode = nil
     self.direct_hotkey = false
 end
 
