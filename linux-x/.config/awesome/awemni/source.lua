@@ -103,6 +103,7 @@ local function filter(args)
     end
     return {
         fetch_async = function (_self, index, cb)
+            assert(index > 0)
             local upstream_index = filtered[index]
             if upstream_index then
                 if not upstream_post_data[upstream_index] then
