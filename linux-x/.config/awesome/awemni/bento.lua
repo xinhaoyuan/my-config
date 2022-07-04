@@ -90,7 +90,8 @@ function lunchbox:new(args)
             cover.direct_hotkey = false
         end
     end
-    local prompt = prompter{
+    local prompt, key_handler
+    prompt = prompter{
         textbox = input_widget,
         hooks = {
             {{}, "Escape", function (input)
@@ -112,9 +113,11 @@ function lunchbox:new(args)
                 cover.active = false
             end
         end,
+        done_callback = function ()
+            key_handler({}, "Escape", "press")
+        end,
     }
-
-    local function key_handler(mods, key, event)
+    function key_handler(mods, key, event)
         if (key == "Escape" or key == "BackSpace") and
             (bento_lister.input == nil or bento_lister.input == "") then
             if cover and not cover.active and cover.key_handler and event == "press" then
