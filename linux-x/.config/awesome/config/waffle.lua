@@ -1235,7 +1235,6 @@ setmetatable(waffle_dashboard_view,
 local dashboard_key_handler = waffle_dashboard_view.key_handler
 waffle_dashboard_view.key_handler = function (self, mods, key, event)
     if key == "Super_L" or key == "Super_R" or key == "Alt_L" or key == "Alt_R" then
-        print(event)
         self.direct_hotkey = event == "press"
         return true
     elseif key == " " then
