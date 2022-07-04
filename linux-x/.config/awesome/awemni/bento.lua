@@ -173,13 +173,6 @@ function lunchbox:new(args)
     local list_container = args.container:get_children_by_id("list_container")[1]
     assert(list_container)
     list_container.widget = list_layout
-    input_widget:connect_signal(
-        "button::release", function (_self, _x, _y, b)
-            if b == 3 then
-                key_handler({}, "Escape", "press")
-            end
-        end)
-
     list_layout:connect_signal(
         "button::press", function (_self, _x, _y, b)
             if b == 4 then
