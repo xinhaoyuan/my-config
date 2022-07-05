@@ -339,9 +339,6 @@ function waffle:show(view, args)
     else
         self.keygrabber_ = awful.keygrabber.run(
             function (mod, key, event)
-                if #key == 1 then
-                    key = key:lower()
-                end
                 if self.view_.key_handler and self.view_:key_handler(mod, key, event) then
                     -- pass
                 elseif key == "Escape" then

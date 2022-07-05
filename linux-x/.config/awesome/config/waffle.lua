@@ -311,7 +311,7 @@ local waffle_shutdown_view = view {
                     -- icon = icons.sleep,
                     markup = "Suspend",
                     indicator = em("s"),
-                    key = "s",
+                    key = {"s", "S"},
                     action = function (alt)
                         waffle:hide()
                         awful.spawn({"systemctl", "suspend"})
@@ -321,7 +321,7 @@ local waffle_shutdown_view = view {
                     -- icon = icons.sleep,
                     markup = "Hibernate",
                     indicator = em("h"),
-                    key = "h",
+                    key = {"h", "H"},
                     action = function (alt)
                         waffle:hide()
                         awful.spawn({"systemctl", "hibernate"})
@@ -330,7 +330,7 @@ local waffle_shutdown_view = view {
                 button {
                     markup = "Reboot",
                     indicator = em("r"),
-                    key = "r",
+                    key = {"r", "R"},
                     action = function (alt)
                         waffle:hide()
                         awful.spawn({"systemctl", "reboot"})
@@ -340,7 +340,7 @@ local waffle_shutdown_view = view {
                     -- icon = icons.poweroff,
                     markup = "Power off",
                     indicator = em("p"),
-                    key = "p",
+                    key = {"p", "P"},
                     action = function (alt)
                         waffle:hide()
                         awful.spawn({"systemctl", "poweroff"})
@@ -655,7 +655,7 @@ do
             widget = fallback,
         },
         indicator = em("m"),
-        key = "m",
+        key = {"m", "M"},
         action = function (alt)
             waffle:hide()
             shared.action.music_app()
@@ -737,7 +737,7 @@ local waffle_dashboard_status_widget = decorate_panel {
                     spacing = button_padding,
                     layout = wibox.layout.fixed.vertical,
                 },
-                key = "x",
+                key = {"x", "X"},
                 indicator = em("x"),
                 action = function (alt)
                     shared.action.terminal({"htop"})
@@ -751,7 +751,7 @@ local waffle_dashboard_status_widget = decorate_panel {
                     widget = wibox.container.background,
                 },
                 indicator = em("n"),
-                key = "n",
+                key = {"n", "N"},
                 action = function (alt)
                     if alt then
                         -- TODO make this an action.
@@ -769,7 +769,7 @@ local waffle_dashboard_status_widget = decorate_panel {
                     widget = wibox.container.background,
                 },
                 indicator = em("d"),
-                key = "d",
+                key = {"d", "D"},
                 action = function (alt)
                     shared.action.terminal({"sudo", "iotop"})
                     waffle:hide()
@@ -813,7 +813,7 @@ local waffle_dashboard_action_grid_widget = decorate_panel {
                 button_layout = grid_button_layout,
                 label_widget = icon_label(icons.launcher),
                 indicator = em("r"),
-                key = "r",
+                key = {"r", "R"},
                 action = function (alt)
                     if waffle:is_in_view(waffle_root_view) then
                         waffle_root_source_mode = nil
@@ -846,7 +846,7 @@ local waffle_dashboard_action_grid_widget = decorate_panel {
                 label_widget = icon_label(icons.browser),
                 markup = "Web",
                 indicator = em("w"),
-                key = "w",
+                key = {"w", "W"},
                 action = function (alt)
                     shared.action.web_browser()
                     waffle:hide()
@@ -859,7 +859,7 @@ local waffle_dashboard_action_grid_widget = decorate_panel {
                 label_widget = icon_label(icons.file_manager),
                 markup = "Files",
                 indicator = em("e"),
-                key = "e",
+                key = {"e", "E"},
                 action = function (alt)
                     shared.action.file_manager()
                     waffle:hide()
@@ -872,7 +872,7 @@ local waffle_dashboard_action_grid_widget = decorate_panel {
                 label_widget = icon_label(icons.dots),
                 markup = "Tray",
                 indicator = em("y"),
-                key = "y",
+                key = {"y", "Y"},
                 action = function (alt)
                     show_tray_view()
                 end,
@@ -884,7 +884,7 @@ local waffle_dashboard_action_grid_widget = decorate_panel {
                 label_widget = icon_label(icons.fortune),
                 markup = "Fortune",
                 indicator = em("f"),
-                key = "f",
+                key = {"f", "F"},
                 action = function (alt)
                     if alt then
                         shared.screen.xkcd()
@@ -904,7 +904,7 @@ local waffle_dashboard_action_grid_widget = decorate_panel {
                 label_widget = icon_label(icons.setup),
                 markup = "Settings",
                 indicator = em("s"),
-                key = "s",
+                key = {"s", "S"},
                 action = function (alt)
                     waffle:show(waffle_settings_view, { mode = "push" })
                 end,
@@ -916,7 +916,7 @@ local waffle_dashboard_action_grid_widget = decorate_panel {
                 label_widget = icon_label(icons.lock),
                 markup = "Lock",
                 indicator = em("l"),
-                key = "l",
+                key = {"l", "L"},
                 action = function (alt)
                     shared.action.screen_locker()
                     waffle:hide()
@@ -929,7 +929,7 @@ local waffle_dashboard_action_grid_widget = decorate_panel {
                 label_widget = icon_label(icons.poweroff),
                 markup = "Power",
                 indicator = em("u"),
-                key = "u",
+                key = {"u", "U"},
                 action = function (alt)
                     waffle:show(waffle_shutdown_view, { mode = "push" })
                 end
@@ -958,7 +958,7 @@ local waffle_dashboard_action_list_widget = decorate_panel {
                 widget = wibox.container.place
             },
             indicator = em("p"),
-            key = "p",
+            key = {"p", "P"},
             action = function (alt)
                 -- if cwidget.audio_sink_widget:execute(alt) then
                 --     waffle:hide()
@@ -983,7 +983,7 @@ local waffle_dashboard_action_list_widget = decorate_panel {
                 widget = wibox.container.place
             },
             indicator = em("i"),
-            key = "i",
+            key = {"i", "I"},
             action = function (alt)
                 -- if cwidget.audio_source_widget:execute(alt) then
                 --     waffle:hide()
@@ -1003,7 +1003,7 @@ local waffle_dashboard_action_list_widget = decorate_panel {
                 widget = wibox.widget.textclock,
             },
             indicator = em("a"),
-            key = "a",
+            key = {"a", "A"},
             action = function (alt)
                 if alt then
                     shared.action.calendar()
@@ -1861,7 +1861,7 @@ waffle_settings_view = view{
                 -- button({
                 --       markup = "Toggle titlebars",
                 --       indicator = em("t"),
-                --       key = "t",
+                --       key = {"t", "T"},
                 --       action = function (alt)
                 --          if not alt then
                 --             if shared.vars.enable_titlebar then
@@ -1886,7 +1886,7 @@ waffle_settings_view = view{
                 -- button({
                 --       markup = "Toggle music",
                 --       indicator = em("m"),
-                --       key = "m",
+                --       key = {"m", "M"},
                 --       action = function (alt)
                 --           music_widget:set_visible(not music_widget:get_visible())
                 --           waffle:go_back()
@@ -1895,7 +1895,7 @@ waffle_settings_view = view{
                 button{
                     markup = "Toggle fortune",
                     indicator = em("f"),
-                    key = "f",
+                    key = {"f", "F"},
                     action = function (alt)
                         shared.screen.toggle_fortune()
                     end
@@ -1903,7 +1903,7 @@ waffle_settings_view = view{
                 button{
                     markup = "Toggle notes",
                     indicator = em("n"),
-                    key = "n",
+                    key = {"n", "N"},
                     action = function (alt)
                         shared.vars.show_notes = not shared.vars.show_notes
                         if not alt then
@@ -1916,7 +1916,7 @@ waffle_settings_view = view{
                         local b
                         b = button{
                             indicator = em("b"),
-                            key = "b",
+                            key = {"b", "B"},
                             action = function (alt)
                                 for i, v in ipairs(beautiful.bar_styles) do
                                     if v == beautiful.bar_style then
@@ -1937,7 +1937,7 @@ waffle_settings_view = view{
                 button{
                     markup = "Wallpaper",
                     indicator = em("w"),
-                    key = "w",
+                    key = {"w", "W"},
                     action = function (alt)
                         shared.action.wallpaper_setup()
                         waffle:hide()
@@ -1946,7 +1946,7 @@ waffle_settings_view = view{
                 button{
                     markup = "Reload theme",
                     indicator = em("t"),
-                    key = "t",
+                    key = {"t", "T"},
                     action = function (alt)
                         shared.action.reload_theme()
                         waffle:hide()
@@ -1955,7 +1955,7 @@ waffle_settings_view = view{
                 button{
                     markup = "Screen layout",
                     indicator = em("s"),
-                    key = "s",
+                    key = {"s", "S"},
                     action = function (alt)
                         if alt then
                             local cmd = {"arandr"}
@@ -2061,7 +2061,7 @@ local waffle_client_pid_button = button{
         },
         layout = fixed_align.vertical
     },
-    key = "d",
+    key = {"d", "D"},
     action = function (alt)
         local client = shared.waffle_selected_client
         waffle:hide()
@@ -2097,7 +2097,7 @@ local client_waffle = view {
                             button_layout = fixed_align.vertical,
                             label_widget = group_label,
                             indicator = em("g"),
-                            key = "g",
+                            key = {"g", "G"},
                             action = function (alt)
                                 local client = shared.waffle_selected_client
                                 if not alt then
@@ -2115,7 +2115,7 @@ local client_waffle = view {
                             button_layout = fixed_align.vertical,
                             label_widget = sticky_label,
                             indicator = em("s"),
-                            key = "s",
+                            key = {"s", "S"},
                             action = function (alt)
                                 local client = shared.waffle_selected_client
                                 if not alt then
@@ -2133,7 +2133,7 @@ local client_waffle = view {
                             button_layout = fixed_align.vertical,
                             label_widget = above_label,
                             indicator = em("a"),
-                            key = "a",
+                            key = {"a", "A"},
                             action = function (alt)
                                 local client = shared.waffle_selected_client
                                 if not alt then
@@ -2154,7 +2154,7 @@ local client_waffle = view {
                             button_layout = fixed_align.vertical,
                             label_widget = min_label,
                             indicator = em("i"),
-                            key = "i",
+                            key = {"i", "I"},
                             action = function (alt)
                                 local client = shared.waffle_selected_client
                                 if client.valid and not client.minimized then
@@ -2187,7 +2187,7 @@ local client_waffle = view {
                             button_layout = fixed_align.vertical,
                             label_widget = max_label,
                             indicator = em("m"),
-                            key = "m",
+                            key = {"m", "M"},
                             action = function (alt)
                                 local client = shared.waffle_selected_client
                                 if not alt then
@@ -2208,7 +2208,7 @@ local client_waffle = view {
                             button_layout = fixed_align.vertical,
                             label_widget = float_label,
                             indicator = em("f"),
-                            key = "f",
+                            key = {"f", "F"},
                             action = function (alt)
                                 local client = shared.waffle_selected_client
                                 if not alt then
@@ -2226,7 +2226,7 @@ local client_waffle = view {
                             button_layout = fixed_align.vertical,
                             markup = "Pos",
                             indicator = em("p"),
-                            key = "p",
+                            key = {"p", "P"},
                             key_action = function (alt)
                                 local client = shared.waffle_selected_client
                                 waffle:hide()
@@ -2261,7 +2261,7 @@ local client_waffle = view {
                                button_layout = fixed_align.vertical,
                                label_widget = close_label,
                                indicator = em("c"),
-                               key = "c",
+                               key = {"c", "C"},
                                action = function (alt)
                                    local client = shared.waffle_selected_client
                                    if not client.valid then
