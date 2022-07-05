@@ -221,16 +221,16 @@ function lister:new(args)
             container:connect_signal(
                 "button::press", function (self, _x, _y, b)
                     if b == 1 then
-                        if ret.focus == current_index and container.child then
-                            container.child:execute()
+                        if ret.focus == self.index and container.child then
+                            self.child:execute()
                         else
-                            ret.focus = current_index
+                            ret.focus = self.index
                         end
                     end
                 end)
             container:connect_signal(
-                "mouse::enter", function (self, _x, _y, b)
-                    ret.focus = current_index
+                "mouse::enter", function (self, _x, _y)
+                    ret.focus = self.index
                 end)
             table.insert(state.scrlist.children, container)
         end
