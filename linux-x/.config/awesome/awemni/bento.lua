@@ -32,9 +32,9 @@ local function prompter(args)
     end
 end
 
-local lunchbox = {}
+local bento = {}
 
-function lunchbox:new(args)
+function bento:new(args)
     local list_layout = wibox.widget{
         layout = scrlist.top,
     }
@@ -155,8 +155,9 @@ function lunchbox:new(args)
                 return true
             end
         end
-        local f = bento_lister.focused_child
-        if f and f.key_handler then return f:key_handler(mods, key, event) end
+        local f = bento_lister.focus and list_layout.children[bento_lister.focus]
+        f = f and f.child
+        if f and f.visible and f.key_handler then return f:key_handler(mods, key, event) end
         prompt(mods, key, event)
         return true
     end
@@ -194,4 +195,4 @@ function lunchbox:new(args)
     }
 end
 
-return setmetatable(lunchbox, {__call = function (self, ...) return self:new(...) end})
+return setmetatable(bento, {__call = function (self, ...) return self:new(...) end})
