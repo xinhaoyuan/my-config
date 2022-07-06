@@ -219,7 +219,7 @@ function lister:new(args)
             container:connect_signal(
                 "draw", ret.container_on_draw)
             container:connect_signal(
-                "button::press", function (self, _x, _y, b)
+                "button::release", function (self, _x, _y, b)
                     if b == 1 then
                         if ret.focus == self.index and container.child then
                             self.child:execute()
