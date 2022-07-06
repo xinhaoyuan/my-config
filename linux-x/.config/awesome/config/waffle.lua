@@ -1246,6 +1246,9 @@ waffle_dashboard_view.key_handler = function (self, mods, key, event)
     local pass = #key > 1 or self.direct_hotkey
     return pass and dashboard_key_handler(self, mods, key, event)
 end
+waffle_dashboard_view.on_open = function (self)
+    waffle_root_view.widget:get_children_by_id("input_area")[1].visible = not waffle:autohide()
+end
 waffle_dashboard_view.on_close = function (self)
     waffle_root_source_mode = nil
     self.direct_hotkey = false
@@ -1261,23 +1264,27 @@ waffle_root_view = bento{
                         {
                             {
                                 {
+                                    id = "input_area",
                                     {
                                         {
-                                            id = "input_widget",
-                                            align = "center",
-                                            widget = wibox.widget.textbox,
+                                            {
+                                                id = "input_widget",
+                                                align = "center",
+                                                widget = wibox.widget.textbox,
+                                            },
+                                            margins = dpi(2),
+                                            widget = wibox.container.margin,
                                         },
-                                        margins = dpi(2),
-                                        widget = wibox.container.margin,
+                                        bg_picker = opicker.concat{opicker.beautiful{"fg_normal"}, "20"},
+                                        widget = ocontainer,
                                     },
-                                    bg_picker = opicker.concat{opicker.beautiful{"fg_normal"}, "20"},
-                                    widget = ocontainer,
+                                    bottom = dpi(4),
+                                    draw_empty = false,
+                                    widget = fixed_margin,
                                 },
                                 {
                                     id = "list_container",
-                                    top = dpi(4),
-                                    draw_empty = false,
-                                    widget = fixed_margin,
+                                    widget = wibox.container.background,
                                 },
                                 layout = fixed_align.vertical
                             },
@@ -1762,22 +1769,26 @@ waffle_calendar_view = bento{
                             {
                                 {
                                     {
+                                        id = "input_area",
                                         {
-                                            id = "input_widget",
-                                            align = "center",
-                                            widget = wibox.widget.textbox,
+                                            {
+                                                id = "input_widget",
+                                                align = "center",
+                                                widget = wibox.widget.textbox,
+                                            },
+                                            margins = dpi(2),
+                                            widget = wibox.container.margin,
                                         },
-                                        margins = dpi(2),
-                                        widget = wibox.container.margin,
+                                        bg_picker = opicker.concat{opicker.beautiful{"fg_normal"}, "20"},
+                                        widget = ocontainer,
                                     },
-                                    bg_picker = opicker.concat{opicker.beautiful{"fg_normal"}, "20"},
-                                    widget = ocontainer,
+                                    bottom = dpi(4),
+                                    draw_empty = false,
+                                    widget = fixed_margin,
                                 },
                                 {
                                     id = "list_container",
-                                    top = dpi(4),
-                                    draw_empty = false,
-                                    widget = fixed_margin,
+                                    widget = wibox.container.background,
                                 },
                                 layout = wibox.layout.fixed.vertical,
                             },
@@ -1813,6 +1824,10 @@ waffle_calendar_view = bento{
             --         return true
             --     end
             -- end,
+            on_open = function (_self)
+                waffle_calendar_view.widget:get_children_by_id("input_area")[1].visible =
+                    not waffle:autohide()
+            end,
             on_close = function (_)
                 for s in screen do
                     s.actions.set_clock_area_focus(false)
