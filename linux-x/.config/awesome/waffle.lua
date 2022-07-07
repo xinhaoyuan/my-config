@@ -36,14 +36,22 @@ function PlacementLayout:layout(context, width, height)
     local w, h = wibox.widget.base.fit_widget(self, context, self._private.widget, width, height)
     local place_func = self._private.place_func or self.default_place_func
     local x, y = place_func(self, context, width, height, w, h)
-    if self._private.shape_x ~= x or self._private.shape_y ~= y or self._private.shape_w ~= w or self._private.shape_h ~= h then
-        self._private.shape_x = x
-        self._private.shape_y = y
-        self._private.shape_w = w
-        self._private.shape_h = h
-        context["wibox"].shape = function(cr, width, height)
-            cr:rectangle(x, y, w, h)
+    local wb = context["wibox"]
+    if self._private.apply_shape then
+        if self._private.shape_x ~= x or
+            self._private.shape_y ~= y or
+            self._private.shape_w ~= w or
+            self._private.shape_h ~= h then
+            self._private.shape_x = x
+            self._private.shape_y = y
+            self._private.shape_w = w
+            self._private.shape_h = h
+            wb.shape = function(cr, width, height)
+                cr:rectangle(x, y, w, h)
+            end
         end
+    else
+        wb.shape = nil
     end
     return { wibox.widget.base.place_widget_at(self._private.widget, x, y, w, h) }
 end
@@ -84,6 +92,19 @@ function PlacementLayout:set_children(children)
     self:set_widget(children[1])
 end
 
+function PlacementLayout:set_apply_shape(v)
+    if self._private.apply_shape ~= v then
+        self._private.apply_shape = v
+        if not v then
+            self._private.shape_x = nil
+            self._private.shape_y = nil
+            self._private.shape_w = nil
+            self._private.shape_h = nil
+        end
+        self:emit_signal("widget::layout_changed")
+    end
+end
+
 function PlacementLayout:new(widget)
     local ret = wibox.widget.base.make_widget(nil, nil, {enable_properties = true})
 
@@ -121,8 +142,15 @@ waffle.widget_container:connect_signal(
     end)
 waffle.widget_container:connect_signal(
     "mouse::leave",
-    function ()
-        -- waffle:hide()
+    function (_self, t)
+        if waffle.mouse_entered_ and not waffle:autohide() then
+            waffle:hide()
+        end
+    end)
+waffle.widget_container:connect_signal(
+    "mouse::enter",
+    function (_self, t)
+        waffle.mouse_entered_ = true
     end)
 
 waffle.widget_container.widget:connect_signal(
@@ -164,7 +192,7 @@ function waffle:get_waffle_wibox(screen)
         self.screen_wibox_ = {}
     end
     local screen_wibox = self.screen_wibox_[screen]
-    local screen_geo = beautiful.waffle_use_entire_screen and screen.geometry or screen.workarea
+    local screen_geo = screen.geometry
     if screen_wibox == nil or
         screen_wibox.x ~= screen_geo.x or
         screen_wibox.y ~= screen_geo.y or
@@ -203,32 +231,6 @@ capi.screen.connect_signal(
     end
 )
 
-local function on_root_button_press(x, y, details, state)
-    waffle:hide()
-end
-
-local function on_client_button_press(c, x, y, details, state)
-    waffle:hide()
-end
-
-local function on_drawable_button_press(d, x, y, details, state)
-    if d ~= waffle.wibox_.drawable and not waffle.to_be_activated then
-        waffle:hide()
-    end
-end
-
-function waffle:connect_button_signals()
-    capi.awesome.connect_signal("root_button::press", on_root_button_press)
-    capi.client.connect_signal("button::press", on_client_button_press)
-    capi.drawable.connect_signal("button::press", on_drawable_button_press)
-end
-
-function waffle:disconnect_button_signals()
-    capi.awesome.disconnect_signal("root_button::press", on_root_button_press)
-    capi.client.disconnect_signal("button::press", on_client_button_press)
-    capi.drawable.disconnect_signal("button::press", on_drawable_button_press)
-end
-
 -- args.mode in {"push", "set", "pop"}
 function waffle:show(view, args)
     args = args or {}
@@ -265,8 +267,10 @@ function waffle:show(view, args)
             self.autohide_ = true
             self.autohide_locking_callback_ = args.autohide_locking_callback
             self.autohide_timer_.timeout = tonumber(args.autohide) or 1
+            self.widget_container.apply_shape = true
         else
             self.autohide_ = false
+            self.widget_container.apply_shape = false
         end
     end
 
@@ -296,7 +300,6 @@ function waffle:show(view, args)
     end
 
     if self.wibox_.input_passthrough then
-        self:connect_button_signals()
         self.wibox_.input_passthrough = false
     end
 
@@ -367,9 +370,9 @@ function waffle:hide()
 
     self:set_view(nil)
     self:clear_stack()
-    self:disconnect_button_signals()
     self.autohide_ = false
     self.autohide_locking_callback_ = nil
+    self.mouse_entered_ = false
     capi.awesome.emit_signal("waffle.hide")
 end
 
