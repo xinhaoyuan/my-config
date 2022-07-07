@@ -20,8 +20,6 @@ local af = require("my-autofocus")
 --   .key_handler (optional) -- the key handling function. It returns a boolean if the key event is captured.
 
 local waffle = {
-    -- TODO: Gravity is deprecated.
-    gravity_ = "southwest",
 }
 
 local PlacementLayout = {mt = {}}
@@ -103,49 +101,35 @@ end
 setmetatable(PlacementLayout, PlacementLayout.mt)
 
 waffle.widget_container = wibox.widget {
+    {
+        widget = wibox.container.background,
+    },
     widget = PlacementLayout,
 }
--- waffle.widget_container:connect_signal(
---     "button::press",
---     function (_, x, y, button, _, info)
---         local f = info.drawable:find_widgets(x, y)
---         if #f == 1 then
---             -- Only happens only if clicking the empty area
---             waffle:hide()
---         end
--- end)
-
-function waffle:update_layout(screen)
-    screen = screen or (self.wibox_ and self.wibox_.screen)
-    if screen then
-        if beautiful.waffle_use_entire_screen then
-            self.wibox_:geometry({
-                    x = screen.geometry.x,
-                    y = screen.geometry.y,
-                    width = screen.geometry.width,
-                    height = screen.geometry.height,
-            })
-        else
-            self.wibox_:geometry({
-                    x = screen.workarea.x,
-                    y = screen.workarea.y,
-                    width = screen.workarea.width,
-                    height = screen.workarea.height,
-            })
+waffle.widget_container:connect_signal(
+    "button::release",
+    function (_, x, y, button, _, info)
+        local f = info.drawable:find_widgets(x, y)
+        if #f == 1 then
+            -- Only happens only if clicking the empty area
+            if button == 1 then
+                waffle:hide()
+            elseif button == 3 then
+                waffle:go_back()
+            end
         end
-    end
+    end)
+waffle.widget_container:connect_signal(
+    "mouse::leave",
+    function ()
+        -- waffle:hide()
+    end)
 
-    if self.wibox_ and self.wibox_.widget == nil then
-        self.wibox_.widget = self.widget_container
-    end
-end
-
-function waffle:set_gravity(gravity)
-    if self.gravity_ ~= gravity then
-        self.gravity_ = gravity
-        self:update_layout()
-    end
-end
+waffle.widget_container.widget:connect_signal(
+    "mouse::leave",
+    function ()
+        waffle:autohide_delayed_check(true)
+    end)
 
 function waffle:set_view(view, is_new_view)
     if self.view_ and self.view_.on_close then
@@ -156,7 +140,7 @@ function waffle:set_view(view, is_new_view)
         if view.on_open then
             view:on_open(self.wibox_.screen, is_new_view)
         end
-        self.widget_container.widget = view.widget
+        self.widget_container.widget.widget = view.widget
     end
 end
 
@@ -180,18 +164,19 @@ function waffle:get_waffle_wibox(screen)
         self.screen_wibox_ = {}
     end
     local screen_wibox = self.screen_wibox_[screen]
+    local screen_geo = beautiful.waffle_use_entire_screen and screen.geometry or screen.workarea
     if screen_wibox == nil or
-        screen_wibox.x ~= screen.geometry.x or
-        screen_wibox.y ~= screen.geometry.y or
-        screen_wibox.width ~= screen.geometry.width or
-        screen_wibox.height ~= screen.geometry.height
+        screen_wibox.x ~= screen_geo.x or
+        screen_wibox.y ~= screen_geo.y or
+        screen_wibox.width ~= screen_geo.width or
+        screen_wibox.height ~= screen_geo.height
     then
         screen_wibox = wibox{
             screen = screen,
-            x = screen.geometry.x,
-            y = screen.geometry.y,
-            width = screen.geometry.width,
-            height = screen.geometry.height,
+            x = screen_geo.x,
+            y = screen_geo.y,
+            width = screen_geo.width,
+            height = screen_geo.height,
             bg = "#00000000",
             opacity = 1,
             ontop = true,
@@ -201,11 +186,6 @@ function waffle:get_waffle_wibox(screen)
         }
 
         local this = self
-        screen_wibox:connect_signal(
-            "mouse::leave",
-            function ()
-                this:autohide_delayed_check(true)
-            end)
         self.screen_wibox_[screen] = screen_wibox
     end
     return screen_wibox
@@ -267,7 +247,7 @@ function waffle:show(view, args)
                 single_shot = true,
                 callback = function ()
                     if this.autohide_ then
-                        if this.wibox_ and capi.mouse.current_wibox == this.wibox_ then
+                        if this.wibox_ and capi.mouse.current_wibox == this.wibox_ and #capi.mouse.current_widgets > 1 then
                             return
                         end
                         if self.autohide_locking_callback_ and self.autohide_locking_callback_() then
