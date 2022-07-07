@@ -228,10 +228,10 @@ function lister:new(args)
                         end
                     end
                 end)
-            container:connect_signal(
-                "mouse::enter", function (self, _x, _y)
-                    ret.focus = self.index
-                end)
+            -- container:connect_signal(
+            --     "mouse::enter", function (self, _x, _y)
+            --         ret.focus = self.index
+            --     end)
             table.insert(state.scrlist.children, container)
         end
         state.scrlist.children[index].child = widget

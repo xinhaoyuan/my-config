@@ -343,6 +343,9 @@ function waffle:show(view, args)
 end
 
 function waffle:go_back()
+    if self.view_ and self.view_.handle_back and self.view_:handle_back() then
+        return
+    end
     local headpos = self.stack_ and #self.stack_ or 0
     if headpos >= 1 then
         local last = self.stack_[headpos]

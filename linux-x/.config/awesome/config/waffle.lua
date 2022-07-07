@@ -1313,6 +1313,14 @@ waffle_root_view = bento{
     cover = waffle_dashboard_view,
     source_generator = get_source,
 }
+function waffle_root_view:handle_back()
+    if not waffle_dashboard_view.active then
+        -- Go back to dashboard.
+        self:key_handler({}, "Escape", "press")
+        self:key_handler({}, "Escape", "press")
+        return true
+    end
+end
 
 waffle:set_root_view(waffle_root_view)
 
