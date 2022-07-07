@@ -142,14 +142,14 @@ waffle.widget_container:connect_signal(
     end)
 waffle.widget_container:connect_signal(
     "mouse::leave",
-    function (_self, t)
+    function (_self, _info)
         if waffle.mouse_entered_ and not waffle:autohide() then
             waffle:hide()
         end
     end)
 waffle.widget_container:connect_signal(
     "mouse::enter",
-    function (_self, t)
+    function (_self, _info)
         waffle.mouse_entered_ = true
     end)
 
