@@ -170,7 +170,7 @@ theme.taglist_squares_unsel = theme_assets.taglist_squares_unsel(
 theme.notification_icon_size = dpi(48)
 
 -- custom property string
--- Interesting fonts: Hack, Iosevka SS08 (or SS03), Lato, Quicksand, Lobster Two, Purisa, Dosis
+-- Interesting fonts: Hack, Iosevka SS08 (or SS03), Lato, Quicksand, Lobster Two, Purisa, Dosis, Fantasque Sans Mono, Agave, Ubuntu Mono, mononoki
 theme.font_name_normal = "Iosevka XY Sans UI"
 -- custom property string
 theme.font_name_mono = "Iosevka XY Sans UI"
@@ -577,27 +577,28 @@ else
     theme.rect_with_corners = gshape.rectangle
 end
 
-theme.decorator_shade_width = 0 -- dpi(10)
 theme.decorator_border_width = 3
-theme.decorator_padding_width = 2
--- theme.decorator = decorator.presets.soft_relief{
---     light_shade = "#ffffff40",
---     high_light_shade = "#ffffff80",
---     dark_shade = "#00000040",
---     high_dark_shade = "#00000080",
---     radius = dpi(6),
---     shade_width = theme.decorator_shade_width,
---     border_width = theme.decorator_border_width,
---     padding_width = theme.decorator_padding_width,
--- }
-theme.decorator = decorator.presets.cutted_box{
-    padding_color = theme.bg_normal,
+theme.decorator_padding_width = 3
+theme.decorator_shade_width = dpi(6)
+theme.decorator = decorator.presets.soft_relief{
+    light_shade = "#ffffff40",
+    high_light_shade = "#ffffff80",
+    dark_shade = "#00000040",
+    high_dark_shade = "#00000080",
+    radius = dpi(6),
+    shade_width = theme.decorator_shade_width,
     border_width = theme.decorator_border_width,
-    inner_padding_width = theme.decorator_padding_width,
-    outer_padding_width = theme.decorator_padding_width,
-    top_left_cut = dpi(8),
-    bottom_right_cut = dpi(8),
+    padding_width = theme.decorator_padding_width,
 }
+-- theme.decorator_shade_width = theme.decorator_padding_width
+-- theme.decorator = decorator.presets.cutted_box{
+--     padding_color = theme.bg_normal,
+--     border_width = theme.decorator_border_width,
+--     inner_padding_width = theme.decorator_padding_width,
+--     outer_padding_width = theme.decorator_shade_width,
+--     top_left_cut = dpi(8),
+--     bottom_right_cut = dpi(8),
+-- }
 
 local function dispose_pattern(pattern)
     local status, s = pattern:get_surface()

@@ -510,6 +510,7 @@ function module.presets.soft_relief(args)
         gcolor.parse_color(args.high_dark_shade or args.dark_shade)
     local border_width = args.border_width
     local padding_width = args.padding_width or 0
+    local extra_width = args.shade_width + border_width + padding_width
 
     return module.create{
         top_left_border = function (self, context, cr, width, _height)
@@ -896,10 +897,10 @@ function module.presets.soft_relief(args)
             cr:arc(0, 0, width, 0, math.pi / 2)
             cr:fill()
         end,
-        top_space = args.shade_width + args.radius,
-        bottom_space = args.shade_width + args.radius,
-        left_space = args.shade_width + args.radius,
-        right_space = args.shade_width + args.radius,
+        top_space = extra_width + args.radius,
+        bottom_space = extra_width + args.radius,
+        left_space = extra_width + args.radius,
+        right_space = extra_width + args.radius,
         top_size = args.radius,
         bottom_size = args.radius,
         left_size = args.radius,

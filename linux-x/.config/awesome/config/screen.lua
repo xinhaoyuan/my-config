@@ -615,9 +615,9 @@ local function setup_screen(scr)
        opacity = 1,
        [size_index[shared.vars.bar_position]] =
            beautiful.bar_height +
-           -- beautiful.decorator_shade_width,
+           beautiful.decorator_shade_width +
            beautiful.decorator_border_width +
-           beautiful.decorator_padding_width * 2,
+           beautiful.decorator_padding_width,
        cursor = "cross",
        visible = true,
        type = "dock",

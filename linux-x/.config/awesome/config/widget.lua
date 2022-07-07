@@ -219,12 +219,13 @@ do
 
        -- Match the calculation in htop.
        local total = mem["MemTotal"]
-       local cached = mem["Cached"] + mem["SReclaimable"] - mem["Shmem"]
+       local shared = mem["Shmem"]
+       local cached = mem["Cached"] + mem["SReclaimable"] - shared
        local cached_or_buffered = mem["Buffers"] + cached
-       local used = total - mem["MemFree"] - cached_or_buffered
+       local used = total - mem["MemFree"] - cached_or_buffered - shared
        local usage = math.floor(used / total * 100 + 0.5)
 
-       local markup = "<span font_desc='" .. font_info .. "'>"..format_size(used * 1024, false).."B "..format_size(cached_or_buffered * 1024, false).."B "..format_duration(uptime).."</span>"
+       local markup = "<span font_desc='" .. font_info .. "'>"..format_size(used * 1024, false).."B "..format_size(shared * 1024, false).."B "..format_size(cached_or_buffered * 1024, false).."B "..format_duration(uptime).."</span>"
        ram_text_widget:set_markup(markup)
        ram_graph_widget:add_value(usage)
    end
