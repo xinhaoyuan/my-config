@@ -1115,7 +1115,7 @@ local global_keys = {
    awful.key({ "Mod4" }, "l",               function () shared.action.screen_locker() end),
    awful.key({ "Mod4" }, "t",               function () shared.action.calendar() end),
    awful.key({ "Mod4" }, "a",               function () capi.awesome.emit_signal("show_calendar_waffle", {anchor = "screen"}) end),
-   awful.key({ "Mod4" }, "r",               function () shared.action.launcher() end),
+   awful.key({ "Mod4" }, "r",               function () shared.waffle.launcher() end),
    awful.key({ "Mod4" }, "F1",              function () shared.action.terminal_session{ name = "F1" } end),
    awful.key({ "Mod4" }, "F2",              function () shared.action.terminal_session{ name = "F2" } end),
    awful.key({ "Mod4" }, "F3",              function () shared.action.terminal_session{ name = "F3" } end),

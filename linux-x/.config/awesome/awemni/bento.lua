@@ -120,7 +120,7 @@ function bento:new(args)
     function key_handler(mods, key, event)
         if (key == "Escape" or key == "BackSpace") and
             (bento_lister.input == nil or bento_lister.input == "") then
-            if cover and not cover.active and cover.key_handler and event == "press" then
+            if key == "BackSpace" and cover and not cover.active and cover.key_handler and event == "press" then
                 reset_input()
                 return true
             else

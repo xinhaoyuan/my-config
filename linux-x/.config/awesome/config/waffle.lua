@@ -1321,6 +1321,11 @@ function waffle_root_view:handle_back()
         return true
     end
 end
+function shared.waffle.launcher()
+    waffle_dashboard_view.active = false
+    waffle_root_source_mode = nil
+    waffle:show(nil, {anchor = "screen"})
+end
 
 waffle:set_root_view(waffle_root_view)
 
@@ -1341,7 +1346,7 @@ capi.awesome.connect_signal(
 capi.awesome.connect_signal(
     "toggle_calendar_waffle",
     function (args)
-        if waffle:is_in_view(waffle_calendar_view) then
+        if waffle:is_in_view(waffle_calendar_view) and not waffle:autohide() then
             waffle:hide()
         else
             waffle:show(waffle_calendar_view, args)
