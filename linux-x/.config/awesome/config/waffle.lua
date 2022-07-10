@@ -1206,11 +1206,64 @@ function get_audio_source_switch_source()
     return ret
 end
 
+local function get_screen_layout_source()
+    local ret = source.filter{
+        upstream = source.dummy,
+        filter_cb = function (f, e)
+            if f == nil then return true end
+            f = f:lower()
+            return e.name:lower():find(f) ~= nil
+        end,
+        post_filter_cb = function (e)
+            local w = wibox.widget{
+                {
+                    {
+                        text = e.name,
+                        widget = wibox.widget.textbox,
+                    },
+                    margins = dpi(2),
+                    widget = wibox.container.margin,
+                },
+                fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
+                bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+                widget = ocontainer,
+            }
+            function w:execute()
+                local cmd
+                if e.name == "[auto]" then
+                    cmd = {"autorandr", "-c"}
+                else
+                    cmd = {"autorandr", e.name}
+                end
+                waffle:hide()
+                awful.spawn(cmd, false)
+            end
+            function w:set_focused(v)
+                self.context_transformation = {highlighted = v}
+            end
+            return w
+        end,
+    }
+    ret:reset()
+    awful.spawn.easy_async_with_shell(
+        [[echo "[auto]"; ls $HOME/.config/autorandr]],
+        function (stdout, _stderr, _exitreason, _exitcode)
+            for line in string.gmatch(stdout, "[^\n\r]+") do
+                ret:on_upstream_next_data{name = line}
+            end
+            ret:on_upstream_next_data(nil)
+        end
+    )
+    return ret
+end
+
 function get_source()
     if waffle_root_source_mode == "audio_sink" then
         return get_audio_sink_switch_source()
     elseif waffle_root_source_mode == "audio_source" then
         return get_audio_source_switch_source()
+    elseif waffle_root_source_mode == "screen_layout" then
+        return get_screen_layout_source()
     end
     return get_apps_widget_source()
 end
@@ -1988,15 +2041,13 @@ waffle_settings_view = view{
                         if alt then
                             local cmd = {"arandr"}
                             awful.spawn(cmd)
+                            waffle:hide()
                         else
-                            local cmd = {"rofi-screen-layout",
-                                         "-normal-window",
-                                         "-font", beautiful.font,
-                                         "-dpi", tostring(dpi(96))
-                                        }
-                            awful.spawn(cmd)
+                            waffle_root_source_mode = "screen_layout"
+                            waffle_root_view:reload_source()
+                            waffle_dashboard_view.active = false
+                            waffle:go_back()
                         end
-                        waffle:hide()
                     end
                 },
                 layout = wibox.layout.fixed.vertical,
