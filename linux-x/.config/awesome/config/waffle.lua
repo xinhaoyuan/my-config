@@ -2316,22 +2316,28 @@ local client_waffle = view {
                             end,
                             buttons = awful.util.table.join(
                                 awful.button({ }, 1, function ()
-                                                 local client = shared.waffle_selected_client
+                                                 local c = shared.waffle_selected_client
                                                  waffle:hide()
-                                                 if not client.valid then
+                                                 if not c.valid then
                                                      return
                                                  end
-                                                 local geo = client:geometry()
+                                                 c:raise()
+                                                 c.maximized = false
+                                                 c.minimized = false
+                                                 local geo = c:geometry()
                                                  mouse.coords({ x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 })
-                                                 awful.mouse.client.move(client)
+                                                 awful.mouse.client.move(c)
                                              end),
                                 awful.button({ }, 3, function ()
-                                                 local client = shared.waffle_selected_client
+                                                 local c = shared.waffle_selected_client
                                                  waffle:hide()
-                                                 if not client.valid then
+                                                 if not c.valid then
                                                      return
                                                  end
-                                                 awful.mouse.client.resize(client, "bottom_right")
+                                                 c:raise()
+                                                 c.maximized = false
+                                                 c.minimized = false
+                                                 awful.mouse.client.resize(c, "bottom_right")
                                              end)),
                     }),
                     button({

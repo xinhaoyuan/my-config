@@ -4,8 +4,10 @@ local capi = {
     mouse = mouse,
     client = client,
     root = root,
+    mousegrabber = mousegrabber,
 }
 local gcolor = require("gears.color")
+local gtimer = require("gears.timer")
 local icons = require("icons")
 local beautiful = require("beautiful")
 local awful = require("awful")
@@ -81,20 +83,58 @@ local function tasklist_item_button(w, c, b)
     end
 end
 
+local mouse_resize_back_to_tasklist
+local function move_mouse_back_to_tasklist_if_needed(c)
+    if not mouse_resize_back_to_tasklist then return end
+    mouse_resize_back_to_tasklist = nil
+    mouse.coords({ x = c.tasklist_x, y = c.tasklist_y })
+end
+awful.mouse.resize.add_leave_callback(move_mouse_back_to_tasklist_if_needed, "mouse.move")
+awful.mouse.resize.add_leave_callback(move_mouse_back_to_tasklist_if_needed, "mouse.resize")
 local function attach_tasklist_item_buttons(w, c)
+    local orig_draw = w.draw
+    function w:draw(context, cr, width, height)
+        local wb_geo = context.wibox
+        local x, y, _, _ = wibox.widget.base.rect_to_device_geometry(cr, 0, 0, width, height)
+        c.tasklist_x = math.floor(wb_geo.x + x + width / 2)
+        c.tasklist_y = math.floor(wb_geo.y + y + height / 2)
+        return orig_draw and orig_draw(self, context, cr, width, height)
+    end
     w.button_pressed = {}
     w:connect_signal(
-        'button::press', function (w, x, y, button)
+        'button::press', function (_w, _x, _y, button, _mods, _info)
             waffle_was_there =
                 shared.waffle_selected_client ~= nil and not waffle:autohide()
-            w.button_pressed[button] = true
-        end)
-    w:connect_signal(
-        'button::release', function (w, x, y, button)
-            if w.button_pressed[button] then
-                w.button_pressed[button] = false
-                tasklist_item_button(w, c, button)
-            end
+            local start_pos = capi.mouse.coords()
+            capi.mousegrabber.run(
+                function (info)
+                    if not info.buttons[button] then
+                        tasklist_item_button(w, c, button)
+                        return false
+                    end
+                    if math.abs(info.x - start_pos.x) > dpi(8) or math.abs(info.y - start_pos.y) > dpi(8) then
+                        -- Dragging
+                        if button == 1 then
+                            c:raise()
+                            c.maximized = false
+                            c.minimized = false
+                            local geo = c:geometry()
+                            mouse.coords({ x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 })
+                            mouse_resize_back_to_tasklist = true
+                            gtimer.delayed_call(awful.mouse.client.move, c)
+                        elseif button == 3 then
+                            c:raise()
+                            c.maximized = false
+                            c.minimized = false
+                            mouse_resize_back_to_tasklist = true
+                            gtimer.delayed_call(awful.mouse.client.resize, c, "bottom_right")
+                        end
+                        return false
+                    end
+                    return true
+                end,
+                "cross")
+            -- w.button_pressed[button] = true
         end)
     w:connect_signal(
         'mouse::enter', function (w, x, y, button)
@@ -130,21 +170,7 @@ local function attach_tasklist_item_buttons(w, c)
             end
         end)
     w:connect_signal(
-        'mouse::leave', function (w, x, y, button)
-            if w.button_pressed[1] then
-                c:raise()
-                c.maximized = false
-                c.minimized = false
-                local geo = c:geometry()
-                mouse.coords({ x = geo.x + geo.width / 2, y = geo.y + geo.height / 2 })
-                awful.mouse.client.move(c)
-            elseif w.button_pressed[3] then
-                c:raise()
-                c.maximized = false
-                c.minimized = false
-                awful.mouse.client.resize(c, "bottom_right")
-            end
-            w.button_pressed = {}
+        'mouse::leave', function (_w, _x, _y, _button)
             waffle:autohide_delayed_check(true)
         end)
 end
