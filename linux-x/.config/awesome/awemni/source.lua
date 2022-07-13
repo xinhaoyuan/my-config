@@ -1,4 +1,4 @@
--- Abstrations of lazy data pulling and transfromation from data streams.
+-- Abstrations of lazy data pulling and transformation from async data streams.
 
 local dummy = {
     fetch_async = function () end,
