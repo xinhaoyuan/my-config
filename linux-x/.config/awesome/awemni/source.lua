@@ -67,9 +67,9 @@ local function filter(args)
                 filtered_last_done = filtered_last_done + 1
                 filtered[filtered_last_done] = filtered_upstream_index
                 if pending_requests[filtered_last_done] then
-                    upstream_post_data[upstream_index] = post_filter_cb(upstream_data[upstream_index])
+                    upstream_post_data[filtered_upstream_index] = post_filter_cb(upstream_data[filtered_upstream_index])
                     for _, cb in ipairs(pending_requests[filtered_last_done]) do
-                        cb(filtered_last_done, upstream_post_data[upstream_index])
+                        cb(filtered_last_done, upstream_post_data[filtered_upstream_index])
                     end
                     pending_requests[filtered_last_done] = nil
                     pending_filtered_indices = pending_filtered_indices - 1
