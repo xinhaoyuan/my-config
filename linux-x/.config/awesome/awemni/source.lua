@@ -23,6 +23,8 @@ local function ignore_self(f)
 end
 local function filter(args)
     local upstream = args.upstream
+    local cache_upstream = args.cache_upstream
+    if cache_upstream == nil then cache_upstream = true end
     local pre_filter_cb = args.pre_filter_cb or id_func
     local filter_cb = args.filter_cb or true_func
     local post_filter_cb = args.post_filter_cb or id_func
@@ -146,6 +148,11 @@ local function filter(args)
             end
         end,
         reset = function (_self, input, new_ready_cb)
+            if not cache_upstream then
+                upstream_data = {}
+                upstream_post_data = {}
+                upstream_sealed = nil
+            end
             filtered_upstream_index = 0
             filtered = {}
             filtered_last_done = 0
