@@ -2044,7 +2044,6 @@ waffle_settings_view = view{
                             waffle:hide()
                         else
                             waffle_root_source_mode = "screen_layout"
-                            waffle_root_view:reload_source()
                             waffle_dashboard_view.active = false
                             waffle:go_back()
                         end
