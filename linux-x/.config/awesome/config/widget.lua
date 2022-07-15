@@ -10,8 +10,8 @@ local masked_imagebox = require("masked_imagebox")
 local outlined_textbox = require("outlined_textbox")
 local gshape = require("gears.shape")
 
-local update_interval_s = 1
--- TODO dedpu with waffle.lua
+local update_interval_s = 2
+-- TODO dedup with waffle.lua
 local button_padding = beautiful.sep_small_size or dpi(4)
 local font_info = beautiful.font_minor
 
