@@ -19,12 +19,18 @@ local is_gravity_vertical = {
     ["top"] = true, ["bottom"] = true
 }
 
+local function array_length(a)
+    local mt = getmetatable(a)
+    if mt and mt.__len then return mt.__len(a) end
+    return #a
+end
+
 function scrlist:compute_children_sizes(available_size, compute_child_size)
     local prev_sizes = {}
     local next_sizes = {}
     local anchor_index = self._private.anchor_index
     local alignment = alignment_to_number[self._private.alignment] or 1
-    local children_count = #self._private.children
+    local children_count = array_length(self._private.children)
     local anchor_size = compute_child_size(self._private.children[anchor_index], total_size)
     local prev_available_size, next_available_size
     if alignment == -1 then
@@ -113,16 +119,35 @@ function scrlist:get_width_measurement_function(context, content_height)
 end
 
 function scrlist:layout(context, width, height)
-    if width <= 0 or height <= 0 or #self._private.children == 0 then return {} end
+    if width <= 0 or height <= 0 then return {} end
+    local size = array_length(self._private.children)
+    if size == 0 then return {} end
     local ret = {}
     if is_gravity_vertical[self._private.gravity] then
         local content_width = math.max(width - self._private.scrollbar_size, 0)
-        local anchor_height, prev_heights, next_heights, prev_adjustment, next_adjustment = self:compute_children_sizes(
-            height, self:get_height_measurement_function(context, content_width))
+        local anchor_height, prev_heights, next_heights, prev_adjustment, next_adjustment
+        while true do
+            anchor_height, prev_heights, next_heights, prev_adjustment, next_adjustment =
+                self:compute_children_sizes(
+                    height, self:get_height_measurement_function(context, content_width))
+            self._private.start_index = self._private.anchor_index - #prev_heights
+            self._private.end_index = self._private.anchor_index + #next_heights
+            if self._private.focused_index then
+                if self._private.focused_index < self._private.start_index then
+                    self._private.anchor_index = self._private.focused_index
+                    self._private.alignment = "start"
+                elseif self._private.focused_index > self._private.end_index then
+                    self._private.anchor_index = self._private.focused_index
+                    self._private.alignment = "end"
+                else
+                    break
+                end
+            else
+                break
+            end
+        end
         local gravity = self._private.gravity
         local current_y = prev_adjustment
-        self._private.start_index = self._private.anchor_index - #prev_heights
-        self._private.end_index = self._private.anchor_index + #next_heights
         if next_adjustment < 0 and #next_heights > 0 then
             self._private.end_index = self._private.end_index - 1
         end
@@ -130,7 +155,7 @@ function scrlist:layout(context, width, height)
             self._private.start_index = self._private.start_index + 1
         end
         if self._private.start_index == 1 and
-            self._private.end_index == #self._private.children and
+            self._private.end_index == size and
             self._private.scrollbar_autohide then
             content_width = width
         end
@@ -171,7 +196,7 @@ function scrlist:layout(context, width, height)
             self._private.start_index = self._private.start_index + 1
         end
         if self._private.start_index == 1 and
-            self._private.end_index == #self._private.children and
+            self._private.end_index == size and
             self._private.scrollbar_autohide then
             content_height = height
         end
@@ -202,7 +227,7 @@ function scrlist:layout(context, width, height)
 end
 
 function scrlist:fit(context, width, height)
-    if width <= 0 or height <= 0 or #self._private.children == 0 then return 0, 0 end
+    if width <= 0 or height <= 0 or array_length(self._private.children) == 0 then return 0, 0 end
     if is_gravity_vertical[self._private.gravity] then
         local content_width = math.max(width - self._private.scrollbar_size, 0)
         local _, _, _, _, _, total_height = self:compute_children_sizes(
@@ -237,7 +262,7 @@ function scrlist:draw(context, cr, width, height)
         self._private.scrollbar_size == 0 then
         return
     end
-    local effective_count = math.max(self._private.extended_count or 0, #self._private.children)
+    local effective_count = math.max(self._private.extended_count or 0, array_length(self._private.children))
     if self._private.start_index == 1 and
         self._private.end_index == effective_count and
         self._private.scrollbar_autohide then
@@ -271,7 +296,7 @@ function scrlist:set_children(children)
     self._private.children = children or {}
     self._private.start_index = nil
     self._private.end_index = nil
-    self._private.anchor_index = 1
+    self._private.anchor_index = math.max(1, math.min(self._private.anchor_index, array_length(children)))
     self:emit_signal("property::children")
 end
 
@@ -285,13 +310,33 @@ function scrlist:get_anchor_index()
 end
 
 function scrlist:set_anchor_index(value)
-    value = math.min(#self._private.children, math.max(1, value or 1))
+    value = math.max(1, math.min(value or 1, array_length(self._private.children)))
     if self._private.anchor_index ~= value then
         self._private.anchor_index = value
         self._private.start_index = nil
         self._private.end_index = nil
         self:emit_signal("widget::layout_changed")
         self:emit_signal("widget::redraw_needed")
+    end
+end
+
+function scrlist:get_focused_index()
+    return self._private.focused_index
+end
+
+function scrlist:set_focused_index(value)
+    value = value and math.max(1, math.min(value or 1, array_length(self._private.children)))
+    if self._private.focused_index ~= value then
+        self._private.focused_index = value
+        if value then
+            if self._private.start_index and self._private.start_index > value then
+                self.anchor_index = value
+                self.alignment = "start"
+            elseif self._private.end_index and self._private.end_index < value then
+                self.anchor_index = value
+                self.alignment = "end"
+            end
+        end
     end
 end
 
@@ -319,11 +364,6 @@ function scrlist:set_alignment(value)
         self:emit_signal("widget::layout_changed")
         self:emit_signal("widget::redraw_needed")
     end
-end
-
-function scrlist:add(w)
-    table.insert(self._private.children, w)
-    self:emit_signal("property::children")
 end
 
 function scrlist:set_scrollbar(scrollbar)
@@ -383,6 +423,7 @@ local function new(args)
     ret._private.start_index = nil
     ret._private.end_index = nil
     ret._private.anchor_index = 1
+    ret._private.focused_index = nil
     ret._private.extended_count = nil
     ret._private.gravity = "top"
     ret._private.alignment = "start"

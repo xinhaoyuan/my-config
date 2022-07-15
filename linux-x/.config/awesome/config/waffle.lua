@@ -35,8 +35,8 @@ local fts = require("hotpot").focus_timestamp
 local dpi = require("beautiful.xresources").apply_dpi
 local ocontainer = require("onion.container")
 local opicker = require("onion.picker")
-local source = require("awemni.source")
-local bento = require("awemni.bento")
+local source = require("awemni.ng.source")
+local bento = require("awemni.ng.bento")
 
 local waffle_width = beautiful.waffle_panel_width or dpi(240)
 local calendar_waffle_width = waffle_width
@@ -1061,197 +1061,225 @@ function get_apps_widget_source()
         end
     end
     table.sort(apps, function (a, b) return a.name < b.name end)
-    local apps_source = source.filter{
-        upstream = source.from_array(apps),
-        filter_cb = function (f, e)
-            if f == nil then return true end
-            f = f:lower()
-            return e.name:lower():find(f) ~= nil
-        end,
-        post_filter_cb = function (e)
-            local w = wibox.widget{
-                {
+    local apps_source = source.filterable{
+        upstream = source.array_proxy{
+            array = apps,
+        },
+        callbacks = {
+            filter = function (f, e)
+                if f == nil then return true end
+                f = f:lower()
+                return e.name:lower():find(f) ~= nil
+            end,
+            post_filter = function (e)
+                local w = wibox.widget{
                     {
                         {
-                            text = e.name,
-                            widget = wibox.widget.textbox,
-                        },
-                        {
-                            id = "desc",
                             {
-                                {
-                                    font = font_info,
-                                    text = e.ai:get_description(),
-                                    widget = wibox.widget.textbox,
-                                },
-                                height = 60,
-                                strategy = "max",
-                                widget = wibox.container.constraint,
+                                text = e.name,
+                                widget = wibox.widget.textbox,
                             },
-                            top = dpi(2),
-                            left = dpi(2),
-                            right = dpi(2),
-                            draw_empty = false,
-                            widget = wibox.container.margin,
+                            {
+                                id = "desc",
+                                {
+                                    {
+                                        font = font_info,
+                                        text = e.ai:get_description(),
+                                        widget = wibox.widget.textbox,
+                                    },
+                                    height = 60,
+                                    strategy = "max",
+                                    widget = wibox.container.constraint,
+                                },
+                                top = dpi(2),
+                                left = dpi(2),
+                                right = dpi(2),
+                                draw_empty = false,
+                                widget = wibox.container.margin,
+                            },
+                            layout = wibox.layout.fixed.vertical,
                         },
-                        layout = wibox.layout.fixed.vertical,
+                        margins = dpi(2),
+                        widget = wibox.container.margin,
                     },
-                    margins = dpi(2),
-                    widget = wibox.container.margin,
-                },
-                fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-                bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
-                widget = ocontainer,
-            }
-            function w:execute()
-                awful.spawn(e.ai:get_executable())
-                waffle:hide()
-            end
-            function w:set_focused(v)
-                self.context_transformation = {highlighted = v}
-            end
-            return w
-        end,
+                    fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
+                    bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+                    widget = ocontainer,
+                }
+                function w:execute()
+                    awful.spawn(e.ai:get_executable())
+                    waffle:hide()
+                end
+                function w:set_focused(v)
+                    self.context_transformation = {highlighted = v}
+                end
+                return w
+            end,
+        },
     }
     return apps_source
 end
 
 function get_audio_sink_switch_source()
-    local ret = source.filter{
-        upstream = source.dummy,
-        filter_cb = function (f, e)
-            if f == nil then return true end
-            f = f:lower()
-            return e.name:lower():find(f) ~= nil
-        end,
-        post_filter_cb = function (e)
-            local w = wibox.widget{
-                {
+    local output = source.array_proxy()
+    local ret = source.filterable{
+        upstream = output,
+        callbacks = {
+            filter = function (f, e)
+                if f == nil then return true end
+                f = f:lower()
+                return e.name:lower():find(f) ~= nil
+            end,
+            post_filter = function (e)
+                local w = wibox.widget{
                     {
-                        text = e.name,
-                        widget = wibox.widget.textbox,
+                        {
+                            text = e.name,
+                            widget = wibox.widget.textbox,
+                        },
+                        margins = dpi(2),
+                        widget = wibox.container.margin,
                     },
-                    margins = dpi(2),
-                    widget = wibox.container.margin,
-                },
-                fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-                bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
-                widget = ocontainer,
-            }
-            function w:execute()
-                awful.spawn({"pactl", "set-default-sink", tostring(e.id)})
-                waffle:hide()
-            end
-            function w:set_focused(v)
-                self.context_transformation = {highlighted = v}
-            end
-            return w
-        end,
+                    fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
+                    bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+                    widget = ocontainer,
+                }
+                function w:execute()
+                    awful.spawn({"pactl", "set-default-sink", tostring(e.id)})
+                    waffle:hide()
+                end
+                function w:set_focused(v)
+                    self.context_transformation = {highlighted = v}
+                end
+                return w
+            end,
+        },
     }
-    ret:reset()
     awful.spawn.easy_async_with_shell(
         [[pacmd list-sinks | awk 'match($0,/index:\s*([0-9]*)/,m){id=m[1]} match($0,/device.description = "([^"]*)"/,m){print id"="m[1]}']],
         function (stdout, _stderr, _exitreason, _exitcode)
             for id, name in string.gmatch(stdout, "([^\n\r]*)=([^\n\r]*)") do
-                ret:on_upstream_next_data{id = id, name = name}
+                output:append{id = id, name = name}
             end
-            ret:on_upstream_next_data(nil)
         end
     )
     return ret
 end
 
 function get_audio_source_switch_source()
-    local ret = source.filter{
-        upstream = source.dummy,
-        filter_cb = function (f, e)
-            if f == nil then return true end
-            f = f:lower()
-            return e.name:lower():find(f) ~= nil
-        end,
-        post_filter_cb = function (e)
-            local w = wibox.widget{
-                {
+    local output = source.array_proxy()
+    local ret = source.filterable{
+        upstream = output,
+        callbacks = {
+            filter = function (f, e)
+                if f == nil then return true end
+                f = f:lower()
+                return e.name:lower():find(f) ~= nil
+            end,
+            post_filter = function (e)
+                local w = wibox.widget{
                     {
-                        text = e.name,
-                        widget = wibox.widget.textbox,
+                        {
+                            text = e.name,
+                            widget = wibox.widget.textbox,
+                        },
+                        margins = dpi(2),
+                        widget = wibox.container.margin,
                     },
-                    margins = dpi(2),
-                    widget = wibox.container.margin,
-                },
-                fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-                bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
-                widget = ocontainer,
-            }
-            function w:execute()
-                awful.spawn({"pactl", "set-default-source", tostring(e.id)})
-                waffle:hide()
-            end
-            function w:set_focused(v)
-                self.context_transformation = {highlighted = v}
-            end
-            return w
-        end,
+                    fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
+                    bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+                    widget = ocontainer,
+                }
+                function w:execute()
+                    awful.spawn({"pactl", "set-default-source", tostring(e.id)})
+                    waffle:hide()
+                end
+                function w:set_focused(v)
+                    self.context_transformation = {highlighted = v}
+                end
+                return w
+            end,
+        },
     }
-    ret:reset()
     awful.spawn.easy_async_with_shell(
         [[pacmd list-sources | awk 'match($0,/index:\s*([0-9]*)/,m){id=m[1]} match($0,/device.description = "([^"]*)"/,m){print id"="m[1]}']],
         function (stdout, _stderr, _exitreason, _exitcode)
             for id, name in string.gmatch(stdout, "([^\n\r]*)=([^\n\r]*)") do
-                ret:on_upstream_next_data{id = id, name = name}
+                output:append{id = id, name = name}
             end
-            ret:on_upstream_next_data(nil)
         end
     )
     return ret
 end
 
 local function get_screen_layout_source()
-    local ret = source.filter{
-        upstream = source.dummy,
-        filter_cb = function (f, e)
-            if f == nil then return true end
-            f = f:lower()
-            return e.name:lower():find(f) ~= nil
-        end,
-        post_filter_cb = function (e)
-            local w = wibox.widget{
-                {
+    local output = source.array_proxy()
+    local ret = source.filterable{
+        upstream = output,
+        callbacks = {
+            filter = function (f, e)
+                if e == nil then return false end
+                if f == nil then return true end
+                f = f:lower()
+                return e.name:lower():find(f) ~= nil
+            end,
+            post_filter = function (e)
+                local w = wibox.widget{
                     {
-                        text = e.name,
-                        widget = wibox.widget.textbox,
+                        {
+                            text = e.name,
+                            widget = wibox.widget.textbox,
+                        },
+                        margins = dpi(2),
+                        widget = wibox.container.margin,
                     },
-                    margins = dpi(2),
-                    widget = wibox.container.margin,
-                },
-                fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-                bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
-                widget = ocontainer,
-            }
-            function w:execute()
-                local cmd
-                if e.name == "[auto]" then
-                    cmd = {"autorandr", "-c"}
-                else
-                    cmd = {"autorandr", e.name}
+                    fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
+                    bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+                    widget = ocontainer,
+                }
+                function w:execute()
+                    local cmd
+                    if e.name == "[auto]" then
+                        cmd = {"autorandr", "-c"}
+                    else
+                        cmd = {"autorandr", e.name}
+                    end
+                    waffle:hide()
+                    awful.spawn(cmd, false)
                 end
-                waffle:hide()
-                awful.spawn(cmd, false)
-            end
-            function w:set_focused(v)
-                self.context_transformation = {highlighted = v}
-            end
-            return w
-        end,
+                function w:set_focused(v)
+                    self.context_transformation = {highlighted = v}
+                end
+                return w
+            end,
+        },
     }
-    ret:reset()
+    local home_dir = os.getenv("HOME")
     awful.spawn.easy_async_with_shell(
         [[echo "[auto]"; ls $HOME/.config/autorandr]],
         function (stdout, _stderr, _exitreason, _exitcode)
-            for line in string.gmatch(stdout, "[^\n\r]+") do
-                ret:on_upstream_next_data{name = line}
+            local index = 0
+            for name in string.gmatch(stdout, "[^\n\r]+") do
+                index = index + 1
+                if name == "[auto]" then
+                    output.array[index] = {name = name}
+                else
+                    local this_index = index
+                    local this_name = name
+                    local file = gio.File.new_for_path(home_dir.."/.config/autorandr/"..name.."/config")
+                    file:load_contents_async(
+                        nil,
+                        function (_source, result)
+                            local contents, _error = file:load_contents_finish(result)
+                            if contents then
+                                -- TODO parse the config and visualize it
+                            end
+                            output.array[this_index] = {name = this_name}
+                            output:emit_signal("property::children")
+                        end)
+                end
             end
-            ret:on_upstream_next_data(nil)
+            output:set_size(index)
         end
     )
     return ret
@@ -1816,6 +1844,14 @@ shared.vars:connect_signal(
 --     end,
 -- }
 
+local waffle_calendar_source = source.filterable{
+    upstream = orgenda_items_widget,
+    callbacks = {
+        filter = function (input, e)
+            return e.item.text:lower():find(input or "") ~= nil
+        end,
+    },
+}
 waffle_calendar_view = bento{
     container = wibox.widget{
         beautiful.apply_border_to_widget_template{
@@ -1913,25 +1949,8 @@ waffle_calendar_view = bento{
                 rawset(self, index, value)
             end,
         }),
-    source_generator = function ()
-        local children = orgenda_items_widget.children
-        local items = {}
-        for i = 1, #children do items[i] = children[i] end
-        return source.filter{
-            upstream = source.from_array(items),
-            filter_cb = function (f, e)
-                if f == nil then return true end
-                f = f:lower()
-                return e.item.text:lower():find(f) ~= nil
-            end,
-        }
-    end,
+    source_generator = function () return waffle_calendar_source end,
 }
--- At this point, this callback should be invoked after the items widget is updated.
-orgenda.data:connect_signal(
-    "property::items", function ()
-        waffle_calendar_view:reload_source()
-    end)
 
 -- Settings
 

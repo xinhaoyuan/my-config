@@ -382,6 +382,7 @@ function orgenda.widget(args)
                 end
             end
             scan_for_expired_items()
+            todo_item_container:emit_signal("property::children")
         end
     )
 
