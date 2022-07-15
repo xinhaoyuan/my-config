@@ -128,8 +128,8 @@ function lister:set_focus(index)
         end
     end
     local old_container = state.scrlist.children[state.focused_index]
-    state.focused_index = index
     state.scrlist.focused_index = index
+    state.focused_index = state.scrlist.focused_index
     local new_container = state.scrlist.children[state.focused_index]
     if old_container == new_container then return end
     if old_container and old_container.child then
