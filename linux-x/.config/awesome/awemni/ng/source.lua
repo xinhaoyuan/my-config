@@ -209,7 +209,75 @@ end
 
 setmetatable(filterable, {__call = function (_self, ...) return filterable.new(...) end})
 
+local concat = {}
+
+function concat:set_upstreams(upstreams)
+    upstreams = upstreams or {}
+    local state = self._private
+    for _, s in ipairs(state.upstreams) do
+        s:disconnect_signal("property::children", self.update_from_upstreams)
+    end
+    state.upstreams = upstreams
+    for _, s in ipairs(state.upstreams) do
+        s:connect_signal("property::children", self.update_from_upstreams)
+    end
+    self.update_from_upstreams()
+end
+
+function concat:get_children()
+    return self._private.children
+end
+
+function concat:set_input(input)
+    local state = self._private
+    for _, s in ipairs(state.upstreams) do
+        s.input = input
+    end
+end
+
+function concat.new(args)
+    local ret = gobject{enable_properties = true}
+    local state
+    state = {
+        upstreams = {},
+        children = setmetatable(
+            {}, {
+                __index = function (_self, key)
+                    if type(key) ~= "number" then return nil end
+                    for i, s in ipairs(state.upstream_size) do
+                        if key <= s then
+                            return state.upstreams[i].children[key]
+                        end
+                        key = key - s
+                    end
+                    return nil
+                end,
+                __len = function ()
+                    return state.size
+                end,
+            })
+    }
+    ret._private = state
+    function ret.update_from_upstreams()
+        state.upstream_size = {}
+        state.size = 0
+        for i, s in ipairs(state.upstreams) do
+            state.upstream_size[i] = array_length(s.children)
+            state.size = state.size + state.upstream_size[i]
+        end
+        ret:emit_signal("property::children")
+    end
+    for k, v in pairs(concat) do
+        ret[k] = v
+    end
+    ret.upstreams = args.upstreams
+    return ret
+end
+
+setmetatable(concat, {__call = function (_self, ...) return concat.new(...) end})
+
 return {
     array_proxy = array_proxy,
     filterable = filterable,
+    concat = concat,
 }

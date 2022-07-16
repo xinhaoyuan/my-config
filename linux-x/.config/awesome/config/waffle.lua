@@ -1844,12 +1844,38 @@ shared.vars:connect_signal(
 --     end,
 -- }
 
-local waffle_calendar_source = source.filterable{
-    upstream = orgenda_items_widget,
-    callbacks = {
-        filter = function (input, e)
-            return e.item.text:lower():find(input or "") ~= nil
-        end,
+local waffle_calendar_source = source.concat{
+    upstreams = {
+        source.filterable{
+            upstream = notix.pinned_container,
+            callbacks = {
+                filter = function (input, e)
+                    for _, t in ipairs{e.notif.app_name, e.notif.title, e.notif.message} do
+                        if t:lower():find(input or "") then return true end
+                    end
+                    return false
+                end,
+            },
+        },
+        source.filterable{
+            upstream = notix.regular_container,
+            callbacks = {
+                filter = function (input, e)
+                    for _, t in ipairs{e.notif.app_name, e.notif.title, e.notif.message} do
+                        if t:lower():find(input or "") then return true end
+                    end
+                    return false
+                end,
+            },
+        },
+        source.filterable{
+            upstream = orgenda_items_widget,
+            callbacks = {
+                filter = function (input, e)
+                    return e.item.text:lower():find(input or "") ~= nil
+                end,
+            },
+        }
     },
 }
 waffle_calendar_view = bento{
@@ -1949,7 +1975,9 @@ waffle_calendar_view = bento{
                 rawset(self, index, value)
             end,
         }),
-    source_generator = function () return waffle_calendar_source end,
+    source_generator = function ()
+        return waffle_calendar_source
+    end,
 }
 
 -- Settings
