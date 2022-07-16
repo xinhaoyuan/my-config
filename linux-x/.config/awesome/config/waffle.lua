@@ -1398,7 +1398,7 @@ function waffle_root_view:handle_back()
     if not waffle_dashboard_view.active then
         -- Go back to dashboard.
         self:key_handler({}, "Escape", "press")
-        self:key_handler({}, "Escape", "press")
+        self:key_handler({}, "BackSpace", "press")
         return true
     end
 end
