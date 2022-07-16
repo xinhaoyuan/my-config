@@ -244,8 +244,6 @@ echo -n "uptime:"; cat /proc/uptime
 end
 
 local net_widget
-local net_has_vpn
-local net_has_wifi
 do
     local netgraph_rx_widget = wibox.widget {
         background_color = "#00000000",
@@ -399,8 +397,8 @@ do
         end
         prev_send = send
 
-        if has_vpn ~= net_has_vpn then
-            net_has_vpn = has_vpn
+        if has_vpn ~= net_widget.has_vpn then
+            net_widget.has_vpn = has_vpn
             if has_vpn then
                 net_widget_icon_container.fg_picker = opicker.beautiful{"special_", opicker.highlighted_switcher}
             else
@@ -409,8 +407,8 @@ do
             end
         end
 
-        if has_wifi ~= net_has_wifi then
-            net_has_wifi = has_wifi
+        if has_wifi ~= net_widget.has_wifi then
+            net_widget.has_wifi = has_wifi
             if has_wifi then
                 net_widget_icon_container.widget.image = icons.wifi
             else

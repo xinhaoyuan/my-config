@@ -755,7 +755,7 @@ local waffle_dashboard_status_widget = decorate_panel {
                 action = function (alt)
                     if alt then
                         -- TODO make this an action.
-                        awful.spawn({"expressvpn", net_has_vpn and "disconnect" or "connect"}, false)
+                        awful.spawn({"expressvpn", cwidget.net_widget.has_vpn and "disconnect" or "connect"}, false)
                     else
                         shared.action.terminal({"sudo", "iftop"})
                     end
