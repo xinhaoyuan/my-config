@@ -127,10 +127,10 @@ function lister:set_focus(index)
             index = state.source.sealed_count - 1
         end
     end
-    local old_container = state.scrlist.children[state.focused_index]
-    state.scrlist.focused_index = index
-    state.focused_index = state.scrlist.focused_index
-    local new_container = state.scrlist.children[state.focused_index]
+    local old_container = state.focused_index and state.scrlist.children[state.focused_index]
+    state.scrlist.view_index = index
+    state.focused_index = state.scrlist.view_index
+    local new_container = state.focused_index and state.scrlist.children[state.focused_index]
     if old_container == new_container then return end
     if old_container and old_container.child then
         old_container.child.focused = nil

@@ -132,12 +132,12 @@ function scrlist:layout(context, width, height)
                     height, self:get_height_measurement_function(context, content_width))
             self._private.start_index = self._private.anchor_index - #prev_heights
             self._private.end_index = self._private.anchor_index + #next_heights
-            if self._private.focused_index then
-                if self._private.focused_index < self._private.start_index then
-                    self._private.anchor_index = self._private.focused_index
+            if self._private.view_index then
+                if self._private.view_index < self._private.start_index then
+                    self._private.anchor_index = self._private.view_index
                     self._private.alignment = "start"
-                elseif self._private.focused_index > self._private.end_index then
-                    self._private.anchor_index = self._private.focused_index
+                elseif self._private.view_index > self._private.end_index then
+                    self._private.anchor_index = self._private.view_index
                     self._private.alignment = "end"
                 else
                     break
@@ -294,15 +294,13 @@ end
 
 function scrlist:set_children(children)
     self._private.children = children or {}
-    self._private.start_index = nil
-    self._private.end_index = nil
-    self._private.anchor_index = math.max(1, math.min(self._private.anchor_index, array_length(children)))
     self:emit_signal("property::children")
 end
 
 function scrlist:reset()
     self.children = {}
     self.extended_count = nil
+    self.view_index = nil
 end
 
 function scrlist:get_anchor_index()
@@ -320,14 +318,14 @@ function scrlist:set_anchor_index(value)
     end
 end
 
-function scrlist:get_focused_index()
-    return self._private.focused_index
+function scrlist:get_view_index()
+    return self._private.view_index
 end
 
-function scrlist:set_focused_index(value)
+function scrlist:set_view_index(value)
     value = value and math.max(1, math.min(value or 1, array_length(self._private.children)))
-    if self._private.focused_index ~= value then
-        self._private.focused_index = value
+    if self._private.view_index ~= value then
+        self._private.view_index = value
         if value then
             if self._private.start_index and self._private.start_index > value then
                 self.anchor_index = value
@@ -423,7 +421,7 @@ local function new(args)
     ret._private.start_index = nil
     ret._private.end_index = nil
     ret._private.anchor_index = 1
-    ret._private.focused_index = nil
+    ret._private.view_index = nil
     ret._private.extended_count = nil
     ret._private.gravity = "top"
     ret._private.alignment = "start"
@@ -433,6 +431,13 @@ local function new(args)
 
     ret:connect_signal(
         "property::children", function (self)
+            self._private.start_index = nil
+            self._private.end_index = nil
+            local len = array_length(self._private.children)
+            self._private.anchor_index = math.max(1, math.min(self._private.anchor_index, len))
+            if self._private.view_index then
+                self._private.view_index = math.max(1, math.min(self._private.view_index, len))
+            end
             self:emit_signal("widget::layout_changed")
             self:emit_signal("widget::redraw_needed")
         end)
