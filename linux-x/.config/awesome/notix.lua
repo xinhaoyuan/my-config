@@ -126,6 +126,7 @@ local function add_widget_to_container(widget, container)
     end
     widget.notif_container = container
     container:add(widget)
+    container:emit_signal("property::children")
 end
 
 capi.awesome.connect_signal(
@@ -212,7 +213,7 @@ function config.create_notif_widget(notif)
                 },
                 {
                     text = notif.message,
-                    font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
+                    font = beautiful.font_name_normal.." "..tostring(beautiful.font_size_small),
                     widget = wibox.widget.textbox,
                 },
                 layout = wibox.layout.fixed.vertical,
@@ -227,9 +228,10 @@ function config.create_notif_widget(notif)
     content_widget:connect_signal(
         "button::release",
         function (_, _x, _y, button)
-            if button == 1 then
-                remove_notification(notif, 2)
-            elseif button == 2 then
+            -- if button == 1 then
+            --     remove_notification(notif, 2)
+            -- else
+            if button == 2 then
                 remove_notification(notif, 1)
             elseif button == 3 then
                 if config.org_file_for_pin then
@@ -252,24 +254,23 @@ function config.create_notif_widget(notif)
             end
         end
     )
-    content_widget:connect_signal(
-        "mouse::enter",
-        function (w)
-            w.context_transformation = {highlighted = true}
-        end
-    )
-    content_widget:connect_signal(
-        "mouse::leave",
-        function (w)
-            w.context_transformation = {highlighted = false}
-        end
-    )
 
-    return wibox.widget{
+    local ret = wibox.widget{
         content_widget,
         action_container,
+        notif = notif,
         layout = wibox.layout.fixed.vertical,
     }
+
+    function ret:execute()
+        remove_notification(notif, 2)
+    end
+
+    function ret:set_focused(f)
+        content_widget.context_transformation = {highlighted = f}
+    end
+
+    return ret
 end
 
 function config.create_button(name, callback)
@@ -277,7 +278,7 @@ function config.create_button(name, callback)
         {
             {
                 text = name,
-                font = beautiful.fontname_normal.." "..tostring(beautiful.fontsize_small),
+                font = beautiful.font_name_normal.." "..tostring(beautiful.font_size_small),
                 align = "center",
                 widget = wibox.widget.textbox,
             },
@@ -316,9 +317,10 @@ remove_notification = function (notif, reason)
     if notif_widgets[notif.notif_id] == nil then
         return
     end
-    notif_widgets[notif.notif_id].notif_container:remove_widgets(
-        notif_widgets[notif.notif_id])
+    local container = notif_widgets[notif.notif_id].notif_container
+    container:remove_widgets(notif_widgets[notif.notif_id])
     notif_widgets[notif.notif_id] = nil
+    container:emit_signal("property::children")
 
     -- This is a hack depending on that :destroy does not really call _private.destroy.
     -- Note that we won't call _private.destory twice thanks to the guard above.
@@ -364,5 +366,7 @@ return {
     remove_notification = remove_notification,
     remove_unpinned = remove_unpinned,
     widget = notix_widget,
+    regular_container = notix_reg_container,
+    pinned_container = notix_pinned_container,
     counter_widget = notix_counter_widget,
 }
