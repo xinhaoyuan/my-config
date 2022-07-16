@@ -1,3 +1,6 @@
+local capi = {
+    mousegrabber = mousegrabber,
+}
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local gtimer = require("gears.timer")
@@ -701,12 +704,39 @@ do
                        update_graphic(stdout, stderr, exitreason, exitcode)
                    end)
            elseif b == 3 then
-               local value = math.floor(x / info.width * 100 + 0.5)
-               awful.spawn.easy_async_with_shell(
-                   SET_VOLUME_CMD.." "..tostring(value).."% >/dev/null&&" .. GET_VOLUME_CMD,
-                   function (stdout, stderr, exitreason, exitcode)
-                       update_graphic(stdout, stderr, exitreason, exitcode)
-                   end)
+               local sx = info.drawable.drawable:geometry().x + info.x
+               local width = info.width
+               local value = math.floor(math.max(0, math.min(x / width, 1)) * 100 + 0.5)
+               local prev_value
+               local timer = gtimer{
+                   timeout = 0.1,
+                   autostart = true,
+                   callback = function ()
+                       if prev_value == value then return end
+                       prev_value = value
+                       awful.spawn.easy_async_with_shell(
+                           SET_VOLUME_CMD.." "..tostring(value).."% >/dev/null&&" .. GET_VOLUME_CMD,
+                           function (stdout, stderr, exitreason, exitcode)
+                               update_graphic(stdout, stderr, exitreason, exitcode)
+                           end)
+                   end,
+               }
+               capi.mousegrabber.run(
+                   function (info)
+                       local p = (info.x - sx) / width
+                       value = math.floor(math.max(0, math.min(p, 1)) * 100 + 0.5)
+                       if not info.buttons[3] then
+                           timer:stop()
+                           awful.spawn.easy_async_with_shell(
+                           SET_VOLUME_CMD.." "..tostring(value).."% >/dev/null&&" .. GET_VOLUME_CMD,
+                           function (stdout, stderr, exitreason, exitcode)
+                               update_graphic(stdout, stderr, exitreason, exitcode)
+                           end)
+                           return false
+                       end
+                       return true
+                   end,
+                   "sb_h_double_arrow")
            end
        end)
    function audio_sink_widget:execute(alt)
@@ -838,12 +868,39 @@ do
                        update_graphic(stdout, stderr, exitreason, exitcode)
                    end)
            elseif b == 3 then
-               local value = math.floor(x / info.width * 100 + 0.5)
-               awful.spawn.easy_async_with_shell(
-                   SET_VOLUME_CMD.." "..tostring(value).."% >/dev/null&&" .. GET_VOLUME_CMD,
-                   function (stdout, stderr, exitreason, exitcode)
-                       update_graphic(stdout, stderr, exitreason, exitcode)
-                   end)
+               local sx = info.drawable.drawable:geometry().x + info.x
+               local width = info.width
+               local value = math.floor(math.max(0, math.min(x / width, 1)) * 100 + 0.5)
+               local prev_value
+               local timer = gtimer{
+                   timeout = 0.1,
+                   autostart = true,
+                   callback = function ()
+                       if prev_value == value then return end
+                       prev_value = value
+                       awful.spawn.easy_async_with_shell(
+                           SET_VOLUME_CMD.." "..tostring(value).."% >/dev/null&&" .. GET_VOLUME_CMD,
+                           function (stdout, stderr, exitreason, exitcode)
+                               update_graphic(stdout, stderr, exitreason, exitcode)
+                           end)
+                   end,
+               }
+               capi.mousegrabber.run(
+                   function (info)
+                       local p = (info.x - sx) / width
+                       value = math.floor(math.max(0, math.min(p, 1)) * 100 + 0.5)
+                       if not info.buttons[3] then
+                           timer:stop()
+                           awful.spawn.easy_async_with_shell(
+                           SET_VOLUME_CMD.." "..tostring(value).."% >/dev/null&&" .. GET_VOLUME_CMD,
+                           function (stdout, stderr, exitreason, exitcode)
+                               update_graphic(stdout, stderr, exitreason, exitcode)
+                           end)
+                           return false
+                       end
+                       return true
+                   end,
+                   "sb_h_double_arrow")
            end
        end)
    function audio_source_widget:execute(alt)
