@@ -164,7 +164,7 @@ function config.create_notif_widget(notif)
         spacing_widget = beautiful.sep_widget,
         layout = wibox.layout.flex.horizontal,
     }
-    for _, action in pairs(notif.actions) do
+    for _, action in ipairs(notif.actions) do
         local callback = function ()
             action:invoke()
             if not notif.resident then
@@ -179,51 +179,45 @@ function config.create_notif_widget(notif)
                 {
                     {
                         {
-                            {
-                                notification = notif,
-                                widget = naughty.widget.icon,
-                            },
-                            {
-                                image = icons.notification,
-                                widget = masked_imagebox,
-                            },
-                            widget = fallback,
+                            notification = notif,
+                            widget = naughty.widget.icon,
                         },
-                        valign = "center",
-                        halign = "center",
-                        widget = wibox.container.place,
+                        {
+                            image = icons.notification,
+                            widget = masked_imagebox,
+                        },
+                        widget = fallback,
                     },
-                    width = beautiful.icon_size,
-                    strategy = "exact",
-                    widget = wibox.container.constraint,
+                    valign = "center",
+                    halign = "center",
+                    widget = wibox.container.place,
                 },
-                right = beautiful.sep_small_size,
+                width = beautiful.icon_size,
+                strategy = "exact",
+                widget = wibox.container.constraint,
+            },
+            right = beautiful.sep_small_size,
+            widget = wibox.container.margin,
+        },
+        {
+            {
+                {
+                    text = (notif.app_name and #notif.app_name > 0 and notif.app_name..":" or "")
+                        ..notif.title,
+                    widget = wibox.widget.textbox,
+                },
+                bottom = beautiful.sep_small_size,
+                draw_empty = false,
                 widget = wibox.container.margin,
             },
             {
-                {
-                    {
-                        text = (notif.app_name and #notif.app_name > 0 and notif.app_name..":" or "")
-                            ..notif.title,
-                        widget = wibox.widget.textbox,
-                    },
-                    bottom = beautiful.sep_small_size,
-                    draw_empty = false,
-                    widget = wibox.container.margin,
-                },
-                {
-                    text = notif.message,
-                    font = beautiful.font_name_normal.." "..tostring(beautiful.font_size_small),
-                    widget = wibox.widget.textbox,
-                },
-                layout = wibox.layout.fixed.vertical,
+                text = notif.message,
+                font = beautiful.font_name_normal.." "..tostring(beautiful.font_size_small),
+                widget = wibox.widget.textbox,
             },
-            layout = wibox.layout.fixed.horizontal,
+            layout = wibox.layout.fixed.vertical,
         },
-        fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-        bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
-        context_transformation = {highlighted = false},
-        widget = ocontainer,
+        layout = wibox.layout.fixed.horizontal,
     }
     content_widget:connect_signal(
         "button::release",
@@ -256,18 +250,38 @@ function config.create_notif_widget(notif)
     )
 
     local ret = wibox.widget{
-        content_widget,
-        action_container,
-        notif = notif,
-        layout = wibox.layout.fixed.vertical,
+        {
+            content_widget,
+            action_container,
+            layout = wibox.layout.fixed.vertical,
+        },
+        fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
+        bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+        context_transformation = {highlighted = false},
+        widget = ocontainer,
     }
+    ret.notif = notif
 
     function ret:execute()
         remove_notification(notif, 2)
     end
 
+    function ret:key_handler(mods, key, event)
+        if event ~= "press" then return false end
+        local c = tonumber(key)
+        if c == nil then return false end
+        if notif.actions[c] then
+            notif.actions[c]:invoke()
+            if not notif.resident then
+                remove_notification(notif)
+            end
+            return true
+        end
+        return false
+    end
+
     function ret:set_focused(f)
-        content_widget.context_transformation = {highlighted = f}
+        ret.context_transformation = {highlighted = f}
     end
 
     return ret
@@ -287,7 +301,7 @@ function config.create_button(name, callback)
         },
         fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
         bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
-        context_transformation = {highlighted = false},
+        context_transformation = {highlighted = nil},
         widget = ocontainer,
     }
     widget:connect_signal(
@@ -299,7 +313,7 @@ function config.create_button(name, callback)
     widget:connect_signal(
         "mouse::leave",
         function (w)
-            w.context_transformation = {highlighted = false}
+            w.context_transformation = {highlighted = nil}
         end
     )
     widget:connect_signal(
