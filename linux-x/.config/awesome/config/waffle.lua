@@ -1286,13 +1286,18 @@ local function get_screen_layout_source()
 end
 
 function get_source()
+    local indicator = waffle_root_view.widget:get_children_by_id("source_indicator")[1]
     if waffle_root_source_mode == "audio_sink" then
+        indicator.image = icons.audio
         return get_audio_sink_switch_source()
     elseif waffle_root_source_mode == "audio_source" then
+        indicator.image = icons.mic
         return get_audio_source_switch_source()
     elseif waffle_root_source_mode == "screen_layout" then
+        indicator.image = icons.monitor
         return get_screen_layout_source()
     end
+    indicator.image = icons.launcher
     return get_apps_widget_source()
 end
 
@@ -1345,27 +1350,50 @@ waffle_root_view = bento{
                         {
                             {
                                 {
-                                    id = "input_area",
                                     {
                                         {
                                             {
-                                                id = "input_widget",
-                                                align = "center",
-                                                widget = wibox.widget.textbox,
+                                                {
+                                                    id = "source_indicator",
+                                                    widget = masked_imagebox,
+                                                },
+                                                height = button_height,
+                                                width = button_height,
+                                                strategy = "exact",
+                                                widget = wibox.container.constraint,
                                             },
-                                            margins = dpi(2),
+                                            right = beautiful.sep_small_size,
                                             widget = wibox.container.margin,
                                         },
-                                        bg_picker = opicker.concat{opicker.beautiful{"fg_normal"}, "20"},
-                                        widget = ocontainer,
+                                        {
+                                            id = "input_area",
+                                            {
+                                                {
+                                                    {
+                                                        id = "input_widget",
+                                                        align = "center",
+                                                        widget = wibox.widget.textbox,
+                                                    },
+                                                    fill_horizontal = true,
+                                                    widget = wibox.container.place,
+                                                },
+                                                margins = dpi(2),
+                                                widget = wibox.container.margin,
+                                            },
+                                            bg_picker = opicker.concat{opicker.beautiful{"fg_normal"}, "20"},
+                                            widget = ocontainer,
+                                        },
+                                        layout = fixed_align.horizontal,
                                     },
-                                    bottom = dpi(4),
-                                    draw_empty = false,
-                                    widget = fixed_margin,
+                                    widget = wibox.container.place,
                                 },
                                 {
-                                    id = "list_container",
-                                    widget = wibox.container.background,
+                                    {
+                                        id = "list_container",
+                                        widget = wibox.container.background,
+                                    },
+                                    top = dpi(4),
+                                    widget = wibox.container.margin,
                                 },
                                 layout = fixed_align.vertical
                             },
