@@ -242,15 +242,16 @@ function scrlist:fit(context, width, height)
 end
 
 function default_scrollbar(context, cr, width, height, size, start_index, end_index)
-    local _, r, g, b, _ = gcolor(beautiful.fg_normal):get_rgba()
-    cr:set_source_rgba(r, g, b, 0.25)
+    local s = cr:get_source()
+    local _, r, g, b, a = s:get_rgba()
+    cr:set_source_rgba(r, g, b, a / 8)
     cr:rectangle(0, 0, width, height)
     cr:fill()
 
     local y_start = height / size * (start_index - 1)
     local y_end = height / size * end_index
 
-    cr:set_source(gcolor(beautiful.fg_normal))
+    cr:set_source(s)
     cr:rectangle(0, y_start, width, y_end - y_start)
     cr:fill()
 end

@@ -72,7 +72,7 @@ function bento:new(args)
     local cover = args.cover
     local input_widget = args.container:get_children_by_id("input_widget")[1]
     assert(input_widget)
-    local function reset_input()
+    local function reset()
         bento_lister.source = nil
         bento_lister.input = ""
         if cover then
@@ -111,7 +111,7 @@ function bento:new(args)
         if (key == "Escape" or key == "BackSpace") and
             (bento_lister.input == nil or bento_lister.input == "") then
             if key == "BackSpace" and cover and not cover.active and cover.key_handler and event == "press" then
-                reset_input()
+                reset()
                 bento_lister.source = args.source_generator()
                 return true
             else
@@ -165,7 +165,7 @@ function bento:new(args)
             end
         end)
 
-    reset_input()
+    reset()
     return {
         widget = args.container,
         reload_source = function ()
@@ -176,7 +176,7 @@ function bento:new(args)
             if cover and cover.on_open then cover:on_open(...) end
         end,
         on_close = function (_self, ...)
-            reset_input()
+            reset()
             prompt({}, "Escape", "press")
             if cover and cover.on_close then cover:on_close(...) end
         end,
