@@ -13,6 +13,8 @@ local awful = require("awful")
 local beautiful = require("beautiful")
 local wibox = require("wibox")
 local waffle = require("waffle")
+local cairo = require("lgi").cairo
+local gsurface = require("gears.surface")
 local gshape = require("gears.shape")
 local gcolor = require("gears.color")
 local gtimer = require("gears.timer")
@@ -1048,7 +1050,12 @@ waffle_dashboard_view = view {
     end,
 }
 
-local gio = require("lgi").Gio
+local lgi = require("lgi")
+local gio = lgi.Gio
+local gtk = lgi.require("Gtk", "3.0")
+local gtk_icon_theme = gtk.IconTheme.get_default()
+-- Force build the cache.
+gtk_icon_theme:load_icon(gtk_icon_theme:get_example_icon_name(), beautiful.icon_size, 0)
 
 function get_apps_widget_source()
     local apps = {}
@@ -1072,32 +1079,59 @@ function get_apps_widget_source()
                 return e.name:lower():find(f) ~= nil
             end,
             post_filter = function (e)
+                local icon_path
+                repeat
+                    local icon = e.ai:get_icon()
+                    if icon == nil then break end
+                    local icon_info = gtk_icon_theme:lookup_by_gicon(icon, beautiful.icon_size, 0)
+                    if icon_info == nil then break end
+                    icon_path = icon_info:get_filename()
+                until true
                 local w = wibox.widget{
                     {
                         {
                             {
-                                text = e.name,
-                                widget = wibox.widget.textbox,
-                            },
-                            {
-                                id = "desc",
                                 {
-                                    {
-                                        font = font_info,
-                                        text = e.ai:get_description(),
-                                        widget = wibox.widget.textbox,
-                                    },
-                                    height = 60,
-                                    strategy = "max",
-                                    widget = wibox.container.constraint,
+                                    image = icon_path,
+                                    forced_width = beautiful.icon_size,
+                                    forced_height = beautiful.icon_size,
+                                    widget = wibox.widget.imagebox,
                                 },
-                                top = dpi(2),
-                                left = dpi(2),
-                                right = dpi(2),
-                                draw_empty = false,
+                                right = beautiful.sep_small_size,
                                 widget = wibox.container.margin,
                             },
-                            layout = wibox.layout.fixed.vertical,
+                            {
+                                {
+                                    {
+                                        text = e.name,
+                                        widget = wibox.widget.textbox,
+                                    },
+                                    {
+                                        id = "desc",
+                                        {
+                                            {
+                                                font = font_info,
+                                                text = e.ai:get_description(),
+                                                widget = wibox.widget.textbox,
+                                            },
+                                            height = 60,
+                                            strategy = "max",
+                                            widget = wibox.container.constraint,
+                                        },
+                                        top = dpi(2),
+                                        left = dpi(2),
+                                        right = dpi(2),
+                                        draw_empty = false,
+                                        visible = false,
+                                        widget = wibox.container.margin,
+                                    },
+                                    layout = wibox.layout.fixed.vertical,
+                                },
+                                valign = "center",
+                                halign = "left",
+                                widget = wibox.container.place,
+                            },
+                            layout = fixed_align.horizontal,
                         },
                         margins = dpi(2),
                         widget = wibox.container.margin,
@@ -1111,6 +1145,7 @@ function get_apps_widget_source()
                     waffle:hide()
                 end
                 function w:set_focused(v)
+                    w:get_children_by_id("desc")[1].visible = v
                     self.context_transformation = {highlighted = v}
                 end
                 return w
@@ -1212,6 +1247,86 @@ function get_audio_source_switch_source()
     return ret
 end
 
+local screen_layout_preview_max_size = dpi(160)
+local function get_preview_from_autorandr_config(contents)
+    local outputs = {}
+    local current_output_name
+    for line in contents:gmatch("[^\n\r]+") do
+        repeat
+            local output = line:match("^output%s+(.-)$")
+            if output then
+                current_output_name = output
+                break
+            end
+            local mode_w, mode_h = line:match("^mode%s+([0-9]+)x([0-9]+)$")
+            if current_output_name and mode_w and mode_h then
+                if outputs[current_output_name] == nil then
+                    outputs[current_output_name] = {}
+                end
+                outputs[current_output_name].width = mode_w
+                outputs[current_output_name].height = mode_h
+                break
+            end
+            local pos_x, pos_y = line:match("^pos%s+([0-9]+)x([0-9]+)$")
+            if current_output_name and pos_x and pos_y then
+                if outputs[current_output_name] == nil then
+                    outputs[current_output_name] = {}
+                end
+                outputs[current_output_name].x = pos_x
+                outputs[current_output_name].y = pos_y
+                break
+            end
+        until true
+    end
+
+    local max_size = screen_layout_preview_max_size
+    local max_off_x, max_off_y
+    for k, v in pairs(outputs) do
+        if max_off_x == nil or v.x + v.width > max_off_x then
+            max_off_x = v.x + v.width
+        end
+        if max_off_y == nil or v.y + v.height > max_off_y then
+            max_off_y = v.y + v.height
+        end
+    end
+    local scale
+    local ret
+    if max_off_x > max_off_y then
+        scale = max_size / max_off_x
+        ret = cairo.ImageSurface.create(cairo.Format.ARGB32, max_size, math.ceil(max_off_y * scale))
+    else
+        scale = max_size / max_off_y
+        ret = cairo.ImageSurface.create(cairo.Format.ARGB32, math.ceil(max_off_x * scale), max_size)
+    end
+    local cr = cairo.Context(ret)
+    local pl = lgi.Pango.Layout.create(cr)
+    for k, v in pairs(outputs) do
+        cr:set_source(gcolor(beautiful.fg_normal))
+        cr:rectangle(v.x * scale, v.y * scale, v.width * scale, v.height * scale)
+        cr:fill()
+        local lw, lh
+        local current_font_size = dpi(beautiful.font_size_normal)
+        for i = 1, 2 do
+            pl:set_font_description(beautiful.get_merged_font(beautiful.font, current_font_size))
+            pl:set_text(k)
+            lw, lh = pl:get_size()
+            lw = lw / lgi.Pango.SCALE
+            lh = lh / lgi.Pango.SCALE
+            if lw <= v.width * scale and lh <= v.height * scale then break end
+            current_font_size = current_font_size * math.min(v.width * scale / lw, v.height * scale / lh)
+        end
+        cr:move_to(v.x * scale + (v.width * scale - lw) / 2, v.y * scale + (v.height * scale - lh) / 2)
+        cr:layout_path(pl)
+        cr:set_line_width(dpi(2))
+        cr:set_line_join("ROUND")
+        cr:stroke()
+        cr:move_to(v.x * scale + (v.width * scale - lw) / 2, v.y * scale + (v.height * scale - lh) / 2)
+        cr:set_source(gcolor(beautiful.fg_focus))
+        cr:show_layout(pl)
+    end
+    return gsurface(ret)
+end
+
 local function get_screen_layout_source()
     local output = source.array_proxy()
     local ret = source.filterable{
@@ -1221,14 +1336,34 @@ local function get_screen_layout_source()
                 if e == nil then return false end
                 if f == nil then return true end
                 f = f:lower()
-                return e.name:lower():find(f) ~= nil
+                return e.info.name:lower():find(f) ~= nil
             end,
             post_filter = function (e)
                 local w = wibox.widget{
                     {
                         {
-                            text = e.name,
-                            widget = wibox.widget.textbox,
+                            {
+                                text = e.info.name..
+                                    (e.info.detected and " (detected)" or "")..
+                                    (e.info.current and " (current)" or ""),
+                                widget = wibox.widget.textbox,
+                            },
+                            e.preview and {
+                                id = "preview",
+                                {
+                                    {
+                                        image = e.preview,
+                                        widget = wibox.widget.imagebox,
+                                    },
+                                    height = screen_layout_preview_max_size,
+                                    width = screen_layout_preview_max_size,
+                                    strategy = "max",
+                                    widget = wibox.container.constraint,
+                                },
+                                -- visible = false,
+                                widget = wibox.container.place,
+                            },
+                            layout = wibox.layout.fixed.vertical,
                         },
                         margins = dpi(2),
                         widget = wibox.container.margin,
@@ -1239,15 +1374,13 @@ local function get_screen_layout_source()
                 }
                 function w:execute()
                     local cmd
-                    if e.name == "[auto]" then
-                        cmd = {"autorandr", "-c"}
-                    else
-                        cmd = {"autorandr", e.name}
-                    end
+                    cmd = {"autorandr", e.info.name}
                     waffle:hide()
                     awful.spawn(cmd, false)
                 end
                 function w:set_focused(v)
+                    -- local preview = self:get_children_by_id("preview")[1]
+                    if preview then preview.visible = v end
                     self.context_transformation = {highlighted = v}
                 end
                 return w
@@ -1255,29 +1388,36 @@ local function get_screen_layout_source()
         },
     }
     local home_dir = os.getenv("HOME")
-    awful.spawn.easy_async_with_shell(
-        [[echo "[auto]"; ls $HOME/.config/autorandr]],
+    awful.spawn.easy_async(
+        "autorandr",
         function (stdout, _stderr, _exitreason, _exitcode)
+            local configs = {}
+            for line in string.gmatch(stdout, "[^\n\r]+") do
+                local name, attr = line:match("^([^%s]+)%s*(.-)$")
+                table.insert(configs, {name = name, detected = attr:find("(detected)") ~= nil, current = attr:find("(current)") ~= nil})
+            end
+            table.sort(
+                configs, function (a, b)
+                    if a.detected ~= b.detected then return a.detected end
+                    return a.name < b.name
+                end)
             local index = 0
-            for name in string.gmatch(stdout, "[^\n\r]+") do
+            for _, info in ipairs(configs) do
                 index = index + 1
-                if name == "[auto]" then
-                    output.array[index] = {name = name}
-                else
-                    local this_index = index
-                    local this_name = name
-                    local file = gio.File.new_for_path(home_dir.."/.config/autorandr/"..name.."/config")
-                    file:load_contents_async(
-                        nil,
-                        function (_source, result)
-                            local contents, _error = file:load_contents_finish(result)
-                            if contents then
-                                -- TODO parse the config and visualize it
-                            end
-                            output.array[this_index] = {name = this_name}
-                            output:emit_signal("property::children")
-                        end)
-                end
+                local this_index = index
+                local this_info = info
+                local file = gio.File.new_for_path(home_dir.."/.config/autorandr/"..info.name.."/config")
+                file:load_contents_async(
+                    nil,
+                    function (_source, result)
+                        local contents, _error = file:load_contents_finish(result)
+                        local preview
+                        if contents then
+                            preview = get_preview_from_autorandr_config(contents)
+                        end
+                        output.array[this_index] = {info = this_info, preview = preview}
+                        output:emit_signal("property::children")
+                    end)
             end
             output:set_size(index)
         end

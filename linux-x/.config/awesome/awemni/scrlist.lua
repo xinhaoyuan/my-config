@@ -41,7 +41,7 @@ function scrlist:compute_children_sizes(available_size, compute_child_size)
     local finished = false
     while not finished do
         local size = 0
-        repeat
+        while true do
             local prev_size, next_size
             if prev_available_size > 0 then
                 if anchor_index - #prev_sizes <= 1 then
@@ -87,7 +87,7 @@ function scrlist:compute_children_sizes(available_size, compute_child_size)
                 total_size = total_size + next_size
                 next_sizes[#next_sizes + 1] = next_size
             end
-        until false
+        end
     end
     return anchor_size, prev_sizes, next_sizes, prev_available_size, next_available_size, total_size
 end
