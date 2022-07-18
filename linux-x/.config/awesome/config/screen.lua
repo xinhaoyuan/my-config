@@ -967,7 +967,6 @@ local function bound_client_geometry(c, bound)
     local nw = math.min(cgeo.width, bound.x + bound.width - nx)
     local nh = math.min(cgeo.height, bound.y + bound.height - ny)
     if nx ~= cgeo.x or ny ~= cgeo.y or nw ~= cgeo.width or nh ~= cgeo.height then
-        print("bound client geometry", c, nx, ny, nw, nh)
         c:geometry{x = nx, y = ny, width = nw, height = nh}
     end
 end
