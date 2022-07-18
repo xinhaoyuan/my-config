@@ -1316,11 +1316,6 @@ local function get_preview_from_autorandr_config(contents)
             current_font_size = current_font_size * math.min(v.width * scale / lw, v.height * scale / lh)
         end
         cr:move_to(v.x * scale + (v.width * scale - lw) / 2, v.y * scale + (v.height * scale - lh) / 2)
-        cr:layout_path(pl)
-        cr:set_line_width(dpi(2))
-        cr:set_line_join("ROUND")
-        cr:stroke()
-        cr:move_to(v.x * scale + (v.width * scale - lw) / 2, v.y * scale + (v.height * scale - lh) / 2)
         cr:set_source(gcolor(beautiful.fg_focus))
         cr:show_layout(pl)
     end
