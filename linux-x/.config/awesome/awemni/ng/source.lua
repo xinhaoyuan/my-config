@@ -83,9 +83,17 @@ function filterable:update_for_appended_upstream()
     local prev_upstream_size = state.filtered_upstream_size
     state.filtered_upstream_size = array_length(upstream_children)
     for i = prev_upstream_size + 1, state.filtered_upstream_size do
-        if state.callbacks.filter(state.filter, upstream_children[i]) then
-            table.insert(state.filtered_indices, i)
+        local succ = state.callbacks.filter(state.filter, upstream_children[i])
+        if succ then
+            table.insert(state.filtered_indices, {i, succ})
         end
+    end
+    if state.callbacks.order then
+        table.sort(state.filtered_indices, function (a, b)
+                       local o = state.callbacks.order(a[2], b[2])
+                       if o ~= nil then return o end
+                       return a[1] < b[1]
+                   end)
     end
     if prev_filtered_size ~= #state.filtered_indices then
         self:emit_signal("property::children")
@@ -173,6 +181,7 @@ function filterable.new(args)
             {}, {
                 __index = function (self, key)
                     local index = state.filtered_indices[key]
+                    index = index and index[1]
                     if index == nil then return nil end
                     local upstream = state.upstream
                     if upstream == nil then return nil end
@@ -187,7 +196,7 @@ function filterable.new(args)
                 end,
             }),
         upstream_children_signal_handler = function ()
-            if state.upstream.is_append_only then
+            if state.callbacks.order == nil and state.upstream.is_append_only then
                 ret:update_for_appended_upstream()
             else
                 ret:reset_filter()

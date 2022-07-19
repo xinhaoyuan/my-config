@@ -1119,12 +1119,13 @@ function get_apps_widget_source()
         },
         callbacks = {
             filter = function (f, e)
-                if f == nil then return true end
+                if f == nil then return 0 end
                 f = f:lower()
                 local n = e.display_name:lower()
-                local succ, result = pcall(string.find, n, f)
-                return succ and result
+                local succ, start = pcall(string.find, n, f)
+                return succ and start
             end,
+            order = function (a, b) if a == b then return nil end return a < b end,
             post_filter = function (e)
                 local icon_path
                 repeat
@@ -1209,12 +1210,13 @@ function get_audio_sink_switch_source()
         upstream = output,
         callbacks = {
             filter = function (f, e)
-                if f == nil then return true end
+                if f == nil then return 0 end
                 f = f:lower()
                 local n = e.name:lower()
-                local succ, result = pcall(string.find, n, f)
-                return succ and result
+                local succ, start = pcall(string.find, n, f)
+                return succ and start
             end,
+            order = function (a, b) if a == b then return nil end return a < b end,
             post_filter = function (e)
                 local w = wibox.widget{
                     {
@@ -1257,12 +1259,13 @@ function get_audio_source_switch_source()
         upstream = output,
         callbacks = {
             filter = function (f, e)
-                if f == nil then return true end
+                if f == nil then return 0 end
                 f = f:lower()
                 local n = e.name:lower()
-                local succ, result = pcall(string.find, n, f)
-                return succ and result
+                local succ, start = pcall(string.find, n, f)
+                return succ and start
             end,
+            order = function (a, b) if a == b then return nil end return a < b end,
             post_filter = function (e)
                 local w = wibox.widget{
                     {
@@ -1384,12 +1387,13 @@ local function get_screen_layout_source()
         callbacks = {
             filter = function (f, e)
                 if e == nil then return false end
-                if f == nil then return true end
+                if f == nil then return 0 end
                 f = f:lower()
                 local n = e.info.name:lower()
-                local succ, result = pcall(string.find, n, f)
-                return succ and result
+                local succ, start = pcall(string.find, n, f)
+                return succ and start
             end,
+            order = function (a, b) if a == b then return nil end return a < b end,
             post_filter = function (e)
                 local w = wibox.widget{
                     {
@@ -2071,11 +2075,12 @@ local waffle_calendar_source = source.concat{
             callbacks = {
                 filter = function (input, e)
                     for _, t in ipairs{e.notif.app_name, e.notif.title, e.notif.message} do
-                        local succ, res = pcall(string.find, t:lower(), input or "")
-                        if succ and res then return true end
+                        local succ, start = pcall(string.find, t:lower(), input or "")
+                        if succ and start then return start end
                     end
                     return false
                 end,
+                order = function (a, b) if a == b then return nil end return a < b end,
             },
         },
         source.filterable{
@@ -2083,20 +2088,22 @@ local waffle_calendar_source = source.concat{
             callbacks = {
                 filter = function (input, e)
                     for _, t in ipairs{e.notif.app_name, e.notif.title, e.notif.message} do
-                        local succ, res = pcall(string.find, t:lower(), input or "")
-                        if succ and res then return true end
+                        local succ, start = pcall(string.find, t:lower(), input or "")
+                        if succ and start then return start end
                     end
                     return false
                 end,
+                order = function (a, b) if a == b then return nil end return a < b end,
             },
         },
         source.filterable{
             upstream = orgenda_items_widget,
             callbacks = {
                 filter = function (input, e)
-                    local succ, res = pcall(string.find, e.item.text:lower(), input or "")
-                    return succ and res
+                    local succ, start = pcall(string.find, e.item.text:lower(), input or "")
+                    return succ and start
                 end,
+                order = function (a, b) if a == b then return nil end return a < b end,
             },
         }
     },
