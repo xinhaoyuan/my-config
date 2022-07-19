@@ -1121,7 +1121,9 @@ function get_apps_widget_source()
             filter = function (f, e)
                 if f == nil then return true end
                 f = f:lower()
-                return e.display_name:lower():find(f) ~= nil
+                local n = e.display_name:lower()
+                local succ, result = pcall(string.find, n, f)
+                return succ and result
             end,
             post_filter = function (e)
                 local icon_path
@@ -1209,7 +1211,9 @@ function get_audio_sink_switch_source()
             filter = function (f, e)
                 if f == nil then return true end
                 f = f:lower()
-                return e.name:lower():find(f) ~= nil
+                local n = e.name:lower()
+                local succ, result = pcall(string.find, n, f)
+                return succ and result
             end,
             post_filter = function (e)
                 local w = wibox.widget{
@@ -1255,7 +1259,9 @@ function get_audio_source_switch_source()
             filter = function (f, e)
                 if f == nil then return true end
                 f = f:lower()
-                return e.name:lower():find(f) ~= nil
+                local n = e.name:lower()
+                local succ, result = pcall(string.find, n, f)
+                return succ and result
             end,
             post_filter = function (e)
                 local w = wibox.widget{
@@ -1380,7 +1386,9 @@ local function get_screen_layout_source()
                 if e == nil then return false end
                 if f == nil then return true end
                 f = f:lower()
-                return e.info.name:lower():find(f) ~= nil
+                local n = e.info.name:lower()
+                local succ, result = pcall(string.find, n, f)
+                return succ and result
             end,
             post_filter = function (e)
                 local w = wibox.widget{
@@ -2063,7 +2071,8 @@ local waffle_calendar_source = source.concat{
             callbacks = {
                 filter = function (input, e)
                     for _, t in ipairs{e.notif.app_name, e.notif.title, e.notif.message} do
-                        if t:lower():find(input or "") then return true end
+                        local succ, res = pcall(string.find, t:lower(), input or "")
+                        if succ and res then return true end
                     end
                     return false
                 end,
@@ -2074,7 +2083,8 @@ local waffle_calendar_source = source.concat{
             callbacks = {
                 filter = function (input, e)
                     for _, t in ipairs{e.notif.app_name, e.notif.title, e.notif.message} do
-                        if t:lower():find(input or "") then return true end
+                        local succ, res = pcall(string.find, t:lower(), input or "")
+                        if succ and res then return true end
                     end
                     return false
                 end,
@@ -2084,7 +2094,8 @@ local waffle_calendar_source = source.concat{
             upstream = orgenda_items_widget,
             callbacks = {
                 filter = function (input, e)
-                    return e.item.text:lower():find(input or "") ~= nil
+                    local succ, res = pcall(string.find, e.item.text:lower(), input or "")
+                    return succ and res
                 end,
             },
         }
