@@ -14,6 +14,7 @@ local beautiful = require("beautiful")
 local wibox = require("wibox")
 local waffle = require("waffle")
 local cairo = require("lgi").cairo
+local gfs = require("gears.filesystem")
 local gsurface = require("gears.surface")
 local gshape = require("gears.shape")
 local gcolor = require("gears.color")
@@ -1057,17 +1058,61 @@ local gtk_icon_theme = gtk.IconTheme.get_default()
 -- Force build the cache.
 gtk_icon_theme:load_icon(gtk_icon_theme:get_example_icon_name(), beautiful.icon_size, 0)
 
+local cached_execution_path = gfs.get_cache_dir() .. "/history_app_execution"
+local cached_execution = {}
+function restore_cache_execution()
+    cached_execution = {}
+    local f, err = io.open(cached_execution_path, "r")
+    if err then return end
+    for line in f:lines() do
+        table.insert(cached_execution, line)
+        cached_execution[line] = #cached_execution
+    end
+    f:close()
+end
+restore_cache_execution()
+
+function cache_exeuction(name)
+    local last = nil
+    for i = 1, #cached_execution + 1  do
+        last, cached_execution[i] = cached_execution[i], last
+        if i > 1 then cached_execution[cached_execution[i]] = i end
+        if last == name then break end
+    end
+    cached_execution[1] = name
+    cached_execution[name] = 1
+end
+
+function save_cache_execution()
+    local f, err = io.open(cached_execution_path, "w")
+    if err then
+        return
+    end
+    for _, r in ipairs(cached_execution) do
+        f:write(r.."\n")
+    end
+    f:close()
+end
+capi.awesome.connect_signal("exit", save_cache_execution)
+
 function get_apps_widget_source()
     local apps = {}
     for _, ai in ipairs(gio.AppInfo.get_all()) do
         if ai:should_show() then
             apps[#apps + 1] = {
                 ai = ai,
-                name = ai:get_display_name(),
+                name = ai:get_name(),
+                display_name = ai:get_display_name(),
             }
         end
     end
-    table.sort(apps, function (a, b) return a.name < b.name end)
+    table.sort(apps, function (a, b)
+                   local ac = cached_execution[a.name]
+                   local bc = cached_execution[b.name]
+                   if ac and bc then return ac < bc end
+                   if ac or bc then return bc == nil end
+                   return a.name < b.name
+               end)
     local apps_source = source.filterable{
         upstream = source.array_proxy{
             array = apps,
@@ -1076,7 +1121,7 @@ function get_apps_widget_source()
             filter = function (f, e)
                 if f == nil then return true end
                 f = f:lower()
-                return e.name:lower():find(f) ~= nil
+                return e.display_name:lower():find(f) ~= nil
             end,
             post_filter = function (e)
                 local icon_path
@@ -1103,7 +1148,7 @@ function get_apps_widget_source()
                             {
                                 {
                                     {
-                                        text = e.name,
+                                        text = e.display_name,
                                         widget = wibox.widget.textbox,
                                     },
                                     {
@@ -1141,6 +1186,7 @@ function get_apps_widget_source()
                     widget = ocontainer,
                 }
                 function w:execute()
+                    cache_exeuction(e.name)
                     awful.spawn(e.ai:get_executable())
                     waffle:hide()
                 end
@@ -1247,8 +1293,7 @@ function get_audio_source_switch_source()
     return ret
 end
 
-local screen_layout_preview_max_size = dpi(160)
-local function get_preview_from_autorandr_config(contents)
+local function get_autorandr_config(contents)
     local outputs = {}
     local current_output_name
     for line in contents:gmatch("[^\n\r]+") do
@@ -1278,29 +1323,33 @@ local function get_preview_from_autorandr_config(contents)
             end
         until true
     end
+    local overall_width, overall_height
+    for k, v in pairs(outputs) do
+        if overall_width == nil or v.x + v.width > overall_width then
+            overall_width = v.x + v.width
+        end
+        if overall_height == nil or v.y + v.height > overall_height then
+            overall_height = v.y + v.height
+        end
+    end
+    return {
+        overall_width = overall_width,
+        overall_height = overall_height,
+        outputs = outputs,
+    }
+end
 
-    local max_size = screen_layout_preview_max_size
-    local max_off_x, max_off_y
-    for k, v in pairs(outputs) do
-        if max_off_x == nil or v.x + v.width > max_off_x then
-            max_off_x = v.x + v.width
-        end
-        if max_off_y == nil or v.y + v.height > max_off_y then
-            max_off_y = v.y + v.height
-        end
-    end
+local function draw_autorandr_config(config, cr, width, height)
     local scale
-    local ret
-    if max_off_x > max_off_y then
-        scale = max_size / max_off_x
-        ret = cairo.ImageSurface.create(cairo.Format.ARGB32, max_size, math.ceil(max_off_y * scale))
+    if width / config.overall_width < height / config.overall_height then
+        scale = width / config.overall_width
+        cr:translate(0, (height - config.overall_height * scale) / 2)
     else
-        scale = max_size / max_off_y
-        ret = cairo.ImageSurface.create(cairo.Format.ARGB32, math.ceil(max_off_x * scale), max_size)
+        scale = height / config.overall_height
+        cr:translate((width - config.overall_width * scale) / 2, 0)
     end
-    local cr = cairo.Context(ret)
     local pl = lgi.Pango.Layout.create(cr)
-    for k, v in pairs(outputs) do
+    for k, v in pairs(config.outputs) do
         cr:set_source(gcolor(beautiful.fg_normal))
         cr:rectangle(v.x * scale, v.y * scale, v.width * scale, v.height * scale)
         cr:fill()
@@ -1319,9 +1368,9 @@ local function get_preview_from_autorandr_config(contents)
         cr:set_source(gcolor(beautiful.fg_focus))
         cr:show_layout(pl)
     end
-    return gsurface(ret)
 end
 
+local screen_layout_preview_max_size = dpi(80)
 local function get_screen_layout_source()
     local output = source.array_proxy()
     local ret = source.filterable{
@@ -1337,28 +1386,28 @@ local function get_screen_layout_source()
                 local w = wibox.widget{
                     {
                         {
+                            e.config and {
+                                forced_width = screen_layout_preview_max_size,
+                                forced_height = math.min(
+                                    screen_layout_preview_max_size,
+                                    math.ceil(e.config.overall_height / e.config.overall_width *
+                                              screen_layout_preview_max_size)),
+                                bgimage = function (context, cr, width, height)
+                                    draw_autorandr_config(e.config, cr, width, height)
+                                end,
+                                widget = wibox.container.background,
+                            },
                             {
-                                text = e.info.name..
-                                    (e.info.detected and " (detected)" or "")..
-                                    (e.info.current and " (current)" or ""),
-                                widget = wibox.widget.textbox,
-                            },
-                            e.preview and {
-                                id = "preview",
                                 {
-                                    {
-                                        image = e.preview,
-                                        widget = wibox.widget.imagebox,
-                                    },
-                                    height = screen_layout_preview_max_size,
-                                    width = screen_layout_preview_max_size,
-                                    strategy = "max",
-                                    widget = wibox.container.constraint,
+                                    text = e.info.name..
+                                        (e.info.detected and " (detected)" or "")..
+                                        (e.info.current and " (current)" or ""),
+                                    widget = wibox.widget.textbox,
                                 },
-                                -- visible = false,
-                                widget = wibox.container.place,
+                                left = dpi(2),
+                                widget = wibox.container.margin,
                             },
-                            layout = wibox.layout.fixed.vertical,
+                            layout = fixed_align.horizontal,
                         },
                         margins = dpi(2),
                         widget = wibox.container.margin,
@@ -1406,11 +1455,11 @@ local function get_screen_layout_source()
                     nil,
                     function (_source, result)
                         local contents, _error = file:load_contents_finish(result)
-                        local preview
+                        local config
                         if contents then
-                            preview = get_preview_from_autorandr_config(contents)
+                            config = get_autorandr_config(contents)
                         end
-                        output.array[this_index] = {info = this_info, preview = preview}
+                        output.array[this_index] = {info = this_info, config = config}
                         output:emit_signal("property::children")
                     end)
             end
