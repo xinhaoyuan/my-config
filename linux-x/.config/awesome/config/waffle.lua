@@ -1332,10 +1332,21 @@ local function get_autorandr_config(contents)
                 outputs[current_output_name].y = pos_y
                 break
             end
+            local rotate = line:match("^rotate%s+(.-)$")
+            if current_output_name and rotate then
+                if outputs[current_output_name] == nil then
+                    outputs[current_output_name] = {}
+                end
+                outputs[current_output_name].rotate = rotate
+                break
+            end
         until true
     end
     local overall_width, overall_height
     for k, v in pairs(outputs) do
+        if v.rotate == "left" or v.rotate == "right" then
+            v.width, v.height = v.height, v.width
+        end
         if overall_width == nil or v.x + v.width > overall_width then
             overall_width = v.x + v.width
         end
@@ -1350,6 +1361,12 @@ local function get_autorandr_config(contents)
     }
 end
 
+local rotate_label = {
+    normal = "",
+    left = "←",
+    right = "→",
+    inverted = "↓",
+}
 local function draw_autorandr_config(config, cr, width, height)
     local scale
     if width / config.overall_width < height / config.overall_height then
@@ -1366,9 +1383,14 @@ local function draw_autorandr_config(config, cr, width, height)
         cr:fill()
         local lw, lh
         local current_font_size = dpi(beautiful.font_size_normal)
+        local label = k
+        if v.rotate then
+            label = label.."\n"..rotate_label[v.rotate]
+        end
         for i = 1, 2 do
             pl:set_font_description(beautiful.get_merged_font(beautiful.font, current_font_size))
-            pl:set_text(k)
+            pl:set_text(label)
+            pl:set_alignment("CENTER")
             lw, lh = pl:get_size()
             lw = lw / lgi.Pango.SCALE
             lh = lh / lgi.Pango.SCALE
@@ -1381,7 +1403,7 @@ local function draw_autorandr_config(config, cr, width, height)
     end
 end
 
-local screen_layout_preview_max_size = dpi(80)
+local screen_layout_preview_max_size = dpi(120)
 local function get_screen_layout_source()
     local output = source.array_proxy()
     local ret = source.filterable{
