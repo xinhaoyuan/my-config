@@ -701,7 +701,7 @@ end
 local waffle_root_view
 local waffle_root_source_mode
 local waffle_dashboard_view
-local waffle_dashboard_status_widget = decorate_panel {
+local waffle_dashboard_status_widget = decorate_panel{
     widget = {
         {
             button {
@@ -715,6 +715,7 @@ local waffle_dashboard_status_widget = decorate_panel {
                         },
                         {
                             cwidget.cpu_widget,
+                            forced_height = button_height,
                             left = button_padding,
                             right = button_padding,
                             widget = wibox.container.margin
@@ -730,6 +731,7 @@ local waffle_dashboard_status_widget = decorate_panel {
                         },
                         {
                             cwidget.ram_widget,
+                            forced_height = button_height,
                             left = button_padding,
                             right = button_padding,
                             widget = wibox.container.margin
@@ -737,7 +739,7 @@ local waffle_dashboard_status_widget = decorate_panel {
                         expand = "inside",
                         layout = wibox.layout.align.horizontal
                     },
-                    spacing = button_padding,
+                    spacing = button_padding * 2,
                     layout = wibox.layout.fixed.vertical,
                 },
                 key = {"x", "X"},

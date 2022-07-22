@@ -62,27 +62,27 @@ do
        widget = outlined_textbox,
    }
 
-   cpu_widget = wibox.widget {
-      {
-          {
-              cpu_graph_widget,
-              {
-                  cpu_graph_widget,
-                  reflection = {
-                      horizontal = false,
-                      vertical = true,
-                  },
-                  widget = wibox.container.mirror,
-              },
-              layout = wibox.layout.flex.vertical,
-          },
-          {
-              id = "text",
-              widget = cpu_text_widget
-          },
-          layout = wibox.layout.stack
-      },
-      widget = wibox.container.constraint,
+   cpu_widget = wibox.widget{
+       {
+           {
+               cpu_graph_widget,
+               {
+                   cpu_graph_widget,
+                   reflection = {
+                       horizontal = false,
+                       vertical = true,
+                   },
+                   widget = wibox.container.mirror,
+               },
+               layout = wibox.layout.flex.vertical,
+           },
+           {
+               id = "text",
+               widget = cpu_text_widget
+           },
+           layout = wibox.layout.stack
+       },
+       widget = wibox.container.constraint,
    }
 
    local cpu_total_prev = {}
@@ -183,7 +183,7 @@ do
        widget = outlined_textbox,
    }
 
-   ram_widget = wibox.widget {
+   ram_widget = wibox.widget{
        {
            {
                ram_graph_widget,
@@ -269,7 +269,7 @@ do
         widget = wibox.container.margin
     }
 
-    local net_rx_layout = wibox.widget {
+    local net_rx_layout = wibox.widget{
         {
             {
                 net_rx_widget,
@@ -456,7 +456,7 @@ do
         widget = wibox.container.margin
     }
 
-    local disk_rd_layout = wibox.widget {
+    local disk_rd_layout = wibox.widget{
         {
             {
                 disk_rd_widget,
