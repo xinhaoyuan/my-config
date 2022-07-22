@@ -11,6 +11,7 @@ local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local dpi = require("beautiful.xresources").apply_dpi
+local gsurf = require("gears.surface")
 local gtimer = require("gears.timer")
 local gshape = require("gears.shape")
 local gcolor = require("gears.color")
@@ -499,45 +500,50 @@ local function apply_container_shape(client, shape, mini_titlebar_shape)
 end
 
 local function update_shape(c)
-    if c.fullscreen or not c.has_decorator then
-        -- -- Awesome handles fullscreen window differently. Assume no border or titlebar.
-        -- apply_container_shape(c, nil, nil)
-        c.client_mask = nil
-        c.composite = nil
-        return
-    end
-
     local geo = c:geometry()
     local decorator = beautiful.decorator
     local width = geo.width - decorator.left_space - decorator.right_space + decorator.left_size + decorator.right_size
     local height = geo.height - decorator.top_space - decorator.bottom_space + decorator.top_size + decorator.bottom_size
-    c.client_mask = cairo.ImageSurface(
-        cairo.Format.A8,
-        width, height)
 
-    local cr = cairo.Context(c.client_mask)
-    decorator:draw({}, cr, true, width, height,
-                   {["top"] = true, ["bottom"] = true, ["left"] = true, ["right"] = true})
-    c.composite = function (c, cr_raw, src_surf_raw, dx, dy, dw, dh)
-        local src = lgicore.record.new(cairo.Surface, src_surf_raw, false)
-        local cr = lgicore.record.new(cairo.Context, cr_raw, false)
-        if c.client_mask == nil then
-            cr:set_source_surface(src, 0, 0)
-            cr:paint()
+    if c.invalidate_frame then
+        if c.fullscreen or not c.has_decorator then
+            c.client_mask = nil
+            c.composite = nil
+            return
+        else
+            c.client_mask = cairo.ImageSurface(cairo.Format.A8, width, height)
+            local cr = cairo.Context(c.client_mask)
+            decorator:draw({}, cr, true, width, height,
+                           {["top"] = true, ["bottom"] = true, ["left"] = true, ["right"] = true})
         end
-        cr:set_source_surface(src, 0, 0)
-        cr:mask_surface(c.client_mask)
-    end
 
-    -- apply_container_shape(
-    --     c, function (cr, width, height)
-    --         cr:translate(decorator.left_space - decorator.left_size, decorator.top_space - decorator.top_size)
-    --         decorator:draw({}, cr, true,
-    --                        width - decorator.left_space - decorator.right_space + decorator.left_size + decorator.right_size,
-    --                        height - decorator.top_space - decorator.bottom_space + decorator.top_size + decorator.bottom_size,
-    --                        {["top"] = true, ["bottom"] = true, ["left"] = true, ["right"] = true})
-    --     end, nil
-    -- )
+        c.composite = function (c, cr_raw, src_surf_raw, dx, dy, dw, dh)
+            local src = lgicore.record.new(cairo.Surface, src_surf_raw, false)
+            local cr = lgicore.record.new(cairo.Context, cr_raw, false)
+            if c.client_mask == nil then
+                cr:set_source_surface(src, 0, 0)
+                cr:paint()
+                return
+            end
+            cr:set_source_surface(src, 0, 0)
+            cr:mask_surface(c.client_mask)
+        end
+        c:invalidate_frame(0, 0, geo.width, geo.height)
+    else
+        if c.fullscreen or not c.has_decorator then
+            -- Awesome handles fullscreen window differently. Assume no border or titlebar.
+            apply_container_shape(c, nil, nil)
+            return
+        end
+
+        apply_container_shape(
+            c, function (cr, _width, _height)
+                cr:translate(decorator.left_space - decorator.left_size, decorator.top_space - decorator.top_size)
+                decorator:draw({}, cr, true, width, height,
+                               {["top"] = true, ["bottom"] = true, ["left"] = true, ["right"] = true})
+            end, nil
+        )
+    end
     -- local mini_titlebar_shape
     -- local padding = (c.has_xborder and beautiful.xborder_width or beautiful.xborder_inner_space)
     -- local radius = beautiful.xborder_radius or 0
