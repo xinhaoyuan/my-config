@@ -873,7 +873,7 @@ local function setup_screen(scr)
        scr.widgets.bar.right_margin_splitted = with_border {
            widget = wibox.widget {
                right_layout,
-               left = scr == primary_screen and beautiful.sep_median_size or nil,
+               -- left = scr == primary_screen and beautiful.sep_median_size or nil,
                widget = fixed_margin
            },
            top = true, left = true,
