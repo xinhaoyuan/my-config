@@ -256,7 +256,7 @@ function config.create_notif_widget(notif)
             layout = wibox.layout.fixed.vertical,
         },
         fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-        bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+        bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
         context_transformation = {highlighted = false},
         widget = ocontainer,
     }
@@ -300,7 +300,7 @@ function config.create_button(name, callback)
             widget = wibox.container.margin,
         },
         fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-        bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+        bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
         context_transformation = {highlighted = nil},
         widget = ocontainer,
     }

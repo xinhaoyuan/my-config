@@ -1187,7 +1187,7 @@ function get_apps_widget_source()
                         widget = wibox.container.margin,
                     },
                     fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-                    bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+                    bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
                     widget = ocontainer,
                 }
                 function w:execute()
@@ -1230,7 +1230,7 @@ function get_audio_sink_switch_source()
                         widget = wibox.container.margin,
                     },
                     fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-                    bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+                    bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
                     widget = ocontainer,
                 }
                 function w:execute()
@@ -1279,7 +1279,7 @@ function get_audio_source_switch_source()
                         widget = wibox.container.margin,
                     },
                     fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-                    bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+                    bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
                     widget = ocontainer,
                 }
                 function w:execute()
@@ -1449,7 +1449,7 @@ local function get_screen_layout_source()
                         widget = wibox.container.margin,
                     },
                     fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-                    bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+                    bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
                     widget = ocontainer,
                 }
                 function w:execute()
@@ -1620,7 +1620,6 @@ waffle_root_view = bento{
                             margins = dpi(4),
                             widget = wibox.container.margin,
                         },
-                        bg_picker = opicker.beautiful{"bg_normal"},
                         fg_picker = opicker.beautiful{"fg_normal"},
                         widget = ocontainer,
                     },
@@ -1960,7 +1959,7 @@ local orgenda_items_widget = orgenda.widget{
                 layout = wibox.layout.fixed.horizontal
             },
             fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-            bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+            bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
             context_transformation = {highlighted = false},
             widget = ocontainer,
         }
@@ -2435,7 +2434,7 @@ local waffle_client_pid_button = button{
                 widget = wibox.widget.textbox
             },
             fg_picker = opicker.branch{
-                "highlighted", opicker.beautiful{"special_focus"}, "#00000000"},
+                "highlighted", opicker.beautiful{"special_focus"}},
             widget = ocontainer,
         },
         layout = fixed_align.vertical

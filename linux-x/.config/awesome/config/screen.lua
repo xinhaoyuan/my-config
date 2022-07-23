@@ -634,7 +634,7 @@ local function setup_screen(scr)
            widget = fallback,
        },
        fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-       bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+       bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
        widget = ocontainer,
    }
    scr.widgets.indicator:buttons(
@@ -753,7 +753,7 @@ local function setup_screen(scr)
            layout = wibox.layout.fixed.horizontal
        },
        fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-       bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+       bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
        context_transformation = {highlighted = false},
        widget = ocontainer,
    }
@@ -836,11 +836,7 @@ local function setup_screen(scr)
        }
    else
        scr.widgets.bar.middle_margin_expanded = with_border {
-           widget = {
-               tasklist_with_fallback,
-               bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
-               widget = ocontainer,
-           },
+           widget = tasklist_with_fallback,
            draw_empty = false,
            top = true
        }
@@ -858,11 +854,7 @@ local function setup_screen(scr)
        }
 
        scr.widgets.bar.middle_margin_splitted = with_border {
-           widget = {
-               tasklist_with_fallback,
-               bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
-               widget = ocontainer,
-           },
+           widget = tasklist_with_fallback,
            draw_empty = false,
            top = true, left = true, right = true,
        }

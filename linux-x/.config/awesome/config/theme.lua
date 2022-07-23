@@ -78,6 +78,7 @@ theme.bg_focus      = acolor(c_blue[1]):blend_with(acolor(theme.bg_normal), 0.3)
 theme.bg_urgent     = c_red[2]
 theme.bg_minimize   = theme.bg_normal
 
+theme.systray_transparent = true
 theme.bg_systray    = theme.bg_normal
 
 theme.fg_normal     = c_normal[1]
@@ -614,7 +615,7 @@ theme.apply_border_to_widget_template = function(args)
         {
             args.widget,
             fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-            bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
+            bg_picker = not args.no_bg and opicker.beautiful{"bg_normal"},
             widget = ocontainer,
         },
         top = args.top and decorator.top_space - decorator.top_size or 0,
@@ -633,14 +634,6 @@ theme.apply_border_to_widget_template = function(args)
                                right = self._private.right > 0,
                                bottom = self._private.bottom > 0,
                            })
-            cr:push_group_with_content(cairo.Content.COLOR_ALPHA)
-            cr:save()
-            cr:set_source(gcolor(beautiful.bg_normal))
-            cr:paint()
-            cr:restore()
-        end,
-        after_draw_children = function (self, context, cr, width, height)
-            if width <= 0 or height <= 0 then return end
             cr:push_group_with_content(cairo.Content.ALPHA)
             local top = args.top and decorator.top_space or 0
             local left = args.left and decorator.left_space or 0
@@ -656,16 +649,27 @@ theme.apply_border_to_widget_template = function(args)
                                right = self._private.right > 0,
                                bottom = self._private.bottom > 0,
                            })
-            local mask = cr:pop_group()
+            self._private.mask = cr:pop_group()
+            cr:save()
+            cr:set_operator("DEST_OUT")
+            cr:mask(self._private.mask)
+            cr:restore()
+
+            cr:push_group_with_content(cairo.Content.COLOR_ALPHA)
+        end,
+        after_draw_children = function (self, context, cr, width, height)
+            if width <= 0 or height <= 0 then return end
             local source = cr:pop_group()
 
             cr:save()
             cr:set_source(source)
-            cr:mask(mask)
+            cr:set_operator("ADD")
+            cr:mask(self._private.mask)
             cr:restore()
 
             dispose_pattern(source)
-            dispose_pattern(mask)
+            dispose_pattern(self._private.mask)
+            self._private.mask = nil
         end,
     }
 end

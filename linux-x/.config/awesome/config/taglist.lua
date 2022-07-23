@@ -70,7 +70,7 @@ local taglist_template = {
     fg_picker = opicker.branch{
         "selected", opicker.beautiful{"fg_focus"}, opicker.beautiful{"fg_normal"}},
     bg_picker = opicker.branch{
-        "selected", opicker.beautiful{"bg_focus"}, opicker.beautiful{"bg_normal"}},
+        "selected", opicker.beautiful{"bg_focus"}},
     widget = ocontainer,
     create_callback = taglist_create_function,
     update_callback = taglist_update_function,

@@ -347,7 +347,6 @@ local tasklist_template = {
     bg_picker = opicker.switch{
         {"highlighted", opicker.beautiful{"bg_focus"}},
         {"minimized", opicker.beautiful{"bg_minimize"}},
-        default = opicker.beautiful{"bg_normal"},
     },
     widget = ocontainer,
     create_callback = tasklist_create_function,
