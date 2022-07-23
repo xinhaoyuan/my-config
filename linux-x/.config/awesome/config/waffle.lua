@@ -14,6 +14,7 @@ local beautiful = require("beautiful")
 local wibox = require("wibox")
 local waffle = require("waffle")
 local cairo = require("lgi").cairo
+local glib = require("lgi").GLib
 local gfs = require("gears.filesystem")
 local gsurface = require("gears.surface")
 local gshape = require("gears.shape")
@@ -1066,23 +1067,26 @@ function restore_cache_execution()
     cached_execution = {}
     local f, err = io.open(cached_execution_path, "r")
     if err then return end
+    local keyword
+    local timestamp
     for line in f:lines() do
-        table.insert(cached_execution, line)
-        cached_execution[line] = #cached_execution
+        if keyword == nil then
+            keyword = line
+        elseif timestamp == nil then
+            timestamp = tonumber(line)
+        else
+            cached_execution[line] = {timestamp, keyword}
+            keyword = nil
+            timestamp = nil
+        end
     end
     f:close()
 end
 restore_cache_execution()
 
-function cache_exeuction(name)
+function cache_execution(name, input)
     local last = nil
-    for i = 1, #cached_execution + 1  do
-        last, cached_execution[i] = cached_execution[i], last
-        if i > 1 then cached_execution[cached_execution[i]] = i end
-        if last == name then break end
-    end
-    cached_execution[1] = name
-    cached_execution[name] = 1
+    cached_execution[name] = {glib.get_real_time(), input}
 end
 
 function save_cache_execution()
@@ -1090,8 +1094,8 @@ function save_cache_execution()
     if err then
         return
     end
-    for _, r in ipairs(cached_execution) do
-        f:write(r.."\n")
+    for k, v in pairs(cached_execution) do
+        f:write(string.format("%s\n%d\n%s\n", v[2], v[1], k))
     end
     f:close()
 end
@@ -1111,20 +1115,22 @@ function get_apps_widget_source()
     table.sort(apps, function (a, b)
                    local ac = cached_execution[a.name]
                    local bc = cached_execution[b.name]
-                   if ac and bc then return ac < bc end
+                   if ac and bc then return ac[1] > bc[1] end
                    if ac or bc then return bc == nil end
                    return a.name < b.name
                end)
-    local apps_source = source.filterable{
+    local apps_source
+    apps_source = source.filterable{
         upstream = source.array_proxy{
             array = apps,
         },
         callbacks = {
             filter = function (f, e)
                 if f == nil then return 0 end
-                f = f:lower()
+                local c = cached_execution[e.name]
+                if c and c[2] == f and #f > 0 then return 0 end
                 local n = e.display_name:lower()
-                local succ, start = pcall(string.find, n, f)
+                local succ, start = pcall(string.find, n, f:lower())
                 return succ and start
             end,
             order = function (a, b) if a == b then return nil end return a < b end,
@@ -1191,7 +1197,7 @@ function get_apps_widget_source()
                     widget = ocontainer,
                 }
                 function w:execute()
-                    cache_exeuction(e.name)
+                    cache_execution(e.name, apps_source.input)
                     awful.spawn(e.ai:get_executable())
                     waffle:hide()
                 end
