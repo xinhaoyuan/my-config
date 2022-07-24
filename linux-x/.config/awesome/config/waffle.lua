@@ -2437,10 +2437,10 @@ local waffle_client_pid_button = button{
             {
                 text = "d",
                 align = "center",
-                widget = wibox.widget.textbox
+                outline_size = dpi(2),
+                widget = outlined_textbox
             },
-            fg_picker = opicker.branch{
-                "highlighted", opicker.beautiful{"special_focus"}},
+            fg_picker = opicker.beautiful{"special_", opicker.highlighted_switcher},
             widget = ocontainer,
         },
         layout = fixed_align.vertical
