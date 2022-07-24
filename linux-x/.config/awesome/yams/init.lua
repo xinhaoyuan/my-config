@@ -28,13 +28,23 @@ local function activate_client(c)
 end
 
 -- TODO diagnose this bug...
+-- Seems that only Firefox is causing this: 91.11.0esr.
 local expected_focus = nil
-capi.client.connect_signal("focus", function (c)
-                               if expected_focus and c ~= expected_focus then
-                                   debug_trap("unexpected focus "..tostring(c))
-                                   capi.client.focus = expected_focus
-                               end
-                           end)
+capi.client.connect_signal(
+    "focus", function (c)
+        if expected_focus and c ~= expected_focus then
+            debug_trap("unexpected focus "..tostring(c))
+            capi.client.focus = expected_focus
+        end
+    end)
+-- Haven't seen this yet.
+capi.client.connect_signal(
+    "request::activate", function (c)
+        if expected_focus and c ~= expected_focus then
+            debug_trap("unexpected request::activate "..tostring(c))
+            capi.client.focus = expected_focus
+        end
+    end)
 
 -- the default filter will get all focusable client with any selected tags or are sticky
 local function default_filter(c)
