@@ -127,6 +127,7 @@ function lister:set_focus(index)
             index = state.source.sealed_count - 1
         end
     end
+
     local old_container = state.focused_index and state.scrlist.children[state.focused_index]
     state.scrlist.view_index = index
     state.focused_index = state.scrlist.view_index
@@ -190,7 +191,14 @@ function lister:new(args)
         {_containers = {}, _prev_size = 0}, {
             __index = function (self, index)
                 local len = state.source and array_length(state.source.children) or 0
-                if type(index) ~= "number" or index < 1 or index > len then return nil end
+                if type(index) ~= "number" then return nil end
+                if index < 1 or index > len then
+                    if self._containers[index] then
+                        -- For properly reset children focus later.
+                        self._containers[index].child = nil
+                    end
+                    return nil
+                end
                 if self._containers[index] == nil then
                     local container = wibox.widget{
                         placeholder = state.placeholder_widget,
@@ -213,10 +221,7 @@ function lister:new(args)
                 local new_child = state.source.children[index]
                 if old_child ~= new_child then
                     self._containers[index].child = new_child
-                    if index == state.focused_index then
-                        if old_child then old_child.focused = nil end
-                        if new_child then new_child.focused = true end
-                    end
+                    new_child.focused = index == state.focused_index
                 end
                 return self._containers[index]
             end,
