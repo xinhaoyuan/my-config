@@ -507,25 +507,25 @@ local function update_shape(c)
 
     if c.invalidate_frame then
         if c.fullscreen or not c.has_decorator then
-            c.client_mask = nil
             c.composite = nil
             return
         else
-            c.client_mask = cairo.ImageSurface(cairo.Format.A8, width, height)
-            local cr = cairo.Context(c.client_mask)
-            decorator:draw({}, cr, true, width, height,
-                           {["top"] = true, ["bottom"] = true, ["left"] = true, ["right"] = true})
+            c.client_mask = nil
         end
 
         c.composite = function (c, cr_raw, src_surf_raw, dx, dy, dw, dh)
             local src = lgicore.record.new(cairo.Surface, src_surf_raw, false)
             local cr = lgicore.record.new(cairo.Context, cr_raw, false)
             if c.client_mask == nil then
-                cr:set_source_surface(src, 0, 0)
-                cr:paint()
-                return
+                c.client_mask = cr:get_target():create_similar("ALPHA", width, height)
+                decorator:draw({}, cairo.Context(c.client_mask), true, width, height,
+                               {["top"] = true, ["bottom"] = true, ["left"] = true, ["right"] = true})
             end
+            cr:set_operator("DEST_OUT")
+            cr:set_source_surface(c.client_mask, 0, 0)
+            cr:paint()
             cr:set_source_surface(src, 0, 0)
+            cr:set_operator("ADD")
             cr:mask_surface(c.client_mask)
         end
         c:invalidate_frame(0, 0, geo.width, geo.height)
