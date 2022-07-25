@@ -580,13 +580,13 @@ end
 
 theme.decorator_border_width = 3
 theme.decorator_padding_width = 3
-theme.decorator_shade_width = dpi(6)
+theme.decorator_shade_width = dpi(8)
 theme.decorator = decorator.presets.soft_relief{
     light_shade = "#ffffff40",
     high_light_shade = "#ffffff80",
     dark_shade = "#00000040",
     high_dark_shade = "#00000080",
-    radius = dpi(6),
+    radius = dpi(8),
     shade_width = theme.decorator_shade_width,
     border_width = theme.decorator_border_width,
     padding_width = theme.decorator_padding_width,
