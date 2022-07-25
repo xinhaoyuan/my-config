@@ -10,12 +10,12 @@ local lgi = require("lgi")
 local mod = {mt = {}}
 
 function mod:draw(context, cr, width, height)
-    local outline_size = self._private.outline_size or 0
+    local outline_size = self._outlined.outline_size or 0
     local outline_color
     if oconstack.get(context)["highlighted"] then
-        outline_color = self._private.outline_color_focus and gcolor(self._private.outline_color_focus) or gcolor(beautiful.bg_focus)
+        outline_color = self._outlined.outline_color_focus and gcolor(self._outlined.outline_color_focus) or gcolor(beautiful.bg_focus)
     else
-        outline_color = self._private.outline_color and gcolor(self._private.outline_color) or gcolor(beautiful.bg_normal)
+        outline_color = self._outlined.outline_color and gcolor(self._outlined.outline_color) or gcolor(beautiful.bg_normal)
     end
     if outline_size == 0 or outline_color == nil then
         return self:orig_draw(context, cr, width, height)
@@ -47,47 +47,52 @@ function mod:draw(context, cr, width, height)
         return ncr[key]
     end
     setmetatable(ncr, ncr.mt)
-    self:orig_draw(context, ncr, width, height)
+    self._outlined.orig_draw(self, context, ncr, width, height)
 end
 
 function mod:set_outline_color(outline_color)
     if outline_color then
-        self._private.outline_color = outline_color
+        self._outlined.outline_color = outline_color
     else
-        self._private.outline_color = nil
+        self._outlined.outline_color = nil
     end
     self:emit_signal("widget::redraw_needed")
 end
 
 function mod:set_outline_color_focus(outline_color_focus)
     if outline_color_focus then
-        self._private.outline_color_focus = outline_color_focus
+        self._outlined.outline_color_focus = outline_color_focus
     else
-        self._private.outline_color_focus = nil
+        self._outlined.outline_color_focus = nil
     end
     self:emit_signal("widget::redraw_needed")
 end
 
 function mod:set_outline_size(outline_size)
     if outline_size then
-        self._private.outline_size = outline_size
+        self._outlined.outline_size = outline_size
     else
-        self._private.outline_size = nil
+        self._outlined.outline_size = nil
     end
     self:emit_signal("widget::redraw_needed")
 end
 
-function mod:new(...)
-    local ret = textbox(...)
+function mod.wrap_widget(widget)
+    if widget._outlined then return widget end
+    widget._outlined = {
+        orig_draw = widget.draw,
+    }
+    gtable.crush(widget, mod, true)
 
-    ret.orig_draw = ret.draw
-    gtable.crush(ret, self, true)
+    return widget
+end
 
-    return ret
+function mod.new(...)
+    return mod.wrap_widget(textbox(...))
 end
 
 function mod.mt:__call(...)
-    return self:new(...)
+    return self.new(...)
 end
 
 return setmetatable(mod, mod.mt)

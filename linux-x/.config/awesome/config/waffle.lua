@@ -27,6 +27,7 @@ local fixed_margin = require("fixed_margin")
 local fixed_align = require("fixed_align")
 local fixed_place = require("fixed_place")
 local outlined_textbox = require("outlined_textbox")
+local prompt_caret_textbox = require("prompt_caret_textbox")
 local debug_container = require("debug_container")
 local masked_imagebox = require("masked_imagebox")
 local acolor = require("aux").color
@@ -1638,7 +1639,7 @@ waffle_root_view = bento{
                                                     {
                                                         id = "input_widget",
                                                         align = "center",
-                                                        widget = wibox.widget.textbox,
+                                                        widget = prompt_caret_textbox,
                                                     },
                                                     fill_horizontal = true,
                                                     widget = wibox.container.place,
@@ -2216,7 +2217,7 @@ waffle_calendar_view = bento{
                                             {
                                                 id = "input_widget",
                                                 align = "center",
-                                                widget = wibox.widget.textbox,
+                                                widget = prompt_caret_textbox,
                                             },
                                             margins = dpi(2),
                                             widget = wibox.container.margin,
