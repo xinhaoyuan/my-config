@@ -1125,6 +1125,10 @@ function get_apps_widget_source()
             array = apps,
         },
         callbacks = {
+            pre_filter = function (input)
+                apps.focus = nil
+                return input
+            end,
             filter = function (f, e)
                 if f == nil then return 0 end
                 local c = cached_execution[e.name]
@@ -1133,8 +1137,19 @@ function get_apps_widget_source()
                 local succ, start = pcall(string.find, n, f:lower())
                 return succ and start
             end,
-            order = function (a, b) if a == b then return nil end return a < b end,
+            reduce = function (filtered_results)
+                table.sort(filtered_results, function (a, b)
+                               if a[2] == b[2] then return a[1] < b[1] end
+                               return a[2] < b[2]
+                           end)
+                for i, e in ipairs(filtered_results) do
+                    if apps.focused_element == apps[e[1]] then
+                        apps.focus = i
+                    end
+                end
+            end,
             post_filter = function (e)
+                if e.widget then return e.widget end
                 local icon_path
                 repeat
                     local icon = e.ai:get_icon()
@@ -1204,7 +1219,9 @@ function get_apps_widget_source()
                 function w:set_focused(v)
                     w:get_children_by_id("desc")[1].visible = v
                     self.context_transformation = {highlighted = v}
+                    if v then apps.focused_element = e end
                 end
+                e.widget = w
                 return w
             end,
         },
@@ -1224,8 +1241,14 @@ function get_audio_sink_switch_source()
                 local succ, start = pcall(string.find, n, f)
                 return succ and start
             end,
-            order = function (a, b) if a == b then return nil end return a < b end,
+            reduce = function (filtered_results)
+                table.sort(filtered_results, function (a, b)
+                               if a[2] == b[2] then return a[1] < b[1] end
+                               return a[2] < b[2]
+                           end)
+            end,
             post_filter = function (e)
+                if e.widget then return e.widget end
                 local w = wibox.widget{
                     {
                         {
@@ -1245,7 +1268,9 @@ function get_audio_sink_switch_source()
                 end
                 function w:set_focused(v)
                     self.context_transformation = {highlighted = v}
+                    if v then app.focused_element = e end
                 end
+                e.widget = w
                 return w
             end,
         },
@@ -1273,8 +1298,14 @@ function get_audio_source_switch_source()
                 local succ, start = pcall(string.find, n, f)
                 return succ and start
             end,
-            order = function (a, b) if a == b then return nil end return a < b end,
+            reduce = function (filtered_results)
+                table.sort(filtered_results, function (a, b)
+                               if a[2] == b[2] then return a[1] < b[1] end
+                               return a[2] < b[2]
+                           end)
+            end,
             post_filter = function (e)
+                if e.widget then return e.widget end
                 local w = wibox.widget{
                     {
                         {
@@ -1294,7 +1325,9 @@ function get_audio_source_switch_source()
                 end
                 function w:set_focused(v)
                     self.context_transformation = {highlighted = v}
+                    if v then app.focused_element = e end
                 end
+                e.widget = w
                 return w
             end,
         },
@@ -1423,8 +1456,14 @@ local function get_screen_layout_source()
                 local succ, start = pcall(string.find, n, f)
                 return succ and start
             end,
-            order = function (a, b) if a == b then return nil end return a < b end,
+            reduce = function (filtered_results)
+                table.sort(filtered_results, function (a, b)
+                               if a[2] == b[2] then return a[1] < b[1] end
+                               return a[2] < b[2]
+                           end)
+            end,
             post_filter = function (e)
+                if e.widget then return e.widget end
                 local w = wibox.widget{
                     {
                         {
@@ -1469,6 +1508,7 @@ local function get_screen_layout_source()
                     if preview then preview.visible = v end
                     self.context_transformation = {highlighted = v}
                 end
+                e.widget = w
                 return w
             end,
         },
@@ -2109,7 +2149,12 @@ local waffle_calendar_source = source.concat{
                     end
                     return false
                 end,
-                order = function (a, b) if a == b then return nil end return a < b end,
+                reduce = function (filtered_results)
+                    table.sort(filtered_results, function (a, b)
+                                   if a[2] == b[2] then return a[1] < b[1] end
+                                   return a[2] < b[2]
+                               end)
+                end,
             },
         },
         source.filterable{
@@ -2122,7 +2167,12 @@ local waffle_calendar_source = source.concat{
                     end
                     return false
                 end,
-                order = function (a, b) if a == b then return nil end return a < b end,
+                reduce = function (filtered_results)
+                    table.sort(filtered_results, function (a, b)
+                                   if a[2] == b[2] then return a[1] < b[1] end
+                                   return a[2] < b[2]
+                               end)
+                end,
             },
         },
         source.filterable{
@@ -2132,7 +2182,12 @@ local waffle_calendar_source = source.concat{
                     local succ, start = pcall(string.find, e.item.text:lower(), input or "")
                     return succ and start
                 end,
-                order = function (a, b) if a == b then return nil end return a < b end,
+                reduce = function (filtered_results)
+                    table.sort(filtered_results, function (a, b)
+                                   if a[2] == b[2] then return a[1] < b[1] end
+                                   return a[2] < b[2]
+                               end)
+                end,
             },
         }
     },

@@ -92,6 +92,7 @@ function lister:set_input(input)
         state.input = input
         state.executing_index = nil
         self.focus = nil
+        state.start_timer_running = true
         state.start_timer:again()
     end
 end
@@ -102,7 +103,7 @@ end
 
 function lister:set_source(source)
     local state = self._private
-    if state.start_timer.started then
+    if state.start_timer_running then
         state.start_timer:stop()
     end
     if state.source then
@@ -120,7 +121,7 @@ end
 
 function lister:set_focus(index)
     local state = self._private
-    if state.start_timer.started then return nil end
+    if state.start_timer_running then return nil end
     if index then
         if index < 1 then index = 1 end
         if state.source.sealed_count and index >= state.source.sealed_count then
@@ -139,7 +140,6 @@ function lister:set_focus(index)
     if new_container and new_container.child then
         new_container.child.focused = true
     end
-    return index
 end
 
 function lister:get_focus()
@@ -148,16 +148,16 @@ end
 
 function lister:get_focused_widget()
     local state = self._private
-    local container = not state.start_timer.started and state.scrlist.children[state.focused_index]
+    local container = not state.start_timer_running and state.scrlist.children[state.focused_index]
     return container and container.child
 end
 
 function lister:execute(...)
     local state = self._private
-    local container = not state.start_timer.started and state.scrlist.children[state.focused_index or 1]
+    local container = not state.start_timer_running and state.scrlist.children[state.focused_index or 1]
     if container and container.child and container.child.execute then
         container.child:execute()
-    elseif state.start_timer.started then
+    elseif state.start_timer_running then
         state.executing_index = 1
     elseif state.focused_index and state.source then
         state.executing_index = state.focused_index
@@ -179,7 +179,10 @@ function lister:new(args)
         start_timer = gtimer{
             timeout = 0.05,
             single_shot = true,
-            callback = function () if state.source then ret:start() end end,
+            callback = function ()
+                state.start_timer_running = false
+                if state.source then ret:start() end
+            end,
         },
     }
     function state.source_children_signal_handler()
@@ -191,7 +194,7 @@ function lister:new(args)
         {_containers = {}, _prev_size = 0}, {
             __index = function (self, index)
                 local len = state.source and array_length(state.source.children) or 0
-                if type(index) ~= "number" then return nil end
+                if type(index) ~= "number" then return state.source[index] end
                 if index < 1 or index > len then
                     if self._containers[index] then
                         -- For properly reset children focus later.
@@ -241,11 +244,15 @@ function lister:new(args)
             children._prev_size = len
             state.scrlist:emit_signal("property::children")
             if state.source then
-                state.scrlist.extended_count = state.source.extended_count
-                if state.executing_index and state.source.children[state.executing_index] then
+                local new_children = state.source.children
+                state.scrlist.extended_count = new_children.extended_count
+                if ret.focus == nil and new_children.focus then
+                    ret.focus = new_children.focus
+                end
+                if state.executing_index and new_children[state.executing_index] then
                     local ei = state.executing_index
                     state.executing_index = nil
-                    if state.source.children[ei].execute then state.source.children[ei]:execute() end
+                    if new_children[ei].execute then new_children[ei]:execute() end
                 end
             end
         end)

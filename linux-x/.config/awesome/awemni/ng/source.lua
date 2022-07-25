@@ -71,7 +71,6 @@ local filterable = {}
 function filterable:reset_filter()
     local state = self._private
     state.filtered_indices = {}
-    state.post_filtered = {}
     state.filtered_upstream_size = 0
 end
 
@@ -88,12 +87,8 @@ function filterable:update_for_appended_upstream()
             table.insert(state.filtered_indices, {i, succ})
         end
     end
-    if state.callbacks.order then
-        table.sort(state.filtered_indices, function (a, b)
-                       local o = state.callbacks.order(a[2], b[2])
-                       if o ~= nil then return o end
-                       return a[1] < b[1]
-                   end)
+    if state.callbacks.reduce then
+        state.callbacks.reduce(state.filtered_indices)
     end
     if prev_filtered_size ~= #state.filtered_indices then
         self:emit_signal("property::children")
@@ -180,23 +175,26 @@ function filterable.new(args)
         children = setmetatable(
             {}, {
                 __index = function (self, key)
-                    local index = state.filtered_indices[key]
-                    index = index and index[1]
-                    if index == nil then return nil end
+                    local use_post_filter = false
+                    if type(key) == "number" then
+                        key = state.filtered_indices[key]
+                        key = key and key[1]
+                        use_post_filter = true
+                    end
+                    if key == nil then return nil end
                     local upstream = state.upstream
                     if upstream == nil then return nil end
-                    if state.post_filtered[index] == nil then
-                        state.post_filtered[index] = state.callbacks.post_filter and
-                            state.callbacks.post_filter(state.upstream.children[index]) or upstream.children[index]
-                    end
-                    return state.post_filtered[index]
+                    return use_post_filter and
+                        state.callbacks.post_filter and
+                        state.callbacks.post_filter(state.upstream.children[key]) or
+                        upstream.children[key]
                 end,
                 __len = function ()
                     return #state.filtered_indices
                 end,
             }),
         upstream_children_signal_handler = function ()
-            if state.callbacks.order == nil and state.upstream.is_append_only then
+            if state.callbacks.reduce == nil and state.upstream.is_append_only then
                 ret:update_for_appended_upstream()
             else
                 ret:reset_filter()
