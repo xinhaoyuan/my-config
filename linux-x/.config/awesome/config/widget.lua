@@ -11,6 +11,7 @@ local opicker = require("onion.picker")
 local icons = require("icons")
 local masked_imagebox = require("masked_imagebox")
 local outlined_textbox = require("outlined_textbox")
+local fallback = require("fallback")
 local gshape = require("gears.shape")
 
 local update_interval_s = 2
@@ -914,6 +915,87 @@ do
    end
 end
 
+local playerctl_widget
+do
+    local max_text_width = dpi(150)
+    playerctl_widget = wibox.widget{
+        {
+            {
+                {
+                    id = "cover",
+                    widget = wibox.widget.imagebox,
+                },
+                {
+                    image = icons.music,
+                    widget = masked_imagebox,
+                },
+                layout = fallback,
+            },
+            width = beautiful.bar_height,
+            height = beautiful.bar_height,
+            strategy = "max",
+            widget = wibox.container.constraint,
+        },
+        {
+            {
+                {
+                    id = "metadata",
+                    wrap = "word_char",
+                    widget = wibox.widget.textbox,
+                },
+                width = max_text_width,
+                height = beautiful.bar_height,
+                strategy = "max",
+                widget = wibox.container.constraint,
+            },
+            widget = wibox.container.place,
+        },
+        spacing = beautiful.sep_small_size,
+        layout = wibox.layout.fixed.horizontal,
+        visible = false
+    }
+
+    local pending_info = {}
+    awful.spawn.with_line_callback(
+        {"playerctl", "-a", "-f", "player={{playerName}}\nstatus={{status}}\ntitle={{title}}\nalbum={{album}}\nartist={{artist}}\nEND", "metadata", "-F"},
+        {
+            stdout = function (line)
+                if line == "END" then
+                    if pending_info.status == "Stopped" then
+                        playerctl_widget.visible = false
+                        return
+                    else
+                        playerctl_widget.visible = true
+                    end
+                    local text
+                    -- For youtube
+                    if pending_info.artist then pending_info.artist = pending_info.artist:gsub(" %- Topic$", "") end
+                    -- for k, v in pairs(pending_info) do print(">", k, v) end
+                    for _, t in ipairs({"title", "artist", "album"}) do
+                        if pending_info[t] and #pending_info[t] > 0 then
+                            text = (text and (text.." - ") or "")..pending_info[t]
+                        end
+                    end
+                    playerctl_widget:get_children_by_id("metadata")[1].text = text
+                    pending_info = {}
+                    return
+                end
+                local k, v = line:match("([^=]*)=(.*)")
+                if k then
+                    pending_info[k] = v
+                end
+            end,
+        })
+    playerctl_widget:connect_signal(
+        "button::release", function (_w, _x, _y , b)
+            if b == 2 then
+                awful.spawn.with_shell("playerctl pause; playerctl stop")
+            elseif b == 3 then
+                awful.spawn({"playerctl", "play-pause"}, false)
+            end
+        end)
+end
+
 return {
     cpu_widget = cpu_widget,
     ram_widget = ram_widget,
@@ -921,4 +1003,5 @@ return {
     disk_widget = disk_widget,
     audio_sink_widget = audio_sink_widget,
     audio_source_widget = audio_source_widget,
+    playerctl_widget = playerctl_widget,
 }

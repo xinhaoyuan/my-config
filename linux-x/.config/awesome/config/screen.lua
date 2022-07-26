@@ -9,6 +9,7 @@ local capi = {
 local prefix = (...):match("(.-)[^%.]+$")
 local shared = require(prefix .. "shared")
 shared.screen = {}
+local cwidget = require((...):match("(.-)[^%.]+$") .. "widget")
 
 local awful  = require("awful")
 local beautiful = require("beautiful")
@@ -679,13 +680,23 @@ local function setup_screen(scr)
    left_layout:add(scr.widgets.tag_list)
    left_layout:add(scr.mypromptbox)
    local right_layout = wibox.widget {
-      spacing        = beautiful.sep_median_size,
-      spacing_widget = beautiful.sep_widget,
+      -- spacing        = beautiful.sep_median_size,
+      -- spacing_widget = beautiful.sep_widget,
       layout         = wibox.layout.fixed[direction_index[shared.vars.bar_position]]
    }
 
+   right_layout:add(beautiful.with_separator{
+                        widget = cwidget.playerctl_widget,
+                        separator_side = "right",
+                        separator_size = beautiful.sep_median_size,
+                    })
+
    if scr == primary_screen then
-       right_layout:add(bar_tray_wrapper)
+       right_layout:add(beautiful.with_separator{
+                            widget = bar_tray_wrapper,
+                            separator_side = "right",
+                            separator_size = beautiful.sep_median_size,
+                        })
    end
 
    local clock

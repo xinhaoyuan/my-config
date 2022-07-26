@@ -677,6 +677,36 @@ theme.apply_border_to_widget = function (args)
     return wibox.widget(theme.apply_border_to_widget_template(args))
 end
 
+theme.with_separator_for_template = function(args)
+    if args.separator_draw == nil then
+        args.separator_draw = theme.draw_separator
+    end
+    return {
+        args.widget,
+        [args.separator_side] = args.separator_size,
+        draw_empty = false,
+        widget = fixed_margin,
+        before_draw_children = function (self, context, cr, width, height)
+            cr:save()
+            if args.separator_side == "left" then
+                args.separator_draw(cr, args.separator_size, height)
+            elseif args.separator_side == "right" then
+                cr:translate(width - args.separator_size, 0)
+                args.separator_draw(cr, args.separator_size, height)
+            elseif args.separator_side == "top" then
+                args.separator_draw(cr, width, args.separator_size)
+            elseif args.separator_side == "bottom" then
+                cr:translate(0, height - args.separator_size)
+                args.separator_draw(cr, width, args.separator_size)
+            end
+            cr:restore()
+        end,
+    }
+end
+theme.with_separator = function (args)
+    return wibox.widget(theme.with_separator_for_template(args))
+end
+
 do
     local function orgenda_icon(outer_color, inner_color)
         local shape = function(cr, size)
