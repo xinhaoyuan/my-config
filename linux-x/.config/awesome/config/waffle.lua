@@ -1269,7 +1269,6 @@ function get_audio_sink_switch_source()
                 end
                 function w:set_focused(v)
                     self.context_transformation = {highlighted = v}
-                    if v then app.focused_element = e end
                 end
                 e.widget = w
                 return w
@@ -1326,7 +1325,6 @@ function get_audio_source_switch_source()
                 end
                 function w:set_focused(v)
                     self.context_transformation = {highlighted = v}
-                    if v then app.focused_element = e end
                 end
                 e.widget = w
                 return w
