@@ -59,6 +59,7 @@ os.execute("touch "..notix_org_path)
 require("notix").config.org_file_for_pin = notix_org_path
 naughty.connect_signal(
     "request::display", function (notif)
+        notif.timeout = 3
         naughty.layout.box{
             notification = notif,
             widget_template = beautiful.apply_border_to_widget_template{

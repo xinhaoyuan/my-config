@@ -13,6 +13,7 @@ local masked_imagebox = require("masked_imagebox")
 local outlined_textbox = require("outlined_textbox")
 local fallback = require("fallback")
 local gshape = require("gears.shape")
+local gsurf = require("gears.surface")
 
 local update_interval_s = 2
 -- TODO dedup with waffle.lua
@@ -955,9 +956,24 @@ do
         visible = false
     }
 
+    local fetching_cover = nil
+    local function fetch_cover(url)
+        if fetching_cover == url then return end
+        playerctl_widget:get_children_by_id("cover")[1].image = nil
+        fetching_cover = url
+        -- print("fetch", url)
+        awful.spawn.easy_async(
+            {"curl", url, "-o", "/tmp/playerctl-cover", "-s", "-w", "%{content_type}"},
+            function (stdout, stderr, exit_reason, exit_code)
+                if fetching_cover ~= url or exit_reason ~= "exit" or exit_code ~= 0 then return end
+                -- print(stdout)
+                playerctl_widget:get_children_by_id("cover")[1].image = gsurf.load_uncached("/tmp/playerctl-cover")
+            end)
+    end
+
     local pending_info = {}
     awful.spawn.with_line_callback(
-        {"playerctl", "-a", "-f", "player={{playerName}}\nstatus={{status}}\ntitle={{title}}\nalbum={{album}}\nartist={{artist}}\nEND", "metadata", "-F"},
+        {"playerctl", "-a", "-f", "player={{playerName}}\nstatus={{status}}\ntitle={{title}}\nalbum={{album}}\ncover={{mpris:artUrl}}\nartist={{artist}}\nEND", "metadata", "-F"},
         {
             stdout = function (line)
                 if line == "END" then
@@ -977,6 +993,9 @@ do
                         end
                     end
                     playerctl_widget:get_children_by_id("metadata")[1].text = text
+                    if pending_info.cover then
+                        fetch_cover(pending_info.cover)
+                    end
                     pending_info = {}
                     return
                 end
@@ -988,10 +1007,12 @@ do
         })
     playerctl_widget:connect_signal(
         "button::release", function (_w, _x, _y , b)
-            if b == 2 then
+            if b == 1 then
+                awful.spawn({"playerctl", "play-pause"}, false)
+            elseif b == 2 then
                 awful.spawn.with_shell("playerctl pause; playerctl stop")
             elseif b == 3 then
-                awful.spawn({"playerctl", "play-pause"}, false)
+                awful.spawn({"playerctl", "next"}, false)
             end
         end)
 end
