@@ -918,24 +918,31 @@ end
 
 local playerctl_widget
 do
+    local playerctl_player_allowlist = {
+        spotify = true,
+        chromium = false,
+    }
     local max_text_width = dpi(150)
     playerctl_widget = wibox.widget{
         {
             {
                 {
-                    id = "cover",
-                    widget = wibox.widget.imagebox,
+                    {
+                        id = "cover",
+                        widget = wibox.widget.imagebox,
+                    },
+                    {
+                        image = icons.music,
+                        widget = masked_imagebox,
+                    },
+                    layout = fallback,
                 },
-                {
-                    image = icons.music,
-                    widget = masked_imagebox,
-                },
-                layout = fallback,
+                width = beautiful.bar_height,
+                height = beautiful.bar_height,
+                strategy = "max",
+                widget = wibox.container.constraint,
             },
-            width = beautiful.bar_height,
-            height = beautiful.bar_height,
-            strategy = "max",
-            widget = wibox.container.constraint,
+            widget = wibox.container.place,
         },
         {
             {
@@ -956,6 +963,7 @@ do
         visible = false
     }
 
+    local player
     local fetching_cover = nil
     local function fetch_cover(url)
         if fetching_cover == url then return end
@@ -977,12 +985,14 @@ do
         {
             stdout = function (line)
                 if line == "END" then
+                    if not playerctl_player_allowlist[pending_info.player] then return end
                     if pending_info.status == "Stopped" then
                         playerctl_widget.visible = false
                         return
                     else
                         playerctl_widget.visible = true
                     end
+                    player = pending_info.player
                     local text
                     -- For youtube
                     if pending_info.artist then pending_info.artist = pending_info.artist:gsub(" %- Topic$", "") end
@@ -1008,11 +1018,11 @@ do
     playerctl_widget:connect_signal(
         "button::release", function (_w, _x, _y , b)
             if b == 1 then
-                awful.spawn({"playerctl", "play-pause"}, false)
+                awful.spawn({"playerctl", "-p", player, "play-pause"}, false)
             elseif b == 2 then
-                awful.spawn.with_shell("playerctl pause; playerctl stop")
+                awful.spawn.with_shell(string.format("playerctl -p %s pause; playerctl -p %s stop", player, player))
             elseif b == 3 then
-                awful.spawn({"playerctl", "next"}, false)
+                awful.spawn({"playerctl", "-p", player, "next"}, false)
             end
         end)
 end
