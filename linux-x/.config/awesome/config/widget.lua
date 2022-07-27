@@ -921,6 +921,7 @@ do
     local playerctl_player_allowlist = {
         spotify = true,
         chromium = false,
+        firefox = false,
     }
     local max_text_width = dpi(150)
     playerctl_widget = wibox.widget{
@@ -980,41 +981,61 @@ do
     end
 
     local pending_info = {}
+    local function handle_playerctl_line(line)
+        if line == "END" then
+            if not playerctl_player_allowlist[pending_info.player] then return end
+            if pending_info.status == "Stopped" then
+                playerctl_widget.visible = false
+                return
+            else
+                playerctl_widget.visible = true
+            end
+            player = pending_info.player
+            local text
+            -- For youtube
+            if pending_info.artist then pending_info.artist = pending_info.artist:gsub(" %- Topic$", "") end
+            -- for k, v in pairs(pending_info) do print(">", k, v) end
+            for _, t in ipairs({"title", "artist", "album"}) do
+                if pending_info[t] and #pending_info[t] > 0 then
+                    text = (text and (text.." - ") or "")..pending_info[t]
+                end
+            end
+            playerctl_widget:get_children_by_id("metadata")[1].text = text
+            if pending_info.cover then
+                fetch_cover(pending_info.cover)
+            end
+            pending_info = {}
+            return
+        end
+        local k, v = line:match("([^=]*)=(.*)")
+        if k then
+            pending_info[k] = v
+        end
+    end
     awful.spawn.with_line_callback(
         {"playerctl", "-a", "-f", "player={{playerName}}\nstatus={{status}}\ntitle={{title}}\nalbum={{album}}\ncover={{mpris:artUrl}}\nartist={{artist}}\nEND", "metadata", "-F"},
-        {
-            stdout = function (line)
-                if line == "END" then
-                    if not playerctl_player_allowlist[pending_info.player] then return end
-                    if pending_info.status == "Stopped" then
-                        playerctl_widget.visible = false
-                        return
-                    else
-                        playerctl_widget.visible = true
-                    end
-                    player = pending_info.player
-                    local text
-                    -- For youtube
-                    if pending_info.artist then pending_info.artist = pending_info.artist:gsub(" %- Topic$", "") end
-                    -- for k, v in pairs(pending_info) do print(">", k, v) end
-                    for _, t in ipairs({"title", "artist", "album"}) do
-                        if pending_info[t] and #pending_info[t] > 0 then
-                            text = (text and (text.." - ") or "")..pending_info[t]
-                        end
-                    end
-                    playerctl_widget:get_children_by_id("metadata")[1].text = text
-                    if pending_info.cover then
-                        fetch_cover(pending_info.cover)
-                    end
+        {stdout = handle_playerctl_line})
+    gtimer{
+        timeout = update_interval_s,
+        autostart = true,
+        callback = function ()
+            awful.spawn.easy_async(
+                {"playerctl", "-a", "-f", "player={{playerName}}\nstatus={{status}}\ntitle={{title}}\nalbum={{album}}\ncover={{mpris:artUrl}}\nartist={{artist}}\nEND", "metadata"},
+                function (stdout, ...)
+                    local old_pending_info = pending_info
                     pending_info = {}
-                    return
-                end
-                local k, v = line:match("([^=]*)=(.*)")
-                if k then
-                    pending_info[k] = v
-                end
-            end,
-        })
+                    player = nil
+                    for line in stdout:gmatch("[^\n\r]+") do
+                        handle_playerctl_line(line)
+                    end
+                    pending_info = old_pending_info
+                    if player == nil then
+                        playerctl_widget.visible = false
+                    end
+                end)
+
+        end,
+    }
     playerctl_widget:connect_signal(
         "button::release", function (_w, _x, _y , b)
             if b == 1 then

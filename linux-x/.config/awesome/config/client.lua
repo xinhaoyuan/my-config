@@ -24,6 +24,7 @@ local manage_ticket = require("manage_ticket")
 local extender = require("extender")
 local lgicore = require("lgi.core")
 local cairo = require("lgi").cairo
+local gtk = require("lgi").require("Gtk", "3.0")
 local table_join = awful.util.table.join
 local delayed = gtimer.delayed_call
 local cgroup = require("cgroup")
@@ -1074,6 +1075,16 @@ require("awful.rules").rules = {
         rule = { class = "qBittorrent", type = "normal" },
         properties = {
             tasklist_icon_only = true,
+        },
+    },
+    {
+        rule = { class = "Spotify" },
+        properties = {
+            callback = function (c)
+                local theme = gtk.IconTheme.get_default()
+                local icon = theme:load_icon("spotify-client", dpi(64), 0)
+                c.icon = capi.awesome.pixbuf_to_surface(icon._native)
+            end,
         },
     },
 }
