@@ -1023,7 +1023,7 @@ do
     local pid = awful.spawn.with_line_callback(
         {"playerctl", "-a", "-f", format, "metadata", "-F"},
         {stdout = handle_playerctl_line})
-    capi.awesome.connect_signal("exit", function () awful.spawn({"kill", tostring(pid)}, false) end)
+    capi.awesome.connect_signal("exit", function () capi.awesome.kill(pid, capi.awesome.unix_signal.SIGTERM) end)
     gtimer{
         timeout = update_interval_s,
         autostart = true,
