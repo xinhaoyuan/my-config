@@ -506,12 +506,17 @@ local function update_shape(c)
     local width = geo.width - decorator.left_space - decorator.right_space + decorator.left_size + decorator.right_size
     local height = geo.height - decorator.top_space - decorator.bottom_space + decorator.top_size + decorator.bottom_size
 
+
+
     if c.invalidate_frame then
+        if c.client_mask then
+            c.client_mask:finish()
+            c.client_mask = nil
+        end
+
         if c.fullscreen or not c.has_decorator then
             c.composite = nil
             return
-        else
-            c.client_mask = nil
         end
 
         c.composite = function (c, cr_raw, src_surf_raw, dx, dy, dw, dh)
