@@ -22,18 +22,11 @@ function mod:draw(context, cr, width, height)
                 cr:push_group_with_content("COLOR_ALPHA")
                 cr:show_layout(layout)
                 if cursor_pos then
-                    local sp, wp = layout:get_cursor_pos(math.abs(cursor_pos) - 1)
+                    local sp, wp = layout:get_cursor_pos(cursor_pos)
                     cr:save()
-                    if cursor_pos == -1 then
-                        -- empty string
-                        local x = sp.x / lgi.Pango.SCALE
-                        if x + cursor_width > width then x = width - cursor_width end
-                        cr:rectangle(x, sp.y / lgi.Pango.SCALE, cursor_width, sp.height / lgi.Pango.SCALE)
-                    elseif cursor_pos < -1 then
-                        cr:rectangle(sp.x / lgi.Pango.SCALE - cursor_width, sp.y / lgi.Pango.SCALE, cursor_width, sp.height / lgi.Pango.SCALE)
-                    else
-                        cr:rectangle(sp.x / lgi.Pango.SCALE, sp.y / lgi.Pango.SCALE, cursor_width, sp.height / lgi.Pango.SCALE)
-                    end
+                    local x = sp.x / lgi.Pango.SCALE
+                    if x + cursor_width > width then x = width - cursor_width end
+                    cr:rectangle(x, sp.y / lgi.Pango.SCALE, cursor_width, sp.height / lgi.Pango.SCALE)
                     cr:set_source_rgb(0, 0, 0)
                     cr:set_operator("XOR")
                     cr:fill()
@@ -71,8 +64,7 @@ function mod:set_markup(markup)
         if s then
             local inner = at_end and "" or markup:match(">(.*)<")
             local before = markup:sub(1, s - 1)
-            cursor_pos = #gstring.xml_unescape(before) + 1
-            if at_end then cursor_pos = -cursor_pos end
+            cursor_pos = string.wlen(gstring.xml_unescape(before))
             markup = before..inner..markup:sub(e + 1, at_end and -1 or -2)
         end
     end
