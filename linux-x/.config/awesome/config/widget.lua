@@ -1,4 +1,5 @@
 local capi = {
+    awesome = awesome,
     mousegrabber = mousegrabber,
 }
 local wibox = require("wibox")
@@ -14,6 +15,8 @@ local outlined_textbox = require("outlined_textbox")
 local fallback = require("fallback")
 local gshape = require("gears.shape")
 local gsurf = require("gears.surface")
+local compactor = require("compactor")
+local debug_container = require("debug_container")
 
 local update_interval_s = 2
 -- TODO dedup with waffle.lua
@@ -948,9 +951,12 @@ do
         {
             {
                 {
-                    id = "metadata",
-                    wrap = "word_char",
-                    widget = wibox.widget.textbox,
+                    {
+                        id = "metadata",
+                        wrap = "word_char",
+                        widget = wibox.widget.textbox,
+                    },
+                    widget = compactor,
                 },
                 width = max_text_width,
                 height = beautiful.bar_height,
@@ -986,6 +992,7 @@ do
             if not playerctl_player_allowlist[pending_info.player] then return end
             if pending_info.status == "Stopped" then
                 playerctl_widget.visible = false
+                player = nil
                 return
             else
                 playerctl_widget.visible = true
@@ -1012,15 +1019,18 @@ do
             pending_info[k] = v
         end
     end
-    awful.spawn.with_line_callback(
-        {"playerctl", "-a", "-f", "player={{playerName}}\nstatus={{status}}\ntitle={{title}}\nalbum={{album}}\ncover={{mpris:artUrl}}\nartist={{artist}}\nEND", "metadata", "-F"},
+    local format = "player={{playerName}}\nstatus={{status}}\ntitle={{title}}\nalbum={{album}}\ncover={{mpris:artUrl}}\nartist={{artist}}\nEND"
+    local pid = awful.spawn.with_line_callback(
+        {"playerctl", "-a", "-f", format, "metadata", "-F"},
         {stdout = handle_playerctl_line})
+    capi.awesome.connect_signal("exit", function () awful.spawn({"kill", tostring(pid)}, false) end)
     gtimer{
         timeout = update_interval_s,
         autostart = true,
         callback = function ()
+            if player == nil then return end
             awful.spawn.easy_async(
-                {"playerctl", "-a", "-f", "player={{playerName}}\nstatus={{status}}\ntitle={{title}}\nalbum={{album}}\ncover={{mpris:artUrl}}\nartist={{artist}}\nEND", "metadata"},
+                {"playerctl", "-a", "-f", format, "metadata"},
                 function (stdout, ...)
                     local old_pending_info = pending_info
                     pending_info = {}

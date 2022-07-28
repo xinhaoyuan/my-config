@@ -18,7 +18,7 @@ function mod:draw(context, cr, width, height)
         outline_color = self._outlined.outline_color and gcolor(self._outlined.outline_color) or gcolor(beautiful.bg_normal)
     end
     if outline_size == 0 or outline_color == nil then
-        return self:orig_draw(context, cr, width, height)
+        return self._outlined.orig_draw(self, context, cr, width, height)
     end
 
     local ncr = {}
