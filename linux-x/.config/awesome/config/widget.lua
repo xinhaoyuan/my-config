@@ -932,14 +932,18 @@ do
             {
                 {
                     {
-                        id = "cover",
-                        widget = wibox.widget.imagebox,
+                        {
+                            id = "cover",
+                            widget = wibox.widget.imagebox,
+                        },
+                        {
+                            image = icons.music,
+                            widget = masked_imagebox,
+                        },
+                        layout = fallback,
                     },
-                    {
-                        image = icons.music,
-                        widget = masked_imagebox,
-                    },
-                    layout = fallback,
+                    id = "cover-container",
+                    widget = wibox.container.background,
                 },
                 width = beautiful.bar_height,
                 height = beautiful.bar_height,
@@ -1008,6 +1012,8 @@ do
                 end
             end
             playerctl_widget:get_children_by_id("metadata")[1].text = text
+            playerctl_widget:get_children_by_id("cover-container")[1].opacity =
+                pending_info.status == "Playing" and 1 or 0.5
             if pending_info.cover then
                 fetch_cover(pending_info.cover)
             end

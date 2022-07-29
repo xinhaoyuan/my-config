@@ -1640,6 +1640,7 @@ waffle_root_view = bento{
                                                         widget = prompt_caret_textbox,
                                                     },
                                                     fill_horizontal = true,
+                                                    content_fill_horizontal = true,
                                                     widget = wibox.container.place,
                                                 },
                                                 margins = dpi(2),
