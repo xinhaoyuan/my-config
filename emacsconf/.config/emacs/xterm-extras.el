@@ -632,6 +632,28 @@
   (define-key function-key-map "\e[1;8F" [S-M-C-end])
   (define-key function-key-map "\e[1;8H" [S-M-C-home]))
 
+(defun define-term-key (keymap prefix suffix key)
+  (define-key keymap (concat prefix "2" suffix) (kbd (concat "S-" key)))
+  (define-key keymap (concat prefix "3" suffix) (kbd (concat "M-" key)))
+  (define-key keymap (concat prefix "4" suffix) (kbd (concat "M-S-" key)))
+  (define-key keymap (concat prefix "5" suffix) (kbd (concat "C-" key)))
+  (define-key keymap (concat prefix "6" suffix) (kbd (concat "C-S-" key)))
+  (define-key keymap (concat prefix "7" suffix) (kbd (concat "M-C-" key)))
+  (define-key keymap (concat prefix "8" suffix) (kbd (concat "M-C-S-" key)))
+  )
+
+(defun define-term-key-uncontrol (keymap prefix suffix key)
+  (define-key keymap (concat prefix "2" suffix) (kbd (concat "S-" key)))
+  (define-key keymap (concat prefix "3" suffix) (kbd (concat "M-" key)))
+  (define-key keymap (concat prefix "4" suffix) (kbd (concat "M-S-" key)))
+  )
+
+(defun define-term-key-unshifted (keymap prefix suffix key)
+  (define-key keymap (concat prefix "3" suffix) (kbd (concat "M-" key)))
+  (define-key keymap (concat prefix "5" suffix) (kbd (concat "C-" key)))
+  (define-key keymap (concat prefix "7" suffix) (kbd (concat "M-C-" key)))
+  )
+
 (defun xterm-extra-extra-keys ()
 
   ;; These are escapes that xterm does not provide by default, but you
@@ -829,51 +851,16 @@
   (define-key function-key-map "\e[z7v"    [M-C-menu])
   (define-key function-key-map "\e[z8v"    [S-M-C-menu])
   ;; modified by xinhaoyuan@gmail.com
-  ;; -- more keys
-  (define-key function-key-map "\e[33;3u"    (kbd "M-!"))
-  (define-key function-key-map "\e[33;5u"    (kbd "C-!"))
-  (define-key function-key-map "\e[33;7u"    (kbd "M-C-!"))
-  
-  (define-key function-key-map "\e[64;3u"    (kbd "M-@"))
-  (define-key function-key-map "\e[64;5u"    (kbd "C-@"))
-  (define-key function-key-map "\e[64;7u"    (kbd "M-C-@"))
-
-  (define-key function-key-map "\e[35;3u"    (kbd "M-#"))
-  (define-key function-key-map "\e[35;5u"    (kbd "C-#"))
-  (define-key function-key-map "\e[35;7u"    (kbd "M-C-#"))
-
-  (define-key function-key-map "\e[36;3u"    (kbd "M-$"))
-  (define-key function-key-map "\e[36;5u"    (kbd "C-$"))
-  (define-key function-key-map "\e[36;7u"    (kbd "M-C-$"))
-
-  (define-key function-key-map "\e[37;3u"    (kbd "M-%"))
-  (define-key function-key-map "\e[37;5u"    (kbd "C-%"))
-  (define-key function-key-map "\e[37;7u"    (kbd "M-C-%"))
-
-  (define-key function-key-map "\e[94;3u"    (kbd "M-^"))
-  (define-key function-key-map "\e[94;5u"    (kbd "C-^"))
-  (define-key function-key-map "\e[94;7u"    (kbd "M-C-^"))
-
-  (define-key function-key-map "\e[38;3u"    (kbd "M-&"))
-  (define-key function-key-map "\e[38;5u"    (kbd "C-&"))
-  (define-key function-key-map "\e[38;7u"    (kbd "M-C-&"))
-
-  (define-key function-key-map "\e[42;3u"    (kbd "M-*"))
-  (define-key function-key-map "\e[42;5u"    (kbd "C-*"))
-  (define-key function-key-map "\e[42;7u"    (kbd "M-C-*"))
-
-  (define-key function-key-map "\e[40;3u"    (kbd "M-("))
-  (define-key function-key-map "\e[40;5u"    (kbd "C-("))
-  (define-key function-key-map "\e[40;7u"    (kbd "M-C-("))
-
-  (define-key function-key-map "\e[41;3u"    (kbd "M-)"))
-  (define-key function-key-map "\e[41;5u"    (kbd "C-)"))
-  (define-key function-key-map "\e[41;7u"    (kbd "M-C-)"))
-
-  (define-key function-key-map "\e[47;3u"    (kbd "M-/"))
-  (define-key function-key-map "\e[47;5u"    (kbd "C-/"))
-  (define-key function-key-map "\e[47;7u"    (kbd "M-C-/"))
-
+  ;; -- more keys by codepoints
+  (define-term-key-uncontrol function-key-map "\e[0;" "u" "C-SPC")
+  (define-term-key-uncontrol function-key-map "\e[32;" "u" "SPC")
+  (dotimes (n (- 127 33))
+    (let ((b (+ n 33)))
+      (if (and (<= 65 b) (<= b 90))
+          (define-term-key-unshifted function-key-map
+            (format "\e[%d;" b) "u" (format "S-%c" (+ b 32)))
+        (define-term-key-unshifted function-key-map
+            (format "\e[%d;" b) "u" (format "%c" b)))))
   )
 
 (defun xterm-extra-screen-keys ()
