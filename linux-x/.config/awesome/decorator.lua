@@ -15,8 +15,9 @@ do
     end
 end
 
-
 local module = {}
+local bor = (bit or require("bit32")).bor
+local band = (bit or require("bit32")).band
 
 local direction_bits = {}
 direction_bits["top"] = 1
@@ -28,7 +29,7 @@ function module.directions(args)
     local ret = 0
     for i = 1, #args do
         local b = direction_bits[args[i]]
-        if b then ret = ret | b end
+        if b then ret = bor(ret, b) end
     end
     return ret
 end
@@ -144,10 +145,10 @@ function module:draw(context, cr, is_shape, width, height, directions)
         left = directions["left"] and (is_shape and self.left_size or self.left_space) or 0
         right = directions["right"] and (is_shape and self.right_size or self.right_space) or 0
     else
-        top = directions & 1 == 0 and 0 or (is_shape and self.top_size or self.top_space)
-        bottom = directions & 2 == 0 and 0 or (is_shape and self.bottom_size or self.bottom_space)
-        left = directions & 4 == 0 and 0 or (is_shape and self.left_size or self.left_space)
-        right = directions & 8 == 0 and 0 or (is_shape and self.right_size or self.right_space)
+        top = band(directions, 1) == 0 and 0 or (is_shape and self.top_size or self.top_space)
+        bottom = band(directions, 2) == 0 and 0 or (is_shape and self.bottom_size or self.bottom_space)
+        left = band(directions, 4) == 0 and 0 or (is_shape and self.left_size or self.left_space)
+        right = band(directions, 8) == 0 and 0 or (is_shape and self.right_size or self.right_space)
     end
     cr:save()
     if is_shape then

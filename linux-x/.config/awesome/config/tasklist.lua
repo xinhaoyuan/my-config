@@ -28,6 +28,8 @@ local outlined_textbox = require("outlined_textbox")
 local debug_container = require("debug_container")
 local module = {}
 
+local unpack = table.unpack or unpack
+
 local size_index = shared.size_index
 local dual_size_index = shared.dual_size_index
 local top_index = shared.top_index
@@ -219,7 +221,7 @@ local function tasklist_update_function(widget, c, index, objects)
             end
         end
         for _, pp in ipairs(property_to_text) do
-            local key, text = table.unpack(pp)
+            local key, text = unpack(pp)
             if prop[key] == true then
                 status_text = status_text .. text
             end

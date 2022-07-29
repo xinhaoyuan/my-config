@@ -34,7 +34,7 @@ function class:lightness()
 end
 
 function mod.from_string(s)
-    local ret = table.pack(gcolor.parse_color(s))
+    local ret = {gcolor.parse_color(s)}
     setmetatable(ret, class.mt)
     return ret
 end
