@@ -9,9 +9,9 @@ local oconstack = require("onion.constack")
 local lgi = require("lgi")
 local dpi = require("beautiful.xresources").apply_dpi
 
-local mod = {mt = {}}
+local pct = {}
 
-function mod:draw(context, cr, width, height)
+function pct:draw(context, cr, width, height)
     local cursor_pos = self._pct.cursor_pos
     local cursor_width = self._pct.cursor_width
     local ncr = {}
@@ -47,7 +47,7 @@ function mod:draw(context, cr, width, height)
     self._pct.orig_draw(self, context, ncr, width, height)
 end
 
-function mod:fit(...)
+function pct:fit(...)
     local w, h = self._pct.orig_fit(self, ...)
     if w == 0 and self._pct.cursor_pos then
         local _, logical = self._private.layout:get_pixel_extents()
@@ -56,7 +56,7 @@ function mod:fit(...)
     return w, h
 end
 
-function mod:set_markup(markup)
+function pct:set_markup(markup)
     local cursor_pos = nil
     if markup then
         local s, e = markup:find("<span.*/span>")
@@ -75,7 +75,7 @@ function mod:set_markup(markup)
     self._pct.orig_set_markup(self, markup)
 end
 
-function mod:set_cursor_width(cw)
+function pct:set_cursor_width(cw)
     if self._pct.cursor_width ~= cw then
         self._pct.cursor_width = cw
         self:emit_signal("widget::layout_changed")
@@ -83,7 +83,7 @@ function mod:set_cursor_width(cw)
     end
 end
 
-function mod.wrap_widget(widget)
+function pct.wrap_widget(widget)
     if widget._pct then return widget end
     widget._pct = {
         cursor_width = dpi(1),
@@ -91,16 +91,12 @@ function mod.wrap_widget(widget)
         orig_draw = widget.draw,
         orig_set_markup = widget.set_markup,
     }
-    gtable.crush(widget, mod, true)
+    gtable.crush(widget, pct, true)
     return widget
 end
 
-function mod.new(...)
-    return mod.wrap_widget(textbox(...))
+function pct.new(...)
+    return pct.wrap_widget(textbox(...))
 end
 
-function mod.mt:__call(...)
-    return self.new(...)
-end
-
-return setmetatable(mod, mod.mt)
+return setmetatable(pct, {__call = function (self, ...) return pct.new(...) end})
