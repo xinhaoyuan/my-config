@@ -179,16 +179,21 @@ function config.create_notif_widget(notif)
                 {
                     {
                         {
-                            notification = notif,
-                            widget = naughty.widget.icon,
+                            {
+                                notification = notif,
+                                widget = naughty.widget.icon,
+                            },
+                            {
+                                image = icons.notification,
+                                widget = masked_imagebox,
+                            },
+                            widget = fallback,
                         },
-                        {
-                            image = icons.notification,
-                            widget = masked_imagebox,
-                        },
-                        widget = fallback,
+                        top = beautiful.sep_small_size,
+                        bottom = beautiful.sep_small_size,
+                        widget = wibox.container.margin,
                     },
-                    valign = "center",
+                    valign = "top",
                     halign = "center",
                     widget = wibox.container.place,
                 },
