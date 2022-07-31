@@ -17,6 +17,8 @@ DEP_ARRAY=(
     socat
     wget
     curl
+    htop
+    pmount
 )
 
 install_dep xy-base "${DEP_ARRAY[@]}"

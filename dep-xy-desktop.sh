@@ -9,6 +9,7 @@ DEP_ARRAY=(
     autorandr
     arandr
     nitrogen
+    picom
     # hotkeys
     xcape
     # im
@@ -36,6 +37,10 @@ DEP_ARRAY=(
     # awesome needs these
     librsvg2-dev
     fswatch
+    # oomox
+    sassc
+    librsvg2-bin
+    gtk2-engines-murrine
 )
 
 install_dep xy-desktop "${DEP_ARRAY[@]}"
