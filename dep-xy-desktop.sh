@@ -31,7 +31,11 @@ DEP_ARRAY=(
     xinput
     xdotool
     network-manager-gnome
+    blueman
     lxappearance
+    qt5ct
+    qt5-gtk-platformtheme
+    qt5-style-plugins
     x11-utils
     xclip
     # awesome needs these
