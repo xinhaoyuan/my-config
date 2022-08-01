@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Spotify (docked)
+GenericName=Music Player
+Icon=spotify-client
+TryExec=spotify-docked
+Exec=spotify-docked
+Terminal=false
+Categories=Audio;Music;Player;AudioVideo;
+StartupWMClass=spotify

@@ -1214,7 +1214,7 @@ function get_apps_widget_source()
                 }
                 function w:execute()
                     cache_execution(e.name, apps_source.input)
-                    awful.spawn(e.ai:get_executable())
+                    e.ai:launch()
                     waffle:hide()
                 end
                 function w:set_focused(v)
