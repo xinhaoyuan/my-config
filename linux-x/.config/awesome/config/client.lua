@@ -1082,16 +1082,6 @@ require("awful.rules").rules = {
             tasklist_icon_only = true,
         },
     },
-    {
-        rule = { class = "Spotify" },
-        properties = {
-            callback = function (c)
-                local theme = gtk.IconTheme.get_default()
-                local icon = theme:load_icon("spotify-client", dpi(64), 0)
-                c.icon = capi.awesome.pixbuf_to_surface(icon._native)
-            end,
-        },
-    },
 }
 
 client.disconnect_signal("request::geometry", awful.ewmh.geometry)
@@ -1100,5 +1090,14 @@ client.connect_signal("request::geometry", function(c, context, ...)
         awful.ewmh.geometry(c, context, ...)
     end
 end)
+
+client.connect_signal(
+    "property::class", function (c)
+        if c.class == "Spotify" and c.icon == nil then
+            local theme = gtk.IconTheme.get_default()
+            local icon = theme:load_icon("spotify-client", dpi(64), 0)
+            c.icon = capi.awesome.pixbuf_to_surface(icon._native)
+        end
+    end)
 
 return nil

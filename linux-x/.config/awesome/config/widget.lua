@@ -942,36 +942,36 @@ do
                         },
                         layout = fallback,
                     },
-                    id = "cover-container",
-                    widget = wibox.container.background,
+                    width = beautiful.bar_height,
+                    height = beautiful.bar_height,
+                    strategy = "max",
+                    widget = wibox.container.constraint,
                 },
-                width = beautiful.bar_height,
-                height = beautiful.bar_height,
-                strategy = "max",
-                widget = wibox.container.constraint,
+                widget = wibox.container.place,
             },
-            widget = wibox.container.place,
-        },
-        {
             {
                 {
                     {
-                        id = "metadata",
-                        wrap = "word_char",
-                        widget = wibox.widget.textbox,
+                        {
+                            id = "metadata",
+                            wrap = "word_char",
+                            widget = wibox.widget.textbox,
+                        },
+                        widget = compactor,
                     },
-                    widget = compactor,
+                    width = max_text_width,
+                    height = beautiful.bar_height,
+                    strategy = "max",
+                    widget = wibox.container.constraint,
                 },
-                width = max_text_width,
-                height = beautiful.bar_height,
-                strategy = "max",
-                widget = wibox.container.constraint,
+                widget = wibox.container.place,
             },
-            widget = wibox.container.place,
+            spacing = beautiful.sep_small_size,
+            layout = wibox.layout.fixed.horizontal,
         },
-        spacing = beautiful.sep_small_size,
-        layout = wibox.layout.fixed.horizontal,
-        visible = false
+        id = "container",
+        widget = wibox.container.background,
+        visible = false,
     }
 
     local player
@@ -1012,7 +1012,7 @@ do
                 end
             end
             playerctl_widget:get_children_by_id("metadata")[1].text = text
-            playerctl_widget:get_children_by_id("cover-container")[1].opacity =
+            playerctl_widget:get_children_by_id("container")[1].opacity =
                 pending_info.status == "Playing" and 1 or 0.5
             if pending_info.cover then
                 fetch_cover(pending_info.cover)
