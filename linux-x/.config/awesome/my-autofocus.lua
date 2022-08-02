@@ -80,6 +80,9 @@ local managed_counter = 0
 -- @param prev the previous focus client, may not be valid now
 -- @param s the screen of prev, in case prev.screen is not accessible now
 local function check_focus(prev, s)
+    if module.debug then
+        print("== DEBUG == check focus on counter", managed_counter, prev, s, s and s.valid, capi.client.focus)
+    end
     if managed_counter > 0 or not module.enabled then return end
     if not s or not s.valid then return end
     -- When no visible client has the focus...
@@ -98,7 +101,11 @@ end
 --- Check client focus (delayed).
 -- @param obj An object that should have a .screen property.
 local function check_focus_delayed(obj)
-    gtimer.delayed_call(check_focus, obj, obj.screen)
+    gtimer.delayed_call(
+        function ()
+            if not obj.valid then return end
+            check_focus(obj, obj.screen)
+        end)
 end
 
 --- Give focus on tag selection change.
@@ -110,21 +117,27 @@ local function check_focus_tag(t)
 end
 
 function module.manage_focus(s)
+    if module.debug then
+        print("== DEBUG == manage focus on counter", managed_counter, "screen", s)
+    end
     managed_counter = managed_counter + 1
 end
 
 function module.unmanage_focus(s)
+    if module.debug then
+        print("== DEBUG == unmanage focus on counter", managed_counter, "screen", s)
+    end
     if managed_counter > 0 then
         managed_counter = managed_counter - 1
         if managed_counter == 0 then
-            gtimer.delayed_call(check_focus, nil, s)
+            gtimer.delayed_call(function () check_focus(nil, s) end)
         end
     end
 end
 
 capi.tag.connect_signal(
     "property::selected", function (t)
-        gtimer.delayed_call(check_focus_tag, t)
+        gtimer.delayed_call(function () check_focus_tag(t) end)
     end)
 
 capi.client.connect_signal("unfocus",             check_focus_delayed)

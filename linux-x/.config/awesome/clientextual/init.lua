@@ -192,7 +192,7 @@ for i, property in ipairs(properties) do
             if during_screen_refresh then return end
             if client_properties_to_save[client] == nil then
                 client_properties_to_save[client] = {}
-                gtimer.delayed_call(save_client_properties, client)
+                gtimer.delayed_call(function () save_client_properties(client) end)
             end
             -- print("signal client property", client, property)
             client_properties_to_save[client][property] = true
@@ -204,7 +204,7 @@ for signal, properties in pairs(signal_watched_properties) do
             if during_screen_refresh then return end
             if client_properties_to_save[client] == nil then
                 client_properties_to_save[client] = {}
-                gtimer.delayed_call(save_client_properties, client)
+                gtimer.delayed_call(function () save_client_properties(client) end)
             end
             for _, property in ipairs(properties) do
                 -- print("signal client property", client, property)
@@ -304,7 +304,7 @@ capi.client.connect_signal(
         if client_tagged_callback_tags[client] == nil then
             client_tagged_callback_tags[client] = {}
             -- print("trigger client tagged callback", client)
-            gtimer.delayed_call(client_tagged_callback, client)
+            gtimer.delayed_call(function () client_tagged_callback(client) end)
         end
         client_tagged_callback_tags[client][tag] = true
     end)
@@ -316,7 +316,7 @@ capi.client.connect_signal(
         if client_tagged_callback_tags[client] == nil then
             client_tagged_callback_tags[client] = {}
             -- print("trigger client tagged callback", client)
-            gtimer.delayed_call(client_tagged_callback, client)
+            gtimer.delayed_call(function () client_tagged_callback(client) end)
         end
         if tag then
             client_tagged_callback_tags[client][tag] = true
@@ -352,7 +352,7 @@ local function maybe_call_screen_refresh(tag)
     if data == screen_last_refreshed_data[tag.screen] then return end
     if screen_refresh_scheduled[tag.screen] then return end
     screen_refresh_scheduled[tag.screen] = true
-    gtimer.delayed_call(screen_refresh, tag.screen)
+    gtimer.delayed_call(function () screen_refresh(tag.screen) end)
 end
 capi.tag.connect_signal("property::selected", maybe_call_screen_refresh)
 capi.tag.connect_signal("property::layout", maybe_call_screen_refresh)
