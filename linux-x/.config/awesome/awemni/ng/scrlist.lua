@@ -31,7 +31,7 @@ function scrlist:compute_children_sizes(available_size, compute_child_size)
     local anchor_index = self._private.anchor_index
     local alignment = alignment_to_number[self._private.alignment] or 1
     local children_count = array_length(self._private.children)
-    local anchor_size = compute_child_size(self._private.children[anchor_index], total_size)
+    local anchor_size = compute_child_size(self._private.children[anchor_index], available_size)
     local prev_available_size, next_available_size
     if alignment == -1 then
         prev_available_size = available_size - anchor_size
