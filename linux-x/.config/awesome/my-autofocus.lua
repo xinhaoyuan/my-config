@@ -12,6 +12,7 @@
 ---------------------------------------------------------------------------
 
 local capi = {
+    mouse = mouse,
     client = client,
     screen = screen,
     tag = tag,
@@ -85,8 +86,10 @@ local function check_focus(prev, s)
     end
     if managed_counter > 0 or not module.enabled then return end
     if not s or not s.valid then return end
-    -- When no visible client has the focus...
-    if not capi.client.focus or not capi.client.focus:isvisible() or not awful_client.focus.filter(capi.client.focus) then
+    -- When no visible client has the focus, or the screen is not where the mouse is
+    if not capi.client.focus or not capi.client.focus:isvisible() or not awful_client.focus.filter(capi.client.focus)
+        or (s == capi.mouse.screen and capi.client.focus.screen ~= s)
+    then
         local c = module.find_alternative_focus(prev, s)
         if c then
             awful_client.focus.history.disable_tracking()
