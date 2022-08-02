@@ -111,7 +111,7 @@ function filterable:set_input(input)
     if state.input == input then return end
     state.input = input
     state.filter = state.callbacks.pre_filter and state.callbacks.pre_filter(state.input) or state.input
-    if state.upstream then state.upstream.input = intput end
+    if state.upstream then state.upstream.input = input end
     state.is_append_only = false
     self:reset_filter()
     self:emit_signal("property::input")
@@ -174,7 +174,7 @@ function filterable.new(args)
         callbacks = args.callbacks,
         children = setmetatable(
             {}, {
-                __index = function (self, key)
+                __index = function (_self, key)
                     local use_post_filter = false
                     if type(key) == "number" then
                         key = state.filtered_indices[key]

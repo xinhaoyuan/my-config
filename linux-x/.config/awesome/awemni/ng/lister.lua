@@ -8,7 +8,7 @@ local gtimer = require("gears.timer")
 
 local entry_container = {}
 
-function entry_container:layout(context, width, height)
+function entry_container:layout(_context, width, height)
     for _, v in ipairs{"child", "placeholder"} do
         local widget = self._private[v]
         if widget then
@@ -152,7 +152,7 @@ function lister:get_focused_widget()
     return container and container.child
 end
 
-function lister:execute(...)
+function lister:execute()
     local state = self._private
     local container = not state.start_timer_running and state.scrlist.children[state.focused_index or 1]
     if container and container.child and container.child.execute then
@@ -176,6 +176,7 @@ function lister:new(args)
         input = nil,
         requested_index = 0,
         focused_index = nil,
+        source_length = 0,
         start_timer = gtimer{
             timeout = 0.05,
             single_shot = true,
@@ -193,9 +194,8 @@ function lister:new(args)
     local children = setmetatable(
         {_containers = {}, _prev_size = 0}, {
             __index = function (self, index)
-                local len = state.source and array_length(state.source.children) or 0
                 if type(index) ~= "number" then return state.source[index] end
-                if index < 1 or index > len then
+                if index < 1 or index > state.source_length then
                     if self._containers[index] then
                         -- For properly reset children focus later.
                         self._containers[index].child = nil
@@ -229,19 +229,19 @@ function lister:new(args)
                 return self._containers[index]
             end,
             __len = function (_self)
-                return state.source and array_length(state.source.children) or 0
+                return state.source_length
             end,
         })
     state.scrlist.children = children
     ret:connect_signal(
         "property::source", function ()
-            local len = array_length(children)
-            if children._prev_size >  len then
-                for i = len, children._prev_size + 1, -1 do
+            state.source_length = state.source and array_length(state.source.children) or 0
+            if children._prev_size > state.source_length then
+                for i = state.source_length, children._prev_size + 1, -1 do
                     children._containers[i] = nil
                 end
             end
-            children._prev_size = len
+            children._prev_size = state.source_length
             state.scrlist:emit_signal("property::children")
             if state.source then
                 local new_children = state.source.children

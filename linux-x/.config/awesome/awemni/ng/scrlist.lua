@@ -3,8 +3,6 @@
 local cairo = require("lgi").cairo
 local base = require("wibox.widget.base")
 local gtable = require("gears.table")
-local gcolor = require("gears.color")
-local beautiful = require("beautiful")
 
 local scrlist = {}
 local huge_size = 100000000
@@ -46,8 +44,7 @@ function scrlist:compute_children_sizes(available_size, compute_child_size)
     local total_size = anchor_size
     local finished = false
     while not finished do
-        local size = 0
-        while true do
+        repeat
             local prev_size, next_size
             if prev_available_size > 0 then
                 if anchor_index - #prev_sizes <= 1 then
@@ -93,7 +90,7 @@ function scrlist:compute_children_sizes(available_size, compute_child_size)
                 total_size = total_size + next_size
                 next_sizes[#next_sizes + 1] = next_size
             end
-        end
+        until true
     end
     return anchor_size, prev_sizes, next_sizes, prev_available_size, next_available_size, total_size
 end
@@ -241,7 +238,7 @@ function scrlist:fit(context, width, height)
     end
 end
 
-function default_scrollbar(context, cr, width, height, size, start_index, end_index)
+local function default_scrollbar(_context, cr, width, height, size, start_index, end_index)
     local s = cr:get_source()
     local _, r, g, b, a = s:get_rgba()
     cr:set_source_rgba(r, g, b, a / 8)
@@ -413,7 +410,7 @@ function scrlist:show_next_page(half)
     end
 end
 
-local function new(args)
+local function new(_args)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
     gtable.crush(ret, scrlist, true)

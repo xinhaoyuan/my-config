@@ -34,7 +34,7 @@ end
 
 local bento = {}
 
-function bento:new(args)
+function bento.new(args)
     local list_layout = wibox.widget{
         layout = scrlist.top,
     }
@@ -84,7 +84,7 @@ function bento:new(args)
     prompt = prompter{
         textbox = input_widget,
         hooks = {
-            {{}, "Escape", function (input)
+            {{}, "Escape", function (_input)
                  bento_lister.input = ""
                  return "", false
              end},
@@ -186,4 +186,4 @@ function bento:new(args)
     }
 end
 
-return setmetatable(bento, {__call = function (self, ...) return self:new(...) end})
+return setmetatable(bento, {__call = function (_self, ...) return bento.new(...) end})
