@@ -119,35 +119,39 @@ local function simple_button(args)
    local button_action = args.button_action or args.action
    local key_action = args.key_action or args.action
 
-   local ret = wibox.widget {
-      {
-         args.widget,
-         buttons = args.buttons,
-         margins = button_padding,
-         widget = wibox.container.margin,
-      },
-      forced_width = args.width,
-      forced_height = args.height,
-      fg_picker = opicker.beautiful{
-          "fg_", opicker.switch{
-              {"active", "focus"},
-              {"hover", "focus"},
-              default = "normal",
-          },
-      },
-      bg_picker = opicker.beautiful{
-          "bg_", opicker.switch{
-              {"active", "focus"},
-              {"hover", "focus"},
-          },
-      },
-      margins_picker = opicker.table{
-          top = opicker.branch{"active", dpi(2), 0},
-          bottom = opicker.branch{"active", -dpi(2), 0},
-          left = opicker.branch{"active", dpi(2), 0},
-          right = opicker.branch{"active", -dpi(2), 0},
-      },
-      widget = ocontainer,
+   local ret = wibox.widget{
+       {
+           {
+               args.widget,
+               buttons = args.buttons,
+               margins = button_padding,
+               widget = wibox.container.margin,
+           },
+           width = args.width,
+           height = args.height,
+           strategy = "exact",
+           widget = wibox.container.constraint,
+       },
+       fg_picker = opicker.beautiful{
+           "fg_", opicker.switch{
+               {"active", "focus"},
+               {"hover", "focus"},
+               default = "normal",
+           },
+       },
+       bg_picker = opicker.beautiful{
+           "bg_", opicker.switch{
+               {"active", "focus"},
+               {"hover", "focus"},
+           },
+       },
+       margins_picker = opicker.table{
+           top = opicker.branch{"active", dpi(2), 0},
+           bottom = opicker.branch{"active", -dpi(2), 0},
+           left = opicker.branch{"active", dpi(2), 0},
+           right = opicker.branch{"active", -dpi(2), 0},
+       },
+       widget = ocontainer,
    }
 
    local function update_context_transfromation()
@@ -239,30 +243,39 @@ local function button(args)
 
     args.width = args.width or waffle_width
 
-    args.widget = wibox.widget {
-        args.icon_widget or (
-            args.icon and
-            wibox.widget {
-                    {
-                        image = args.icon,
-                        resize = true,
-                        forced_width = args.icon_size or button_height,
-                        forced_height = args.icon_size or button_height,
-                        widget = masked_imagebox,
-                    },
-                    halign = "center",
-                    valign = "center",
-                    widget = wibox.container.place,
-            }
-        ),
+    local icon_widget = args.icon_widget or (
+        args.icon and
+        wibox.widget {
+                {
+                    image = args.icon,
+                    resize = true,
+                    forced_width = args.icon_size or button_height,
+                    forced_height = args.icon_size or button_height,
+                    widget = masked_imagebox,
+                },
+                halign = "center",
+                valign = "center",
+                widget = wibox.container.place,
+        }
+    )
+    args.widget = wibox.widget{
+        icon_widget and {
+            icon_widget,
+            right = button_padding,
+            widget = wibox.container.margin,
+        },
         label,
         args.indicator and {
             {
-                text = args.indicator,
-                font = font_normal,
-                align = "center",
-                valign = "center",
-                widget = wibox.widget.textbox,
+                {
+                    text = args.indicator,
+                    font = font_normal,
+                    align = "center",
+                    valign = "center",
+                    widget = wibox.widget.textbox,
+                },
+                left = button_padding,
+                widget = wibox.container.margin,
             },
             fg_picker = opicker.beautiful{opicker.branch{"inactive_hotkey", "minor_", "special_"}, opicker.highlighted_switcher},
             widget = ocontainer,
@@ -949,15 +962,37 @@ local waffle_dashboard_action_grid_widget = decorate_panel {
     },
 }
 
+local playerctl_button = button{
+    label_widget = wibox.widget{
+        cwidget.playerctl_widget,
+        height = button_height * 2,
+        widget = wibox.container.constraint,
+    },
+    indicator = em("m"),
+    key = {"m", "M"},
+    action = function (alt)
+        if alt then
+            cwidget.playerctl_widget:player_next()
+        else
+            cwidget.playerctl_widget:player_pause()
+        end
+    end,
+}
+playerctl_button.visible = cwidget.playerctl_widget.visible
+cwidget.playerctl_widget:connect_signal(
+    "property::visible", function ()
+        playerctl_button.visible = cwidget.playerctl_widget.visible
+    end)
+
 local waffle_dashboard_action_list_widget = decorate_panel {
     top_sep = true,
     widget = {
+        playerctl_button,
         button {
             icon = icons.audio,
             label_widget = wibox.widget{
                 {
                     cwidget.audio_sink_widget,
-                    width = waffle_width - beautiful.icon_size * 2 - button_padding * 2,
                     height = button_height * 2,
                     strategy = "max",
                     widget = wibox.container.constraint,
@@ -982,7 +1017,6 @@ local waffle_dashboard_action_list_widget = decorate_panel {
             label_widget = wibox.widget{
                 {
                     cwidget.audio_source_widget,
-                    width = waffle_width - beautiful.icon_size * 2 - button_padding * 2,
                     height = button_height * 2,
                     strategy = "max",
                     widget = wibox.container.constraint,
@@ -1020,7 +1054,6 @@ local waffle_dashboard_action_list_widget = decorate_panel {
                 end
             end,
         },
-        music_widget,
         layout = wibox.layout.fixed.vertical,
     },
 }

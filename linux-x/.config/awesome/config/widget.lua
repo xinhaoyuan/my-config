@@ -15,6 +15,7 @@ local outlined_textbox = require("outlined_textbox")
 local fallback = require("fallback")
 local gshape = require("gears.shape")
 local gsurf = require("gears.surface")
+local fixed_align = require("fixed_align")
 local compactor = require("compactor")
 local debug_container = require("debug_container")
 
@@ -926,48 +927,45 @@ do
         chromium = false,
         firefox = false,
     }
-    local max_text_width = dpi(150)
     playerctl_widget = wibox.widget{
         {
             {
                 {
                     {
                         {
-                            id = "cover",
-                            widget = wibox.widget.imagebox,
+                            {
+                                id = "cover",
+                                widget = wibox.widget.imagebox,
+                            },
+                            {
+                                image = icons.music,
+                                widget = masked_imagebox,
+                            },
+                            layout = fallback,
                         },
-                        {
-                            image = icons.music,
-                            widget = masked_imagebox,
-                        },
-                        layout = fallback,
+                        widget = wibox.container.place,
                     },
-                    width = beautiful.bar_height,
-                    height = beautiful.bar_height,
+                    width = beautiful.bar_icon_size,
                     strategy = "max",
                     widget = wibox.container.constraint,
                 },
-                widget = wibox.container.place,
+                right = beautiful.sep_small_size,
+                widget = wibox.container.margin,
             },
             {
                 {
                     {
-                        {
-                            id = "metadata",
-                            wrap = "word_char",
-                            widget = wibox.widget.textbox,
-                        },
-                        widget = compactor,
+                        id = "metadata",
+                        wrap = "word_char",
+                        align = "center",
+                        widget = wibox.widget.textbox,
                     },
-                    width = max_text_width,
-                    height = beautiful.bar_height,
-                    strategy = "max",
-                    widget = wibox.container.constraint,
+                    widget = compactor,
                 },
+                -- halign = "left",
                 widget = wibox.container.place,
             },
-            spacing = beautiful.sep_small_size,
-            layout = wibox.layout.fixed.horizontal,
+            layout = fixed_align.horizontal,
         },
         id = "container",
         widget = wibox.container.background,
@@ -997,9 +995,11 @@ do
             if pending_info.status == "Stopped" then
                 playerctl_widget.visible = false
                 player = nil
+                playerctl_widget:emit_signal("property::visible")
                 return
             else
                 playerctl_widget.visible = true
+                playerctl_widget:emit_signal("property::visible")
             end
             player = pending_info.player
             local text
@@ -1052,14 +1052,23 @@ do
 
         end,
     }
+    function playerctl_widget:player_pause()
+        awful.spawn({"playerctl", "-p", player, "play-pause"}, false)
+    end
+    function playerctl_widget:player_stop()
+        awful.spawn.with_shell(string.format("playerctl -p %s pause; playerctl -p %s stop", player, player))
+    end
+    function playerctl_widget:player_next()
+        awful.spawn({"playerctl", "-p", player, "next"}, false)
+    end
     playerctl_widget:connect_signal(
-        "button::release", function (_w, _x, _y , b)
+        "button::release", function (w, _x, _y , b)
             if b == 1 then
-                awful.spawn({"playerctl", "-p", player, "play-pause"}, false)
+                w:player_pause()
             elseif b == 2 then
-                awful.spawn.with_shell(string.format("playerctl -p %s pause; playerctl -p %s stop", player, player))
+                w:player_stop()
             elseif b == 3 then
-                awful.spawn({"playerctl", "-p", player, "next"}, false)
+                w:player_next()
             end
         end)
 end
