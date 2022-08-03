@@ -1,4 +1,4 @@
--- Lazy widget listing and filtering.
+-- Listing widgets with filtering, focus, sealing, and extension.
 
 local wibox = require("wibox")
 local base = wibox.widget.base
@@ -8,7 +8,7 @@ local gtimer = require("gears.timer")
 
 local entry_container = {}
 
-function entry_container:layout(context, width, height)
+function entry_container:layout(_context, width, height)
     for _, v in ipairs{"child", "placeholder"} do
         local widget = self._private[v]
         if widget then
@@ -26,10 +26,6 @@ function entry_container:fit(context, width, height)
         end
     end
     return 0, 0
-end
-
-function entry_container:draw(...)
-    self:emit_signal("draw")
 end
 
 function entry_container:get_placeholder()
@@ -64,38 +60,26 @@ function entry_container:set_child(child)
     self:emit_signal("widget::layout_changed")
 end
 
-function entry_container.new()
+function entry_container:new()
     local ret = base.make_widget(nil, nil, {enable_properties = true})
-    gtable.crush(ret, entry_container, true)
+    gtable.crush(ret, self, true)
     return ret
 end
 
-setmetatable(entry_container, {__call = function(_, ...) return entry_container.new(...) end})
+setmetatable(entry_container, {__call = function(self, ...) return self:new(...) end})
+
+local function array_length(a)
+    local mt = getmetatable(a)
+    if mt and mt.__len then return mt.__len(a) end
+    return #a
+end
 
 local lister = {}
 
 function lister:start()
     local state = self._private
-    state.scrlist:reset()
     if state.source == nil then return end
-    state.source:reset(
-        state.input, function (extended_count)
-            state.scrlist.extended_count = extended_count
-        end)
-    state.sealed_index = nil
-    for i = 1, state.fetch_size do
-        state.requested_index = i
-        state.source:fetch_async(i, self.handle_widget)
-    end
-end
-
-function lister:update_extended_count(extended_count)
-    local state = self._private
-    if extended_count == nil then extended_count = state.extended_count end
-    if extended_index and state.sealed_index and state.sealed_index <= extended_index then
-        extended_index = state.sealed_index - 1
-    end
-    state.scrlist.extended_count = extended_count
+    state.source.input = state.input
 end
 
 function lister:get_input()
@@ -108,6 +92,7 @@ function lister:set_input(input)
         state.input = input
         state.executing_index = nil
         self.focus = nil
+        state.start_timer_running = true
         state.start_timer:again()
     end
 end
@@ -118,30 +103,36 @@ end
 
 function lister:set_source(source)
     local state = self._private
-    if state.start_timer.started then
+    if state.start_timer_running then
         state.start_timer:stop()
     end
-    if state.source and state.source ~= source then
-        state.source:reset()
+    if state.source then
+        state.source:disconnect_signal("property::children", state.source_children_signal_handler)
     end
     state.source = source
+    if source then
+        source:connect_signal("property::children", state.source_children_signal_handler)
+    end
     state.executing_index = nil
+    self:emit_signal("property::source")
     self.focus = nil
     self:start()
 end
 
 function lister:set_focus(index)
     local state = self._private
-    if state.start_timer.started then return nil end
+    if state.start_timer_running then return nil end
     if index then
         if index < 1 then index = 1 end
-        if state.sealed_index and index >= state.sealed_index then
-            index = state.sealed_index - 1
+        if state.source.sealed_count and index >= state.source.sealed_count then
+            index = state.source.sealed_count - 1
         end
     end
-    local old_container = state.scrlist.children[state.focused_index]
-    state.focused_index = index
-    local new_container = state.scrlist.children[state.focused_index]
+
+    local old_container = state.focused_index and state.scrlist.children[state.focused_index]
+    state.scrlist.view_index = index
+    state.focused_index = state.scrlist.view_index
+    local new_container = state.focused_index and state.scrlist.children[state.focused_index]
     if old_container == new_container then return end
     if old_container and old_container.child then
         old_container.child.focused = nil
@@ -149,7 +140,6 @@ function lister:set_focus(index)
     if new_container and new_container.child then
         new_container.child.focused = true
     end
-    return index
 end
 
 function lister:get_focus()
@@ -158,105 +148,121 @@ end
 
 function lister:get_focused_widget()
     local state = self._private
-    local container = not state.start_timer.started and state.scrlist.children[state.focused_index]
+    local container = not state.start_timer_running and state.scrlist.children[state.focused_index]
     return container and container.child
 end
 
-function lister:execute(...)
+function lister:execute()
     local state = self._private
-    local container = not state.start_timer.started and state.scrlist.children[state.focused_index or 1]
-    if container and container.child then
+    local container = not state.start_timer_running and state.scrlist.children[state.focused_index or 1]
+    if container and container.child and container.child.execute then
         container.child:execute()
-    elseif state.start_timer.started then
+    elseif state.start_timer_running then
         state.executing_index = 1
     elseif state.focused_index and state.source then
         state.executing_index = state.focused_index
-        state.source:fetch_async(state.focused_index, self.handle_widget)
     end
 end
 
 function lister:new(args)
     assert(type(args) == "table")
     assert(args.scrlist)
-    args.fetch_size = args.fetch_size or 10
-    assert(type(args.fetch_size) == "number" and args.fetch_size >= 1)
 
     local ret = gobject{enable_properties = true}
     local state
     state = {
         scrlist = args.scrlist,
-        fetch_size = args.fetch_size,
+        placeholder_widget = args.placeholder_widget,
         input = nil,
-        source = nil,
         requested_index = 0,
-        sealed_index = nil,
         focused_index = nil,
+        source_length = 0,
         start_timer = gtimer{
             timeout = 0.05,
             single_shot = true,
-            callback = function () if state.source then ret:start() end end, 
+            callback = function ()
+                state.start_timer_running = false
+                if state.source then ret:start() end
+            end,
         },
     }
+    function state.source_children_signal_handler()
+        ret:emit_signal("property::source")
+    end
     ret._private = state
 
-    function ret.handle_widget(index, widget)
-        if state.sealed_index and state.sealed_index <= index then return end
-        if widget == nil then
-            state.sealed_index = index
-            ret:update_extended_count()
-            if state.focused_index and state.focused_index >= index then
-                self.focus = index - 1
-            end
-            return
-        end
-        while #state.scrlist.children < index do
-            local current_index = #state.scrlist.children + 1
-            local container = wibox.widget{
-                placeholder = state.placeholder_widget,
-                widget = entry_container,
-            }
-            container.index = current_index
-            container:connect_signal(
-                "draw", ret.container_on_draw)
-            container:connect_signal(
-                "button::release", function (self, _x, _y, b)
-                    if b == 1 then
-                        if ret.focus == self.index and container.child then
-                            self.child:execute()
-                        else
-                            ret.focus = self.index
-                        end
+    local children = setmetatable(
+        {_containers = {}, _prev_size = 0}, {
+            __index = function (self, index)
+                if type(index) ~= "number" then return state.source[index] end
+                if index < 1 or index > state.source_length then
+                    if self._containers[index] then
+                        -- For properly reset children focus later.
+                        self._containers[index].child = nil
                     end
-                end)
-            -- container:connect_signal(
-            --     "mouse::enter", function (self, _x, _y)
-            --         ret.focus = self.index
-            --     end)
-            table.insert(state.scrlist.children, container)
-        end
-        state.scrlist.children[index].child = widget
-        state.scrlist:emit_signal("property::children")
-        if index == state.focused_index then
-            widget.focused = true
-        end
-        if index == state.executing_index then
-            return widget:execute()
-        end
-    end
-
-    function ret.container_on_draw(container)
-        for i = state.requested_index + 1, container.index + state.fetch_size do
-            if state.sealed_index and i >= state.sealed_index then break end
-            state.requested_index = i
-            state.source:fetch_async(i, ret.handle_widget)
-        end
-    end
+                    return nil
+                end
+                if self._containers[index] == nil then
+                    local container = wibox.widget{
+                        placeholder = state.placeholder_widget,
+                        widget = entry_container,
+                    }
+                    container.index = index
+                    container:connect_signal(
+                        "button::release", function (self, _x, _y, b)
+                            if b == 1 then
+                                if ret.focus == self.index and container.child and container.child.execute then
+                                    self.child:execute()
+                                else
+                                    ret.focus = self.index
+                                end
+                            end
+                        end)
+                    self._containers[index] = container
+                end
+                local old_child = self._containers[index].child
+                local new_child = state.source.children[index]
+                if old_child ~= new_child then
+                    self._containers[index].child = new_child
+                    new_child.focused = index == state.focused_index
+                end
+                return self._containers[index]
+            end,
+            __len = function (_self)
+                return state.source_length
+            end,
+        })
+    state.scrlist.children = children
+    ret:connect_signal(
+        "property::source", function ()
+            state.source_length = state.source and array_length(state.source.children) or 0
+            if children._prev_size > state.source_length then
+                for i = state.source_length, children._prev_size + 1, -1 do
+                    children._containers[i] = nil
+                end
+            end
+            children._prev_size = state.source_length
+            state.scrlist:emit_signal("property::children")
+            if state.source then
+                local new_children = state.source.children
+                state.scrlist.extended_count = new_children.extended_count
+                if ret.focus == nil and new_children.focus then
+                    ret.focus = new_children.focus
+                end
+                if state.executing_index and new_children[state.executing_index] then
+                    local ei = state.executing_index
+                    state.executing_index = nil
+                    if new_children[ei].execute then new_children[ei]:execute() end
+                end
+            end
+        end)
 
     for k, v in pairs(self) do
         ret[k] = v
     end
+    ret.source = args.source
 
     return ret
 end
 
-return setmetatable(lister, {__call = function (self, args) return self:new(args) end})
+return setmetatable(lister, {__call = function (self, ...) return self:new(...) end})

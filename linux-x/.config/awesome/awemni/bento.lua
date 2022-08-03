@@ -34,7 +34,7 @@ end
 
 local bento = {}
 
-function bento:new(args)
+function bento.new(args)
     local list_layout = wibox.widget{
         layout = scrlist.top,
     }
@@ -46,35 +46,25 @@ function bento:new(args)
     local function go_up()
         local f = bento_lister.focus
         bento_lister.focus = f and f - 1 or 1
-        if bento_lister.focus and list_layout.start_index and
-            bento_lister.focus < list_layout.start_index then
-            list_layout.anchor_index = bento_lister.focus
-            list_layout.alignment = "start"
-        end
     end
 
     local function go_down()
         local f = bento_lister.focus
         bento_lister.focus = f and f + 1 or 1
-        if bento_lister.focus and list_layout.end_index and
-            bento_lister.focus > list_layout.end_index then
-            list_layout.anchor_index = bento_lister.focus
-            list_layout.alignment = "end"
-        end
     end
 
     local function go_prior()
         if list_layout.start_index then
-            bento_lister.focus = list_layout.start_index - 1
-            list_layout.anchor_index = bento_lister.focus
+            list_layout.anchor_index = list_layout.start_index - 1
+            bento_lister.focus = list_layout.anchor_index
             list_layout.alignment = "end"
         end
     end
 
     local function go_next()
         if list_layout.end_index then
-            bento_lister.focus = list_layout.end_index + 1
-            list_layout.anchor_index = bento_lister.focus
+            list_layout.anchor_index = list_layout.end_index + 1
+            bento_lister.focus = list_layout.anchor_index
             list_layout.alignment = "start"
         end
     end
@@ -82,8 +72,8 @@ function bento:new(args)
     local cover = args.cover
     local input_widget = args.container:get_children_by_id("input_widget")[1]
     assert(input_widget)
-    local function reset_input()
-        bento_lister.source = args.source_generator()
+    local function reset()
+        bento_lister.source = nil
         bento_lister.input = ""
         if cover then
             cover.active = true
@@ -94,7 +84,7 @@ function bento:new(args)
     prompt = prompter{
         textbox = input_widget,
         hooks = {
-            {{}, "Escape", function (input)
+            {{}, "Escape", function (_input)
                  bento_lister.input = ""
                  return "", false
              end},
@@ -109,7 +99,7 @@ function bento:new(args)
         },
         changed_callback = function (input)
             bento_lister.input = input
-            if #input > 0 then
+            if #input > 0 and cover then
                 cover.active = false
             end
         end,
@@ -121,7 +111,8 @@ function bento:new(args)
         if (key == "Escape" or key == "BackSpace") and
             (bento_lister.input == nil or bento_lister.input == "") then
             if key == "BackSpace" and cover and not cover.active and cover.key_handler and event == "press" then
-                reset_input()
+                reset()
+                bento_lister.source = args.source_generator()
                 return true
             else
                 return false
@@ -174,7 +165,7 @@ function bento:new(args)
             end
         end)
 
-    reset_input()
+    reset()
     return {
         widget = args.container,
         reload_source = function ()
@@ -185,7 +176,7 @@ function bento:new(args)
             if cover and cover.on_open then cover:on_open(...) end
         end,
         on_close = function (_self, ...)
-            reset_input()
+            reset()
             prompt({}, "Escape", "press")
             if cover and cover.on_close then cover:on_close(...) end
         end,
@@ -195,4 +186,4 @@ function bento:new(args)
     }
 end
 
-return setmetatable(bento, {__call = function (self, ...) return self:new(...) end})
+return setmetatable(bento, {__call = function (_self, ...) return bento.new(...) end})

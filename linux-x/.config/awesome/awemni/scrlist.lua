@@ -3,8 +3,6 @@
 local cairo = require("lgi").cairo
 local base = require("wibox.widget.base")
 local gtable = require("gears.table")
-local gcolor = require("gears.color")
-local beautiful = require("beautiful")
 
 local scrlist = {}
 local huge_size = 100000000
@@ -19,13 +17,19 @@ local is_gravity_vertical = {
     ["top"] = true, ["bottom"] = true
 }
 
+local function array_length(a)
+    local mt = getmetatable(a)
+    if mt and mt.__len then return mt.__len(a) end
+    return #a
+end
+
 function scrlist:compute_children_sizes(available_size, compute_child_size)
     local prev_sizes = {}
     local next_sizes = {}
     local anchor_index = self._private.anchor_index
     local alignment = alignment_to_number[self._private.alignment] or 1
-    local children_count = #self._private.children
-    local anchor_size = compute_child_size(self._private.children[anchor_index], total_size)
+    local children_count = array_length(self._private.children)
+    local anchor_size = compute_child_size(self._private.children[anchor_index], available_size)
     local prev_available_size, next_available_size
     if alignment == -1 then
         prev_available_size = available_size - anchor_size
@@ -40,8 +44,7 @@ function scrlist:compute_children_sizes(available_size, compute_child_size)
     local total_size = anchor_size
     local finished = false
     while not finished do
-        local size = 0
-        while true do
+        repeat
             local prev_size, next_size
             if prev_available_size > 0 then
                 if anchor_index - #prev_sizes <= 1 then
@@ -87,7 +90,7 @@ function scrlist:compute_children_sizes(available_size, compute_child_size)
                 total_size = total_size + next_size
                 next_sizes[#next_sizes + 1] = next_size
             end
-        end
+        until true
     end
     return anchor_size, prev_sizes, next_sizes, prev_available_size, next_available_size, total_size
 end
@@ -113,16 +116,35 @@ function scrlist:get_width_measurement_function(context, content_height)
 end
 
 function scrlist:layout(context, width, height)
-    if width <= 0 or height <= 0 or #self._private.children == 0 then return {} end
+    if width <= 0 or height <= 0 then return {} end
+    local size = array_length(self._private.children)
+    if size == 0 then return {} end
     local ret = {}
     if is_gravity_vertical[self._private.gravity] then
         local content_width = math.max(width - self._private.scrollbar_size, 0)
-        local anchor_height, prev_heights, next_heights, prev_adjustment, next_adjustment = self:compute_children_sizes(
-            height, self:get_height_measurement_function(context, content_width))
+        local anchor_height, prev_heights, next_heights, prev_adjustment, next_adjustment
+        while true do
+            anchor_height, prev_heights, next_heights, prev_adjustment, next_adjustment =
+                self:compute_children_sizes(
+                    height, self:get_height_measurement_function(context, content_width))
+            self._private.start_index = self._private.anchor_index - #prev_heights
+            self._private.end_index = self._private.anchor_index + #next_heights
+            if self._private.view_index then
+                if self._private.view_index < self._private.start_index then
+                    self._private.anchor_index = self._private.view_index
+                    self._private.alignment = "start"
+                elseif self._private.view_index > self._private.end_index then
+                    self._private.anchor_index = self._private.view_index
+                    self._private.alignment = "end"
+                else
+                    break
+                end
+            else
+                break
+            end
+        end
         local gravity = self._private.gravity
         local current_y = prev_adjustment
-        self._private.start_index = self._private.anchor_index - #prev_heights
-        self._private.end_index = self._private.anchor_index + #next_heights
         if next_adjustment < 0 and #next_heights > 0 then
             self._private.end_index = self._private.end_index - 1
         end
@@ -130,7 +152,7 @@ function scrlist:layout(context, width, height)
             self._private.start_index = self._private.start_index + 1
         end
         if self._private.start_index == 1 and
-            self._private.end_index == #self._private.children and
+            self._private.end_index == size and
             self._private.scrollbar_autohide then
             content_width = width
         end
@@ -171,7 +193,7 @@ function scrlist:layout(context, width, height)
             self._private.start_index = self._private.start_index + 1
         end
         if self._private.start_index == 1 and
-            self._private.end_index == #self._private.children and
+            self._private.end_index == size and
             self._private.scrollbar_autohide then
             content_height = height
         end
@@ -202,7 +224,7 @@ function scrlist:layout(context, width, height)
 end
 
 function scrlist:fit(context, width, height)
-    if width <= 0 or height <= 0 or #self._private.children == 0 then return 0, 0 end
+    if width <= 0 or height <= 0 or array_length(self._private.children) == 0 then return 0, 0 end
     if is_gravity_vertical[self._private.gravity] then
         local content_width = math.max(width - self._private.scrollbar_size, 0)
         local _, _, _, _, _, total_height = self:compute_children_sizes(
@@ -216,16 +238,17 @@ function scrlist:fit(context, width, height)
     end
 end
 
-function default_scrollbar(context, cr, width, height, size, start_index, end_index)
-    local _, r, g, b, _ = gcolor(beautiful.fg_normal):get_rgba()
-    cr:set_source_rgba(r, g, b, 0.25)
+local function default_scrollbar(_context, cr, width, height, size, start_index, end_index)
+    local s = cr:get_source()
+    local _, r, g, b, a = s:get_rgba()
+    cr:set_source_rgba(r, g, b, a / 8)
     cr:rectangle(0, 0, width, height)
     cr:fill()
 
     local y_start = height / size * (start_index - 1)
     local y_end = height / size * end_index
 
-    cr:set_source(gcolor(beautiful.fg_normal))
+    cr:set_source(s)
     cr:rectangle(0, y_start, width, y_end - y_start)
     cr:fill()
 end
@@ -237,7 +260,7 @@ function scrlist:draw(context, cr, width, height)
         self._private.scrollbar_size == 0 then
         return
     end
-    local effective_count = math.max(self._private.extended_count or 0, #self._private.children)
+    local effective_count = math.max(self._private.extended_count or 0, array_length(self._private.children))
     if self._private.start_index == 1 and
         self._private.end_index == effective_count and
         self._private.scrollbar_autohide then
@@ -269,15 +292,13 @@ end
 
 function scrlist:set_children(children)
     self._private.children = children or {}
-    self._private.start_index = nil
-    self._private.end_index = nil
-    self._private.anchor_index = 1
     self:emit_signal("property::children")
 end
 
 function scrlist:reset()
     self.children = {}
     self.extended_count = nil
+    self.view_index = nil
 end
 
 function scrlist:get_anchor_index()
@@ -285,13 +306,33 @@ function scrlist:get_anchor_index()
 end
 
 function scrlist:set_anchor_index(value)
-    value = math.min(#self._private.children, math.max(1, value or 1))
+    value = math.max(1, math.min(value or 1, array_length(self._private.children)))
     if self._private.anchor_index ~= value then
         self._private.anchor_index = value
         self._private.start_index = nil
         self._private.end_index = nil
         self:emit_signal("widget::layout_changed")
         self:emit_signal("widget::redraw_needed")
+    end
+end
+
+function scrlist:get_view_index()
+    return self._private.view_index
+end
+
+function scrlist:set_view_index(value)
+    value = value and math.max(1, math.min(value or 1, array_length(self._private.children)))
+    if self._private.view_index ~= value then
+        self._private.view_index = value
+        if value then
+            if self._private.start_index and self._private.start_index > value then
+                self.anchor_index = value
+                self.alignment = "start"
+            elseif self._private.end_index and self._private.end_index < value then
+                self.anchor_index = value
+                self.alignment = "end"
+            end
+        end
     end
 end
 
@@ -319,11 +360,6 @@ function scrlist:set_alignment(value)
         self:emit_signal("widget::layout_changed")
         self:emit_signal("widget::redraw_needed")
     end
-end
-
-function scrlist:add(w)
-    table.insert(self._private.children, w)
-    self:emit_signal("property::children")
 end
 
 function scrlist:set_scrollbar(scrollbar)
@@ -374,7 +410,7 @@ function scrlist:show_next_page(half)
     end
 end
 
-local function new(args)
+local function new(_args)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
     gtable.crush(ret, scrlist, true)
@@ -383,6 +419,7 @@ local function new(args)
     ret._private.start_index = nil
     ret._private.end_index = nil
     ret._private.anchor_index = 1
+    ret._private.view_index = nil
     ret._private.extended_count = nil
     ret._private.gravity = "top"
     ret._private.alignment = "start"
@@ -392,6 +429,13 @@ local function new(args)
 
     ret:connect_signal(
         "property::children", function (self)
+            self._private.start_index = nil
+            self._private.end_index = nil
+            local len = array_length(self._private.children)
+            self._private.anchor_index = math.max(1, math.min(self._private.anchor_index, len))
+            if self._private.view_index then
+                self._private.view_index = math.max(1, math.min(self._private.view_index, len))
+            end
             self:emit_signal("widget::layout_changed")
             self:emit_signal("widget::redraw_needed")
         end)

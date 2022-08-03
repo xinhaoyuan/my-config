@@ -40,8 +40,8 @@ local fts = require("hotpot").focus_timestamp
 local dpi = require("beautiful.xresources").apply_dpi
 local ocontainer = require("onion.container")
 local opicker = require("onion.picker")
-local source = require("awemni.ng.source")
-local bento = require("awemni.ng.bento")
+local source = require("awemni.source")
+local bento = require("awemni.bento")
 
 local waffle_width = beautiful.waffle_panel_width or dpi(240)
 local calendar_waffle_width = waffle_width

@@ -1,262 +1,290 @@
--- Abstrations of lazy data pulling and transformation from async data streams.
+local gobject = require("gears.object")
 
-local dummy = {
-    fetch_async = function () end,
-    reset = function () end,
-}
+local array_proxy = {}
 
-local function from_array(array)
-    return {
-        fetch_async = function (self, index, cb)
-            cb(index, array[index])
-        end,
-        reset = function (self, input, ready_cb)
-            if ready_cb then ready_cb(#array) end
-        end,
+function array_proxy:get_is_append_only()
+    return self._private.is_append_only
+end
+
+function array_proxy:get_children()
+    return self._private.children
+end
+
+function array_proxy:get_array()
+    return self._private.array
+end
+
+function array_proxy:set_array(array)
+    local state = self._private
+    state.is_append_only = false
+    state.array = array
+    self:emit_signal("property::children")
+end
+
+function array_proxy:set_size(size)
+    local state = self._private
+    state.size = size
+    self:emit_signal("property::children")
+end
+
+function array_proxy:append(element)
+    local state = self._private
+    state.is_append_only = true
+    state.array[#state.array + 1] = element
+    self:emit_signal("property::children")
+end
+
+function array_proxy.new(args)
+    args = args or {}
+    local ret = gobject{enable_properties = true}
+    local state
+    state = {
+        array = args.array or {},
+        is_append_only = false,
+        children = setmetatable(
+            {}, {
+                __index = function (_self, key)
+                    return state.array[key]
+                end,
+                __len = function (_self)
+                    return state.size or #state.array
+                end,
+            })
     }
+    ret._private = state
+    for k, v in pairs(array_proxy) do
+        ret[k] = v
+    end
+    return ret
 end
 
-local function id_func(x) return x end
-local function true_func() return true end
-local function ignore_self(f)
-    return function (_self, ...) return f(...) end
+setmetatable(array_proxy, {__call = function (_self, ...) return array_proxy.new(...) end})
+
+local function array_length(a)
+    local mt = getmetatable(a)
+    if mt and mt.__len then return mt.__len(a) end
+    return #a
 end
-local function filter(args)
-    local upstream = args.upstream
-    local cache_upstream = args.cache_upstream
-    if cache_upstream == nil then cache_upstream = true end
-    local pre_filter_cb = args.pre_filter_cb or id_func
-    local filter_cb = args.filter_cb or true_func
-    local post_filter_cb = args.post_filter_cb or id_func
-    -- unfiltered pre/post-filter data 
-    local upstream_data = {}
-    local upstream_post_data = {}
-    local upstream_sealed
-    -- filtered slot data and/or callbacks
-    local filtered_upstream_index
-    local filtered
-    local filtered_last_done
-    local filtered_sealed
-    local pending_filtered_indices
-    local pending_requests
-    -- source filtering state
-    local last_ready_upstream_index
-    local filter
-    local ready_cb
-    -- handlers
-    local on_upstream_data
-    local on_upstream_ready
-    function on_upstream_data(upstream_index, element)
-        if (upstream_sealed and upstream_index >= upstream_sealed) or upstream_data[upstream_index] then return end
-        if element == nil then
-            upstream_sealed = upstream_index
-            if upstream_index > 1 and upstream_data[upstream_index - 1] == nil then return end
-            filtered_upstream_index = upstream_index
-            filtered_sealed = filtered_last_done + 1
-            for k, v in pairs(pending_requests) do
-                for _, cb in ipairs(v) do
-                    cb(k, nil)
-                end
-                pending_requests[k] = nil
-            end
-            pending_filtered_indices = 0
-            return
-        end
-        upstream_data[upstream_index] = element
-        while pending_filtered_indices > 0 and upstream_data[filtered_upstream_index + 1] do
-            filtered_upstream_index = filtered_upstream_index + 1
-            if filter_cb(filter, upstream_data[filtered_upstream_index]) then
-                filtered_last_done = filtered_last_done + 1
-                filtered[filtered_last_done] = filtered_upstream_index
-                if pending_requests[filtered_last_done] then
-                    upstream_post_data[filtered_upstream_index] = post_filter_cb(upstream_data[filtered_upstream_index])
-                    for _, cb in ipairs(pending_requests[filtered_last_done]) do
-                        cb(filtered_last_done, upstream_post_data[filtered_upstream_index])
-                    end
-                    pending_requests[filtered_last_done] = nil
-                    pending_filtered_indices = pending_filtered_indices - 1
-                end
-            end
-        end
-        on_upstream_ready()
-        if filtered_upstream_index + 1 == upstream_sealed then
-            filtered_upstream_index = upstream_sealed
-            filtered_sealed = filtered_last_done + 1
-            for k, v in pairs(pending_requests) do
-                for _, cb in ipairs(v) do
-                    cb(k, nil)
-                end
-                pending_requests[k] = nil
-            end
-            pending_filtered_indices = 0
-        elseif pending_filtered_indices > 0 then
-            return upstream:fetch_async(filtered_upstream_index + 1, on_upstream_data)
+
+local filterable = {}
+
+function filterable:reset_filter()
+    local state = self._private
+    state.filtered_indices = {}
+    state.filtered_upstream_size = 0
+end
+
+function filterable:update_for_appended_upstream()
+    local state = self._private
+    local upstream_children = state.upstream and state.upstream.children
+    if upstream_children == nil then return end
+    local prev_filtered_size = #state.filtered_indices
+    local prev_upstream_size = state.filtered_upstream_size
+    state.filtered_upstream_size = array_length(upstream_children)
+    for i = prev_upstream_size + 1, state.filtered_upstream_size do
+        local succ = state.callbacks.filter(state.filter, upstream_children[i])
+        if succ then
+            table.insert(state.filtered_indices, {i, succ})
         end
     end
-    function on_upstream_ready(upstream_index)
-        if upstream_index then
-            last_ready_upstream_index = upstream_index
-        else
-            upstream_index = last_ready_upstream_index
-        end
-        if upstream_index and ready_cb and filtered_upstream_index > 0 then
-            return ready_cb(filtered_last_done / filtered_upstream_index * upstream_index)
-        end
+    if state.callbacks.reduce then
+        state.callbacks.reduce(state.filtered_indices)
     end
-    return {
-        fetch_async = function (_self, index, cb)
-            assert(index > 0)
-            local upstream_index = filtered[index]
-            if upstream_index then
-                if not upstream_post_data[upstream_index] then
-                    upstream_post_data[upstream_index] = post_filter_cb(upstream_data[upstream_index])
-                end
-                cb(index, upstream_post_data[upstream_index])
-                return
-            end
-            if filtered_sealed and index >= filtered_sealed then cb(index, nil) end
-            if pending_filtered_indices == 0 then
-                while filtered_last_done < index and upstream_data[filtered_upstream_index + 1] do
-                    filtered_upstream_index = filtered_upstream_index + 1
-                    if filter_cb(filter, upstream_data[filtered_upstream_index]) then
-                        filtered_last_done = filtered_last_done + 1
-                        filtered[filtered_last_done] = filtered_upstream_index
-                    end
-                end
-                on_upstream_ready()
-                if filtered_last_done == index then
-                    upstream_index = filtered[index]
-                    if not upstream_post_data[upstream_index] then
-                        upstream_post_data[upstream_index] = post_filter_cb(upstream_data[upstream_index])
-                    end
-                    cb(index, upstream_post_data[upstream_index])
-                    return
-                elseif filtered_upstream_index + 1 == upstream_sealed then
-                    filter_sealed = filtered_last_done
-                    cb(index, nil)
-                    return
-                end
-            end
-            local to_request_upstream = pending_filtered_indices == 0
-            if pending_requests[index] == nil then
-                pending_requests[index] = {}
-                pending_filtered_indices = pending_filtered_indices + 1
-            end
-            table.insert(pending_requests[index], cb)
-            if to_request_upstream then
-                return upstream:fetch_async(filtered_upstream_index + 1, on_upstream_data)
-            end
-        end,
-        reset = function (_self, input, new_ready_cb)
-            if not cache_upstream then
-                upstream_data = {}
-                upstream_post_data = {}
-                upstream_sealed = nil
-            end
-            filtered_upstream_index = 0
-            filtered = {}
-            filtered_last_done = 0
-            filtered_sealed = nil
-            pending_filtered_indices = 0
-            pending_requests = {}
-            filter = pre_filter_cb(input)
-            last_ready_upstream_index = nil
-            ready_cb = new_ready_cb
-            upstream:reset(input, on_upstream_ready)
-        end,
-        on_upstream_data = ignore_self(on_upstream_data),
-        on_upstream_next_data = function (_self, data)
-            return on_upstream_data(#upstream_data + 1, data)
-        end,
-        on_upstream_ready = ignore_self(on_upstream_ready),
-    }
+    if prev_filtered_size ~= #state.filtered_indices then
+        self:emit_signal("property::children")
+    end
 end
 
-local function concat(sources)
-    assert(#sources > 0)
-    local expansion_counts
-    local slots -- member of each element: data, callbacks, source_index, source_element_index
-    local slot_last_done
-    local slot_last_requested
-    local sealed
-    return {
-        fetch_async = function (self, index, cb)
-            if slots[index] and slots[index].callbacks == nil then
-                cb(index, slots[index].data)
-                return
-            end
-            if sealed and index >= sealed then cb(index, nil) end
-            if slot_last_requested == nil or slot_last_requested < index then slot_last_requested = index end
-            if slots[index] == nil then slots[index] = {callbacks = {}} end
-            table.insert(slots[index].callbacks, cb)
-            if slots[slot_last_requested].callbacks == nil then
-                -- No more request is on the fly.
-                local index = (slot_last_done or 0) + 1
-                local source_index, source_element_index
-                if index == 1 then
-                    source_index = 1
-                    source_element_index = 1
-                else
-                    source_index = slots[index - 1].source_index
-                    source_element_index = slots[index - 1].source_element_index + 1
-                end
-                local internal_handler
-                function internal_handler(_source_element_index, data)
-                    if data == nil and source_index < #sources then
-                        source_index = source_index + 1
-                        source_element_index = 1
-                        return sources[source_index]:fetch_async(
-                            source_element_index, internal_handler)
-                    end
-                    if slots[index] == nil then slots[index] = {} end
-                    slots[index].data = data
-                    slots[index].source_index = source_index
-                    slots[index].source_element_index = source_element_index
-                    if slots[index].callbacks then
-                        for _, cb in ipairs(slots[index].callbacks) do
-                            cb(index, data)
-                        end
-                        slots[index].callbacks = nil
-                    end
-                    slot_last_done = index
-                    if data == nil then
-                        sealed_index = index
-                    elseif index < slot_last_requested then
-                        index = index + 1
-                        source_element_index = source_element_index + 1
-                        return sources[source_index]:fetch_async(
-                            source_element_index, internal_handler)
-                    end
-                end
-                sources[source_index]:fetch_async(
-                    source_element_index, internal_handler)
-            end
-        end,
-        reset = function (self, input, ready_cb)
-            expansion_counts = {}
-            slots = {}
-            slot_last_done = nil
-            slot_last_requested = nil
-            sealed = nil
-            request_pending = false
-            for i = 1, #sources do
-                sources[i]:reset(
-                    input, ready_cb and function (expansion_count)
-                        expansion_counts[i] = expansion_count
-                        local total = 0
-                        for j = 1, #sources do
-                            total = total + (expansion_counts[j] or 0)
-                        end
-                        ready_cb(total)
-                    end)
-            end
-        end,
-    }
+function filterable:get_is_append_only()
+    local state = self._private
+    if state.is_append_only ~= nil then return state.is_append_only end
+    local upstream = self._private.upstream
+    return upstream and upstream.is_append_only
 end
+
+function filterable:get_input()
+    return self._private.input
+end
+
+function filterable:set_input(input)
+    local state = self._private
+    if state.input == input then return end
+    state.input = input
+    state.filter = state.callbacks.pre_filter and state.callbacks.pre_filter(state.input) or state.input
+    if state.upstream then state.upstream.input = input end
+    state.is_append_only = false
+    self:reset_filter()
+    self:emit_signal("property::input")
+    self:update_for_appended_upstream()
+    if #state.filtered_indices == 0 then
+        self:emit_signal("property::children")
+    end
+    state.is_append_only = nil
+end
+
+function filterable:get_callbacks()
+    return self._private.callbacks
+end
+
+function filterable:set_callbacks(callbacks)
+    local state = self._private
+    if state.callbacks == callbacks then return end
+    state.callbacks = callbacks
+    state.filter = state.callbacks.pre_filter and state.callbacks.pre_filter(state.input) or state.input
+    state.is_append_only = false
+    self:reset_filter()
+    self:emit_signal("property::callbacks")
+    self:update_for_appended_upstream()
+    if #state.filtered_indices == 0 then
+        self:emit_signal("property::children")
+    end
+    state.is_append_only = nil
+end
+
+function filterable:set_upstream(upstream)
+    local state = self._private
+    if state.upstream then
+        state.upstream:disconnect_signal("property::children", state.upstream_children_signal_handler)
+    end
+    state.upstream = upstream
+    if upstream then
+        upstream:connect_signal("property::children", state.upstream_children_signal_handler)
+    end
+    state.is_append_only = false
+    self:reset_filter()
+    self:emit_signal("property::upstream")
+    self:update_for_appended_upstream()
+    if #state.filtered_indices == 0 then
+        self:emit_signal("property::children")
+    end
+    state.is_append_only = nil
+end
+
+function filterable:get_children()
+    return self._private.children
+end
+
+function filterable.new(args)
+    local ret = gobject{
+        enable_properties = true
+    }
+    local state
+    state = {
+        filtered_indices = {},
+        callbacks = args.callbacks,
+        children = setmetatable(
+            {}, {
+                __index = function (_self, key)
+                    local use_post_filter = false
+                    if type(key) == "number" then
+                        key = state.filtered_indices[key]
+                        key = key and key[1]
+                        use_post_filter = true
+                    end
+                    if key == nil then return nil end
+                    local upstream = state.upstream
+                    if upstream == nil then return nil end
+                    return use_post_filter and
+                        state.callbacks.post_filter and
+                        state.callbacks.post_filter(state.upstream.children[key]) or
+                        upstream.children[key]
+                end,
+                __len = function ()
+                    return #state.filtered_indices
+                end,
+            }),
+        upstream_children_signal_handler = function ()
+            if state.callbacks.reduce == nil and state.upstream.is_append_only then
+                ret:update_for_appended_upstream()
+            else
+                ret:reset_filter()
+                ret:update_for_appended_upstream()
+                if #state.filtered_indices == 0 then
+                    ret:emit_signal("property::children")
+                end
+            end
+        end
+    }
+    ret._private = state
+    for k, v in pairs(filterable) do
+        ret[k] = v
+    end
+    ret.upstream = args.upstream
+
+    return ret
+end
+
+setmetatable(filterable, {__call = function (_self, ...) return filterable.new(...) end})
+
+local concat = {}
+
+function concat:set_upstreams(upstreams)
+    upstreams = upstreams or {}
+    local state = self._private
+    for _, s in ipairs(state.upstreams) do
+        s:disconnect_signal("property::children", self.update_from_upstreams)
+    end
+    state.upstreams = upstreams
+    for _, s in ipairs(state.upstreams) do
+        s:connect_signal("property::children", self.update_from_upstreams)
+    end
+    self.update_from_upstreams()
+end
+
+function concat:get_children()
+    return self._private.children
+end
+
+function concat:set_input(input)
+    local state = self._private
+    for _, s in ipairs(state.upstreams) do
+        s.input = input
+    end
+end
+
+function concat.new(args)
+    local ret = gobject{enable_properties = true}
+    local state
+    state = {
+        upstreams = {},
+        children = setmetatable(
+            {}, {
+                __index = function (_self, key)
+                    if type(key) ~= "number" then return nil end
+                    for i, s in ipairs(state.upstream_size) do
+                        if key <= s then
+                            return state.upstreams[i].children[key]
+                        end
+                        key = key - s
+                    end
+                    return nil
+                end,
+                __len = function ()
+                    return state.size
+                end,
+            })
+    }
+    ret._private = state
+    function ret.update_from_upstreams()
+        state.upstream_size = {}
+        state.size = 0
+        for i, s in ipairs(state.upstreams) do
+            state.upstream_size[i] = array_length(s.children)
+            state.size = state.size + state.upstream_size[i]
+        end
+        ret:emit_signal("property::children")
+    end
+    for k, v in pairs(concat) do
+        ret[k] = v
+    end
+    ret.upstreams = args.upstreams
+    return ret
+end
+
+setmetatable(concat, {__call = function (_self, ...) return concat.new(...) end})
 
 return {
-    dummy = dummy, 
-    from_array = from_array,
-    filter = filter,
+    array_proxy = array_proxy,
+    filterable = filterable,
     concat = concat,
 }
