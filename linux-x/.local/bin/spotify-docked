@@ -1,3 +1,4 @@
 #!/bin/sh
 
-exec kdocker -i "$(lua -e 'print(require("lgi").require("Gtk", "3.0").IconTheme.get_default():lookup_icon("spotify-client", 64, 0):get_filename())')" spotify
+exec kdocker -i "$(lua -e 'print(require("lgi").require("Gtk", "3.0").IconTheme.get_default():lookup_icon("spotify-client", 64, 0):get_filename())')" \
+     spotify --force-device-scale-factor="${HIDPI_SCALE:-1}"
