@@ -1071,6 +1071,17 @@ do
                 w:player_next()
             end
         end)
+    playerctl_widget.keys = {
+       ["m"] = function (mod, _, event)
+           if event == "release" then return end
+           playerctl_widget:player_pause()
+       end,
+       ["M"] = function (mod, _, event)
+           if event == "release" then return end
+           playerctl_widget:player_next()
+       end,
+   }
+
 end
 
 return {

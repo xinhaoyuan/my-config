@@ -969,14 +969,6 @@ local playerctl_button = button{
         widget = wibox.container.constraint,
     },
     indicator = em("m"),
-    key = {"m", "M"},
-    action = function (alt)
-        if alt then
-            cwidget.playerctl_widget:player_next()
-        else
-            cwidget.playerctl_widget:player_pause()
-        end
-    end,
 }
 playerctl_button.visible = cwidget.playerctl_widget.visible
 cwidget.playerctl_widget:connect_signal(
