@@ -21,6 +21,7 @@ There are two things you can do about this warning:
 
 (defcustom my-configure-dir (concat (getenv "HOME") "/.config/emacs") "")
 (defcustom my-org-dir (concat (getenv "HOME") "/org") "")
+(setq load-prefer-newer t)
 
 (add-to-list 'load-path my-configure-dir)
 (load "_init.el")
