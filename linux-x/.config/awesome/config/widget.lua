@@ -1047,6 +1047,7 @@ do
                     pending_info = old_pending_info
                     if player == nil then
                         playerctl_widget.visible = false
+                        playerctl_widget:emit_signal("property::visible")
                     end
                 end)
 
