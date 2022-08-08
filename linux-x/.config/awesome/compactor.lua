@@ -18,6 +18,7 @@ function compactor:fit(context, width, height)
         if self._private.horizontal then
             w, h = base.fit_widget(self, context, child, width, SIZE_MAX)
             if h > height then break end
+            if self._private.stretch_first then height = h end
             local width_max = width
             local width_min = 1
             while width_max - width_min > 0 do
@@ -34,6 +35,7 @@ function compactor:fit(context, width, height)
         else
             w, h = base.fit_widget(self, context, child, SIZE_MAX, height)
             if w > width then break end
+            if self._private.stretch_first then width = w end
             local height_max = height
             local height_min = 1
             while height_max - height_min > 0 do
@@ -74,6 +76,7 @@ function compactor.new(...)
     gtable.crush(
         ret._private, {
             horizontal = true,
+            stretch_first = true,
             children = {},
         })
     gtable.crush(ret, compactor, true)
