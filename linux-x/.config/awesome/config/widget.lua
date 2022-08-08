@@ -738,6 +738,7 @@ do
                            function (stdout, stderr, exitreason, exitcode)
                                update_graphic(stdout, stderr, exitreason, exitcode)
                            end)
+                           audio_sink_widget:emit_signal_recursive("button::release", 0, 0, 3)
                            return false
                        end
                        return true
@@ -902,6 +903,7 @@ do
                            function (stdout, stderr, exitreason, exitcode)
                                update_graphic(stdout, stderr, exitreason, exitcode)
                            end)
+                           audio_source_widget:emit_signal_recursive("button::release", 0, 0, 3)
                            return false
                        end
                        return true
