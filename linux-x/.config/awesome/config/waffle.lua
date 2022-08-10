@@ -261,7 +261,7 @@ local function button(args)
     args.widget = wibox.widget{
         icon_widget and {
             icon_widget,
-            right = button_padding,
+            right = args.button_layout and 0 or button_padding,
             widget = wibox.container.margin,
         },
         label,
@@ -274,13 +274,12 @@ local function button(args)
                     valign = "center",
                     widget = wibox.widget.textbox,
                 },
-                left = button_padding,
+                left = args.button_layout and 0 or button_padding,
                 widget = wibox.container.margin,
             },
             fg_picker = opicker.beautiful{opicker.branch{"inactive_hotkey", "minor_", "special_"}, opicker.highlighted_switcher},
             widget = ocontainer,
         },
-        expand = "inside",
         layout = args.button_layout or fixed_align.horizontal,
     }
 
