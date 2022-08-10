@@ -226,7 +226,7 @@ my_tray.base_size = beautiful.bar_height / beautiful.bar_rows
 local bar_tray_wrapper = wibox.widget {
     {
         my_tray,
-        strength = 0.8,
+        strength = 0.5,
         widget = recolor,
     },
     valign = "bottom",
