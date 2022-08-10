@@ -1,7 +1,7 @@
 local base = require("wibox.widget.base")
 local gtable = require("gears.table")
 
-local fallback = { mt = {} }
+local fallback = {}
 
 function fallback:layout(context, width, height)
    local w = 0
@@ -53,9 +53,9 @@ function fallback:set_debug_prefix(prefix)
    self._private.debug_prefix = prefix
 end
 
-function fallback:new(children, draw_last)
+function fallback.new(children, draw_last)
    local ret = base.make_widget(nil, nil, {enable_properties = true})
-   gtable.crush(ret, self, true)
+   gtable.crush(ret, fallback, true)
 
    ret._private.children = children or {}
    if draw_last ~= nil then
@@ -64,10 +64,4 @@ function fallback:new(children, draw_last)
    return ret
 end
 
-function fallback.mt:__call(...)
-   return self:new(...)
-end
-
-setmetatable(fallback, fallback.mt)
-
-return fallback
+return setmetatable(fallback, {__call = function (_self, ...) return fallback.new(...) end})

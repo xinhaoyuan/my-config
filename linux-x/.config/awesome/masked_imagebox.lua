@@ -5,7 +5,7 @@ local gcolor = require("gears.color")
 local lgi = require("lgi")
 local cairo = lgi.cairo
 
-local mod = {mt = {}}
+local masked_imagebox = {}
 
 local function dispose_pattern(pattern)
     local status, s = pattern:get_surface()
@@ -14,35 +14,28 @@ local function dispose_pattern(pattern)
     end
 end
 
-function mod:draw(context, cr, width, height)
+function masked_imagebox:draw(context, cr, width, height)
     if width == 0 or height == 0 or not self._private.default then return end
     cr:save()
     cr:push_group_with_content(cairo.Content.ALPHA)
-    self:orig_draw(context, cr, width, height)
+    self._masked_imagebox.orig_draw(self, context, cr, width, height)
     local mask = cr:pop_group()
     cr:restore()
     cr:mask(mask)
-    cr:fill()
     dispose_pattern(mask)
 end
 
-function mod:new(...)
-    local ret = imagebox(...)
-    ret.orig_draw = ret.draw
-    ret.draw = mod.draw
-    return ret
+function masked_imagebox.new(...)
+    return masked_imagebox.convert(imagebox(...))
 end
 
-function mod.convert(ib)
-    if ib.draw ~= mod.draw then
-        ib.orig_draw = ib.draw
-        ib.draw = mod.draw
-    end
-    return ib
+function masked_imagebox.convert(widget)
+    if widget._masked_imagebox then return widget end
+    widget._masked_imagebox = {
+        orig_draw = widget.draw
+    }
+    widget.draw = masked_imagebox.draw
+    return widget
 end
 
-function mod.mt:__call(...)
-    return self:new(...)
-end
-
-return setmetatable(mod, mod.mt)
+return setmetatable(masked_imagebox, {__call = function (_self, ...) return masked_imagebox.new(...) end})
