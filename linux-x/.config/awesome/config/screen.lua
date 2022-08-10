@@ -29,6 +29,7 @@ local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
 local fixed_align = require("fixed_align")
 local masked_imagebox = require("masked_imagebox")
+local recolor = require("recolor")
 local debug_container = require("debug_container")
 local tasklist = require("config.tasklist")
 local taglist = require("config.taglist")
@@ -223,9 +224,13 @@ my_tray = wibox.widget.systray()
 my_tray.horizontal = direction_index[shared.vars.bar_position] == "horizontal"
 my_tray.base_size = beautiful.bar_height / beautiful.bar_rows
 local bar_tray_wrapper = wibox.widget {
-    my_tray,
+    {
+        my_tray,
+        strength = 0.8,
+        widget = recolor,
+    },
     valign = "bottom",
-    widget = wibox.container.place
+    widget = wibox.container.place,
 }
 
 function shared.screen.detach_tray_widget()
