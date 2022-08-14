@@ -92,6 +92,7 @@ function lister:set_input(input)
         state.input = input
         state.executing_index = nil
         self.focus = nil
+        state.scrlist.anchor_index = nil
         state.start_timer_running = true
         state.start_timer:again()
     end

@@ -19,6 +19,7 @@ function pct:draw(context, cr, width, height)
     ncr.mt.__index = function(_, key)
         if key == "show_layout" then
             ncr[key] = function (self, layout)
+                cr:save()
                 cr:push_group_with_content("COLOR_ALPHA")
                 cr:show_layout(layout)
                 if cursor_pos then
@@ -27,13 +28,13 @@ function pct:draw(context, cr, width, height)
                     local x = sp.x / lgi.Pango.SCALE
                     if x + cursor_width > width then x = width - cursor_width end
                     cr:rectangle(x, sp.y / lgi.Pango.SCALE, cursor_width, sp.height / lgi.Pango.SCALE)
-                    cr:set_source_rgb(0, 0, 0)
                     cr:set_operator("XOR")
                     cr:fill()
                     cr:restore()
                 end
                 cr:pop_group_to_source()
                 cr:paint()
+                cr:restore()
             end
         else
             ncr[key] = function (self, ...)

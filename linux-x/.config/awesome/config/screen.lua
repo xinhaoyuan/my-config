@@ -692,7 +692,11 @@ local function setup_screen(scr)
 
    right_layout:add(beautiful.with_separator{
                         widget = {
-                            cwidget.playerctl_widget,
+                            {
+                                cwidget.playerctl_widget,
+                                strength = 0.5,
+                                widget = recolor,
+                            },
                             width = dpi(150),
                             widget = wibox.container.constraint,
                         },
