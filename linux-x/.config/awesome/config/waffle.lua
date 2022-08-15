@@ -1300,7 +1300,7 @@ function get_audio_sink_switch_source()
         },
     }
     awful.spawn.easy_async_with_shell(
-        [[pacmd list-sinks | awk 'match($0,/index:\s*([0-9]*)/,m){id=m[1]} match($0,/device.description = "([^"]*)"/,m){print id"="m[1]}']],
+        [[pactl list sinks | awk 'match($0,/Name:\s*(.*)/,m){id=m[1]} match($0,/device.description = "([^"]*)"/,m){print id"="m[1]}']],
         function (stdout, _stderr, _exitreason, _exitcode)
             for id, name in string.gmatch(stdout, "([^\n\r]*)=([^\n\r]*)") do
                 output:append{id = id, name = name}
@@ -1356,7 +1356,7 @@ function get_audio_source_switch_source()
         },
     }
     awful.spawn.easy_async_with_shell(
-        [[pacmd list-sources | awk 'match($0,/index:\s*([0-9]*)/,m){id=m[1]} match($0,/device.description = "([^"]*)"/,m){print id"="m[1]}']],
+        [[pactl list sources | awk 'match($0,/Name:\s*(.*)/,m){id=m[1]} match($0,/device.description = "([^"]*)"/,m){print id"="m[1]}']],
         function (stdout, _stderr, _exitreason, _exitcode)
             for id, name in string.gmatch(stdout, "([^\n\r]*)=([^\n\r]*)") do
                 output:append{id = id, name = name}

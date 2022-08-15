@@ -602,7 +602,7 @@ do
             [[pactl set-default-sink "$(pacmd list-sinks | awk 'match($0,/index:\s*([0-9]*)/,m){id=m[1]} match($0,/device.description = "([^"]*)"/,m){print id"\t"m[1]}' | rofi -dmenu -normal-window | cut -f 1)"]])
     end
 
-    local GET_VOLUME_CMD = [[pacmd list-sinks | awk -- '/^\s*\* index/{f=1} /^\s*index/{f=0} f==1&&match($0, /device.description = "([^"]*)"$/, m){print "name="m[1]} f==1&&match($0, /^\s*volume:.*\/\s*([0-9]*)%/, m){print "volume="m[1]} f==1&&match($0,/^\s*muted:\s*(.*)$/,m){print "muted="m[1]}']]
+    local GET_VOLUME_CMD = [[DEFAULT="$(pactl get-default-sink)"; pactl list sinks | awk -- 'match($0, /Name:\s*(.*)/, m){f=(m[1]=="'"$DEFAULT"'")} f&&match($0, /device.description = "([^"]*)"$/, m){print "name="m[1]} f&&match($0, /^\s*Volume:.*\/\s*([0-9]*)%/, m){print "volume="m[1]} f&&match($0,/^\s*Mute:\s*(.*)$/,m){print "muted="m[1]}']]
     local SET_VOLUME_CMD = "pactl set-sink-volume @DEFAULT_SINK@"
     local INC_VOLUME_CMD = SET_VOLUME_CMD.." +5%"
     local DEC_VOLUME_CMD = SET_VOLUME_CMD.." -5%"
@@ -711,6 +711,7 @@ do
                    end)
            elseif b == 3 then
                local sx = info.drawable.drawable:geometry().x + info.x
+               local sy = info.drawable.drawable:geometry().y + info.y
                local width = info.width
                local value = math.floor(math.max(0, math.min(x / width, 1)) * 100 + 0.5)
                local prev_value
@@ -727,6 +728,7 @@ do
                            end)
                    end,
                }
+               local init_info = info
                capi.mousegrabber.run(
                    function (info)
                        local p = (info.x - sx) / width
@@ -738,7 +740,7 @@ do
                            function (stdout, stderr, exitreason, exitcode)
                                update_graphic(stdout, stderr, exitreason, exitcode)
                            end)
-                           audio_sink_widget:emit_signal_recursive("button::release", 0, 0, 3)
+                           audio_sink_widget:emit_signal_recursive("button::release", sx, sy, 3, {}, init_info)
                            return false
                        end
                        return true
@@ -767,7 +769,7 @@ do
         awful.spawn.with_shell([[pactl set-default-source "$(pacmd list-sources | awk 'match($0,/index:\s*([0-9]*)/,m){id=m[1]} match($0,/device.description = "([^"]*)"/,m){print id"\t"m[1]}' | rofi -dmenu -normal-window | cut -f 1)"]])
     end
 
-    local GET_VOLUME_CMD = [[pacmd list-sources | awk -- '/^\s*\* index/{f=1} /^\s*index/{f=0} f==1&&match($0, /device.description = "([^"]*)"$/, m){print "name="m[1]} f==1&&match($0, /^\s*volume:.*\/\s*([0-9]*)%/, m){print "volume="m[1]} f==1&&match($0,/^\s*muted:\s*(.*)$/,m){print "muted="m[1]}']]
+    local GET_VOLUME_CMD = [[DEFAULT="$(pactl get-default-source)"; pactl list sources | awk -- 'match($0, /Name:\s*(.*)/, m){f=(m[1]=="'"$DEFAULT"'")} f&&match($0, /device.description = "([^"]*)"$/, m){print "name="m[1]} f&&match($0, /^\s*Volume:.*\/\s*([0-9]*)%/, m){print "volume="m[1]} f&&match($0,/^\s*Mute:\s*(.*)$/,m){print "muted="m[1]}']]
     local SET_VOLUME_CMD = "pactl set-source-volume @DEFAULT_SOURCE@"
     local INC_VOLUME_CMD = SET_VOLUME_CMD.." +5%"
     local DEC_VOLUME_CMD = SET_VOLUME_CMD.." -5%"
@@ -876,6 +878,7 @@ do
                    end)
            elseif b == 3 then
                local sx = info.drawable.drawable:geometry().x + info.x
+               local sy = info.drawable.drawable:geometry().y + info.y
                local width = info.width
                local value = math.floor(math.max(0, math.min(x / width, 1)) * 100 + 0.5)
                local prev_value
@@ -892,6 +895,7 @@ do
                            end)
                    end,
                }
+               local init_info = info
                capi.mousegrabber.run(
                    function (info)
                        local p = (info.x - sx) / width
@@ -903,7 +907,7 @@ do
                            function (stdout, stderr, exitreason, exitcode)
                                update_graphic(stdout, stderr, exitreason, exitcode)
                            end)
-                           audio_source_widget:emit_signal_recursive("button::release", 0, 0, 3)
+                           audio_source_widget:emit_signal_recursive("button::release", sx, sy, 3, {}, init_info)
                            return false
                        end
                        return true

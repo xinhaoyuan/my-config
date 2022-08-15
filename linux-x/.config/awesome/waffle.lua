@@ -129,7 +129,7 @@ waffle.widget_container = wibox.widget {
 }
 waffle.widget_container:connect_signal(
     "button::release",
-    function (_, x, y, button, _, info)
+    function (_, x, y, button, _mod, info)
         local f = info.drawable:find_widgets(x, y)
         if #f == 1 then
             -- Only happens only if clicking the empty area
