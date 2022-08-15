@@ -86,9 +86,9 @@ local function check_focus(prev, s)
     end
     if managed_counter > 0 or not module.enabled then return end
     if not s or not s.valid then return end
-    -- When no visible client has the focus, or the screen is not where the mouse is
+    -- When no visible client has the focus, or the screen is not where the mouse is and there is no previous focus.
     if not capi.client.focus or not capi.client.focus:isvisible() or not awful_client.focus.filter(capi.client.focus)
-        or (s == capi.mouse.screen and capi.client.focus.screen ~= s)
+        or (s == capi.mouse.screen and capi.client.focus.screen ~= s and (prev == nil or not prev.valid))
     then
         local c = module.find_alternative_focus(prev, s)
         if c then
