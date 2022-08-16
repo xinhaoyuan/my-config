@@ -143,6 +143,11 @@ waffle.widget_container:connect_signal(
 waffle.widget_container:connect_signal(
     "mouse::leave",
     function (_self, _info)
+        -- Some time false positive can happen.
+        local c = capi.mouse.coords()
+        local g = _info.drawable.wibox:geometry()
+        if g.x <= c.x and c.x < g.x + g.width and g.y < c.y and c.y < g.y + g.height then return end
+
         if waffle.mouse_entered_ and not waffle:autohide() then
             waffle:hide()
         end

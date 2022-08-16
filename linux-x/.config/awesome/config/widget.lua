@@ -941,23 +941,18 @@ do
                     {
                         {
                             {
-                                {
-                                    id = "cover",
-                                    widget = wibox.widget.imagebox,
-                                },
-                                {
-                                    image = icons.music,
-                                    widget = masked_imagebox,
-                                },
-                                layout = fallback,
+                                id = "cover",
+                                widget = wibox.widget.imagebox,
                             },
-                            widget = regulator,
+                            {
+                                image = icons.music,
+                                widget = masked_imagebox,
+                            },
+                            layout = fallback,
                         },
-                        widget = wibox.container.place,
+                        widget = regulator,
                     },
-                    width = beautiful.bar_icon_size,
-                    strategy = "max",
-                    widget = wibox.container.constraint,
+                    widget = wibox.container.place,
                 },
                 right = beautiful.sep_small_size,
                 widget = wibox.container.margin,

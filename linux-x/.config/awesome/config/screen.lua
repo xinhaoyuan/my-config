@@ -1022,8 +1022,8 @@ end
 table.insert(shared.on_start_functions, schedule_reset_widgets)
 
 capi.screen.connect_signal("list", schedule_reset_widgets)
-capi.screen.connect_signal("list", schedule_fix_client_geometries)
 capi.screen.connect_signal("primary_changed", schedule_reset_widgets)
+capi.screen.connect_signal("list", schedule_fix_client_geometries)
 
 awful.keyboard.append_global_keybindings{
     awful.key({ }, "XF86Launch1", function () capi.awesome.emit_signal("show_main_waffle", {anchor = "screen"}) end),
