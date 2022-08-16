@@ -2381,6 +2381,22 @@ waffle_settings_view = view{
                     function()
                         local b
                         b = button{
+                            indicator = em("r"),
+                            key = {"r", "R"},
+                            action = function (alt)
+                                beautiful.set_rows(({2, 1})[beautiful.bar_rows or 1])
+                                b.label.text = "Bar rows: "..beautiful.bar_rows
+                                capi.screen.emit_signal("list")
+                            end
+                        }
+                        b.label.text = "Bar rows: "..beautiful.bar_rows
+                        return b
+                    end
+                )(),
+                (
+                    function()
+                        local b
+                        b = button{
                             indicator = em("b"),
                             key = {"b", "B"},
                             action = function (alt)

@@ -185,13 +185,16 @@ theme.font_minor = theme.font_name_mono.." "..tostring(theme.font_size_small)
 theme.font_mono = theme.font_name_mono.." "..tostring(theme.font_size_normal)
 theme.useless_gap = dpi(4)
 -- custom property number
-theme.bar_rows = 2
-theme.bar_height = dpi(22 * theme.bar_rows)
-theme.bar_icon_size = dpi(20 * theme.bar_rows)
+function theme.set_rows(r)
+    theme.bar_rows = r
+    theme.bar_height = dpi(22 * theme.bar_rows)
+    theme.bar_icon_size = dpi(20 * theme.bar_rows)
+    theme.systray_max_rows = theme.bar_rows
+end
+theme.set_rows(1)
 theme.icon_size = dpi(20)
 theme.menu_width = dpi(150)
 theme.systray_icon_spacing = dpi(0)
-theme.systray_max_rows = theme.bar_rows
 -- custom property color
 theme.special_normal = is_light_color(theme.bg_normal) and c_red[1] or c_yellow[2]
 -- custom property color
