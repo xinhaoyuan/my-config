@@ -17,6 +17,7 @@ local gshape = require("gears.shape")
 local gsurf = require("gears.surface")
 local fixed_align = require("fixed_align")
 local compactor = require("compactor")
+local regulator = require("regulator")
 local debug_container = require("debug_container")
 
 local update_interval_s = 2
@@ -940,14 +941,17 @@ do
                     {
                         {
                             {
-                                id = "cover",
-                                widget = wibox.widget.imagebox,
+                                {
+                                    id = "cover",
+                                    widget = wibox.widget.imagebox,
+                                },
+                                {
+                                    image = icons.music,
+                                    widget = masked_imagebox,
+                                },
+                                layout = fallback,
                             },
-                            {
-                                image = icons.music,
-                                widget = masked_imagebox,
-                            },
-                            layout = fallback,
+                            widget = regulator,
                         },
                         widget = wibox.container.place,
                     },
