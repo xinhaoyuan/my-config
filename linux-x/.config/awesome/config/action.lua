@@ -34,7 +34,8 @@ do
         term_cmd = {term_prog}
     end
 
-    browser_cmd = {"firefox-esr"}
+    browser_cmd = {"x-www-browser"}
+    -- browser_cmd = {"firefox-esr"}
     -- if os.execute("command -v luakit") then
     --     browser_cmd = {"luakit"}
     -- else
