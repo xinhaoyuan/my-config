@@ -356,8 +356,7 @@ function orgenda.widget(args)
     end
 
     local function get_item_key(item)
-        -- return tostring(item.timestamp)..":"..(item.done and "!" or "?")..tostring(item.priority)..":"..item.decorated_text..":"..(item.tags_text or "")
-        return item.line_number
+        return tostring(item.timestamp)..":"..(item.done and "!" or "?")..tostring(item.priority)..":"..item.decorated_text..":"..(item.tags_text or "")
     end
 
     orgenda.data:connect_signal(
