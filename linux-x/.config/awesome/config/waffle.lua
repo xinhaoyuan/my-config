@@ -331,7 +331,7 @@ local waffle_shutdown_view = view {
                     key = {"s", "S"},
                     action = function (alt)
                         waffle:hide()
-                        awful.spawn({"systemctl", "suspend"})
+                        awful.spawn({"systemctl", "suspend"}, false)
                     end
                 },
                 button {
@@ -341,7 +341,7 @@ local waffle_shutdown_view = view {
                     key = {"h", "H"},
                     action = function (alt)
                         waffle:hide()
-                        awful.spawn({"systemctl", "hibernate"})
+                        awful.spawn({"systemctl", "hibernate"}, false)
                     end
                 },
                 button {
@@ -350,7 +350,7 @@ local waffle_shutdown_view = view {
                     key = {"r", "R"},
                     action = function (alt)
                         waffle:hide()
-                        awful.spawn({"systemctl", "reboot"})
+                        awful.spawn({"systemctl", "reboot"}, false)
                     end
                 },
                 button {
@@ -360,7 +360,7 @@ local waffle_shutdown_view = view {
                     key = {"p", "P"},
                     action = function (alt)
                         waffle:hide()
-                        awful.spawn({"systemctl", "poweroff"})
+                        awful.spawn({"systemctl", "poweroff"}, false)
                     end
                 },
                 layout = wibox.layout.fixed.vertical
@@ -1288,7 +1288,7 @@ function get_audio_sink_switch_source()
                     widget = ocontainer,
                 }
                 function w:execute()
-                    awful.spawn({"pactl", "set-default-sink", tostring(e.id)})
+                    awful.spawn({"pactl", "set-default-sink", tostring(e.id)}, false)
                     waffle:hide()
                 end
                 function w:set_focused(v)
@@ -1344,7 +1344,7 @@ function get_audio_source_switch_source()
                     widget = ocontainer,
                 }
                 function w:execute()
-                    awful.spawn({"pactl", "set-default-source", tostring(e.id)})
+                    awful.spawn({"pactl", "set-default-source", tostring(e.id)}, false)
                     waffle:hide()
                 end
                 function w:set_focused(v)
