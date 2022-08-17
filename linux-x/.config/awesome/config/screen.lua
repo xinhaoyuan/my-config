@@ -666,6 +666,7 @@ local function setup_screen(scr)
            {
                {
                    format = "%m/%d",
+                   align = "center",
                    widget = wibox.widget.textclock,
                },
                fg_picker = opicker.beautiful{"minor_", opicker.highlighted_switcher},
@@ -673,6 +674,7 @@ local function setup_screen(scr)
            },
            {
                format = "%H:%M",
+               align = "center",
                widget = wibox.widget.textclock,
            },
            spacing = beautiful.bar_rows == 1 and beautiful.sep_small_size or 0,

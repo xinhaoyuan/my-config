@@ -715,7 +715,77 @@ end
 local waffle_root_view
 local waffle_root_source_mode
 local waffle_dashboard_view
+
+local todo_text = wibox.widget{
+    align = "center",
+    widget = wibox.widget.textbox,
+}
+orgenda.data:connect_signal(
+    "property::items",
+    function (_, path, items)
+        local todo_count = 0
+        for _, item in ipairs(orgenda.data.items) do
+            if not item.done then
+                todo_count = todo_count + 1
+            end
+        end
+        if todo_count > 0 then
+            todo_text.text = tostring(todo_count).." TODO"..
+                (todo_count > 1 and "s" or "")
+        else
+            todo_text.text = "No TODOs!"
+        end
+    end
+)
+
+local waffle_dashboard_header_widget = decorate_panel{
+    widget = {
+        button{
+            label_widget = wibox.widget{
+                {
+                    {
+                        {
+                            image = os.getenv("HOME").."/Pictures/avatar.svg",
+                            widget = masked_imagebox,
+                        },
+                        right = beautiful.sep_small_size,
+                        widget = wibox.container.margin,
+                    },
+                    {
+                        {
+                            {
+                                align = "center",
+                                format = "%Y-%m-%d %a %H:%M",
+                                widget = wibox.widget.textclock,
+                            },
+                            todo_text,
+                            layout = wibox.layout.fixed.vertical,
+                        },
+                        widget = wibox.container.place,
+                    },
+                    nil,
+                    widget = fixed_align.horizontal,
+                },
+                height = button_height * 2,
+                widget = wibox.container.constraint,
+            },
+            indicator = em("a"),
+            key = {"a", "A"},
+            action = function (alt)
+                if alt then
+                    shared.action.calendar()
+                    waffle:hide()
+                else
+                    waffle:show(waffle_calendar_view, { mode = "push" })
+                end
+            end,
+        },
+        layout = wibox.layout.fixed.vertical,
+    },
+}
+
 local waffle_dashboard_status_widget = decorate_panel{
+    top_sep = true,
     widget = {
         {
             button {
@@ -1027,24 +1097,6 @@ local waffle_dashboard_action_list_widget = decorate_panel {
                 end
             end,
         },
-        button {
-            icon = icons.calendar_todo,
-            label_widget = wibox.widget {
-                align = "center",
-                format = "%Y-%m-%d %a %H:%M",
-                widget = wibox.widget.textclock,
-            },
-            indicator = em("a"),
-            key = {"a", "A"},
-            action = function (alt)
-                if alt then
-                    shared.action.calendar()
-                    waffle:hide()
-                else
-                    waffle:show(waffle_calendar_view, { mode = "push" })
-                end
-            end,
-        },
         layout = wibox.layout.fixed.vertical,
     },
 }
@@ -1052,6 +1104,7 @@ local waffle_dashboard_action_list_widget = decorate_panel {
 waffle_dashboard_view = view {
     root = wibox.widget{
         {
+            waffle_dashboard_header_widget,
             waffle_dashboard_status_widget,
             waffle_dashboard_action_grid_widget,
             waffle_dashboard_action_list_widget,
@@ -2384,7 +2437,7 @@ waffle_settings_view = view{
                             indicator = em("r"),
                             key = {"r", "R"},
                             action = function (alt)
-                                beautiful.set_rows(({2, 1})[beautiful.bar_rows or 1])
+                                beautiful.set_bar_rows(({2, 1})[beautiful.bar_rows or 1])
                                 b.label.text = "Bar rows: "..beautiful.bar_rows
                                 capi.screen.emit_signal("list")
                             end

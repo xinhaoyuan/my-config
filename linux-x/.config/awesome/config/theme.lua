@@ -1,4 +1,6 @@
 local capi = { mouse = mouse, client = client }
+-- Not addressable using `...`.
+local shared = require("config.shared")
 local theme_assets = require("beautiful.theme_assets")
 local awful = require("awful")
 local wibox = require("wibox")
@@ -185,13 +187,14 @@ theme.font_minor = theme.font_name_mono.." "..tostring(theme.font_size_small)
 theme.font_mono = theme.font_name_mono.." "..tostring(theme.font_size_normal)
 theme.useless_gap = dpi(4)
 -- custom property number
-function theme.set_rows(r)
+function theme.set_bar_rows(r)
+    shared.vars.bar_rows = r
     theme.bar_rows = r
     theme.bar_height = dpi(22 * theme.bar_rows)
     theme.bar_icon_size = dpi(20 * theme.bar_rows)
     theme.systray_max_rows = theme.bar_rows
 end
-theme.set_rows(1)
+theme.set_bar_rows(shared.vars.bar_rows or 2)
 theme.icon_size = dpi(20)
 theme.menu_width = dpi(150)
 theme.systray_icon_spacing = dpi(0)
@@ -361,12 +364,12 @@ function theme.draw_separator(cr, width, height)
         -- cr:fill()
         cr:move_to(width / 2, width / 2)
         cr:line_to(width / 2, height - width / 2)
-        cr:set_dash({width <= dpi(12) and dpi(2) or 0, width / 2})
+        cr:set_dash({width <= dpi(6) and dpi(2) or 0, width / 2})
         cr:set_line_width(width / 6)
     else
         cr:move_to(height / 2, height / 2)
         cr:line_to(width - height / 2, height / 2)
-        cr:set_dash({height <= dpi(12) and dpi(2) or 0, height / 2})
+        cr:set_dash({height <= dpi(6) and dpi(2) or 0, height / 2})
         cr:set_line_width(height / 6)
     end
     cr:stroke()

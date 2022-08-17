@@ -86,6 +86,13 @@ function module.create(screen)
         style = {
             font = "DejaVu Sans 10",
         },
+        source = beautiful.bar_rows == 1 and function (s)
+            local r = {}
+            for _, t in ipairs(s.tags) do
+                if #t:clients() > 0 or t.selected then table.insert(r, t) end
+            end
+            return r
+        end or nil,
         widget_template = taglist_template,
     }
 end

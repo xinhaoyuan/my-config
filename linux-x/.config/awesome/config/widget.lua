@@ -697,9 +697,10 @@ do
    }
 
    audio_sink_widget = wibox.widget{
+       nil,
        audio_sink_name_widget,
        audio_sink_bar_widget,
-       layout = wibox.layout.fixed.vertical,
+       layout = fixed_align.vertical
    }
 
    audio_sink_widget:connect_signal(
@@ -864,9 +865,10 @@ do
    }
 
    audio_source_widget = wibox.widget{
+       nil,
        audio_source_name_widget,
        audio_source_bar_widget,
-       layout = wibox.layout.fixed.vertical,
+       layout = fixed_align.vertical,
    }
 
    audio_source_widget:connect_signal(
