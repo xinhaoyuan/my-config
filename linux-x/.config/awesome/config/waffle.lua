@@ -745,29 +745,45 @@ local waffle_dashboard_header_widget = decorate_panel{
                 {
                     {
                         {
-                            image = os.getenv("HOME").."/Pictures/avatar.svg",
-                            widget = masked_imagebox,
+                            {
+                                {
+                                    image = os.getenv("HOME").."/Pictures/avatar.svg",
+                                    widget = masked_imagebox,
+                                },
+                                height = button_height * 2,
+                                widget = wibox.container.constraint,
+                            },
+                            {
+                                {
+                                    image = icons.calendar_todo,
+                                    widget = masked_imagebox,
+                                },
+                                height = button_height,
+                                widget = wibox.container.constraint,
+                            },
+                            widget = fallback,
                         },
                         right = beautiful.sep_small_size,
                         widget = wibox.container.margin,
                     },
+                    widget = wibox.container.place,
+                },
+                {
                     {
                         {
-                            {
-                                align = "center",
-                                format = "%Y-%m-%d %a %H:%M",
-                                widget = wibox.widget.textclock,
-                            },
-                            todo_text,
-                            layout = wibox.layout.fixed.vertical,
+                            format = "%Y-%m-%d %a %H:%M",
+                            widget = wibox.widget.textclock,
                         },
                         widget = wibox.container.place,
                     },
-                    nil,
-                    widget = fixed_align.horizontal,
+                    {
+                        todo_text,
+                        widget = wibox.container.place,
+                    },
+                    layout = wibox.layout.flex.vertical,
                 },
-                height = button_height * 2,
-                widget = wibox.container.constraint,
+                nil,
+                widget = fixed_align.horizontal,
             },
             indicator = em("a"),
             key = {"a", "A"},
