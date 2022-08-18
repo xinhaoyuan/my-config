@@ -5,29 +5,29 @@ local setmetatable = setmetatable
 
 local onionize = {}
 
-local function apply_pickers(widget, pickers, constack, emit_signal_override)
+local function apply_pickers(widget, pickers, constack, data, emit_signal_override)
     local es = rawget(widget, "emit_signal")
     rawset(widget, "emit_signal", emit_signal_override)
     for _i, kv in ipairs(pickers) do
-        if not kv[3] then widget[kv[1]] = opicker.eval_exhaustively(kv[2], constack, widget) end
+        if not kv[3] then widget[kv[1]] = opicker.eval_exhaustively(kv[2], constack, data) end
     end
     for k, v in pairs(pickers) do
         if type(k) == "string" then
-            widget[k] = opicker.eval_exhaustively(v, constack, widget)
+            widget[k] = opicker.eval_exhaustively(v, constack, data)
         end
     end
     for _i, kv in ipairs(pickers) do
-        if kv[3] then widget[kv[1]] = opicker.eval_exhaustively(kv[2], constack, widget) end
+        if kv[3] then widget[kv[1]] = opicker.eval_exhaustively(kv[2], constack, data) end
     end
     rawset(widget, "emit_signal", es)
 end
 
-local function apply_layout_pickers(widget, constack)
+local function apply_layout_pickers(widget, constack, data)
     local pickers = widget._onionize.layout_pickers
     if pickers == nil then return end
     local es = rawget(widget, "emit_signal")
     apply_pickers(
-        widget, pickers, constact, function (self, name, ...)
+        widget, pickers, constact, data, function (self, name, ...)
             if name == "widget::layout_changed" then
                 return
             end
@@ -35,12 +35,12 @@ local function apply_layout_pickers(widget, constack)
         end)
 end
 
-local function apply_draw_pickers(widget, constack)
+local function apply_draw_pickers(widget, constack, data)
     local pickers = widget._onionize.draw_pickers
     if pickers == nil then return end
     local es = rawget(widget, "emit_signal")
     apply_pickers(
-        widget, pickers, constact, function (self, name, ...)
+        widget, pickers, constact, data, function (self, name, ...)
             if name == "widget::layout_changed" then
                 print("WARNING", "Sending "..name.." while applying draw pickers")
                 return
@@ -51,22 +51,22 @@ local function apply_draw_pickers(widget, constack)
         end)
 end
 
-local function layout_override(self, context, width, height)
+local function layout_override(widget, context, width, height)
     local constack = oconstack.get(context)
-    apply_layout_pickers(self, constack)
-    return self._onionize.orig_layout(self, constack, width, height)
+    apply_layout_pickers(widget, constack, widget.data)
+    return widget._onionize.orig_layout(widget, constack, width, height)
 end
 
-local function fit_override(self, context, width, height)
+local function fit_override(widget, context, width, height)
     local constack = oconstack.get(context)
-    apply_layout_pickers(self, constack)
-    return self._onionize.orig_fit(self, constack, width, height)
+    apply_layout_pickers(widget, constack, widget.data)
+    return widget._onionize.orig_fit(widget, constack, width, height)
 end
 
-local function draw_override(self, context, cr, width, height)
+local function draw_override(widget, context, cr, width, height)
     local constack = oconstack.get(context)
-    apply_draw_pickers(self, constack)
-    return self._onionize.orig_draw(self, constack, cr, width, height)
+    apply_draw_pickers(widget, constack, widget.data)
+    return widget._onionize.orig_draw(widget, constack, cr, width, height)
 end
 
 function onionize:set_layout_pickers(pickers)
