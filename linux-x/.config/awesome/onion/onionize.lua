@@ -79,27 +79,36 @@ function onionize:set_draw_pickers(pickers)
     self:emit_signal("widget::redraw_needed")
 end
 
-function onionize.convert(widget)
-    if widget._onionize then return widget end
-    widget._onionize = {
-        orig_draw = widget.draw,
-        orig_fit = widget.fit,
-        orig_layout = widget.layout,
-        layout_pickers = widget.layout_pickers,
-        draw_pickers = widget.draw_pickers,
-    }
-    widget.layout_pickers = nil
-    widget.draw_pickers = nil
-    gtable.crush(widget, onionize, true)
-    if widget.fit then
-        widget.fit = fit_override
-    elseif widget.layout then
-        widget.layout = layout_override
+local wrapped_constructor = {}
+function onionize.wrap_constructor(ctor)
+    local wrapped = wrapped_constructor[ctor]
+    if wrapped == nil then
+        wrapped = function (...)
+            local widget = ctor(...)
+            widget._onionize = {
+                orig_draw = widget.draw,
+                orig_fit = widget.fit,
+                orig_layout = widget.layout,
+                layout_pickers = widget.layout_pickers,
+                draw_pickers = widget.draw_pickers,
+            }
+            widget.layout_pickers = nil
+            widget.draw_pickers = nil
+            gtable.crush(widget, onionize, true)
+            if widget.fit then
+                widget.fit = fit_override
+            elseif widget.layout then
+                widget.layout = layout_override
+            end
+            if widget.draw then
+                widget.draw = draw_override
+            end
+            return widget
+        end
+        wrapped_constructor[ctor] = wrapped
+        wrapped_constructor[wrapped] = wrapped
     end
-    if widget.draw then
-        widget.draw = draw_override
-    end
-    return widget
+    return wrapped_constructor[ctor]
 end
 
-return setmetatable(onionize, {__call = function(_self, ...) return onionize.convert(...) end})
+return setmetatable(onionize, {__call = function(_self, ...) return onionize.wrap_constructor(...) end})
