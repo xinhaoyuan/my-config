@@ -36,6 +36,7 @@ local taglist = require("config.taglist")
 local ocontainer = require("onion.container")
 local opicker = require("onion.picker")
 local otextbox = require("onion.textbox")
+local onionize = require("onion.onionize")
 local fts = require("hotpot").focus_timestamp
 local aux = require("aux")
 local icons = require("icons")
@@ -432,19 +433,22 @@ gtimer {
 
 -- Orgenda
 local orgenda_counter_data = {}
-local orgenda_counter_text_widget = wibox.widget{
-    markup_picker = opicker.wrap_raw{
-        function (context)
-            local high = orgenda_counter_data.high or 0
-            local mid = orgenda_counter_data.mid or 0
-            local low = orgenda_counter_data.low or 0
-            if high > 0 then high = "<span color='"..(context.highlighted and beautiful.special_focus or beautiful.special_normal).."'><b>"..tostring(high).."</b></span>" else high = "" end
-            if mid > 0 then mid = "<b>"..tostring(mid).."</b>" else mid = "" end
-            if low > 0 then low = tostring(low) else low = "" end
-            return high..((#high > 0 and #mid + #low > 0) and "!" or "")..mid..((#mid > 0 and #low > 0) and "/" or "")..low
-        end},
-    widget = otextbox,
-}
+local orgenda_counter_text_widget = onionize(
+    wibox.widget{
+        layout_pickers = {
+            markup = opicker.wrap_raw{
+                function (context)
+                    local high = orgenda_counter_data.high or 0
+                    local mid = orgenda_counter_data.mid or 0
+                    local low = orgenda_counter_data.low or 0
+                    if high > 0 then high = "<span color='"..(context.highlighted and beautiful.special_focus or beautiful.special_normal).."'><b>"..tostring(high).."</b></span>" else high = "" end
+                    if mid > 0 then mid = "<b>"..tostring(mid).."</b>" else mid = "" end
+                    if low > 0 then low = tostring(low) else low = "" end
+                    return high..((#high > 0 and #mid + #low > 0) and "!" or "")..mid..((#mid > 0 and #low > 0) and "/" or "")..low
+                end},
+        },
+        widget = wibox.widget.textbox,
+    })
 local orgenda_counter_widget_container = wibox.container.background()
 
 orgenda.data:connect_signal(
