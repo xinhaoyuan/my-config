@@ -8,16 +8,28 @@ local onionize = {}
 local function apply_pickers(widget, pickers, constack, data, emit_signal_override)
     local es = rawget(widget, "emit_signal")
     rawset(widget, "emit_signal", emit_signal_override)
-    for _i, kv in ipairs(pickers) do
-        if not kv[3] then widget[kv[1]] = opicker.eval_exhaustively(kv[2], constack, data) end
-    end
-    for k, v in pairs(pickers) do
-        if type(k) == "string" then
-            widget[k] = opicker.eval_exhaustively(v, constack, data)
+    assert(opicker.is_picker(pickers))
+    local attrs = oconstack.cached_table(constack, data, pickers)
+    for _i, kv in ipairs(attrs) do
+        if not kv[3] then
+            local k = kv[1]
+            local v = kv[2]
+            if v == ocontext.table_cache_nil_placeholder then v = nil end
+            widget[k] = v
         end
     end
-    for _i, kv in ipairs(pickers) do
-        if kv[3] then widget[kv[1]] = opicker.eval_exhaustively(kv[2], constack, data) end
+    for k, v in pairs(attrs) do
+        if type(k) == "string" then
+            widget[k] = v
+        end
+    end
+    for _i, kv in ipairs(attrs) do
+        if kv[3] then
+            local k = kv[1]
+            local v = kv[2]
+            if v == ocontext.table_cache_nil_placeholder then v = nil end
+            widget[k] = v
+        end
     end
     rawset(widget, "emit_signal", es)
 end
@@ -53,30 +65,46 @@ end
 
 local function layout_override(widget, context, width, height)
     local constack = oconstack.get(context)
-    apply_layout_pickers(widget, constack, widget.data)
+    apply_layout_pickers(widget, constack, widget)
     return widget._onionize.orig_layout(widget, constack, width, height)
 end
 
 local function fit_override(widget, context, width, height)
     local constack = oconstack.get(context)
-    apply_layout_pickers(widget, constack, widget.data)
+    apply_layout_pickers(widget, constack, widget)
     return widget._onionize.orig_fit(widget, constack, width, height)
 end
 
 local function draw_override(widget, context, cr, width, height)
     local constack = oconstack.get(context)
-    apply_draw_pickers(widget, constack, widget.data)
+    apply_draw_pickers(widget, constack, widget)
     return widget._onionize.orig_draw(widget, constack, cr, width, height)
 end
 
 function onionize:set_layout_pickers(pickers)
-    self._onionize.layout_pickers = pickers
-    self:emit_signal("widget::layout_changed")
+    assert(pickers == nil or
+           opicker.is_picker(pickers) or
+           type(pickers) == "table")
+    if type(pickers) == "table" and not opicker.is_picker(pickers) then
+        pickers = opicker.table(pickers)
+    end
+    if self._onionize.layout_pickers ~= pickers then
+        self._onionize.layout_pickers = pickers
+        self:emit_signal("widget::layout_changed")
+    end
 end
 
 function onionize:set_draw_pickers(pickers)
-    self._onionize.draw_pickers = pickers
-    self:emit_signal("widget::redraw_needed")
+    assert(pickers == nil or
+           opicker.is_picker(pickers) or
+           type(pickers) == "table")
+    if type(pickers) == "table" and not opicker.is_picker(pickers) then
+        pickers = opicker.table(pickers)
+    end
+    if self._onionize.draw_pickers ~= pickers then
+        self._onionize.draw_pickers = pickers
+        self:emit_signal("widget::redraw_needed")
+    end
 end
 
 local wrapped_constructor = {}
@@ -103,6 +131,10 @@ function onionize.wrap_constructor(ctor)
             if widget.draw then
                 widget.draw = draw_override
             end
+            widget:connect_signal(
+                "onion::widget_changed", function (self)
+                    oconstack.clear_constack_table_cache(self)
+                end)
             return widget
         end
         wrapped_constructor[ctor] = wrapped

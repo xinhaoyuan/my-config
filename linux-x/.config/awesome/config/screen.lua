@@ -472,6 +472,7 @@ orgenda.data:connect_signal(
                 mid = mid,
                 low = low,
             }
+            orgenda_counter_text_widget:emit_signal("onion::widget_changed")
             orgenda_counter_text_widget:emit_signal("widget::layout_changed")
             orgenda_counter_text_widget:emit_signal("widget::redraw_needed")
         else

@@ -111,6 +111,39 @@ function module.cached_push_and_transform(constack, data, transfromation_picker)
     return top_layer, new_top
 end
 
+local table_cache_nil_placeholder = {}
+module.table_cache_nil_placeholder = table_cache_nil_placeholder
+local data_constack_table_cache = setmetatable({}, {__mode = "k"})
+local function get_constack_table_cache(data)
+    local data_key = data == nil and constack_value_tomb or data
+    local cache = data_constack_table_cache[data_key]
+    if cache == nil then
+        cache = pcache.new(
+            function(base_layer, transfromation_picker)
+                assert(picker.is_picker(transfromation_picker))
+                local modification = picker.eval_exhaustively(transfromation_picker, base_layer, data)
+                assert(type(modification) == "table")
+                local ret = {}
+                for k, v in pairs(modification) do
+                    if picker.is_picker(v) then
+                        v = picker.eval_exhaustively(v, base_layer, data)
+                    end
+                    ret[k] = v == nil and table_cache_nil_placeholder or v
+                end
+                return ret
+            end)
+        data_constack_table_cache[data_key] = cache
+    end
+    return cache
+end
+function module.clear_constack_table_cache(data)
+    data_constack_table_cache[data == nil and constack_value_tomb or data] = nil
+end
+function module.cached_table(constack, data, picker)
+    local top_layer = constack_last_layer[constack]
+    return get_constack_table_cache(data):get(top_layer, picker)
+end
+
 function module.push(constack)
     local ret = constack_last_layer[constack]
     local new_layer = create_layer(ret)
