@@ -27,7 +27,7 @@ local function apply_layout_pickers(widget, constack, data)
     if pickers == nil then return end
     local es = rawget(widget, "emit_signal")
     apply_pickers(
-        widget, pickers, constact, data, function (self, name, ...)
+        widget, pickers, constack, data, function (self, name, ...)
             if name == "widget::layout_changed" then
                 return
             end
@@ -40,7 +40,7 @@ local function apply_draw_pickers(widget, constack, data)
     if pickers == nil then return end
     local es = rawget(widget, "emit_signal")
     apply_pickers(
-        widget, pickers, constact, data, function (self, name, ...)
+        widget, pickers, constack, data, function (self, name, ...)
             if name == "widget::layout_changed" then
                 print("WARNING", "Sending "..name.." while applying draw pickers")
                 return
