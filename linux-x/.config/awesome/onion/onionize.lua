@@ -5,6 +5,8 @@ local setmetatable = setmetatable
 
 local onionize = {}
 
+local nil_placeholder = {}
+onionize.nil_placeholder = nil_placeholder
 local function apply_pickers(widget, pickers, constack, data, emit_signal_override)
     local es = rawget(widget, "emit_signal")
     rawset(widget, "emit_signal", emit_signal_override)
@@ -14,12 +16,13 @@ local function apply_pickers(widget, pickers, constack, data, emit_signal_overri
         if not kv[3] then
             local k = kv[1]
             local v = kv[2]
-            if v == ocontext.table_cache_nil_placeholder then v = nil end
+            if v == nil_placeholder then v = nil end
             widget[k] = v
         end
     end
     for k, v in pairs(attrs) do
         if type(k) == "string" then
+            if v == nil_placeholder then v = nil end
             widget[k] = v
         end
     end
@@ -27,7 +30,7 @@ local function apply_pickers(widget, pickers, constack, data, emit_signal_overri
         if kv[3] then
             local k = kv[1]
             local v = kv[2]
-            if v == ocontext.table_cache_nil_placeholder then v = nil end
+            if v == nil_placeholder then v = nil end
             widget[k] = v
         end
     end

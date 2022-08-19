@@ -202,6 +202,19 @@ module.constructors.fallback = {
     end,
 }
 
+module.constructors.list = {
+    constructor = function (...)
+        local args = {...}
+        return function (constack, data)
+            local ret = {}
+            for i = 1, #args do
+                ret[i] = eval_exhaustively(args[i], constack, data)
+            end
+            return ret
+        end
+    end,
+}
+
 module.constructors.table = {
     preprocessor = function (value)
         assert(type(value) == "table")

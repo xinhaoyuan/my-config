@@ -111,8 +111,6 @@ function module.cached_push_and_transform(constack, data, transfromation_picker)
     return top_layer, new_top
 end
 
-local table_cache_nil_placeholder = {}
-module.table_cache_nil_placeholder = table_cache_nil_placeholder
 local data_constack_table_cache = setmetatable({}, {__mode = "k"})
 local function get_constack_table_cache(data)
     local data_key = data == nil and constack_value_tomb or data
@@ -128,7 +126,7 @@ local function get_constack_table_cache(data)
                     if picker.is_picker(v) then
                         v = picker.eval_exhaustively(v, base_layer, data)
                     end
-                    ret[k] = v == nil and table_cache_nil_placeholder or v
+                    ret[k] = v
                 end
                 return ret
             end)
