@@ -129,6 +129,12 @@ function scrlist:layout(context, width, height)
                     height, self:get_height_measurement_function(context, content_width))
             self._private.start_index = self._private.anchor_index - #prev_heights
             self._private.end_index = self._private.anchor_index + #next_heights
+            if next_adjustment < 0 and #next_heights > 0 then
+                self._private.end_index = self._private.end_index - 1
+            end
+            if prev_adjustment < 0 and #prev_heights > 0 then
+                self._private.start_index = self._private.start_index + 1
+            end
             if self._private.view_index then
                 if self._private.view_index < self._private.start_index then
                     self._private.anchor_index = self._private.view_index
@@ -145,12 +151,6 @@ function scrlist:layout(context, width, height)
         end
         local gravity = self._private.gravity
         local current_y = prev_adjustment
-        if next_adjustment < 0 and #next_heights > 0 then
-            self._private.end_index = self._private.end_index - 1
-        end
-        if prev_adjustment < 0 and #prev_heights > 0 then
-            self._private.start_index = self._private.start_index + 1
-        end
         if self._private.start_index == 1 and
             self._private.end_index == size and
             self._private.scrollbar_autohide then
@@ -333,6 +333,8 @@ function scrlist:set_view_index(value)
                 self.alignment = "end"
             end
         end
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("widget::redraw_needed")
     end
 end
 
