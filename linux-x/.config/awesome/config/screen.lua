@@ -493,6 +493,7 @@ capi.awesome.connect_signal(
 local waffle_indicator = wibox.widget{
     image = icons.waffle,
     widget = masked_imagebox,
+    visible = false,
 }
 
 capi.awesome.connect_signal("waffle.show", function () if not waffle:autohide() then waffle_indicator.visible = true end end)
