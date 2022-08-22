@@ -600,10 +600,10 @@ do
     local audio_sink_toggle_mute
     local function audio_sink_choose_default()
         awful.spawn.with_shell(
-            [[pactl set-default-sink "$(pacmd list-sinks | awk 'match($0,/index:\s*([0-9]*)/,m){id=m[1]} match($0,/device.description = "([^"]*)"/,m){print id"\t"m[1]}' | rofi -dmenu -normal-window | cut -f 1)"]])
+            [[pactl set-default-sink "$(pacmd list-sinks | awk 'match($0,/index:\s*([0-9]*)/,m){id=m[1]} match($0,/Description:\s*(.*)$/,m){print id"\t"m[1]}' | rofi -dmenu -normal-window | cut -f 1)"]])
     end
 
-    local GET_VOLUME_CMD = [[DEFAULT="$(pactl get-default-sink)"; pactl list sinks | awk -- 'match($0, /Name:\s*(.*)/, m){f=(m[1]=="'"$DEFAULT"'")} f&&match($0, /device.description = "([^"]*)"$/, m){print "name="m[1]} f&&match($0, /^\s*Volume:.*\/\s*([0-9]*)%/, m){print "volume="m[1]} f&&match($0,/^\s*Mute:\s*(.*)$/,m){print "muted="m[1]}']]
+    local GET_VOLUME_CMD = [[DEFAULT="$(pactl get-default-sink)"; pactl list sinks | awk -- 'match($0, /Name:\s*(.*)/, m){f=(m[1]=="'"$DEFAULT"'")} f&&match($0, /Description:\s*(.*)$/, m){print "name="m[1]} f&&match($0, /^\s*Volume:.*\/\s*([0-9]*)%/, m){print "volume="m[1]} f&&match($0,/^\s*Mute:\s*(.*)$/,m){print "muted="m[1]}']]
     local SET_VOLUME_CMD = "pactl set-sink-volume @DEFAULT_SINK@"
     local INC_VOLUME_CMD = SET_VOLUME_CMD.." +5%"
     local DEC_VOLUME_CMD = SET_VOLUME_CMD.." -5%"
@@ -768,10 +768,10 @@ do
     local audio_source_buttons
     local audio_source_toggle_mute
     local function audio_source_choose_default()
-        awful.spawn.with_shell([[pactl set-default-source "$(pacmd list-sources | awk 'match($0,/index:\s*([0-9]*)/,m){id=m[1]} match($0,/device.description = "([^"]*)"/,m){print id"\t"m[1]}' | rofi -dmenu -normal-window | cut -f 1)"]])
+        awful.spawn.with_shell([[pactl set-default-source "$(pacmd list-sources | awk 'match($0,/index:\s*([0-9]*)/,m){id=m[1]} match($0,/Description:\s*(.*)$/,m){print id"\t"m[1]}' | rofi -dmenu -normal-window | cut -f 1)"]])
     end
 
-    local GET_VOLUME_CMD = [[DEFAULT="$(pactl get-default-source)"; pactl list sources | awk -- 'match($0, /Name:\s*(.*)/, m){f=(m[1]=="'"$DEFAULT"'")} f&&match($0, /device.description = "([^"]*)"$/, m){print "name="m[1]} f&&match($0, /^\s*Volume:.*\/\s*([0-9]*)%/, m){print "volume="m[1]} f&&match($0,/^\s*Mute:\s*(.*)$/,m){print "muted="m[1]}']]
+    local GET_VOLUME_CMD = [[DEFAULT="$(pactl get-default-source)"; pactl list sources | awk -- 'match($0, /Name:\s*(.*)/, m){f=(m[1]=="'"$DEFAULT"'")} f&&match($0, /Description:\s*(.*)$/, m){print "name="m[1]} f&&match($0, /^\s*Volume:.*\/\s*([0-9]*)%/, m){print "volume="m[1]} f&&match($0,/^\s*Mute:\s*(.*)$/,m){print "muted="m[1]}']]
     local SET_VOLUME_CMD = "pactl set-source-volume @DEFAULT_SOURCE@"
     local INC_VOLUME_CMD = SET_VOLUME_CMD.." +5%"
     local DEC_VOLUME_CMD = SET_VOLUME_CMD.." -5%"
