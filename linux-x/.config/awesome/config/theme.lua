@@ -584,8 +584,8 @@ else
     theme.rect_with_corners = gshape.rectangle
 end
 
-theme.decorator_border_width = 3
-theme.decorator_padding_width = 3
+theme.decorator_border_width = dpi(2)
+theme.decorator_padding_width = dpi(2)
 theme.decorator_shade_width = dpi(6)
 theme.decorator = decorator.presets.soft_relief{
     light_shade = "#ffffff40",
