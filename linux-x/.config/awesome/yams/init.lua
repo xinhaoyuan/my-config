@@ -170,7 +170,14 @@ local function create(config)
 
             for i = #tablist, 1, -1 do
                 local c = tablist[i]
-                c.saved = {ontop = c.ontop, above = c.above, below = c.below, minimized = c.minimized, opacity = c.opacity}
+                c.saved = {
+                    ontop = c.ontop,
+                    above = c.above,
+                    below = c.below,
+                    minimized = c.minimized,
+                    fullscreen = c.fullscreen,
+                    opacity = c.opacity
+                }
                 c.ontop = false
                 c.above = false
                 c.below = false
@@ -194,6 +201,7 @@ local function create(config)
                 c.ontop = c.saved.ontop
                 c.above = c.saved.above
                 c.below = c.saved.below
+                c.fullscreen = c.saved.fullscreen
                 c.opacity = c.saved.opacity
                 c.saved = nil
             end

@@ -1085,11 +1085,13 @@ require("awful.rules").rules = {
 }
 
 client.disconnect_signal("request::geometry", awful.ewmh.geometry)
-client.connect_signal("request::geometry", function(c, context, ...)
-    if context ~= "fullscreen" or not c.fake_fullscreen then
+client.connect_signal(
+    "request::geometry", function(c, context, ...)
+        if context == "fullscreen" and c.fake_fullscreen then
+            context = "maximize"
+        end
         awful.ewmh.geometry(c, context, ...)
-    end
-end)
+    end)
 
 client.connect_signal(
     "property::class", function (c)
