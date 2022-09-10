@@ -962,6 +962,12 @@ require("awful.rules").rules = {
         },
     },
     {
+        rule = { class = "Chromium" },
+        properties = {
+            avoid_fullscreen = true,
+        },
+    },
+    {
         rule = { class = "Firefox" },
         properties = {
             fake_fullscreen = true,
@@ -1091,6 +1097,19 @@ client.connect_signal(
             context = "maximize"
         end
         awful.ewmh.geometry(c, context, ...)
+    end)
+
+client.connect_signal(
+    "property::fullscreen", function (c)
+        if not c.fullscreen or not c.avoid_fullscreen then return end
+        gtimer{
+            timeout = 0.01,
+            autostart = true,
+            single_shot = true,
+            callback = function ()
+                c.fullscreen = false
+            end,
+        }
     end)
 
 client.connect_signal(
