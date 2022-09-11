@@ -277,7 +277,7 @@ local function button(args)
                 left = args.button_layout and 0 or button_padding,
                 widget = wibox.container.margin,
             },
-            fg_picker = opicker.beautiful{opicker.branch{"inactive_hotkey", "minor_", "special_"}, opicker.highlighted_switcher},
+            fg_picker = opicker.beautiful{"special_", opicker.highlighted_switcher},
             widget = ocontainer,
         },
         layout = args.button_layout or fixed_align.horizontal,
@@ -918,7 +918,7 @@ local waffle_dashboard_action_grid_widget = decorate_panel {
                 button_layout = grid_button_layout,
                 label_widget = icon_label(icons.launcher),
                 indicator = em("r"),
-                key = {"r", "R"},
+                key = {"r", "R", " "},
                 action = function (alt)
                     if waffle:is_in_view(waffle_root_view) then
                         waffle_root_source_mode = nil
@@ -1119,17 +1119,11 @@ local waffle_dashboard_action_list_widget = decorate_panel {
 
 waffle_dashboard_view = view {
     root = wibox.widget{
-        {
-            waffle_dashboard_header_widget,
-            waffle_dashboard_status_widget,
-            waffle_dashboard_action_grid_widget,
-            waffle_dashboard_action_list_widget,
-            layout = wibox.layout.fixed.vertical,
-        },
-        context_transformation = {
-            inactive_hotkey = true,
-        },
-        widget = ocontainer,
+        waffle_dashboard_header_widget,
+        waffle_dashboard_status_widget,
+        waffle_dashboard_action_grid_widget,
+        waffle_dashboard_action_list_widget,
+        layout = wibox.layout.fixed.vertical,
     },
     no_margin = true,
     key_filter = function (_self, mod, key, event)
@@ -1668,34 +1662,15 @@ setmetatable(waffle_dashboard_view,
                    if self._private[index] == value then return end
                    if index == "active" then
                        self.widget.visible = value
-                   elseif index == "direct_hotkey" then
-                       self.widget.context_transformation = {
-                           inactive_hotkey = not value
-                       }
                    end
                    self._private[index] = value
                end,
              })
-local dashboard_key_handler = waffle_dashboard_view.key_handler
-waffle_dashboard_view.key_handler = function (self, mods, key, event)
-    if key == "Super_L" or key == "Super_R" or key == "Alt_L" or key == "Alt_R" then
-        self.direct_hotkey = event == "press"
-        return true
-    elseif key == " " then
-        if event == "press" then
-            self.direct_hotkey = not self.direct_hotkey
-        end
-        return true
-    end
-    local pass = #key > 1 or self.direct_hotkey
-    return pass and dashboard_key_handler(self, mods, key, event)
-end
 waffle_dashboard_view.on_open = function (self)
     waffle_root_view.widget:get_children_by_id("input_area")[1].visible = not waffle:autohide()
 end
 waffle_dashboard_view.on_close = function (self)
     waffle_root_source_mode = nil
-    self.direct_hotkey = false
 end
 
 waffle_root_view = bento{
@@ -2370,7 +2345,6 @@ waffle_calendar_view = bento{
             end,
             _readonly = {
                 active = true,
-                direct_hotkey = false,
             },
         },
         {
