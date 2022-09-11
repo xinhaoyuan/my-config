@@ -125,7 +125,7 @@ function ionize:set_draw_pickers(pickers)
     end
     if self._ionize.draw_pickers ~= pickers then
         self._ionize.draw_pickers = pickers
-        self:emit_signal("widget::layout_changed")
+        self:emit_signal("widget::redraw_needed")
     end
 end
 
