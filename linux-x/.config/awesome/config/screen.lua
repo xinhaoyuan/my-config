@@ -31,6 +31,7 @@ local fixed_align = require("fixed_align")
 local masked_imagebox = require("masked_imagebox")
 local recolor = require("recolor")
 local debug_container = require("debug_container")
+local compactor = require("compactor")
 local tasklist = require("config.tasklist")
 local taglist = require("config.taglist")
 local ocontainer = require("onion.container")
@@ -183,7 +184,11 @@ awful.mouse.append_global_mousebinding(root_buttons)
 local fortune_widget = wibox.widget {
     {
         {
-            widget = wibox.widget.textbox
+            {
+                id = "contents",
+                widget = wibox.widget.textbox
+            },
+            widget = compactor,
         },
         left = beautiful.sep_median_size,
         right = beautiful.sep_median_size,
@@ -199,7 +204,7 @@ fortune_widget.watch:connect_signal(
    "property::output",
    function (watch)
       local raw = watch.output:gsub("\n", " "):gsub("%s+", " "):match("^%s*(.-)%s*$")
-      fortune_widget.widget.widget:set_text(raw)
+      fortune_widget:get_children_by_id("contents")[1]:set_text(raw)
       fortune_widget.fortune_raw = raw
    end
 )

@@ -71,6 +71,13 @@ function compactor:set_horizontal(h)
     end
 end
 
+function compactor:set_stretch_first(s)
+    if self._private.stretch_first ~= s then
+        self._private.stretch_first = s
+        self:emit_signal("widget::layout_changed")
+    end
+end
+
 function compactor.new(...)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
     gtable.crush(
