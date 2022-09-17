@@ -43,34 +43,42 @@ local function get_layer_cache(data)
                 assert(picker.is_picker(transformation_picker))
                 local transformation = picker.eval_exhaustively(transformation_picker, context, data)
                 assert(type(transformation) == "table")
-                local new_layer = create_layer(context)
+                -- A hacky way of two-phase caching
+                local direct = transformation.__direct
+                local new_layer = direct and create_layer(context) or {}
                 for _i, kv in ipairs(transformation) do
                     if not kv[3] then
                         local k = kv[1]
                         local v = kv[2]
-                        new_layer[k] = v
+                        new_layer[k] = v == nil and not direct and nil_tomb or v
                     end
                 end
                 for k, v in pairs(transformation) do
                     if type(k) == "string" then
-                        new_layer[k] = v
+                        if v == nil_tomb then
+                            new_layer[k] = nil
+                        else
+                            new_layer[k] = v
+                        end
                     end
                 end
                 for _i, kv in ipairs(transformation) do
                     if kv[3] then
                         local k = kv[1]
                         local v = kv[2]
-                        new_layer[k] = v
+                        new_layer[k] = v == nil and not direct and nil_tomb or v
                     end
                 end
-                return new_layer
+                if direct then return new_layer end
+                new_layer.__direct = true
+                return get_layer_cache(nil):get(context, picker.table(new_layer))
             end)
         data_layer_cache[data_key] = cache
     end
     return cache
 end
 local function clear_layer_cache(data)
-    data_layer_cache[data == nil and value_tomb or data] = nil
+    data_layer_cache[data == nil and nil_tomb or data] = nil
 end
 
 local layer = {}
@@ -184,7 +192,7 @@ function layer.new()
     local ret = base.make_widget(nil, nil, {enable_properties = true})
     gtable.crush(ret, layer, true)
     ret:connect_signal(
-        "anion::widget_changed", function (self)
+        "prism::widget_changed", function (self)
             clear_layer_cache(self)
             self:emit_signal("widget::layout_changed")
         end)

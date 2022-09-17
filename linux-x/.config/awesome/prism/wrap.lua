@@ -27,7 +27,7 @@ local function cached_table(context, data, picker)
     return get_table_cache(data):get(context, picker)
 end
 
-local ionize = {}
+local wrap = {}
 
 local function apply_pickers(widget, pickers, context, data, emit_signal_override)
     local es = rawget(widget, "emit_signal")
@@ -84,58 +84,58 @@ local function apply_pickers_before_draw(widget, context, pickers)
 end
 
 local function fit_override(widget, context, width, height)
-    apply_pickers_before_layout(widget, context, widget._ionize.layout_pickers)
-    return widget._ionize.orig_fit(widget, context, width, height)
+    apply_pickers_before_layout(widget, context, widget._prism_wrap.layout_pickers)
+    return widget._prism_wrap.orig_fit(widget, context, width, height)
 end
 
 local function layout_override(widget, context, width, height)
-    apply_pickers_before_layout(widget, context, widget._ionize.layout_pickers)
-    apply_pickers_before_layout(widget, context, widget._ionize.draw_pickers)
-    if widget._ionize.orig_layout then
-        return widget._ionize.orig_layout(widget, context, width, height)
+    apply_pickers_before_layout(widget, context, widget._prism_wrap.layout_pickers)
+    apply_pickers_before_layout(widget, context, widget._prism_wrap.draw_pickers)
+    if widget._prism_wrap.orig_layout then
+        return widget._prism_wrap.orig_layout(widget, context, width, height)
     end
 end
 
 local function draw_override(widget, context, cr, width, height)
-    apply_pickers_before_draw(widget, context, widget._ionize.draw_pickers)
-    if widget._ionize.orig_draw then
-        return widget._ionize.orig_draw(widget, context, cr, width, height)
+    apply_pickers_before_draw(widget, context, widget._prism_wrap.draw_pickers)
+    if widget._prism_wrap.orig_draw then
+        return widget._prism_wrap.orig_draw(widget, context, cr, width, height)
     end
 end
 
-function ionize:set_layout_pickers(pickers)
+function wrap:set_layout_pickers(pickers)
     assert(pickers == nil or
            picker.is_picker(pickers) or
            type(pickers) == "table")
     if type(pickers) == "table" and not picker.is_picker(pickers) then
         pickers = picker.table(pickers)
     end
-    if self._ionize.layout_pickers ~= pickers then
-        self._ionize.layout_pickers = pickers
+    if self._prism_wrap.layout_pickers ~= pickers then
+        self._prism_wrap.layout_pickers = pickers
         self:emit_signal("widget::layout_changed")
     end
 end
 
-function ionize:set_draw_pickers(pickers)
+function wrap:set_draw_pickers(pickers)
     assert(pickers == nil or
            picker.is_picker(pickers) or
            type(pickers) == "table")
     if type(pickers) == "table" and not picker.is_picker(pickers) then
         pickers = picker.table(pickers)
     end
-    if self._ionize.draw_pickers ~= pickers then
-        self._ionize.draw_pickers = pickers
+    if self._prism_wrap.draw_pickers ~= pickers then
+        self._prism_wrap.draw_pickers = pickers
         self:emit_signal("widget::redraw_needed")
     end
 end
 
 local wrapped_constructor = {}
-function ionize.wrap_constructor(ctor)
+function wrap.wrap_constructor(ctor)
     local wrapped = wrapped_constructor[ctor]
     if wrapped == nil then
         wrapped = function (...)
             local widget = ctor(...)
-            widget._ionize = {
+            widget._prism_wrap = {
                 orig_draw = widget.draw,
                 orig_fit = widget.fit,
                 orig_layout = widget.layout,
@@ -144,14 +144,14 @@ function ionize.wrap_constructor(ctor)
             }
             widget.layout_pickers = nil
             widget.draw_pickers = nil
-            gtable.crush(widget, ionize, true)
+            gtable.crush(widget, wrap, true)
             if widget.fit then
                 widget.fit = fit_override
             end
             widget.layout = layout_override
             widget.draw = draw_override
             widget:connect_signal(
-                "anion::widget_changed", function (self)
+                "prism::widget_changed", function (self)
                     clear_table_cache(self)
                 end)
             return widget
@@ -162,4 +162,4 @@ function ionize.wrap_constructor(ctor)
     return wrapped_constructor[ctor]
 end
 
-return setmetatable(ionize, {__call = function(_self, ...) return ionize.wrap_constructor(...) end})
+return setmetatable(wrap, {__call = function(_self, ...) return wrap.wrap_constructor(...) end})
