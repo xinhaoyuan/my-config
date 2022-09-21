@@ -11,7 +11,7 @@ picker_cache = pcache.new(
         assert(type(type_ctor) == "function", "not a type constructor")
         local ret, info = type_ctor(...)
         assert(type(ret) == "table" or type(ret) == "function",
-               "constructed picker must be a (callable) table or a function")
+               "constructed picker must be a callable table or a function")
         picker_info[ret] = info or true
         return ret
     end)
@@ -95,7 +95,7 @@ local function eval_string(components, context, data)
         elseif type(component) == "string" then
             ret = ret..component
         else
-            print("WARNING: ignoring unknown string component "
+            print("WARNING:", "ignoring unknown string component "
                   ..tostring(component))
         end
     end
@@ -222,7 +222,14 @@ module.constructors.table = {
         for k, _ in pairs(value) do
             keys[#keys + 1] = k
         end
-        table.sort(keys)
+        table.sort(
+            keys, function (a, b)
+                local ta, tb = type(a), type(b)
+                if ta == tb then
+                    return a < b
+                end
+                return ta < tb
+            end)
         local result = {}
         for i = 1, #keys do
             result[#result + 1] = keys[i]

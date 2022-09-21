@@ -18,8 +18,7 @@ local masked_imagebox = require("masked_imagebox")
 local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
 local acolor = require("aux").color
-local ocontainer = require("onion.container")
-local opicker = require("onion.picker")
+local prism = require("prism")
 local lgi   = require("lgi")
 local icons = require("icons")
 local cairo = lgi.cairo
@@ -619,10 +618,15 @@ theme.apply_border_to_widget_template = function(args)
     local decorator = beautiful.decorator
     return {
         {
-            args.widget,
-            fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-            bg_picker = not args.no_bg and opicker.beautiful{"bg_normal"},
-            widget = ocontainer,
+            {
+                args.widget,
+                draw_pickers = {
+                    fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
+                    bg = not args.no_bg and prism.picker.beautiful{"bg_normal"},
+                },
+                widget = prism.wrap(wibox.container.background),
+            },
+            widget = prism.layer,
         },
         top = args.top and decorator.top_space - decorator.top_size or 0,
         left = args.left and decorator.left_space - decorator.left_size or 0,

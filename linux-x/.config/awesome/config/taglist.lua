@@ -3,8 +3,7 @@ local shared = require((...):match("(.-)[^%.]+$") .. "shared")
 local awful = require("awful")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
-local ocontainer = require("onion.container")
-local opicker = require("onion.picker")
+local prism = require("prism")
 
 local module = {}
 
@@ -42,9 +41,9 @@ local gravity_index = shared.gravity_index
 
 local function taglist_update_function(widget, tag, index, objects)
     local text_widget = widget:get_children_by_id("my_text_role")[1]
-    local background_widget = widget:get_children_by_id("background_role")[1]
+    local base_layer = widget:get_children_by_id("base_layer")[1]
     text_widget.text = shared.screen.tags[tag.index]
-    background_widget.context_transformation = {
+    base_layer.context_transformation = {
         selected = tag.selected
     }
 end
@@ -54,24 +53,34 @@ local function taglist_create_function(widget, c, index, objects)
 end
 
 local taglist_template = {
+    id = "base_layer",
     {
+        id = "background_role",
         {
-            id = "my_text_role",
-            font = "DejaVu Sans Mono:style=Book 10",
-            widget = wibox.widget.textbox,
+            {
+                id = "my_text_role",
+                font = "DejaVu Sans Mono:style=Book 10",
+                widget = wibox.widget.textbox,
+            },
+            halign = "center",
+            valign = "center",
+            forced_width = beautiful.bar_height / beautiful.bar_rows,
+            forced_height = beautiful.bar_height / beautiful.bar_rows,
+            widget = wibox.container.place
         },
-        halign = "center",
-        valign = "center",
-        forced_width = beautiful.bar_height / beautiful.bar_rows,
-        forced_height = beautiful.bar_height / beautiful.bar_rows,
-        widget = wibox.container.place
+        draw_pickers = {
+            fg = prism.picker.branch{
+                "selected",
+                prism.picker.beautiful{"fg_focus"},
+                prism.picker.beautiful{"fg_normal"}},
+            prism.picker.list{
+                "bg", prism.picker.branch{
+                    "selected", prism.picker.beautiful{"bg_focus"}}
+            },
+        },
+        widget = prism.wrap(wibox.container.background),
     },
-    id = "background_role",
-    fg_picker = opicker.branch{
-        "selected", opicker.beautiful{"fg_focus"}, opicker.beautiful{"fg_normal"}},
-    bg_picker = opicker.branch{
-        "selected", opicker.beautiful{"bg_focus"}},
-    widget = ocontainer,
+    widget = prism.layer,
     create_callback = taglist_create_function,
     update_callback = taglist_update_function,
 }

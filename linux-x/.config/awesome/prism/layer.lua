@@ -33,59 +33,46 @@ local function create_layer(base_layer)
 end
 
 local nil_tomb = {}
-local data_layer_cache = setmetatable({}, {__mode = "k"})
-local function get_layer_cache(data)
-    local data_key = data == nil and nil_tomb or data
-    local cache = data_layer_cache[data_key]
-    if cache == nil then
-        cache = pcache.new(
-            function(context, transformation_picker)
-                assert(picker.is_picker(transformation_picker))
-                local transformation = picker.eval_exhaustively(transformation_picker, context, data)
-                assert(type(transformation) == "table")
-                -- A hacky way of two-phase caching
-                local direct = transformation.__direct
-                local new_layer = direct and create_layer(context) or {}
-                for _i, kv in ipairs(transformation) do
-                    if not kv[3] then
-                        local k = kv[1]
-                        local v = kv[2]
-                        new_layer[k] = v == nil and not direct and nil_tomb or v
-                    end
+local layer_cache
+layer_cache = pcache.new(
+    function (widget_or_picker, context)
+        local transformation_picker
+        local data
+        if picker.is_picker(widget_or_picker) then
+            transformation_picker = widget_or_picker
+        else
+            transformation_picker = widget_or_picker._private.context_transformation
+            assert(picker.is_picker(transformation_picker))
+            data = widget_or_picker
+        end
+        local transformation = picker.eval_exhaustively(transformation_picker, context, data)
+        assert(type(transformation) == "table")
+        local direct = transformation.__direct
+        local new_layer = direct and create_layer(context) or {}
+        for _i, kv in ipairs(transformation) do
+            local k = kv[1]
+            local v = kv[2]
+            new_layer[k] = direct and v == nil and nil_tomb or v
+        end
+        for k, v in pairs(transformation) do
+            if type(k) == "string" then
+                if v == nil_tomb then
+                    new_layer[k] = v
+                else
+                    new_layer[k] = v
                 end
-                for k, v in pairs(transformation) do
-                    if type(k) == "string" then
-                        if v == nil_tomb then
-                            new_layer[k] = nil
-                        else
-                            new_layer[k] = v
-                        end
-                    end
-                end
-                for _i, kv in ipairs(transformation) do
-                    if kv[3] then
-                        local k = kv[1]
-                        local v = kv[2]
-                        new_layer[k] = v == nil and not direct and nil_tomb or v
-                    end
-                end
-                if direct then return new_layer end
-                new_layer.__direct = true
-                return get_layer_cache(nil):get(context, picker.table(new_layer))
-            end)
-        data_layer_cache[data_key] = cache
-    end
-    return cache
-end
-local function clear_layer_cache(data)
-    data_layer_cache[data == nil and nil_tomb or data] = nil
-end
+            end
+        end
+        if direct then return new_layer end
+        new_layer.__direct = true
+        return layer_cache:get(picker.table(new_layer), context)
+    end)
 
 local layer = {}
 
 function layer:push_context(context)
     if self._private.context_transformation ~= nil then
-        return get_layer_cache(self):get(context, self._private.context_transformation)
+        return layer_cache:get(self, context)
     end
     return context
 end
@@ -134,7 +121,7 @@ function layer:set_context_transformation(transformation)
     end
     if self._private.context_transformation ~= transformation then
         self._private.context_transformation = transformation
-        self:emit_signal("widget::layout_changed")
+        self:emit_signal("prism::widget_changed")
     end
 end
 
@@ -193,8 +180,9 @@ function layer.new()
     gtable.crush(ret, layer, true)
     ret:connect_signal(
         "prism::widget_changed", function (self)
-            clear_layer_cache(self)
+            layer_cache:clear(self)
             self:emit_signal("widget::layout_changed")
+            self:emit_signal("widget::redraw_needed")
         end)
     return ret
 end

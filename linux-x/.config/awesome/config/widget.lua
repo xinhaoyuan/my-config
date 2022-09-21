@@ -7,8 +7,7 @@ local beautiful = require("beautiful")
 local gtimer = require("gears.timer")
 local awful = require("awful")
 local dpi = require("beautiful.xresources").apply_dpi
-local ocontainer = require("onion.container")
-local opicker = require("onion.picker")
+local prism = require("prism")
 local icons = require("icons")
 local masked_imagebox = require("masked_imagebox")
 local outlined_textbox = require("outlined_textbox")
@@ -338,9 +337,17 @@ do
 
     local net_widget_icon_container = wibox.widget {
         {
-            widget = masked_imagebox,
+            {
+                widget = masked_imagebox,
+            },
+            draw_pickers = {
+                prism.picker.list{"fg", prism.picker.branch{
+                    "has_vpn",
+                    prism.picker.beautiful{"special_", prism.picker.highlighted_switcher}}},
+            },
+            widget = prism.wrap(wibox.container.background),
         },
-        widget = ocontainer,
+        widget = prism.layer,
     }
 
     net_widget = wibox.widget {
@@ -408,21 +415,18 @@ do
         prev_send = send
 
         if has_vpn ~= net_widget.has_vpn then
+            net_widget_icon_container.context_transformation = {
+                has_vpn = has_vpn
+            }
             net_widget.has_vpn = has_vpn
-            if has_vpn then
-                net_widget_icon_container.fg_picker = opicker.beautiful{"special_", opicker.highlighted_switcher}
-            else
-                -- Need to investigate why nil does not work.
-                net_widget_icon_container.fg_picker = nil
-            end
         end
 
         if has_wifi ~= net_widget.has_wifi then
             net_widget.has_wifi = has_wifi
             if has_wifi then
-                net_widget_icon_container.widget.image = icons.wifi
+                net_widget_icon_container.widget.widget.image = icons.wifi
             else
-                net_widget_icon_container.widget.image = icons.ethernet
+                net_widget_icon_container.widget.widget.image = icons.ethernet
             end
         end
     end

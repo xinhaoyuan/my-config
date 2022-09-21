@@ -16,8 +16,7 @@ local dpi = require("beautiful.xresources").apply_dpi
 local wibox  = require("wibox")
 local masked_imagebox = require("masked_imagebox")
 local fallback = require("fallback")
-local ocontainer = require("onion.container")
-local opicker = require("onion.picker")
+local prism = require("prism")
 local border = require("border-theme")
 local fixed_margin = require("fixed_margin")
 local fixed_place = require("fixed_place")
@@ -191,7 +190,7 @@ local property_to_text = {
 local function tasklist_update_function(widget, c, index, objects)
     local status_widget = widget:get_children_by_id("status_role")[1]
     local inline_status_widget = widget:get_children_by_id("inline_status_role")[1]
-    local background_widget = widget:get_children_by_id("my_background_role")[1]
+    local base_layer = widget:get_children_by_id("base_layer")[1]
     local title_widget = widget:get_children_by_id("title_text_role")[1]
     local status_text = ""
     local prop = {}
@@ -240,7 +239,7 @@ local function tasklist_update_function(widget, c, index, objects)
         if status_widget then status_widget.text = status_text end
         if inline_status_widget and #inline_status_widget.text > 0 then inline_status_widget.text = "" end
     end
-    background_widget.context_transformation = {
+    base_layer.context_transformation = {
         highlighted = client.focus == c or (shared.waffle_selected_client == c and not waffle:autohide()),
         minimized = (c.cgroup and c.cgroup.current_client or c).minimized,
         is_odd = index % 2 == 1
@@ -278,79 +277,88 @@ local tasklist_template = {
                         {
                             {
                                 {
-                                    widget = awful.widget.clienticon,
+                                    {
+                                        widget = awful.widget.clienticon,
+                                    },
+                                    {
+                                        id = "default_icon",
+                                        image = beautiful.client_default_icon,
+                                        widget = masked_imagebox,
+                                    },
+                                    widget = fallback,
                                 },
                                 {
-                                    id = "default_icon",
-                                    image = beautiful.client_default_icon,
-                                    widget = masked_imagebox,
+                                    id = "inline_status_role",
+                                    text = "",
+                                    align = "right",
+                                    valign = "bottom",
+                                    outline_size = dpi(2),
+                                    widget = outlined_textbox,
                                 },
-                                widget = fallback,
+                                layout = wibox.layout.stack,
                             },
-                            {
-                                id = "inline_status_role",
-                                text = "",
-                                align = "right",
-                                valign = "bottom",
-                                outline_size = dpi(2),
-                                widget = outlined_textbox,
-                            },
-                            layout = wibox.layout.stack,
+                            [top_index[shared.vars.bar_position]] = (beautiful.bar_height - beautiful.bar_icon_size) / 2,
+                            [bottom_index[shared.vars.bar_position]] = (beautiful.bar_height - beautiful.bar_icon_size) / 2,
+                            widget = wibox.container.margin,
                         },
-                        [top_index[shared.vars.bar_position]] = (beautiful.bar_height - beautiful.bar_icon_size) / 2,
-                        [bottom_index[shared.vars.bar_position]] = (beautiful.bar_height - beautiful.bar_icon_size) / 2,
-                        widget = wibox.container.margin,
-                    },
-                    {
-                        {
-                            id = "title_text_role",
-                            widget = wibox.widget.textbox,
-                        },
-                        [left_index[shared.vars.bar_position]] = beautiful.sep_small_size,
-                        [right_index[shared.vars.bar_position]] = beautiful.sep_small_size,
-                        draw_empty = false,
-                        widget = fixed_margin,
-                    },
-                    {
                         {
                             {
-                                id = "status_role",
-                                valign = "center",
-                                align = "center",
+                                id = "title_text_role",
                                 widget = wibox.widget.textbox,
                             },
-                            direction = direction_index[shared.vars.bar_position] == "horizontal" and "north" or "west",
-                            widget = wibox.container.rotate
+                            [left_index[shared.vars.bar_position]] = beautiful.sep_small_size,
+                            [right_index[shared.vars.bar_position]] = beautiful.sep_small_size,
+                            draw_empty = false,
+                            widget = fixed_margin,
                         },
-                        fg_picker = opicker.switch{
-                            {"highlighted", opicker.beautiful{"special_focus"}},
-                            {"minimized", opicker.beautiful{"special_focus"}},
-                            default = opicker.beautiful{"special_normal"},
+                        {
+                            {
+                                {
+                                    id = "status_role",
+                                    valign = "center",
+                                    align = "center",
+                                    widget = wibox.widget.textbox,
+                                },
+                                direction = direction_index[shared.vars.bar_position] == "horizontal" and "north" or "west",
+                                widget = wibox.container.rotate
+                            },
+                            draw_pickers = {
+                                fg = prism.picker.switch{
+                                    {"highlighted", prism.picker.beautiful{"special_focus"}},
+                                    {"minimized", prism.picker.beautiful{"special_focus"}},
+                                    default = prism.picker.beautiful{"special_normal"},
+                                },
+                            },
+                            widget = prism.wrap(wibox.container.background),
                         },
-                        widget = ocontainer,
+                        layout = wibox.layout.align[direction_index[shared.vars.bar_position]],
                     },
-                    layout = wibox.layout.align[direction_index[shared.vars.bar_position]],
+                    direction = direction_index[shared.vars.bar_position] == "horizontal" and "north" or "west",
+                    widget = wibox.container.rotate
                 },
-                direction = direction_index[shared.vars.bar_position] == "horizontal" and "north" or "west",
-                widget = wibox.container.rotate
+                [left_index[shared.vars.bar_position]]  = beautiful.sep_small_size,
+                [right_index[shared.vars.bar_position]] = beautiful.sep_small_size,
+                widget = wibox.container.margin
             },
-            [left_index[shared.vars.bar_position]]  = beautiful.sep_small_size,
-            [right_index[shared.vars.bar_position]] = beautiful.sep_small_size,
-            widget = wibox.container.margin
+            layout = wibox.layout.stack,
         },
-        layout = wibox.layout.stack,
+        draw_pickers = {
+            fg = prism.picker.switch{
+                {"highlighted", prism.picker.beautiful{"fg_focus"}},
+                {"minimized", prism.picker.beautiful{"fg_minimize"}},
+                default = prism.picker.beautiful{"fg_normal"},
+            },
+            prism.picker.list{
+                "bg", prism.picker.switch{
+                    {"highlighted", prism.picker.beautiful{"bg_focus"}},
+                    {"minimized", prism.picker.beautiful{"bg_minimize"}},
+                },
+            },
+        },
+        widget = prism.wrap(wibox.container.background),
     },
-    id     = "my_background_role",
-    fg_picker = opicker.switch{
-        {"highlighted", opicker.beautiful{"fg_focus"}},
-        {"minimized", opicker.beautiful{"fg_minimize"}},
-        default = opicker.beautiful{"fg_normal"},
-    },
-    bg_picker = opicker.switch{
-        {"highlighted", opicker.beautiful{"bg_focus"}},
-        {"minimized", opicker.beautiful{"bg_minimize"}},
-    },
-    widget = ocontainer,
+    id = "base_layer",
+    widget = prism.layer,
     create_callback = tasklist_create_function,
     update_callback = tasklist_update_function,
 }

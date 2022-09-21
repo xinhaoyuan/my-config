@@ -34,10 +34,7 @@ local debug_container = require("debug_container")
 local compactor = require("compactor")
 local tasklist = require("config.tasklist")
 local taglist = require("config.taglist")
-local ocontainer = require("onion.container")
-local opicker = require("onion.picker")
-local otextbox = require("onion.textbox")
-local onionize = require("onion.onionize")
+local prism = require("prism")
 local fts = require("hotpot").focus_timestamp
 local aux = require("aux")
 local icons = require("icons")
@@ -439,8 +436,8 @@ gtimer {
 -- Orgenda
 local orgenda_counter_data = {}
 local orgenda_counter_text_widget = wibox.widget{
-    layout_pickers = {
-        markup = opicker.wrap_raw{
+    pickers = {
+        markup = prism.picker.wrap_raw{
             function (context)
                 local high = orgenda_counter_data.high or 0
                 local mid = orgenda_counter_data.mid or 0
@@ -451,7 +448,7 @@ local orgenda_counter_text_widget = wibox.widget{
                 return high..((#high > 0 and #mid + #low > 0) and "!" or "")..mid..((#mid > 0 and #low > 0) and "/" or "")..low
             end},
     },
-    widget = onionize(wibox.widget.textbox),
+    widget = prism.wrap(wibox.widget.textbox),
 }
 local orgenda_counter_widget_container = wibox.container.background()
 
@@ -477,7 +474,7 @@ orgenda.data:connect_signal(
                 mid = mid,
                 low = low,
             }
-            orgenda_counter_text_widget:emit_signal("onion::widget_changed")
+            orgenda_counter_text_widget:emit_signal("prism::widget_changed")
             orgenda_counter_text_widget:emit_signal("widget::layout_changed")
             orgenda_counter_text_widget:emit_signal("widget::redraw_needed")
         else
@@ -591,15 +588,20 @@ local function setup_screen(scr)
    local left_layout = wibox.layout.fixed[direction_index[shared.vars.bar_position]]()
    local layoutbox = awful.widget.layoutbox{screen = scr}
    masked_imagebox.convert(layoutbox.imagebox)
-   scr.widgets.indicator = wibox.widget {
+   scr.widgets.indicator = wibox.widget{
        {
-           waffle_indicator,
-           layoutbox,
-           widget = fallback,
+           {
+               waffle_indicator,
+               layoutbox,
+               widget = fallback,
+           },
+           pickers = {
+               fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
+               prism.picker.list{"bg", prism.picker.beautiful{"bg_", prism.picker.branch{"highlighted", "focus"}}},
+           },
+           widget = prism.wrap(wibox.container.background),
        },
-       fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-       bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
-       widget = ocontainer,
+       widget = prism.layer,
    }
    scr.widgets.indicator:buttons(
       awful.util.table.join(
@@ -679,8 +681,10 @@ local function setup_screen(scr)
                    align = "center",
                    widget = wibox.widget.textclock,
                },
-               fg_picker = opicker.beautiful{"minor_", opicker.highlighted_switcher},
-               widget = ocontainer,
+               pickers = {
+                   fg = prism.picker.beautiful{"minor_", prism.picker.highlighted_switcher},
+               },
+               widget = prism.wrap(wibox.container.background),
            },
            {
                format = "%H:%M",
@@ -698,8 +702,10 @@ local function setup_screen(scr)
                    format = "%m<b>%d</b>",
                    widget = wibox.widget.textclock,
                },
-               fg_picker = opicker.beautiful{"minor_", opicker.highlighted_switcher},
-               widget = ocontainer,
+               pickers = {
+                   fg = prism.picker.beautiful{"minor_", prism.picker.highlighted_switcher},
+               },
+               widget = prism.wrap(wibox.container.background),
            },
            {
                format = "%H<b>%M</b>",
@@ -763,35 +769,40 @@ local function setup_screen(scr)
    local clock_area = wibox.widget{
        {
            {
-               clock,
-               left = beautiful.sep_small_size,
-               right = beautiful.sep_small_size,
-               widget = fixed_margin,
+               {
+                   clock,
+                   left = beautiful.sep_small_size,
+                   right = beautiful.sep_small_size,
+                   widget = fixed_margin,
+               },
+               {
+                   orgenda_counter_widget_container,
+                   right = beautiful.sep_small_size,
+                   draw_empty = false,
+                   widget = fixed_margin,
+               },
+               {
+                   next_todo_widget_container,
+                   right = beautiful.sep_small_size,
+                   draw_empty = false,
+                   widget = fixed_margin,
+               },
+               {
+                   notix_counter_widget_container,
+                   right = beautiful.sep_small_size,
+                   draw_empty = false,
+                   widget = fixed_margin,
+               },
+               layout = wibox.layout.fixed.horizontal,
            },
-           {
-               orgenda_counter_widget_container,
-               right = beautiful.sep_small_size,
-               draw_empty = false,
-               widget = fixed_margin,
+           draw_pickers = {
+               fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
+               prism.picker.list{"bg", prism.picker.beautiful{"bg_", prism.picker.branch{"highlighted", "focus"}}},
            },
-           {
-               next_todo_widget_container,
-               right = beautiful.sep_small_size,
-               draw_empty = false,
-               widget = fixed_margin,
-           },
-           {
-               notix_counter_widget_container,
-               right = beautiful.sep_small_size,
-               draw_empty = false,
-               widget = fixed_margin,
-           },
-           layout = wibox.layout.fixed.horizontal
+           widget = prism.wrap(wibox.container.background),
        },
-       fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-       bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
        context_transformation = {highlighted = false},
-       widget = ocontainer,
+       widget = prism.layer,
    }
    local clock_area_focused
    function scr.actions.set_clock_area_focus(f)
