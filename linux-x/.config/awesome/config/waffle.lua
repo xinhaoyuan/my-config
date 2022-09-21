@@ -31,7 +31,7 @@ local prompt_caret_textbox = require("prompt_caret_textbox")
 local debug_container = require("debug_container")
 local masked_imagebox = require("masked_imagebox")
 local acolor = require("aux").color
-local mpc_gobject = require("mpc-gobject")
+-- local mpc_gobject = require("mpc-gobject")
 local orgenda = require("orgenda")
 local mycalendar = require("my-calendar")
 local scroller = require("scroller")
@@ -509,208 +509,208 @@ do
    }
 end
 
-local music_widget
-do
-    -- Not used anymore
-    -- local GET_STATUS_CMD = 'mpc current -f "%title% - %artist%" -q'
-    -- local NEXT_CMD = 'mpc next -q'
-    -- local PREV_CMD = 'mpc prev -q'
-    -- local TOGGLE_CMD = 'mpc toggle -q'
+-- local music_widget
+-- do
+--     -- Not used anymore
+--     -- local GET_STATUS_CMD = 'mpc current -f "%title% - %artist%" -q'
+--     -- local NEXT_CMD = 'mpc next -q'
+--     -- local PREV_CMD = 'mpc prev -q'
+--     -- local TOGGLE_CMD = 'mpc toggle -q'
 
-    local mpd_status_widget = wibox.widget {
-        text = "",
-        forced_height = button_height,
-        font = font_normal,
-        -- outline_size = dpi(2),
-        -- widget = outlined_textbox
-        widget = wibox.widget.textbox
-    }
+--     local mpd_status_widget = wibox.widget {
+--         text = "",
+--         forced_height = button_height,
+--         font = font_normal,
+--         -- outline_size = dpi(2),
+--         -- widget = outlined_textbox
+--         widget = wibox.widget.textbox
+--     }
 
-    local mpd_title_widget = wibox.widget {
-        text = "",
-        ellipsize = "end",
-        forced_height = button_height,
-        widget = wibox.widget.textbox
-    }
+--     local mpd_title_widget = wibox.widget {
+--         text = "",
+--         ellipsize = "end",
+--         forced_height = button_height,
+--         widget = wibox.widget.textbox
+--     }
 
-    local mpd_meta_widget = wibox.widget {
-        text = "",
-        ellipsize = "end",
-        font = font_info,
-        forced_height = button_height,
-        widget = wibox.widget.textbox
-    }
+--     local mpd_meta_widget = wibox.widget {
+--         text = "",
+--         ellipsize = "end",
+--         font = font_info,
+--         forced_height = button_height,
+--         widget = wibox.widget.textbox
+--     }
 
-    local mpd_progress_widget = wibox.widget {
-        max_value     = 1,
-        value         = 0,
-        forced_height = dpi(2),
-        background_color = "#00000000",
-        widget        = wibox.widget.progressbar,
-    }
+--     local mpd_progress_widget = wibox.widget {
+--         max_value     = 1,
+--         value         = 0,
+--         forced_height = dpi(2),
+--         background_color = "#00000000",
+--         widget        = wibox.widget.progressbar,
+--     }
 
-    -- local lighter_fg_normal = acolor.from_string(beautiful.fg_normal):blend_with(beautiful.bg_normal, 0.75):to_string()
-    -- local lighter_fg_focus = acolor.from_string(beautiful.fg_focus):blend_with(beautiful.bg_focus, 0.75):to_string()
+--     -- local lighter_fg_normal = acolor.from_string(beautiful.fg_normal):blend_with(beautiful.bg_normal, 0.75):to_string()
+--     -- local lighter_fg_focus = acolor.from_string(beautiful.fg_focus):blend_with(beautiful.bg_focus, 0.75):to_string()
 
-    local mpd_icon_widget =
-        wibox.widget {
-            {
-                image = icons.music,
-                resize = true,
-                forced_width = button_height,
-                forced_height = button_height,
-                widget = masked_imagebox,
-            },
-            fg_picker = opicker.beautiful{
-                "fg_", opicker.highlighted_switcher},
-            widget = ocontainer,
-        }
+--     local mpd_icon_widget =
+--         wibox.widget {
+--             {
+--                 image = icons.music,
+--                 resize = true,
+--                 forced_width = button_height,
+--                 forced_height = button_height,
+--                 widget = masked_imagebox,
+--             },
+--             fg_picker = opicker.beautiful{
+--                 "fg_", opicker.highlighted_switcher},
+--             widget = ocontainer,
+--         }
 
-    mpc_gobject:connect_signal(
-        "update::status",
-        function (_, status)
-            if status.err then
-                -- mpd_status_widget:set_text("✖")
-                -- mpd_title_widget:set_text(tostring(err))
-                -- mpd_meta_widget:set_text("(╯°Д°)╯ ┻━┻")
-                music_widget:set_visible(false)
-                return
-            end
+--     mpc_gobject:connect_signal(
+--         "update::status",
+--         function (_, status)
+--             if status.err then
+--                 -- mpd_status_widget:set_text("✖")
+--                 -- mpd_title_widget:set_text(tostring(err))
+--                 -- mpd_meta_widget:set_text("(╯°Д°)╯ ┻━┻")
+--                 music_widget:set_visible(false)
+--                 return
+--             end
 
-            if status.state == "play" then
-                mpd_status_widget:set_text("▶")
-            elseif status.state == "pause" then
-                mpd_status_widget:set_text("⏸")
-            elseif status.state == "stop" then
-                mpd_status_widget:set_text("⏹")
-            else
-                mpd_status_widget:set_text(status.state)
-            end
+--             if status.state == "play" then
+--                 mpd_status_widget:set_text("▶")
+--             elseif status.state == "pause" then
+--                 mpd_status_widget:set_text("⏸")
+--             elseif status.state == "stop" then
+--                 mpd_status_widget:set_text("⏹")
+--             else
+--                 mpd_status_widget:set_text(status.state)
+--             end
 
-            mpd_progress_widget:set_value(status.progress or 0)
-            music_widget:set_visible(true)
-        end
-    )
+--             mpd_progress_widget:set_value(status.progress or 0)
+--             music_widget:set_visible(true)
+--         end
+--     )
 
-    mpc_gobject:connect_signal(
-        "update::song",
-        function (_, song)
-            mpd_title_widget:set_text(song.title or "")
+--     mpc_gobject:connect_signal(
+--         "update::song",
+--         function (_, song)
+--             mpd_title_widget:set_text(song.title or "")
 
-            local meta = {}
-            if song.artist then
-                meta[#meta + 1] = song.artist
-            end
-            if song.album then
-                meta[#meta + 1] = song.album
-            end
+--             local meta = {}
+--             if song.artist then
+--                 meta[#meta + 1] = song.artist
+--             end
+--             if song.album then
+--                 meta[#meta + 1] = song.album
+--             end
 
-            mpd_meta_widget:set_text(table.concat(meta, " - "))
-        end
-    )
+--             mpd_meta_widget:set_text(table.concat(meta, " - "))
+--         end
+--     )
 
-    music_widget = button {
-        icon_widget = wibox.widget {
-            {
-                mpd_status_widget,
-                widget = wibox.container.place
-            },
-            {
-                mpd_icon_widget,
-                widget = wibox.container.place
-            },
-            layout = wibox.layout.fixed.vertical,
-        },
-        label_widget = wibox.widget {
-            {
-                {
-                    {
-                        {
-                            mpd_title_widget,
-                            speed = 100,
-                            step_function = wibox.container.scroll.step_functions
-                                .waiting_nonlinear_back_and_forth,
-                            layout = wibox.container.scroll.horizontal,
-                        },
-                        widget = wibox.container.place
-                    },
-                    mpd_progress_widget,
-                    {
-                        {
-                            {
-                                mpd_meta_widget,
-                                speed = 100,
-                                step_function = wibox.container.scroll.step_functions
-                                    .waiting_nonlinear_back_and_forth,
-                                layout = wibox.container.scroll.horizontal,
-                            },
-                            widget = wibox.container.place
-                        },
-                        {
-                            text = "_(:3」∠)_",
-                            align = "center",
-                            force_height = button_height - dpi(2),
-                            font = font_info,
-                            widget = wibox.widget.textbox
-                        },
-                        widget = fallback
-                    },
-                    layout = wibox.layout.fixed.vertical,
-                },
-                draw_empty = false,
-                left = button_padding,
-                right = button_padding,
-                widget = fixed_margin,
-            },
-            {
-                text = "Music",
-                align = "center",
-                valign = "center",
-                forced_height = button_height,
-                widget = wibox.widget.textbox,
-            },
-            widget = fallback,
-        },
-        indicator = em("m"),
-        key = {"m", "M"},
-        action = function (alt)
-            waffle:hide()
-            shared.action.music_app()
-        end,
-        buttons = awful.util.table.join(
-            awful.button({ }, 1, function () waffle:hide(); shared.action.music_app() end),
-            awful.button({ }, 3, function () mpc_gobject:toggle_play() end),
-            awful.button({ }, 4, function ()
-                    mpc_gobject:go_next()
-            end),
-            awful.button({ }, 5, function ()
-                    mpc_gobject:go_previous()
-            end)
-        ),
-    }
+--     music_widget = button {
+--         icon_widget = wibox.widget {
+--             {
+--                 mpd_status_widget,
+--                 widget = wibox.container.place
+--             },
+--             {
+--                 mpd_icon_widget,
+--                 widget = wibox.container.place
+--             },
+--             layout = wibox.layout.fixed.vertical,
+--         },
+--         label_widget = wibox.widget {
+--             {
+--                 {
+--                     {
+--                         {
+--                             mpd_title_widget,
+--                             speed = 100,
+--                             step_function = wibox.container.scroll.step_functions
+--                                 .waiting_nonlinear_back_and_forth,
+--                             layout = wibox.container.scroll.horizontal,
+--                         },
+--                         widget = wibox.container.place
+--                     },
+--                     mpd_progress_widget,
+--                     {
+--                         {
+--                             {
+--                                 mpd_meta_widget,
+--                                 speed = 100,
+--                                 step_function = wibox.container.scroll.step_functions
+--                                     .waiting_nonlinear_back_and_forth,
+--                                 layout = wibox.container.scroll.horizontal,
+--                             },
+--                             widget = wibox.container.place
+--                         },
+--                         {
+--                             text = "_(:3」∠)_",
+--                             align = "center",
+--                             force_height = button_height - dpi(2),
+--                             font = font_info,
+--                             widget = wibox.widget.textbox
+--                         },
+--                         widget = fallback
+--                     },
+--                     layout = wibox.layout.fixed.vertical,
+--                 },
+--                 draw_empty = false,
+--                 left = button_padding,
+--                 right = button_padding,
+--                 widget = fixed_margin,
+--             },
+--             {
+--                 text = "Music",
+--                 align = "center",
+--                 valign = "center",
+--                 forced_height = button_height,
+--                 widget = wibox.widget.textbox,
+--             },
+--             widget = fallback,
+--         },
+--         indicator = em("m"),
+--         key = {"m", "M"},
+--         action = function (alt)
+--             waffle:hide()
+--             shared.action.music_app()
+--         end,
+--         buttons = awful.util.table.join(
+--             awful.button({ }, 1, function () waffle:hide(); shared.action.music_app() end),
+--             awful.button({ }, 3, function () mpc_gobject:toggle_play() end),
+--             awful.button({ }, 4, function ()
+--                     mpc_gobject:go_next()
+--             end),
+--             awful.button({ }, 5, function ()
+--                     mpc_gobject:go_previous()
+--             end)
+--         ),
+--     }
 
-    music_widget.keys["Left"] = function (mod, _key, event)
-        if event == "press" then return end
-        for _, m in ipairs(mod) do mod[m] = true end
-        if mod["Shift"] then
-            mpc_gobject:go_previous()
-        end
-    end
-    music_widget.keys["Right"] = function (mod, _key, event)
-        if event == "press" then return end
-        for _, m in ipairs(mod) do mod[m] = true end
-        if mod["Shift"] then
-            mpc_gobject:go_next()
-        end
-    end
-    music_widget.keys["Up"] = function (mod, _key, event)
-        if event == "press" then return end
-        for _, m in ipairs(mod) do mod[m] = true end
-        if mod["Shift"] then
-            mpc_gobject:toggle_play()
-        end
-    end
-end
+--     music_widget.keys["Left"] = function (mod, _key, event)
+--         if event == "press" then return end
+--         for _, m in ipairs(mod) do mod[m] = true end
+--         if mod["Shift"] then
+--             mpc_gobject:go_previous()
+--         end
+--     end
+--     music_widget.keys["Right"] = function (mod, _key, event)
+--         if event == "press" then return end
+--         for _, m in ipairs(mod) do mod[m] = true end
+--         if mod["Shift"] then
+--             mpc_gobject:go_next()
+--         end
+--     end
+--     music_widget.keys["Up"] = function (mod, _key, event)
+--         if event == "press" then return end
+--         for _, m in ipairs(mod) do mod[m] = true end
+--         if mod["Shift"] then
+--             mpc_gobject:toggle_play()
+--         end
+--     end
+-- end
 
 local waffle_root_view
 local waffle_root_source_mode
