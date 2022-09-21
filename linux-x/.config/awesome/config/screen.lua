@@ -448,7 +448,7 @@ local orgenda_counter_text_widget = wibox.widget{
                 return high..((#high > 0 and #mid + #low > 0) and "!" or "")..mid..((#mid > 0 and #low > 0) and "/" or "")..low
             end},
     },
-    widget = prism.wrap(wibox.widget.textbox),
+    widget = prism.widget.textbox,
 }
 local orgenda_counter_widget_container = wibox.container.background()
 
@@ -599,7 +599,7 @@ local function setup_screen(scr)
                fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
                prism.picker.list{"bg", prism.picker.beautiful{"bg_", prism.picker.branch{"highlighted", "focus"}}},
            },
-           widget = prism.wrap(wibox.container.background),
+           widget = prism.container.background,
        },
        widget = prism.layer,
    }
@@ -684,7 +684,7 @@ local function setup_screen(scr)
                pickers = {
                    fg = prism.picker.beautiful{"minor_", prism.picker.highlighted_switcher},
                },
-               widget = prism.wrap(wibox.container.background),
+               widget = prism.container.background,
            },
            {
                format = "%H:%M",
@@ -705,7 +705,7 @@ local function setup_screen(scr)
                pickers = {
                    fg = prism.picker.beautiful{"minor_", prism.picker.highlighted_switcher},
                },
-               widget = prism.wrap(wibox.container.background),
+               widget = prism.container.background,
            },
            {
                format = "%H<b>%M</b>",
@@ -799,7 +799,7 @@ local function setup_screen(scr)
                fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
                prism.picker.list{"bg", prism.picker.beautiful{"bg_", prism.picker.branch{"highlighted", "focus"}}},
            },
-           widget = prism.wrap(wibox.container.background),
+           widget = prism.container.background,
        },
        context_transformation = {highlighted = false},
        widget = prism.layer,

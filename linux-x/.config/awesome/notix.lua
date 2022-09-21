@@ -11,8 +11,7 @@ local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local fixed_margin = require("fixed_margin")
 local masked_imagebox = require("masked_imagebox")
-local ocontainer = require("onion.container")
-local opicker = require("onion.picker")
+local prism = require("prism")
 local fallback = require("fallback")
 local naughty = require("naughty")
 local icons = require("icons")
@@ -33,33 +32,38 @@ local notix_counter_header = wibox.widget.textbox("<span size='large'>Notificati
 local notix_header_bar = wibox.widget{
     {
         {
-            nil,
-            notix_counter_header,
             {
+                nil,
+                notix_counter_header,
                 {
                     {
-                        image = gcolor.recolor_image(icons.remove, beautiful.fg_normal),
-                        widget = masked_imagebox,
+                        {
+                            image = gcolor.recolor_image(icons.remove, beautiful.fg_normal),
+                            widget = masked_imagebox,
+                        },
+                        forced_height = beautiful.icon_size,
+                        forced_width = beautiful.icon_size,
+                        margins = beautiful.sep_small_size / 2,
+                        widget = wibox.container.margin,
                     },
-                    forced_height = beautiful.icon_size,
-                    forced_width = beautiful.icon_size,
-                    margins = beautiful.sep_small_size / 2,
-                    widget = wibox.container.margin,
+                    halign = "right",
+                    widget = wibox.container.place,
                 },
-                halign = "right",
-                widget = wibox.container.place,
+                expand = "outside",
+                layout = wibox.layout.align.horizontal,
             },
-            expand = "outside",
-            layout = wibox.layout.align.horizontal,
+            left = beautiful.sep_small_size,
+            widget = wibox.container.margin,
         },
-        left = beautiful.sep_small_size,
-        widget = wibox.container.margin,
+        draw_pickers = {
+            fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
+            bg = prism.picker.beautiful{"bg_", prism.picker.highlighted_switcher},
+        },
+        widget = prism.container.background,
     },
-    fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-    bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
     context_transformation = {highlighted = false},
     visible = false,
-    widget = ocontainer,
+    widget = prism.layer,
 }
 
 notix_header_bar:connect_signal(
@@ -256,14 +260,19 @@ function config.create_notif_widget(notif)
 
     local ret = wibox.widget{
         {
-            content_widget,
-            action_container,
-            layout = wibox.layout.fixed.vertical,
+            {
+                content_widget,
+                action_container,
+                layout = wibox.layout.fixed.vertical,
+            },
+            draw_pickers = {
+                fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
+                prism.picker.list{"bg", prism.picker.beautiful{"bg_", prism.picker.branch{"highlighted", "focus"}}},
+            },
+            widget = prism.container.background,
         },
-        fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-        bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
         context_transformation = {highlighted = false},
-        widget = ocontainer,
+        widget = prism.layer,
     }
     ret.notif = notif
 
@@ -296,18 +305,23 @@ function config.create_button(name, callback)
     local widget = wibox.widget{
         {
             {
-                text = name,
-                font = beautiful.font_name_normal.." "..tostring(beautiful.font_size_small),
-                align = "center",
-                widget = wibox.widget.textbox,
+                {
+                    text = name,
+                    font = beautiful.font_name_normal.." "..tostring(beautiful.font_size_small),
+                    align = "center",
+                    widget = wibox.widget.textbox,
+                },
+                margins = beautiful.sep_small_size,
+                widget = wibox.container.margin,
             },
-            margins = beautiful.sep_small_size,
-            widget = wibox.container.margin,
+            draw_pickers = {
+                fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
+                prism.picker.list{"bg", prism.picker.beautiful{"bg_", prism.picker.branch{"highlighted", "focus"}}},
+            },
+            widget = prism.container.background,
         },
-        fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-        bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
         context_transformation = {highlighted = nil},
-        widget = ocontainer,
+        widget = prism.layer,
     }
     widget:connect_signal(
         "mouse::enter",

@@ -38,8 +38,7 @@ local scroller = require("scroller")
 local notix = require("notix")
 local fts = require("hotpot").focus_timestamp
 local dpi = require("beautiful.xresources").apply_dpi
-local ocontainer = require("onion.container")
-local opicker = require("onion.picker")
+local prism = require("prism")
 local source = require("awemni.source")
 local bento = require("awemni.bento")
 
@@ -122,36 +121,44 @@ local function simple_button(args)
    local ret = wibox.widget{
        {
            {
-               args.widget,
-               buttons = args.buttons,
-               margins = button_padding,
-               widget = wibox.container.margin,
+               {
+                   {
+                       args.widget,
+                       buttons = args.buttons,
+                       margins = button_padding,
+                       widget = wibox.container.margin,
+                   },
+                   width = args.width,
+                   height = args.height,
+                   strategy = "exact",
+                   widget = wibox.container.constraint,
+               },
+               layout_pickers = {
+                   top = prism.picker.branch{"active", dpi(2), 0},
+                   bottom = prism.picker.branch{"active", -dpi(2), 0},
+                   left = prism.picker.branch{"active", dpi(2), 0},
+                   right = prism.picker.branch{"active", -dpi(2), 0},
+               },
+               widget = prism.container.margin,
            },
-           width = args.width,
-           height = args.height,
-           strategy = "exact",
-           widget = wibox.container.constraint,
-       },
-       fg_picker = opicker.beautiful{
-           "fg_", opicker.switch{
-               {"active", "focus"},
-               {"hover", "focus"},
-               default = "normal",
+           draw_pickers = {
+               fg = prism.picker.beautiful{
+                   "fg_", prism.picker.switch{
+                       {"active", "focus"},
+                       {"hover", "focus"},
+                       default = "normal",
+                   },
+               },
+               prism.picker.list{"bg", prism.picker.beautiful{
+                                     "bg_", prism.picker.switch{
+                                         {"active", "focus"},
+                                         {"hover", "focus"},
+                                     },
+                                 }},
            },
+           widget = prism.container.background,
        },
-       bg_picker = opicker.beautiful{
-           "bg_", opicker.switch{
-               {"active", "focus"},
-               {"hover", "focus"},
-           },
-       },
-       margins_picker = opicker.table{
-           top = opicker.branch{"active", dpi(2), 0},
-           bottom = opicker.branch{"active", -dpi(2), 0},
-           left = opicker.branch{"active", dpi(2), 0},
-           right = opicker.branch{"active", -dpi(2), 0},
-       },
-       widget = ocontainer,
+       widget = prism.layer,
    }
 
    local function update_context_transfromation()
@@ -277,8 +284,10 @@ local function button(args)
                 left = args.button_layout and 0 or button_padding,
                 widget = wibox.container.margin,
             },
-            fg_picker = opicker.beautiful{"special_", opicker.highlighted_switcher},
-            widget = ocontainer,
+            draw_pickers = {
+                fg = prism.picker.beautiful{"special_", prism.picker.highlighted_switcher},
+            },
+            widget = prism.container.background,
         },
         layout = args.button_layout or fixed_align.horizontal,
     }
@@ -1251,53 +1260,58 @@ function get_apps_widget_source()
                         {
                             {
                                 {
-                                    image = icon_path,
-                                    forced_width = beautiful.icon_size,
-                                    forced_height = beautiful.icon_size,
-                                    widget = wibox.widget.imagebox,
+                                    {
+                                        image = icon_path,
+                                        forced_width = beautiful.icon_size,
+                                        forced_height = beautiful.icon_size,
+                                        widget = wibox.widget.imagebox,
+                                    },
+                                    right = beautiful.sep_small_size,
+                                    widget = wibox.container.margin,
                                 },
-                                right = beautiful.sep_small_size,
-                                widget = wibox.container.margin,
-                            },
-                            {
                                 {
                                     {
-                                        text = e.display_name,
-                                        widget = wibox.widget.textbox,
-                                    },
-                                    {
-                                        id = "desc",
                                         {
-                                            {
-                                                font = font_info,
-                                                text = e.ai:get_description(),
-                                                widget = wibox.widget.textbox,
-                                            },
-                                            height = 60,
-                                            strategy = "max",
-                                            widget = wibox.container.constraint,
+                                            text = e.display_name,
+                                            widget = wibox.widget.textbox,
                                         },
-                                        top = dpi(2),
-                                        left = dpi(2),
-                                        right = dpi(2),
-                                        draw_empty = false,
-                                        visible = false,
-                                        widget = wibox.container.margin,
+                                        {
+                                            id = "desc",
+                                            {
+                                                {
+                                                    font = font_info,
+                                                    text = e.ai:get_description(),
+                                                    widget = wibox.widget.textbox,
+                                                },
+                                                height = 60,
+                                                strategy = "max",
+                                                widget = wibox.container.constraint,
+                                            },
+                                            top = dpi(2),
+                                            left = dpi(2),
+                                            right = dpi(2),
+                                            draw_empty = false,
+                                            visible = false,
+                                            widget = wibox.container.margin,
+                                        },
+                                        layout = wibox.layout.fixed.vertical,
                                     },
-                                    layout = wibox.layout.fixed.vertical,
+                                    valign = "center",
+                                    halign = "left",
+                                    widget = wibox.container.place,
                                 },
-                                valign = "center",
-                                halign = "left",
-                                widget = wibox.container.place,
+                                layout = fixed_align.horizontal,
                             },
-                            layout = fixed_align.horizontal,
+                            margins = dpi(2),
+                            widget = wibox.container.margin,
                         },
-                        margins = dpi(2),
-                        widget = wibox.container.margin,
+                        draw_pickers = {
+                                fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
+                                prism.picker.list{"bg", prism.picker.beautiful{"bg_", prism.picker.branch{"highlighted", "focus"}}},
+                        },
+                        widget = prism.container.background,
                     },
-                    fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-                    bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
-                    widget = ocontainer,
+                    widget = prism.layer,
                 }
                 function w:execute()
                     cache_execution(e.name, apps_source.input)
@@ -1340,15 +1354,20 @@ function get_audio_sink_switch_source()
                 local w = wibox.widget{
                     {
                         {
-                            text = e.name,
-                            widget = wibox.widget.textbox,
+                            {
+                                text = e.name,
+                                widget = wibox.widget.textbox,
+                            },
+                            margins = dpi(2),
+                            widget = wibox.container.margin,
                         },
-                        margins = dpi(2),
-                        widget = wibox.container.margin,
+                        draw_pickers = {
+                            fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
+                            prism.picker.list{"bg", prism.picker.beautiful{"bg_", prism.picker.branch{"highlighted", "focus"}}},
+                        },
+                        widget = prism.container.background,
                     },
-                    fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-                    bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
-                    widget = ocontainer,
+                    widget = prism.layer,
                 }
                 function w:execute()
                     awful.spawn({"pactl", "set-default-sink", tostring(e.id)}, false)
@@ -1396,15 +1415,20 @@ function get_audio_source_switch_source()
                 local w = wibox.widget{
                     {
                         {
-                            text = e.name,
-                            widget = wibox.widget.textbox,
+                            {
+                                text = e.name,
+                                widget = wibox.widget.textbox,
+                            },
+                            margins = dpi(2),
+                            widget = wibox.container.margin,
                         },
-                        margins = dpi(2),
-                        widget = wibox.container.margin,
+                        draw_pickers = {
+                            fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
+                            prism.picker.list{"bg", prism.picker.beautiful{"bg_", prism.picker.branch{"highlighted", "focus"}}},
+                        },
+                        widget = prism.container.background,
                     },
-                    fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-                    bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
-                    widget = ocontainer,
+                    widget = prism.layer,
                 }
                 function w:execute()
                     awful.spawn({"pactl", "set-default-source", tostring(e.id)}, false)
@@ -1553,35 +1577,40 @@ local function get_screen_layout_source()
                 local w = wibox.widget{
                     {
                         {
-                            e.config and {
-                                forced_width = screen_layout_preview_max_size,
-                                forced_height = math.min(
-                                    screen_layout_preview_max_size,
-                                    math.ceil(e.config.overall_height / e.config.overall_width *
-                                              screen_layout_preview_max_size)),
-                                bgimage = function (context, cr, width, height)
-                                    draw_autorandr_config(e.config, cr, width, height)
-                                end,
-                                widget = wibox.container.background,
-                            },
                             {
-                                {
-                                    text = e.info.name..
-                                        (e.info.detected and " (detected)" or "")..
-                                        (e.info.current and " (current)" or ""),
-                                    widget = wibox.widget.textbox,
+                                e.config and {
+                                    forced_width = screen_layout_preview_max_size,
+                                    forced_height = math.min(
+                                        screen_layout_preview_max_size,
+                                        math.ceil(e.config.overall_height / e.config.overall_width *
+                                                  screen_layout_preview_max_size)),
+                                    bgimage = function (context, cr, width, height)
+                                        draw_autorandr_config(e.config, cr, width, height)
+                                    end,
+                                    widget = wibox.container.background,
                                 },
-                                left = dpi(2),
-                                widget = wibox.container.margin,
+                                {
+                                    {
+                                        text = e.info.name..
+                                            (e.info.detected and " (detected)" or "")..
+                                            (e.info.current and " (current)" or ""),
+                                        widget = wibox.widget.textbox,
+                                    },
+                                    left = dpi(2),
+                                    widget = wibox.container.margin,
+                                },
+                                layout = fixed_align.horizontal,
                             },
-                            layout = fixed_align.horizontal,
+                            margins = dpi(2),
+                            widget = wibox.container.margin,
                         },
-                        margins = dpi(2),
-                        widget = wibox.container.margin,
+                        draw_pickers = {
+                            fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
+                            prism.picker.list{"bg", prism.picker.beautiful{"bg_", prism.picker.branch{"highlighted", "focus"}}},
+                        },
+                        widget = prism.container.background,
                     },
-                    fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-                    bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
-                    widget = ocontainer,
+                    widget = prism.layer,
                 }
                 function w:execute()
                     local cmd
@@ -1714,8 +1743,10 @@ waffle_root_view = bento{
                                                 margins = dpi(2),
                                                 widget = wibox.container.margin,
                                             },
-                                            bg_picker = opicker.concat{opicker.beautiful{"fg_normal"}, "20"},
-                                            widget = ocontainer,
+                                            draw_pickers = {
+                                                bg = prism.picker.concat{prism.picker.beautiful{"fg_normal"}, "20"},
+                                            },
+                                            widget = prism.container.background,
                                         },
                                         layout = fixed_align.horizontal,
                                     },
@@ -1734,8 +1765,10 @@ waffle_root_view = bento{
                             margins = dpi(4),
                             widget = wibox.container.margin,
                         },
-                        fg_picker = opicker.beautiful{"fg_normal"},
-                        widget = ocontainer,
+                        draw_pickers = {
+                            fg = prism.picker.beautiful{"fg_normal"},
+                        },
+                        widget = prism.container.background,
                     },
                     width = dpi(500),
                     height = dpi(400),
@@ -1845,8 +1878,10 @@ local cal_widget = wibox.widget {
             widget.font = font_info
             widget = wibox.widget{
                 widget,
-                fg_picker = opicker.beautiful{"minor_", opicker.highlighted_switcher},
-                widget = ocontainer,
+                draw_pickers = {
+                    fg = prism.picker.beautiful{"minor_", prism.picker.highlighted_switcher},
+                },
+                widget = prism.container.background,
             }
         end
 
@@ -1860,9 +1895,11 @@ local cal_widget = wibox.widget {
             if active_dates[date.year] and active_dates[date.year][date.month] and active_dates[date.year][date.month][date.day] then
                 widget = wibox.widget {
                     widget,
-                    fg_picker = opicker.beautiful{
-                        "special_", opicker.branch{"inverted", "focus", "normal"}},
-                    widget = ocontainer,
+                    draw_pickers = {
+                        fg = prism.picker.beautiful{
+                            "special_", prism.picker.branch{"inverted", "focus", "normal"}},
+                    },
+                    widget = prism.container.background,
                 }
             end
         end
@@ -1873,24 +1910,29 @@ local cal_widget = wibox.widget {
         }
 
         if inverted then
-            return wibox.widget {
+            return wibox.widget{
                 {
-                    widget,
-                    margins = dpi(2),
-                    widget = wibox.container.margin
+                    {
+                        widget,
+                        margins = dpi(2),
+                        widget = wibox.container.margin
+                    },
+                    shape = function (cr, width, height)
+                        if beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width then
+                            beautiful.rect_with_corners(cr, width, height, true, true, true, true,
+                                                        beautiful.xborder_radius - beautiful.xborder_width)
+                        else
+                            beautiful.rect_with_corners(cr, width, height)
+                        end
+                    end,
+                    draw_pickers = {
+                        fg = prism.picker.beautiful{"fg_focus"},
+                        bg = prism.picker.beautiful{"bg_focus"},
+                    },
+                    widget = prism.container.background,
                 },
-                shape = function (cr, width, height)
-                    if beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width then
-                        beautiful.rect_with_corners(cr, width, height, true, true, true, true,
-                                                    beautiful.xborder_radius - beautiful.xborder_width)
-                    else
-                        beautiful.rect_with_corners(cr, width, height)
-                    end
-                end,
-                fg_picker = opicker.beautiful{"fg_focus"},
-                bg_picker = opicker.beautiful{"bg_focus"},
                 context_transformation = {inverted = true},
-                widget = ocontainer,
+                widget = prism.layer,
             }
         else
             return wibox.widget {
@@ -1952,33 +1994,38 @@ local orgenda_header
 do
     orgenda_header = wibox.widget{
         {
-            nil,
             {
-                markup = "<span size='large'>TODO</span>",
-                widget = wibox.widget.textbox,
-            },
-            {
+                nil,
+                {
+                    markup = "<span size='large'>TODO</span>",
+                    widget = wibox.widget.textbox,
+                },
                 {
                     {
-                        image = icons.refresh,
-                        resize = true,
-                        forced_height = button_height,
-                        forced_width = button_height,
-                        widget = masked_imagebox,
+                        {
+                            image = icons.refresh,
+                            resize = true,
+                            forced_height = button_height,
+                            forced_width = button_height,
+                            widget = masked_imagebox,
+                        },
+                        margins = 0,
+                        widget = wibox.container.margin,
                     },
-                    margins = 0,
-                    widget = wibox.container.margin,
+                    halign = "right",
+                    widget = wibox.container.place,
                 },
-                halign = "right",
-                widget = wibox.container.place,
+                expand = "outside",
+                layout = wibox.layout.align.horizontal,
             },
-            expand = "outside",
-            layout = wibox.layout.align.horizontal,
+            draw_pickers = {
+                fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
+                bg = prism.picker.beautiful{"bg_", prism.picker.highlighted_switcher},
+            },
+           widget = prism.container.background,
         },
-        fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-        bg_picker = opicker.beautiful{"bg_", opicker.highlighted_switcher},
         context_transformation = {highlighted = false},
-        widget = ocontainer,
+        widget = prism.layer,
     }
     orgenda_header:connect_signal(
         "mouse::enter",
@@ -2032,50 +2079,55 @@ local orgenda_items_widget = orgenda.widget{
                 {
                     {
                         {
-                            id = "icon_role",
                             {
-                                forced_width = beautiful.icon_size,
-                                forced_height = beautiful.icon_size,
-                                widget = masked_imagebox,
+                                id = "icon_role",
+                                {
+                                    forced_width = beautiful.icon_size,
+                                    forced_height = beautiful.icon_size,
+                                    widget = masked_imagebox,
+                                },
+                                widget = prism.container.background,
                             },
-                            widget = ocontainer,
+                            valign = "top",
+                            widget = wibox.container.place
                         },
-                        valign = "top",
-                        widget = wibox.container.place
+                        right = beautiful.sep_small_size,
+                        widget = wibox.container.margin,
                     },
-                    right = beautiful.sep_small_size,
-                    widget = wibox.container.margin,
-                },
-                {
                     {
                         {
-                            id = "timestamp_role",
-                            widget = wibox.widget.textbox
-                        },
-                        {
                             {
-                                id = "text_role",
-                                ellipsize = "none",
-                                align = "left",
-                                valign = "center",
-                                wrap = "word_char",
+                                id = "timestamp_role",
                                 widget = wibox.widget.textbox
                             },
-                            fill_horizontal = true,
-                            content_fill_horizontal = true,
-                            widget = wibox.container.place,
+                            {
+                                {
+                                    id = "text_role",
+                                    ellipsize = "none",
+                                    align = "left",
+                                    valign = "center",
+                                    wrap = "word_char",
+                                    widget = wibox.widget.textbox
+                                },
+                                fill_horizontal = true,
+                                content_fill_horizontal = true,
+                                widget = wibox.container.place,
+                            },
+                            layout = wibox.layout.fixed.vertical
                         },
-                        layout = wibox.layout.fixed.vertical
+                        valign = "center",
+                        widget = wibox.container.place,
                     },
-                    valign = "center",
-                    widget = wibox.container.place,
+                    layout = wibox.layout.fixed.horizontal
                 },
-                layout = wibox.layout.fixed.horizontal
+                draw_pickers = {
+                    fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
+                    prism.picker.list{"bg", prism.picker.beautiful{"bg_", prism.picker.branch{"highlighted", "focus"}}},
+                },
+                widget = prism.container.background,
             },
-            fg_picker = opicker.beautiful{"fg_", opicker.highlighted_switcher},
-            bg_picker = opicker.beautiful{"bg_", opicker.branch{"highlighted", "focus"}},
             context_transformation = {highlighted = false},
-            widget = ocontainer,
+            widget = prism.layer,
         }
         function widget:set_focused(f)
             self._private.focused = f
@@ -2100,10 +2152,12 @@ local orgenda_items_widget = orgenda.widget{
     end,
     update_item_widget_cb = function (widget, item)
         widget:get_children_by_id("icon_role")[1].widget.image = orgenda_get_icon(item)
-        widget:get_children_by_id("icon_role")[1].fg_picker = opicker.wrap{
-            organda_color_func,
-            item.priority,
-            item.done,
+        widget:get_children_by_id("icon_role")[1].draw_pickers = {
+            fg = prism.picker.wrap{
+                organda_color_func,
+                item.priority,
+                item.done,
+            },
         }
         widget:get_children_by_id("text_role")[1].markup = item.decorated_text
         widget.item = item
@@ -2289,8 +2343,10 @@ waffle_calendar_view = bento{
                                             margins = dpi(2),
                                             widget = wibox.container.margin,
                                         },
-                                        bg_picker = opicker.concat{opicker.beautiful{"fg_normal"}, "20"},
-                                        widget = ocontainer,
+                                        draw_pickers = {
+                                            bg = prism.picker.concat{prism.picker.beautiful{"fg_normal"}, "20"},
+                                        },
+                                        widget = prism.container.background,
                                     },
                                     bottom = dpi(4),
                                     draw_empty = false,
@@ -2578,8 +2634,10 @@ local waffle_client_pid_button = button{
                 outline_size = dpi(2),
                 widget = outlined_textbox
             },
-            fg_picker = opicker.beautiful{"special_", opicker.highlighted_switcher},
-            widget = ocontainer,
+            draw_pickers = {
+                fg = prism.picker.beautiful{"special_", prism.picker.highlighted_switcher},
+            },
+            widget = prism.container.background,
         },
         layout = fixed_align.vertical
     },
