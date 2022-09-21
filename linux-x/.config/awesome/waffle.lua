@@ -247,6 +247,12 @@ function waffle:show(view, args)
         self:hide()
     end
 
+    if (self.wibox_ == nil or self.autohide_) and not args.autohide then
+        self.focused_client = capi.client.focus
+        af.manage_focus(screen)
+        capi.client.focus = nil
+    end
+
     if mode == "set" then
         if self.autohide_timer_ == nil then
             local this = self
@@ -280,11 +286,6 @@ function waffle:show(view, args)
     end
 
     if self.wibox_ == nil then
-        self.focused_client = capi.client.focus
-        if not self.autohide_ then
-            af.manage_focus(screen)
-            capi.client.focus = nil
-        end
         self.wibox_ = self:get_waffle_wibox(screen)
     end
     self.wibox_.widget = self.widget_container
