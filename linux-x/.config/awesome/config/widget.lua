@@ -752,6 +752,20 @@ do
                        return true
                    end,
                    "sb_h_double_arrow")
+           elseif b == 4 then
+               awful.spawn.easy_async_with_shell(
+                   INC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
+                   function (stdout, stderr, exitreason, exitcode)
+                       update_graphic(stdout, stderr, exitreason, exitcode)
+                   end
+               )
+           elseif b == 5 then
+               awful.spawn.easy_async_with_shell(
+                   DEC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
+                   function (stdout, stderr, exitreason, exitcode)
+                       update_graphic(stdout, stderr, exitreason, exitcode)
+                   end
+               )
            end
        end)
    function audio_sink_widget:execute(alt)
@@ -920,6 +934,20 @@ do
                        return true
                    end,
                    "sb_h_double_arrow")
+           elseif b == 4 then
+               awful.spawn.easy_async_with_shell(
+                   INC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
+                   function (stdout, stderr, exitreason, exitcode)
+                       update_graphic(stdout, stderr, exitreason, exitcode)
+                   end
+               )
+           elseif b == 5 then
+               awful.spawn.easy_async_with_shell(
+                   DEC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
+                   function (stdout, stderr, exitreason, exitcode)
+                       update_graphic(stdout, stderr, exitreason, exitcode)
+                   end
+               )
            end
        end)
    function audio_source_widget:execute(alt)
