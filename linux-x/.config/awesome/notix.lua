@@ -228,13 +228,14 @@ function config.create_notif_widget(notif)
         },
         layout = wibox.layout.fixed.horizontal,
     }
+
+    local ret
     content_widget:connect_signal(
         "button::release",
         function (_, _x, _y, button)
-            -- if button == 1 then
-            --     remove_notification(notif, 2)
-            -- else
-            if button == 2 then
+            if button == 1 and ret._focused then
+                remove_notification(notif, 2)
+            elseif button == 2 then
                 remove_notification(notif, 1)
             elseif button == 3 then
                 if config.org_file_for_pin then
@@ -258,7 +259,7 @@ function config.create_notif_widget(notif)
         end
     )
 
-    local ret = wibox.widget{
+    ret = wibox.widget{
         {
             {
                 content_widget,
@@ -276,12 +277,12 @@ function config.create_notif_widget(notif)
     }
     ret.notif = notif
 
-    function ret:execute()
-        remove_notification(notif, 2)
-    end
-
     function ret:key_handler(mods, key, event)
         if event ~= "press" then return false end
+        if key == "Return" then
+            remove_notification(notif, 2)
+            return true
+        end
         local c = tonumber(key)
         if c == nil then return false end
         if notif.actions[c] then
@@ -295,6 +296,8 @@ function config.create_notif_widget(notif)
     end
 
     function ret:set_focused(f)
+        -- !!! Avoid immediate activation in the mouse handler above.
+        gtimer.delayed_call(function () ret._focused = f end)
         ret.context_transformation = {highlighted = f}
     end
 
@@ -336,9 +339,9 @@ function config.create_button(name, callback)
         end
     )
     widget:connect_signal(
-        "button::release",
-        callback
-    )
+        "button::release", function (_w, _x, _y, b)
+            if b == 1 then callback() end
+        end)
     return widget
 end
 

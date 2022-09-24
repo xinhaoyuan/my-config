@@ -126,10 +126,7 @@ function bento.new(args)
             end
         end
         if event == "press" then
-            if key == "Return" then
-                bento_lister:execute()
-                return true
-            elseif key == "Escape" then
+            if key == "Escape" then
                 prompt(mods, key, event)
                 return true
             elseif key == "Up" then
@@ -148,7 +145,13 @@ function bento.new(args)
         end
         local f = bento_lister.focus and list_layout.children[bento_lister.focus]
         f = f and f.child
-        if f and f.visible and f.key_handler then return f:key_handler(mods, key, event) end
+        if f and f.visible and f.key_handler and f:key_handler(mods, key, event) then
+            return true
+        end
+        if key == "Return" then
+            if event == "press" then bento_lister:execute() end
+            return true
+        end
         prompt(mods, key, event)
         return true
     end
