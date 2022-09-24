@@ -24,7 +24,26 @@ local icons = require("icons")
 local cairo = lgi.cairo
 local decorator = require("decorator")
 
-local xrdb = {}
+local xrdb = {
+    background = "#e0e0e0",
+    foreground = "#3b3a47",
+    color0 = "#262626",
+    color1 = "#981910",
+    color2 = "#598540",
+    color3 = "#d29910",
+    color4 = "#107e9b",
+    color5 = "#f767ca",
+    color6 = "#4fa691",
+    color7 = "#c0c0c0",
+    color8 = "#404040",
+    color9 = "#c62115",
+    color10 = "#70a751",
+    color11 = "#efb426",
+    color12 = "#15a3c9",
+    color13 = "#fa97db",
+    color14 = "#6ebaa8",
+    color15 = "#f0f0f0",
+}
 do
     xrdb_filter = {
         foreground = true,
