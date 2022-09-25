@@ -12,8 +12,8 @@ function install_dep {
     local NAME=$1; shift
     local DEPS=$(join_by , "$@")
     [ -z "$TEMP_DIR" ] && TEMP_DIR=/tmp/dep-workspace-$$
-    mkdir -p $TEMP_DIR
-    mkdir -p $TEMP_DIR/$NAME/DEBIAN
+    mkdir -m 0755 -p $TEMP_DIR
+    mkdir -m 0755 -p $TEMP_DIR/$NAME/DEBIAN
     cat >$TEMP_DIR/$NAME/DEBIAN/control <<EOF
 Package: $NAME
 Maintainer: Xinhao Yuan

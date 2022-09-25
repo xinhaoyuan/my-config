@@ -38,6 +38,7 @@ DEP_ARRAY=(
     qt5-style-plugins
     x11-utils
     xclip
+    brightnessctl
     # awesome needs these
     librsvg2-dev
     fswatch
