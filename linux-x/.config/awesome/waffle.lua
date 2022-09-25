@@ -331,8 +331,15 @@ function waffle:show(view, args)
                 if self.view_.key_handler and self.view_:key_handler(mod, key, event) then
                     -- pass
                 elseif key == "Escape" then
-                    if event == "release" then
+                    if event == "press" then
                         self:hide()
+                        local tmp_grabber
+                        tmp_grabber = awful.keygrabber.run(
+                            function (mod, key, event)
+                                if key == "Escape" and event == "release" then
+                                    awful.keygrabber.stop(tmp_grabber)
+                                end
+                            end)
                     end
                 elseif key == "BackSpace" then
                     if event == "press" then
