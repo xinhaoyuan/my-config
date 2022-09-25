@@ -12,8 +12,6 @@ end
 function recolor:after_draw_children(context, cr, width, height)
     if self._private.strength <= 0 then return end
     local pattern = cr:pop_group()
-    cr:restore()
-    cr:save()
     cr:push_group()
     cr:save()
     cr:set_source(pattern)
