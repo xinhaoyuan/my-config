@@ -1,6 +1,7 @@
 .PHONY: prepare install uninstall cron sync
 
 prepare:
+	git submodule update --init --recursive
 	./install.sh prepare
 
 install: prepare
