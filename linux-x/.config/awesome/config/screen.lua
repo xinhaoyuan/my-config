@@ -153,23 +153,24 @@ if yggdrasil then
 end
 
 local alayout = require("awful.layout")
-alayout.layouts = {
-   machi.default_layout,
-   yggdrasil and yggdrasil.create_root{},
-   alayout.suit.tile,
-   alayout.suit.tile.left,
-   alayout.suit.tile.bottom,
-   alayout.suit.tile.top,
-   alayout.suit.fair,
-   alayout.suit.fair.horizontal,
-   alayout.suit.spiral,
-   alayout.suit.spiral.dwindle,
-   alayout.suit.magnifier,
-   alayout.suit.corner.nw,
-   alayout.suit.corner.ne,
-   alayout.suit.corner.sw,
-   alayout.suit.corner.se,
+local layouts = {
+    machi.default_layout,
+    alayout.suit.tile,
+    alayout.suit.tile.left,
+    alayout.suit.tile.bottom,
+    alayout.suit.tile.top,
+    alayout.suit.fair,
+    alayout.suit.fair.horizontal,
+    alayout.suit.spiral,
+    alayout.suit.spiral.dwindle,
+    alayout.suit.magnifier,
+    alayout.suit.corner.nw,
+    alayout.suit.corner.ne,
+    alayout.suit.corner.sw,
+    alayout.suit.corner.se,
 }
+if yggdrasil then table.insert(layouts, 1, yggdrasil.create_root{}) end
+alayout.layouts = layouts
 
 -- Define the tag list upfront for keybindings
 
@@ -1094,7 +1095,7 @@ local global_keys = {
                  end
 
                  local layout = c.screen.selected_tag.layout
-                 if layout.signature == yggdrasil.signature then
+                 if yggdrasil and layout.signature == yggdrasil.signature then
                      yggdrasil.unsplit{client = c}
                  end
              end),
@@ -1108,7 +1109,7 @@ local global_keys = {
                  local layout = c.screen.selected_tag.layout
                  if layout.machi_set_cmd ~= nil then
                      shared.client.start_switcher(nil, false)
-                 elseif layout.signature == yggdrasil.signature then
+                 elseif yggdrasil and layout.signature == yggdrasil.signature then
                      yggdrasil.split{client = c}
                  end
              end),
@@ -1123,7 +1124,7 @@ local global_keys = {
                  local layout = c.screen.selected_tag.layout
                  if layout.machi_set_cmd ~= nil then
                      shared.client.start_switcher(c, true)
-                 elseif layout.signature == yggdrasil.signature then
+                 elseif yggdrasil and layout.signature == yggdrasil.signature then
                      yggdrasil.set_inner_layout{client = c}
                  end
              end),
