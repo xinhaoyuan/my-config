@@ -10,6 +10,7 @@ local wibox = require("wibox")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 local fixed_margin = require("fixed_margin")
+local fixed_align = require("fixed_align")
 local masked_imagebox = require("masked_imagebox")
 local prism = require("prism")
 local fallback = require("fallback")
@@ -50,7 +51,7 @@ local notix_header_bar = wibox.widget{
                     widget = wibox.container.place,
                 },
                 expand = "outside",
-                layout = wibox.layout.align.horizontal,
+                layout = fixed_align.horizontal,
             },
             left = beautiful.sep_small_size,
             widget = wibox.container.margin,
