@@ -169,7 +169,7 @@ local layouts = {
     alayout.suit.corner.sw,
     alayout.suit.corner.se,
 }
-if yggdrasil then table.insert(layouts, 1, yggdrasil.create_root{}) end
+if yggdrasil then table.insert(layouts, 2, yggdrasil.create_root{}) end
 alayout.layouts = layouts
 
 -- Define the tag list upfront for keybindings
