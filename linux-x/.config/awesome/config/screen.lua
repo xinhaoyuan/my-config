@@ -458,7 +458,6 @@ orgenda.data:connect_signal(
     function (_, path, items)
         update_next_todo()
         if #orgenda.data.items > 0 then
-            orgenda_counter_widget_container.visible = true
             local high = 0
             local mid = 0
             local low = 0
@@ -478,6 +477,7 @@ orgenda.data:connect_signal(
             orgenda_counter_text_widget:emit_signal("prism::widget_changed")
             orgenda_counter_text_widget:emit_signal("widget::layout_changed")
             orgenda_counter_text_widget:emit_signal("widget::redraw_needed")
+            orgenda_counter_widget_container.visible = high + mid + low > 0
         else
             orgenda_counter_widget_container.visible = false
         end
