@@ -6,3 +6,4 @@ RUN pip3 install fontbakery fontmake fonttools font-v fs ufodiff ufolint
 RUN go install github.com/chrissimpkins/ink@latest && cp $HOME/go/bin/ink /usr/bin/ink
 RUN go install github.com/source-foundry/uni@latest && cp $HOME/go/bin/uni /usr/bin/uni
 COPY scripts /scripts
+RUN /scripts/build-iosevka-deps.sh
