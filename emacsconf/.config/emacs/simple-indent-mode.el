@@ -21,12 +21,15 @@
 
 (defun si-indent-line (levels)
   "Indent the current line by levels."
-  (cond
-   ((>= levels 0)
-    (indent-line-to (* (+ (/ (current-indentation) si-indent-size) levels) si-indent-size)))
-   (t
-    (indent-line-to (* (+ (/ (+ (current-indentation) si-indent-size -1) si-indent-size) levels) si-indent-size)))
-   ))
+  (let* ((old (current-indentation))
+         (new (cond
+               ((>= levels 0) (* (+ (/ old si-indent-size) levels) si-indent-size))
+               (t (* (max 0 (+ (/ (+ old si-indent-size -1) si-indent-size) levels)) si-indent-size))))
+         (col (current-column))
+         (new-col (+ col (- new old))))
+    (indent-line-to new)
+    (move-to-column (max new-col new))
+    ))
 
 (defun si-indent-region (start end levels)
   "Indent the region of lines of [start, end] by levels."
@@ -39,11 +42,7 @@
       (goto-char end) (forward-line 0) (setq end (point))
       (while loop-flag
         (if (< end (line-end-position))
-            (let* ((new-indentation (+ (current-indentation) delta)))
-              (if (<= 0 new-indentation)
-                  (indent-line-to new-indentation)
-                (indent-line-to 0))
-              ))
+            (indent-line-to (max 0 (+ (current-indentation) delta))))
         (forward-line -1)
         (if (or (>= (point) end) (>= start end)) (setq loop-flag nil))
         (setq end (point))
@@ -73,16 +72,16 @@
           (old (current-indentation))
           (col (current-column)))
       (cond
-       ((and (not (eq old col)) (not (eq levels 0)))
-        (back-to-indentation)
-        (setq this-command nil))
        ((and (> levels 0) (>= old new))
         (si-indent-line levels))
        ((and (< levels 0) (<= old new))
         (si-indent-line levels))
        (t
-        (indent-line-to new))
-       ))
+        (indent-line-to new)
+        (move-to-column (max new (+ col (- new old))))
+        )
+       )
+      )
     )
   )
 
