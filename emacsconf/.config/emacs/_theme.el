@@ -123,7 +123,11 @@
                                  ;; http://permalink.gmane.org/gmane.emacs.devel/119627
                                  (when recompute-faces
                                    (tty-set-up-initial-frame-faces)))))))
-                     (xterm--query "\e]11;?\e\\" '(("\e]11;" .  my-xterm--report-background-handler)))
+                     ;; I've been seeing "Quit" occuring when the response from terminal
+                     ;; does not end with ST ("\e\\").
+                     (with-local-quit
+                       (let ((inhibit-quit t))
+                         (xterm--query "\e]11;?\e\\" '(("\e]11;" .  my-xterm--report-background-handler)))))
 	             ))))
 	     )
 	 )))
