@@ -105,4 +105,7 @@
   :keymap si-mode-map
   )
 
+(defun si-electric-indent-function (_char) (if simple-indent-mode 'no-indent nil))
+(add-hook 'electric-indent-functions #'si-electric-indent-function)
+
 (provide 'simple-indent-mode)
