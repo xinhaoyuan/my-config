@@ -86,8 +86,10 @@ end
 
 local mouse_resize_back_to_tasklist
 local function move_mouse_back_to_tasklist_if_needed(c)
+    if not c.valid then return end
     if not mouse_resize_back_to_tasklist then return end
     mouse_resize_back_to_tasklist = nil
+    c:emit_signal("request::activate", "mouse.move", {raise=true})
     mouse.coords({ x = c.tasklist_x, y = c.tasklist_y })
 end
 awful.mouse.resize.add_leave_callback(move_mouse_back_to_tasklist_if_needed, "mouse.move")
