@@ -1734,6 +1734,7 @@ waffle_root_view = bento{
                                                     {
                                                         id = "input_widget",
                                                         align = "center",
+                                                        ellipsize = "none",
                                                         widget = prompt_caret_textbox,
                                                     },
                                                     fill_horizontal = true,
@@ -2338,6 +2339,7 @@ waffle_calendar_view = bento{
                                             {
                                                 id = "input_widget",
                                                 align = "center",
+                                                ellipsize = "none",
                                                 widget = prompt_caret_textbox,
                                             },
                                             margins = dpi(2),
