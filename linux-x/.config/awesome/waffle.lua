@@ -178,13 +178,6 @@ function waffle:set_view(view, is_new_view)
 end
 
 function waffle:clear_stack()
-    if self.stack_ then
-        for _, v in ipairs(self.stack_) do
-            if v.on_close then
-                v:on_close()
-            end
-        end
-    end
     self.stack_ = nil
 end
 
