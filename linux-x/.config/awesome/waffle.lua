@@ -222,6 +222,12 @@ capi.screen.connect_signal(
     function (s)
         local screen_wibox = waffle.screen_wibox_[s]
         if screen_wibox ~= nil then
+            -- I think a mouse leave would emit on the wibox, causing
+            -- it to hide, but just in case it didn't...
+            if screen_wibox == waffle.wibox_ then
+                print("Hide waffle due to screen removal.")
+                waffle:hide()
+            end
             print("Screen "..tostring(s).." is removed. Removing its waffle wibox.")
             screen_wibox.visible = false
             waffle.screen_wibox_[s] = nil
