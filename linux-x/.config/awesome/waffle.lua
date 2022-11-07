@@ -220,6 +220,10 @@ end
 capi.screen.connect_signal(
     "removed",
     function (s)
+        if s == nil then
+            print("!!! screen::removed with nil screen:", debug.traceback())
+            return
+        end
         local screen_wibox = waffle.screen_wibox_[s]
         if screen_wibox ~= nil then
             -- I think a mouse leave would emit on the wibox, causing

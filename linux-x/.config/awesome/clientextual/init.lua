@@ -326,6 +326,7 @@ capi.client.connect_signal(
 local screen_last_refreshed_data = setmetatable({}, {__mode = "k"})
 local screen_refresh_scheduled = setmetatable({}, {__mode = "k"})
 local function screen_refresh(s)
+    if not s.valid then return end
     screen_refresh_scheduled[s] = nil
     during_screen_refresh = true
     local tag = s.selected_tag
@@ -346,13 +347,15 @@ end
 local function is_virtual(tag) return tag.screen == nil end
 
 local function maybe_call_screen_refresh(tag)
+    if not tag.valid then return end
     if is_virtual(tag) then return end
     local data = get_data(tag.layout, tag)
     if data == nil then return end
     if data == screen_last_refreshed_data[tag.screen] then return end
-    if screen_refresh_scheduled[tag.screen] then return end
-    screen_refresh_scheduled[tag.screen] = true
-    gtimer.delayed_call(function () screen_refresh(tag.screen) end)
+    local s = tag.screen
+    if screen_refresh_scheduled[s] then return end
+    screen_refresh_scheduled[s] = true
+    gtimer.delayed_call(function () screen_refresh(s) end)
 end
 capi.tag.connect_signal("property::selected", maybe_call_screen_refresh)
 capi.tag.connect_signal("property::layout", maybe_call_screen_refresh)
