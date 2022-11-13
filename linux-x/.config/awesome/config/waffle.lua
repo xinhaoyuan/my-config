@@ -747,31 +747,35 @@ orgenda.data:connect_signal(
     end
 )
 
+local function get_avatar()
+    local user_avatar_path = os.getenv("HOME").."/Pictures/avatar.svg"
+    if gfs.file_readable(user_avatar_path) then
+        return {
+            {
+                image = user_avatar_path,
+                widget = masked_imagebox,
+            },
+            height = button_height * 2,
+            widget = wibox.container.constraint,
+        }
+    end
+    return {
+        {
+            image = icons.calendar_todo,
+            widget = masked_imagebox,
+        },
+        height = button_height,
+        widget = wibox.container.constraint,
+    }
+end
+
 local waffle_dashboard_header_widget = decorate_panel{
     widget = {
         button{
             label_widget = wibox.widget{
                 {
                     {
-                        {
-                            {
-                                {
-                                    image = os.getenv("HOME").."/Pictures/avatar.svg",
-                                    widget = masked_imagebox,
-                                },
-                                height = button_height * 2,
-                                widget = wibox.container.constraint,
-                            },
-                            {
-                                {
-                                    image = icons.calendar_todo,
-                                    widget = masked_imagebox,
-                                },
-                                height = button_height,
-                                widget = wibox.container.constraint,
-                            },
-                            widget = fallback,
-                        },
+                        get_avatar(),
                         right = beautiful.sep_small_size,
                         widget = wibox.container.margin,
                     },

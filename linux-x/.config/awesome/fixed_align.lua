@@ -45,7 +45,9 @@ function align:layout(context, width, height)
     --  if it is, we prioritize the first widget by not doing this block also,
     --  if the second widget doesn't exist, we will prioritise the first one
     --  instead
-    if self._private.expand ~= "inside" and self._private.second then
+    if self._private.expand ~= "inside"
+        and self._private.expand ~= "outside_with_minimum"
+        and self._private.second then
         local w, h = base.fit_widget(self, context, self._private.second, width, height)
         size_second = is_dir_y and h or w
         size_remains = math.max(0, size_remains - size_second)
@@ -72,7 +74,18 @@ function align:layout(context, width, height)
             size_first = size_first - math.floor((size_first + size_third - size) / 2)
             size_third = size - size_first
         end
-        size_remains = size - size_first - size_second - size_third
+        size_remains = size - size_first - size_third
+        if self._private.second then
+            local w, h
+            if is_dir_y then
+                w, h = base.fit_widget(self, context, self._private.second, width, size_remains)
+                size_second = h
+            else
+                w, h = base.fit_widget(self, context, self._private.second, size_remains, height)
+                size_second = w
+            end
+            size_remains = math.max(0, size_remains - size_second)
+        end
         if size_remains < 0 then
             size_second = size_second + size_remains
         else

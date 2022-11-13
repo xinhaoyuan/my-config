@@ -179,12 +179,12 @@ local root_buttons = awful.util.table.join(
 )
 awful.mouse.append_global_mousebinding(root_buttons)
 
-local fortune_widget = wibox.widget {
+local fortune_widget = wibox.widget{
     {
         {
             {
                 id = "contents",
-                widget = wibox.widget.textbox
+                widget = wibox.widget.textbox,
             },
             widget = compactor,
         },
@@ -878,7 +878,7 @@ local function setup_screen(scr)
                    [direction_index[shared.vars.bar_position] == "horizontal" and "left" or "top"] = beautiful.sep_median_size,
                    widget = wibox.container.margin,
                },
-               layout = wibox.layout.align[direction_index[shared.vars.bar_position]],
+               layout = fixed_align[direction_index[shared.vars.bar_position]],
            },
            top = true
        }

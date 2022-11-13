@@ -11,14 +11,14 @@ local capi = {
 local safe_require_warned = {}
 function safe_require(m)
     assert(type(m) == "string")
-    local ok, mod = pcall(require, m)
+    local ok, mod_or_err = pcall(require, m)
     if not ok and not safe_require_warned[m] then
         safe_require_warned[m] = true
         print(string.format("Cannot load module %s, returning nil.", m))
-        print(mod)
-        mod = nil
+        -- print(mod_or_err)
+        mod_or_err = nil
     end
-    return mod
+    return mod_or_err
 end
 
 capi.client.connect_signal(
