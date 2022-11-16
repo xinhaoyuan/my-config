@@ -39,6 +39,7 @@ DEP_ARRAY=(
     x11-utils
     xclip
     brightnessctl
+    playerctl
     # awesome needs these
     librsvg2-dev
     fswatch
