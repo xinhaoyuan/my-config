@@ -34,12 +34,12 @@ do
         term_cmd = {term_prog}
     end
 
-    browser_cmd = {"x-www-browser"}
-    -- browser_cmd = {"firefox-esr"}
+    browser_cmd = "x-www-browser"
+    -- browser_cmd = "firefox-esr"
     -- if os.execute("command -v luakit") then
-    --     browser_cmd = {"luakit"}
+    --     browser_cmd = "luakit"
     -- else
-    --     browser_cmd = {"firefox"}
+    --     browser_cmd = "firefox"
     -- end
 end
 
@@ -65,7 +65,7 @@ shared.action = {
         shared.action.terminal(real_cmd)
     end,
     web_browser = function (url)
-        local cmd = browser_cmd
+        local cmd = {browser_cmd}
         if url then table.insert(cmd, url) end
         awful.spawn(cmd)
     end,
