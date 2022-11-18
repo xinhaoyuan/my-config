@@ -40,6 +40,7 @@ DEP_ARRAY=(
     xclip
     brightnessctl
     playerctl
+    kdocker
     # awesome needs these
     librsvg2-dev
     fswatch
