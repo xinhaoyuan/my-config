@@ -135,6 +135,8 @@ function module.unmanage_focus(s)
         if managed_counter == 0 then
             gtimer.delayed_call(function () check_focus(nil, s) end)
         end
+    else
+        print("!!! unpared unmanage_focus !!!", debug.traceback())
     end
 end
 
