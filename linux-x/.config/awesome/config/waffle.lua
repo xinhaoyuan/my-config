@@ -2907,7 +2907,6 @@ local client_waffle = view {
     default_key_handler = function (_self, mod, key, event)
         if event ~= "press" then return end
         if key == "Return" then
-            client_waffle_attached = true
             waffle:hide()
             return
         end
