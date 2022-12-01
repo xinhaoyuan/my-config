@@ -41,6 +41,7 @@ DEP_ARRAY=(
     brightnessctl
     playerctl
     kdocker
+    python3-fusepy
     # awesome needs these
     librsvg2-dev
     fswatch

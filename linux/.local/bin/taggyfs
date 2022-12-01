@@ -1,0 +1,213 @@
+#!/usr/bin/env python3
+import argparse
+import glob
+import os
+import re
+import sys
+import errno
+from fusepy import FUSE, FuseOSError, Operations, fuse_get_context
+
+def _path_to_taggy_basename(path : str):
+    return path.replace('_', '__').replace('/', '_s')
+
+
+def _taggy_basename_to_path(basename : str):
+    return '_'.join([p.replace('_s', '/') for p in basename.split('__')])
+
+
+class TaggyFuseOps(Operations):
+
+    def __init__(self, base_path, files):
+        self.base_path = base_path
+        st = os.lstat(base_path)
+        self.preset_attrs = dict((key, getattr(st, key)) for key in ('st_atime', 'st_ctime',
+                     'st_gid', 'st_mode', 'st_mtime', 'st_nlink', 'st_size', 'st_uid'))
+        # Make the internal nodes look cleaner in shell.
+        self.preset_attrs['st_mode'] = self.preset_attrs['st_mode'] ^ (self.preset_attrs['st_mode'] & 0o277)
+        self.files = files
+
+    def _origin_path(self, taggy_path):
+        return os.path.join(self.base_path, _taggy_basename_to_path())
+
+    def access(self, path, mode):
+        basename = os.path.basename(path)
+        if len(basename) <= 1 or basename[0] != '@':
+            return
+        origin_path = os.path.join(
+            self.base_path, _taggy_basename_to_path(basename[1:]))
+        if not os.access(origin_path, mode):
+            raise FuseOSError(errno.EACCES)
+
+    def getattr(self, path, fh=None):
+        basename = os.path.basename(path)
+        if len(basename) <= 1 or basename[0] != '@':
+            return self.preset_attrs
+        origin_path = os.path.join(
+            self.base_path, _taggy_basename_to_path(basename[1:]))
+        st = os.lstat(origin_path)
+        return dict((key, getattr(st, key)) for key in ('st_atime', 'st_ctime',
+                     'st_gid', 'st_mode', 'st_mtime', 'st_nlink', 'st_size', 'st_uid'))
+
+    def readdir(self, path, fh):
+        list_files = os.path.basename(path) == '@'
+        ops = list(filter(None, (os.path.dirname(path) if list_files else path).split('/')))
+        include_tags = set()
+        exclude_tags = set()
+        result = ['.', '..']
+        # TODO Make cancellation/canonicalization symbolic links.
+        for op in ops:
+            if len(op) <= 1:
+                return result
+            tag = op[1:]
+            if op[0] == '+':
+                if tag in exclude_tags:
+                    exclude_tags.remove(tag)
+                else:
+                    include_tags.add(tag)
+            elif op[0] == '-':
+                if tag in include_tags:
+                    include_tags.remove(tag)
+                else:
+                    exclude_tags.add(tag)
+            else:
+                return result
+        total_files = 0
+        tag_file_counter = {}
+        for tag in exclude_tags:
+            tag_file_counter[tag] = 0
+        for path, tags in self.files.items():
+            to_skip = False
+            for include_tag in include_tags:
+                if include_tag not in tags:
+                    to_skip = True
+                    break
+            for exclude_tag in exclude_tags:
+                if exclude_tag in tags:
+                    to_skip = True
+                    break
+            if to_skip:
+                continue
+            if list_files:
+                result.append('@' + _path_to_taggy_basename(path))
+            else:
+                total_files += 1
+                for tag in tags:
+                    tag_file_counter[tag] = tag_file_counter.get(tag, 0) + 1
+        if not list_files:
+            result.append('@')
+            for tag in tag_file_counter:
+                if tag_file_counter[tag] < total_files:
+                    result.append('+' + tag)
+                if tag_file_counter[tag] > 0 and (tag_file_counter[tag] < total_files or tag in include_tags):
+                    result.append('-' + tag)
+        return result
+
+    def readlink(self, path):
+        basename = os.path.basename(path)
+        if len(basename) <= 1 or basename[0] != '@':
+            return
+        origin_path = os.path.join(
+            self.base_path, _taggy_basename_to_path(basename[1:]))
+        pathname = os.readlink(origin_path)
+        if pathname.startswith('/'):
+            # Path name is absolute, sanitize it.
+            return os.path.relpath(pathname, self.base_path)
+        else:
+            return pathname
+
+    def statfs(self, path):
+        stv = os.statvfs(self.base_path)
+        return dict((key, getattr(stv, key)) for key in ('f_bavail', 'f_bfree',
+            'f_blocks', 'f_bsize', 'f_favail', 'f_ffree', 'f_files', 'f_flag',
+            'f_frsize', 'f_namemax'))
+
+    def chmod(self, path, mode):
+        raise FuseOSError(errno.EACCES)
+
+    def chown(self, path, uid, gid):
+        raise FuseOSError(errno.EACCES)
+
+    def utimens(self, path, times=None):
+        return os.utime(self._full_path(path), times)
+
+    def mknod(self, path, mode, dev):
+        raise FuseOSError(errno.EACCES)
+
+    def rmdir(self, path):
+        raise FuseOSError(errno.EACCES)
+
+    def mkdir(self, path, mode):
+        raise FuseOSError(errno.EACCES)
+
+    def unlink(self, path):
+        raise FuseOSError(errno.EACCES)
+
+    def symlink(self, name, target):
+        raise FuseOSError(errno.EACCES)
+
+    def rename(self, old, new):
+        raise FuseOSError(errno.EACCES)
+
+    def link(self, target, name):
+        raise FuseOSError(errno.EACCES)
+
+    def open(self, path, flags):
+        basename = os.path.basename(path)
+        if len(basename) <= 1 or basename[0] != '@':
+            raise FuseOSError(errno.EACCES)
+        origin_path = os.path.join(
+            self.base_path, _taggy_basename_to_path(basename[1:]))
+        return os.open(origin_path, flags)
+
+    def read(self, path, length, offset, fh):
+        os.lseek(fh, offset, os.SEEK_SET)
+        return os.read(fh, length)
+
+    def create(self, path, mode, fi=None):
+        raise FuseOSError(errno.EACCES)
+
+    def write(self, path, buf, offset, fh):
+        raise FuseOSError(errno.EACCES)
+
+    def truncate(self, path, length, fh=None):
+        raise FuseOSError(errno.EACCES)
+
+    def flush(self, path, fh):
+        return os.fsync(fh)
+
+    def release(self, path, fh):
+        return os.close(fh)
+
+    def fsync(self, path, fdatasync, fh):
+        return self.flush(path, fh)
+
+
+parser = argparse.ArgumentParser(
+    prog = 'taggyfs',
+    description = 'Taggy file system.')
+parser.add_argument('-m', dest='mount_point', required=True)
+parser.add_argument('-b', dest='base_path', required=True)
+parser.add_argument('-g', dest='glob', default='**/*')
+parser.add_argument('-f', dest='filter_regex')
+parser.add_argument('-t', dest='tag_delimiter_regex', default='[-/@. 0-9]')
+
+
+def main(args):
+    base_path = os.path.realpath(args.base_path)
+    base_path_prefix = base_path + '/'
+    files = {}
+    filter_regex = None if args.filter_regex is None else re.compile(args.filter_regex)
+    for full_path in glob.iglob(base_path_prefix + args.glob, recursive=True):
+        if os.path.isdir(full_path):
+            continue
+        path = full_path.removeprefix(base_path_prefix)
+        if filter_regex is not None and filter_regex.search(path):
+            continue
+        tags = list(filter(None, re.split(args.tag_delimiter_regex, path)))
+        files[path] = tags
+
+    FUSE(TaggyFuseOps(base_path, files), args.mount_point, nothreads=True, foreground=True)
+
+
+if __name__ == '__main__':
+    main(parser.parse_args())
