@@ -2743,16 +2743,12 @@ local client_waffle = view {
                             key = {"i", "I"},
                             action = function (alt)
                                 local client = shared.waffle_selected_client
-                                if client.valid and not client.minimized then
-                                    client_waffle_attached = false
+                                if client.valid then
+                                    client.minimized = not client.minimized
                                 end
-                                if not alt then
+                                if not alt or not client.valid then
                                     waffle:hide()
                                 end
-                                if not client.valid then
-                                    return
-                                end
-                                client.minimized = not client.minimized
                             end
                     }),
                     {
@@ -2889,7 +2885,9 @@ local client_waffle = view {
             awful.client.focus.history.enable_tracking()
             local c = shared.waffle_selected_client
             client_waffle_attached = false
-            gtimer.delayed_call(function () c:emit_signal("request::activate", "switch", {raise=true}) end)
+            if c and c.valid and c:isvisible() then
+                gtimer.delayed_call(function () c:emit_signal("request::activate", "switch", {raise=true}) end)
+            end
         end
         client_waffle_transient = false
         -- TODO check why I did this.

@@ -1084,7 +1084,7 @@ gtimer {
 local global_keys = {
    awful.key({ "Mod1" }, "Tab",
       function ()
-          yams_switcher.start{}
+          yams_switcher.start{screen = awful.screen.focused()}
    end),
 
    awful.key({ "Mod4" }, ",", function ()
