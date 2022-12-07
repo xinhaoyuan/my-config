@@ -3041,37 +3041,41 @@ update_client_waffle_labels = function ()
         return
     end
 
-    local now_group = (shared.waffle_selected_client and shared.waffle_selected_client.cgroup ~= nil)
+    if shared.waffle_selected_client == nil or not shared.waffle_selected_client.valid then
+        return
+    end
+
+    local now_group = shared.waffle_selected_client.cgroup ~= nil
     if group_cache ~= now_group then
         group_cache = now_group
         group_label:set_markup(now_group and "GROUP" or "group")
     end
 
-    local now_sticky = (shared.waffle_selected_client and shared.waffle_selected_client.sticky)
+    local now_sticky = shared.waffle_selected_client.sticky
     if sticky_cache ~= now_sticky then
         sticky_cache = now_sticky
         sticky_label:set_markup(now_sticky and "STICKY" or "sticky")
     end
 
-    local now_above = (shared.waffle_selected_client and shared.waffle_selected_client.above)
+    local now_above = shared.waffle_selected_client.above
     if above_cache ~= now_above then
         above_cache = now_above
         above_label:set_markup(now_above and "ABOVE" or "above")
     end
 
-    local now_float = (shared.waffle_selected_client and shared.waffle_selected_client.floating)
+    local now_float = shared.waffle_selected_client.floating
     if float_cache ~= now_float then
         float_cache = now_float
         float_label:set_markup(now_float and "FLOAT" or "float")
     end
 
-    local now_max = (shared.waffle_selected_client and shared.waffle_selected_client.maximized)
+    local now_max = shared.waffle_selected_client.maximized
     if max_cache ~= now_max then
         max_cache = now_max
         max_label:set_markup(now_max and "MAX" or "max")
     end
 
-    local now_min = (shared.waffle_selected_client and shared.waffle_selected_client.minimized)
+    local now_min = shared.waffle_selected_client.minimized
     if min_cache ~= now_min then
         min_cache = now_min
         min_label:set_markup(now_min and "MIN" or "min")
