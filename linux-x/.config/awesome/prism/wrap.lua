@@ -10,6 +10,7 @@ local table_cache = pcache.new(
         assert(type(ret) == "table")
         return ret
     end)
+awesome.connect_signal("theme_changed", function () table_cache:clear() end)
 
 local wrap = {}
 

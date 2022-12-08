@@ -67,6 +67,7 @@ layer_cache = pcache.new(
         new_layer.__direct = true
         return layer_cache:get(picker.table(new_layer), context)
     end)
+awesome.connect_signal("theme_changed", function () layer_cache:clear() end)
 
 local layer = {}
 
