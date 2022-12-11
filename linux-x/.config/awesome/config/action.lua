@@ -122,7 +122,6 @@ shared.action = {
     reload_theme = function ()
         if beautiful.theme_path then
             beautiful.init(beautiful.theme_path.."/theme.lua")
-            capi.awesome.emit_signal("theme_changed")
             capi.awesome.emit_signal("wallpaper_changed")
             -- Workaround before making the taglist dynamic.
             for s in screen do
