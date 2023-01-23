@@ -207,7 +207,7 @@ function waffle:get_waffle_wibox(screen)
             opacity = 1,
             ontop = true,
             type = "dock",
-            visible = true,
+            visible = false,
             input_passthrough = true,
         }
 
@@ -309,6 +309,7 @@ function waffle:show(view, args)
     end
 
     if self.wibox_.input_passthrough then
+        self.wibox_.visible = true
         self.wibox_.input_passthrough = false
     end
 
@@ -383,6 +384,7 @@ function waffle:hide()
             af.unmanage_focus(self.wibox_.screen)
         end
         self.wibox_.input_passthrough = true
+        self.wibox_.visible = false
         self.wibox_.widget = nil
         self.wibox_ = nil
     end
