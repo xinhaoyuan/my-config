@@ -194,7 +194,7 @@ local fortune_widget = wibox.widget{
     },
     valign = "center",
     halign = "center",
-    buttons = awful.util.table.join(awful.button({ }, 3, function () capi.awesome.emit_signal("show_main_waffle", {anchor = "mouse"}) end)),
+    buttons = awful.util.table.join(awful.button({ }, 3, nil, function () capi.awesome.emit_signal("show_main_waffle", {anchor = "mouse"}) end)),
     widget = fixed_place
 }
 fortune_widget.watch = require("watchcommand").create({"fortune", "-s"}, 300)
@@ -606,14 +606,14 @@ local function setup_screen(scr)
    }
    scr.widgets.indicator:buttons(
       awful.util.table.join(
-          awful.button({ }, 1, function () capi.awesome.emit_signal("show_main_waffle", {anchor = "mouse"}) end),
-          -- awful.button({ }, 3, function ()
+          awful.button({ }, 1, nil, function () capi.awesome.emit_signal("show_main_waffle", {anchor = "mouse"}) end),
+          -- awful.button({ }, 3, nil, function ()
           --         if capi.client.focus ~= nil then
           --             capi.awesome.emit_signal("show_client_waffle", capi.client.focus, "mouse")
           --         end
           -- end),
-          awful.button({ }, 4, function () awful.layout.inc( 1) end),
-          awful.button({ }, 5, function () awful.layout.inc(-1) end)))
+          awful.button({ }, 4, nil, function () awful.layout.inc( 1) end),
+          awful.button({ }, 5, nil, function () awful.layout.inc(-1) end)))
    scr.widgets.indicator:connect_signal(
        'mouse::enter', function()
            local waffle_scr = waffle:get_screen()
@@ -812,7 +812,7 @@ local function setup_screen(scr)
    end
    clock_area:buttons(
        awful.util.table.join(
-           awful.button({         }, 1, function()
+           awful.button({         }, 1, nil, function()
                             if not clock_area_focused then
                                 gtimer.delayed_call(
                                     function()
@@ -828,7 +828,7 @@ local function setup_screen(scr)
                                 )
                             end
                         end),
-           awful.button({         }, 3, function() notix.remove_unpinned() end)
+           awful.button({         }, 3, nil, function() notix.remove_unpinned() end)
        )
    )
    clock_area:connect_signal(
