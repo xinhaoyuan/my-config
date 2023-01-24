@@ -128,8 +128,17 @@ waffle.widget_container = wibox.widget {
     widget = PlacementLayout,
 }
 waffle.widget_container:connect_signal(
+    "button::press",
+    function (_, _x, _y, button, _mod, _info)
+        if waffle.mouse_buttons_ == nil then
+            waffle.mouse_buttons_ = {}
+        end
+        waffle.mouse_buttons_[button] = true
+    end)
+waffle.widget_container:connect_signal(
     "button::release",
     function (_, x, y, button, _mod, info)
+        if waffle.mouse_buttons_ == nil or not waffle.mouse_buttons_[button] then return end
         local f = info.drawable:find_widgets(x, y)
         if #f == 1 then
             -- Only happens only if clicking the empty area
@@ -394,6 +403,7 @@ function waffle:hide()
     self.autohide_ = false
     self.autohide_locking_callback_ = nil
     self.mouse_entered_ = false
+    self.mouse_buttons_ = nil
     capi.awesome.emit_signal("waffle.hide")
 end
 
