@@ -137,11 +137,13 @@ do
            end
        end
 
-       local markup = "<span font_desc='"..font_info.."'>"..
-           string.format("%3d", math.floor(cpu_overall_usage)).. "%A "..
-           string.format("%3d", math.floor(cpu_max_usage)).."%S "..
-           string.format("%3d", math.floor(cpu_temp)).."℃ "..format_size(cpu_freq_min).."-"..format_size(cpu_freq_max)..
-           "Hz</span>"
+       local markup = string.format(
+           "<span font_desc='%s'>%3d%%A %3d%%S %3d℃ %s-%sHz</span>",
+           font_info,
+           math.floor(cpu_overall_usage), math.floor(cpu_max_usage),
+           math.floor(cpu_temp),
+           format_size(cpu_freq_min),
+           format_size(cpu_freq_max))
        cpu_text_widget:set_markup(markup)
        cpu_graph_widget:add_value(cpu_overall_usage)
    end
