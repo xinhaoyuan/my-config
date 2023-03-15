@@ -138,7 +138,7 @@ do
        end
 
        local markup = string.format(
-           "<span font_desc='%s'>%3d%%A %3d%%S %3d℃ %s-%sHz</span>",
+           "<span font_desc='%s'>%3d%%A%3d%%S%3d℃ %s-%sHz</span>",
            font_info,
            math.floor(cpu_overall_usage), math.floor(cpu_max_usage),
            math.floor(cpu_temp),

@@ -107,8 +107,11 @@ local DATE_FORMAT_LEN=19
 local DATE_HFORMAT="%y-%m-%d %H:%M:%S"
 export LAST_CMD_TS=""
 
-local ML_PROMPT_L1='%{$fg_bold[default]%}↓'
-local ML_PROMPT_L2="›"
+local BLOCK_START_MARK='┌'
+local BLOCK_END_MARK='└'
+
+local ML_PROMPT_L1='%{$fg_bold[default]%}'"${BLOCK_START_MARK}"
+local ML_PROMPT_L2="${BLOCK_END_MARK}"
 
 timestamp_ms() {
     print -nP '%D{%s%3.}'
@@ -135,14 +138,14 @@ preexec_date() {
         local temp="$1$(print -P %c)"
         C=$(( ( ${#temp} + ${DATE_FORMAT_LEN} + 3 ) / $COLUMNS + 1 ))
         print -nP '%{\033[${C}A\033[${C}M%}'
-        print -nP '%{$fg_bold[default]%}↓%{${STYLED_DATE}%'$DATE_FORMAT_LEN'G%} %{$reset_color%}'
+        print -nP '%{$fg_bold[default]%}'"${BLOCK_START_MARK}"'%{${STYLED_DATE}%'$DATE_FORMAT_LEN'G%} %{$reset_color%}'
         print -r "$1"
     else
         # similar to above, but don't count the pwd in. Also swallow the header line.
         W=$(( ${#1} + ${#ML_PROMPT_L2} ))
         C=$(( W / COLUMNS + 1 ))
         print -nP '%{\033[$((C + 1))A\033[$((C + 1))M%}'
-        print -nP '%{$fg_bold[default]%}↓%{${STYLED_DATE}%'$DATE_FORMAT_LEN'G $fg_bold[green]%G%}%~%{${reset_color}%} '
+        print -nP '%{$fg_bold[default]%}'"${BLOCK_START_MARK}"'%{${STYLED_DATE}%'$DATE_FORMAT_LEN'G $fg_bold[green]%G%}%~%{${reset_color}%} '
         print -r "$1"
     fi
 
@@ -166,7 +169,7 @@ precmd_date() {
         duration="$(print -f "%'d" $(($(timestamp_ms) - LAST_CMD_TS)))"
         export LAST_CMD_STATUS="${duration}ms $ret_status"
         if [[ "$MY_PROMPT_STYLE" = "1" ]]; then
-            print -P '\e[1m↑${duration}ms $ev'
+            print -P '\e[1m'"${BLOCK_END_MARK}"'${duration}ms $ev'
         fi
     fi
     export LAST_CMD_TS=""
