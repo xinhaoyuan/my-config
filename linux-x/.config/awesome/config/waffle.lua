@@ -2464,6 +2464,15 @@ waffle_settings_view = view{
                 --       end
                 -- }),
                 button{
+                    markup = "Toggle tasklist titles",
+                    indicator = em("i"),
+                    key = {"i", "I"},
+                    action = function (alt)
+                        beautiful.set_tasklist_icon_only(not beautiful.tasklist_icon_only)
+                        capi.screen.emit_signal("list")
+                    end
+                },
+                button{
                     markup = "Toggle fortune",
                     indicator = em("f"),
                     key = {"f", "F"},
@@ -3113,12 +3122,12 @@ update_client_waffle_labels = function ()
     end
 end
 
-client.connect_signal("property::name", update_client_waffle_labels)
-client.connect_signal("property::cgroup", update_client_waffle_labels)
-client.connect_signal("property::sticky", update_client_waffle_labels)
-client.connect_signal("property::above", update_client_waffle_labels)
-client.connect_signal("property::floating", update_client_waffle_labels)
-client.connect_signal("property::maximized", update_client_waffle_labels)
-client.connect_signal("property::minimized", update_client_waffle_labels)
+capi.client.connect_signal("property::name", update_client_waffle_labels)
+capi.client.connect_signal("property::cgroup", update_client_waffle_labels)
+capi.client.connect_signal("property::sticky", update_client_waffle_labels)
+capi.client.connect_signal("property::above", update_client_waffle_labels)
+capi.client.connect_signal("property::floating", update_client_waffle_labels)
+capi.client.connect_signal("property::maximized", update_client_waffle_labels)
+capi.client.connect_signal("property::minimized", update_client_waffle_labels)
 
 return nil

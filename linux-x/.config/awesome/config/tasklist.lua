@@ -204,6 +204,7 @@ local function tasklist_update_function(widget, c, index, objects)
         else icon_only = group_hidden
         end
     end
+    icon_only = icon_only or beautiful.tasklist_icon_only
     if group_hidden then
         if not icon_only then forced_width = dpi(150) end
         if c.cgroup.current_client.manage_ticket < c.manage_ticket then

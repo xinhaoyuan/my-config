@@ -213,6 +213,11 @@ function theme.set_bar_rows(r)
     theme.systray_max_rows = theme.bar_rows
 end
 theme.set_bar_rows(shared.vars.bar_rows or 2)
+function theme.set_tasklist_icon_only(icon_only)
+    shared.vars.tasklist_icon_only = icon_only
+    theme.tasklist_icon_only = icon_only
+end
+theme.set_tasklist_icon_only(false)
 theme.icon_size = dpi(20)
 theme.menu_width = dpi(150)
 theme.systray_icon_spacing = dpi(0)
