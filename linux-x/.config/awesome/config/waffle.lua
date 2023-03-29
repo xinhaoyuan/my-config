@@ -2662,6 +2662,12 @@ local waffle_client_pid_button = button{
     end
 }
 
+local waffle_client_name = wibox.widget{
+    wrap = "word_char",
+    align = "center",
+    widget = wibox.widget.textbox,
+}
+
 local close_label = wibox.widget {
     markup = "Close",
     widget = wibox.widget.textbox,
@@ -2676,6 +2682,23 @@ local client_waffle = view {
     root = decorate_waffle {
         decorate_panel {
             widget = {
+                {
+                    {
+                        {
+                            waffle_client_name,
+                            margins = beautiful.sep_small_size,
+                            draw_empty = false,
+                            widget = fixed_margin,
+                        },
+                        draw_pickers = {
+                            fg = prism.picker.beautiful{"fg_focus"},
+                            bg = prism.picker.beautiful{"bg_focus"},
+                        },
+                        widget = prism.container.background,
+                    },
+                    width = dpi(64) * 3,
+                    widget = wibox.container.constraint,
+                },
                 {
                     button({
                             width = dpi(64),
@@ -3081,6 +3104,8 @@ update_client_waffle_labels = function ()
         min_label:set_markup(now_min and "MIN" or "min")
     end
 
+    waffle_client_name.text = shared.waffle_selected_client.name or ""
+
     if client_close_count == 0 then
         close_label:set_markup("Close")
     else
@@ -3088,6 +3113,7 @@ update_client_waffle_labels = function ()
     end
 end
 
+client.connect_signal("property::name", update_client_waffle_labels)
 client.connect_signal("property::cgroup", update_client_waffle_labels)
 client.connect_signal("property::sticky", update_client_waffle_labels)
 client.connect_signal("property::above", update_client_waffle_labels)
