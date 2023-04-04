@@ -68,7 +68,7 @@ end
 
 local filterable = {}
 
-function filterable:reset_filter()
+function filterable:reset_filtered_results()
     local state = self._private
     state.filtered_indices = {}
     state.filtered_upstream_size = 0
@@ -106,6 +106,10 @@ function filterable:get_input()
     return self._private.input
 end
 
+function filterable:get_filter()
+    return self._private.filter
+end
+
 function filterable:set_input(input)
     local state = self._private
     if state.input == input then return end
@@ -113,7 +117,7 @@ function filterable:set_input(input)
     state.filter = state.callbacks.pre_filter and state.callbacks.pre_filter(state.input) or state.input
     if state.upstream then state.upstream.input = input end
     state.is_append_only = false
-    self:reset_filter()
+    self:reset_filtered_results()
     self:emit_signal("property::input")
     self:update_for_appended_upstream()
     if #state.filtered_indices == 0 then
@@ -132,7 +136,7 @@ function filterable:set_callbacks(callbacks)
     state.callbacks = callbacks
     state.filter = state.callbacks.pre_filter and state.callbacks.pre_filter(state.input) or state.input
     state.is_append_only = false
-    self:reset_filter()
+    self:reset_filtered_results()
     self:emit_signal("property::callbacks")
     self:update_for_appended_upstream()
     if #state.filtered_indices == 0 then
@@ -151,7 +155,7 @@ function filterable:set_upstream(upstream)
         upstream:connect_signal("property::children", state.upstream_children_signal_handler)
     end
     state.is_append_only = false
-    self:reset_filter()
+    self:reset_filtered_results()
     self:emit_signal("property::upstream")
     self:update_for_appended_upstream()
     if #state.filtered_indices == 0 then
@@ -197,7 +201,7 @@ function filterable.new(args)
             if state.callbacks.reduce == nil and state.upstream.is_append_only then
                 ret:update_for_appended_upstream()
             else
-                ret:reset_filter()
+                ret:reset_filtered_results()
                 ret:update_for_appended_upstream()
                 if #state.filtered_indices == 0 then
                     ret:emit_signal("property::children")

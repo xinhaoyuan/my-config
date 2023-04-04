@@ -1228,14 +1228,21 @@ function get_apps_widget_source()
         callbacks = {
             pre_filter = function (input)
                 apps.focus = nil
-                return input
+                local keyword_assignment, keyword_search
+                if input then
+                    keyword_assignment = input:match("^[^:]+")
+                    keyword_search = input:match("([^:]+):?$")
+                end
+                return {
+                    assignment = keyword_assignment,
+                    search = keyword_search,
+                }
             end,
-            filter = function (f, e)
-                if f == nil then return 0 end
-                local c = cached_execution[e.name]
-                if c and c[2] == f and #f > 0 then return 0 end
-                local n = e.display_name:lower()
-                local succ, start = pcall(string.find, n, f:lower())
+            filter = function (filter, entry)
+                if filter == nil or filter.search == nil then return 0 end
+                local cache_entry = cached_execution[entry.name]
+                if cache_entry and cache_entry[2] == filter.search and #filter.search > 0 then return 0 end
+                local succ, start = pcall(string.find, entry.display_name:lower(), filter.search:lower())
                 return succ and start
             end,
             reduce = function (filtered_results)
@@ -1318,7 +1325,9 @@ function get_apps_widget_source()
                     widget = prism.layer,
                 }
                 function w:execute()
-                    cache_execution(e.name, apps_source.input)
+                    if apps_source.filter.assignment then
+                        cache_execution(e.name, apps_source.filter.assignment)
+                    end
                     e.ai:launch()
                     waffle:hide()
                 end
