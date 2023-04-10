@@ -217,7 +217,7 @@ function theme.set_tasklist_icon_only(icon_only)
     shared.vars.tasklist_icon_only = icon_only
     theme.tasklist_icon_only = icon_only
 end
-theme.set_tasklist_icon_only(false)
+theme.set_tasklist_icon_only(shared.vars.tasklist_icon_only)
 theme.icon_size = dpi(20)
 theme.menu_width = dpi(150)
 theme.systray_icon_spacing = dpi(0)
