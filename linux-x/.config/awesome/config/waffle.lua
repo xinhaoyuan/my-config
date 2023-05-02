@@ -1186,8 +1186,10 @@ end
 restore_cache_execution()
 
 function cache_execution(name, input)
-    local last = nil
-    cached_execution[name] = {glib.get_real_time(), input}
+    cached_execution[name] = {
+        glib.get_real_time(),
+        input or (cached_execution[name] and cached_execution[name][2]) or "",
+    }
 end
 
 function save_cache_execution()
@@ -1230,7 +1232,7 @@ function get_apps_widget_source()
                 apps.focus = nil
                 local keyword_assignment, keyword_search
                 if input then
-                    keyword_assignment = input:match("^[^:]+")
+                    keyword_assignment = input:match("^([^:]*):")
                     keyword_search = input:match("([^:]+):?$")
                 end
                 return {
@@ -1325,9 +1327,7 @@ function get_apps_widget_source()
                     widget = prism.layer,
                 }
                 function w:execute()
-                    if apps_source.filter.assignment then
-                        cache_execution(e.name, apps_source.filter.assignment)
-                    end
+                    cache_execution(e.name, apps_source.filter.assignment)
                     e.ai:launch()
                     waffle:hide()
                 end
