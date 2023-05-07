@@ -1,0 +1,124 @@
+#!/bin/bash
+
+# Run command in a bridged network namespace with external access.
+#
+# References:
+#
+# https://unix.stackexchange.com/questions/270883/trying-to-run-openvpn-in-network-namespace
+# https://josephmuia.ca/2018-05-16-net-namespaces-veth-nat/
+# https://medium.com/techlog/diving-into-linux-networking-and-docker-bridge-veth-and-iptables-a05eb27b1e72
+
+set -euo pipefail
+
+: ${BR_DEV:=br0}
+: ${BR_ADDR:=10.10.0.1}
+: ${NS_NAME:=ns}
+: ${DEBUG:=0}
+
+log() {
+    if (( DEBUG )); then echo "$@"; fi
+}
+
+declare -r NS_EXEC="ip netns exec ${NS_NAME}"
+
+if [[ "${1:-}" == "--shutdown" ]]; then
+    if (( EUID != 0 )); then
+        exec sudo env NS_NAME="${NS_NAME}" BR_DEV="${BR_DEV}" BR_ADDR="${BR_ADDR}" DEBUG="${DEBUG}" "$0" "$1"
+    fi
+
+    log "Stopping network namespace ${NS_NAME}"
+    ip netns pids $NS_NAME | xargs -rd'\n' kill
+
+    log "Delete network interface"
+    rm -rf /etc/netns/$NS_NAME
+
+    ip netns delete $NS_NAME
+    ip link delete "${NS_NAME}_outer"
+
+    exit
+elif [[ "${1:-}" == "--purge" ]]; then
+    if (( EUID != 0 )); then
+        exec sudo env NS_NAME="${NS_NAME}" BR_DEV="${BR_DEV}" BR_ADDR="${BR_ADDR}" DEBUG="${DEBUG}" "$0" "$1"
+    fi
+
+    "$0" --shutdown ||
+        log "Cannot stop network namespace"
+    iptables -D FORWARD -o wl+ -i "${BR_DEV}" -j ACCEPT ||
+        log "Cannot remove bridge forward rule"
+    iptables -D FORWARD -i wl+ -o "${BR_DEV}" -j ACCEPT ||
+        log "Cannot remove bridge forward rule"
+    iptables -D FORWARD -o en+ -i "${BR_DEV}" -j ACCEPT ||
+        log "Cannot remove bridge forward rule"
+    iptables -D FORWARD -i en+ -o "${BR_DEV}" -j ACCEPT ||
+        log "Cannot remove bridge forward rule"
+    iptables -t nat -D POSTROUTING -s "${BR_ADDR}/16" ! -o "${BR_DEV}" -j MASQUERADE ||
+        log "Cannot remove bridge masquerade rule"
+    ip link delete "${BR_DEV}" ||
+        log "Cannot remove bridge dev ${BR_DEV}"
+    exit
+elif [[ "${1:-}" == "--start" ]]; then
+    if (( EUID != 0 )); then
+        exec sudo env NS_NAME="${NS_NAME}" BR_DEV="${BR_DEV}" BR_ADDR="${BR_ADDR}" DEBUG="${DEBUG}" "$0" "$@"
+    fi
+
+    if ip link add "${BR_DEV}" type bridge 2>/dev/null; then
+        ip addr add "${BR_ADDR}/16" dev "${BR_DEV}"
+        iptables -A FORWARD -o wl+ -i "${BR_DEV}" -j ACCEPT
+        iptables -A FORWARD -i wl+ -o "${BR_DEV}" -j ACCEPT
+        iptables -A FORWARD -o en+ -i "${BR_DEV}" -j ACCEPT
+        iptables -A FORWARD -i en+ -o "${BR_DEV}" -j ACCEPT
+        iptables -t nat -A POSTROUTING -s "${BR_ADDR}/16" ! -o "${BR_DEV}" -j MASQUERADE
+
+        log "Created bridge network interface ${BR_DEV}"
+    else
+        log "Network interface ${BR_DEV} already exists."
+    fi
+    ip link set "${BR_DEV}" up
+
+    if ! ip netns pid "${NS_NAME}" 2>/dev/null 1>&2; then
+        log "Starting network namespace ${NS_NAME}"
+        ip netns add "$NS_NAME"
+
+        # Start the loopback interface in the namespace
+        $NS_EXEC ip addr add 127.0.0.1/16 dev lo
+        $NS_EXEC ip link set lo up
+        log "Created loop back in ${NS_NAME}"
+
+        # Create virtual network interface pair that will let the namespace access
+        # the real network.
+        ip link add "${NS_NAME}_outer" type veth peer name "${NS_NAME}_inner"
+        ip link set "${NS_NAME}_inner" netns "${NS_NAME}" up
+        ip link set "${NS_NAME}_outer" master "${BR_DEV}" up
+
+        $NS_EXEC ip addr add 10.10.0.2/16 dev "${NS_NAME}_inner"
+        $NS_EXEC ip link set dev "${NS_NAME}_inner" mtu 1492
+        $NS_EXEC ip route add default via "${BR_ADDR}"
+        log "Set up veth pairs ${NS_NAME}_inner and ${NS_NAME}_outer"
+
+        # Configure the nameserver to use inside the namespace
+        # TODO use VPN-provided DNS servers in order to prevent leaks
+        mkdir -p "/etc/netns/${NS_NAME}"
+        cat >"/etc/netns/${NS_NAME}/resolv.conf" <<EOF || exit 1
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+EOF
+        log "Created DNS config"
+    else
+        log "Network namespace ${NS_NAME} already exists."
+    fi
+
+    exit
+elif [[ "${1:-}" == "--run-with-env" ]] && (( $# > 2 )) ; then
+    eval "$2"
+    shift 2
+    exec "$@"
+elif (( $# )); then
+    env NS_NAME="${NS_NAME}" BR_DEV="${BR_DEV}" BR_ADDR="${BR_ADDR}" DEBUG="${DEBUG}" "$0" "--start"
+    exec sudo $NS_EXEC sudo -u "${USER}" env -i "$0" --run-with-env "$(export -p)" "$@"
+fi
+
+echo "Usage: $0 (--shutdown|--purge)  # shutdown the network namespace"
+echo "Usage: $0 --start               # create the network namespace if not existent"
+echo "Usage: $0 --run-with-env        # INTERNAL - do not use."
+echo "       $0 command ...           # run the command in the network namespace"
+exit 1
