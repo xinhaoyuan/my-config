@@ -9,7 +9,7 @@ if [ ! -e $HOME/.xsession-init-guard ]; then
     if (( ! NO_FCITX )); then
         fcitx5 -d
     fi
-    picom --config $HOME/.config/compton/compton.conf --experimental-backend &
+    picom --config $HOME/.config/compton/compton.conf &
     cbatticon -n BAT0 &
     pasystray --notify=all &
     blueman-applet &
