@@ -27,7 +27,12 @@ if [[ "${1:-}" == "--shutdown" ]]; then
     fi
 
     log "Stopping network namespace ${NS_NAME}"
-    ip netns pids $NS_NAME | xargs -rd'\n' kill
+    (
+	IFS=$'\n'
+        for pid in $(ip netns pids $NS_NAME); do
+            kill $pid || log "Cannot kill process $pid"
+        done
+    )
 
     log "Delete network interface"
     rm -rf /etc/netns/$NS_NAME
