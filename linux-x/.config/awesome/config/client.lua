@@ -1027,14 +1027,14 @@ require("awful.rules").rules = {
     {
         rule = { class = "tabbed" },
         properties = {
-            tasklist_icon_only = false,
+            tasklist_brief = false,
             placement = awful.placement.centered_with_half_size_on_new,
         },
     },
     {
         rule = { class = "St" },
         properties = {
-            tasklist_icon_only = false,
+            tasklist_brief = false,
             size_hints_honor = false,
             placement = awful.placement.centered_with_half_size_on_new,
         },
@@ -1065,14 +1065,14 @@ require("awful.rules").rules = {
         rule = { class = "discord" },
         properties = {
             size_hints_honor = false,
-            tasklist_icon_only = true,
+            tasklist_brief = true,
         },
     },
     {
         rule = { class = "TelegramDesktop" },
         properties = {
             size_hints_honor = false,
-            tasklist_icon_only = true,
+            tasklist_brief = true,
         },
     },
     {
@@ -1085,7 +1085,7 @@ require("awful.rules").rules = {
     {
         rule = { class = "qBittorrent", type = "normal" },
         properties = {
-            tasklist_icon_only = true,
+            tasklist_brief = true,
         },
     },
 }

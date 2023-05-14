@@ -2473,11 +2473,11 @@ waffle_settings_view = view{
                 --       end
                 -- }),
                 button{
-                    markup = "Toggle tasklist titles",
+                    markup = "Toggle tasklist brief mode",
                     indicator = em("i"),
                     key = {"i", "I"},
                     action = function (alt)
-                        beautiful.set_tasklist_icon_only(not beautiful.tasklist_icon_only)
+                        beautiful.set_tasklist_brief(not beautiful.tasklist_brief)
                         capi.screen.emit_signal("list")
                     end
                 },

@@ -198,22 +198,26 @@ local function tasklist_update_function(widget, c, index, objects)
     local prop = {}
     local forced_width
     local group_hidden = c.cgroup and c.cgroup.current_client ~= c
-    local icon_only
+    local brief
     if not c.screen.client_compare then
-        if c.cgroup == nil then icon_only = c.tasklist_icon_only
-        else icon_only = group_hidden
+        if c.cgroup == nil then brief = c.tasklist_brief
+        else brief = group_hidden
         end
     end
-    icon_only = icon_only or beautiful.tasklist_icon_only
+    brief = brief or beautiful.tasklist_brief
     if group_hidden then
-        if not icon_only then forced_width = dpi(150) end
+        if not brief then forced_width = dpi(150)
+        elseif shared.vars.bar_rows == 1 then forced_width = dpi(75)
+        end
         if c.cgroup.current_client.manage_ticket < c.manage_ticket then
             status_text = "<"
         else
             status_text = ">"
         end
     else
-        if not icon_only then forced_width = dpi(300) end
+        if not brief then forced_width = dpi(300)
+        elseif shared.vars.bar_rows == 1 then forced_width = dpi(75)
+        end
         for _, pp in ipairs(property_to_text) do
             local key = pp[1]
             if c.saved and c.saved[key] ~= nil then
@@ -233,7 +237,11 @@ local function tasklist_update_function(widget, c, index, objects)
         end
     end
     widget.forced_width = forced_width
-    if icon_only then
+    if brief and shared.vars.bar_rows == 1 then
+        if title_widget then title_widget.text = c.name or "<Untitled>" end
+        if status_widget then status_widget.text = status_text end
+        if inline_status_widget then inline_status_widget.text = "" end
+    elseif brief then
         if title_widget and #title_widget.text > 0 then title_widget.text = "" end
         if status_widget and #status_widget.text > 0 then status_widget.text = "" end
         if inline_status_widget then inline_status_widget.text = status_text end
@@ -310,29 +318,33 @@ local tasklist_template = {
                                 widget = wibox.widget.textbox,
                             },
                             [left_index[shared.vars.bar_position]] = beautiful.sep_small_size,
-                            [right_index[shared.vars.bar_position]] = beautiful.sep_small_size,
                             draw_empty = false,
                             widget = fixed_margin,
                         },
                         {
                             {
                                 {
-                                    id = "status_role",
-                                    valign = "center",
-                                    align = "center",
-                                    widget = wibox.widget.textbox,
+                                    {
+                                        id = "status_role",
+                                        valign = "center",
+                                        align = "center",
+                                        widget = wibox.widget.textbox,
+                                    },
+                                    direction = direction_index[shared.vars.bar_position] == "horizontal" and "north" or "west",
+                                    widget = wibox.container.rotate
                                 },
-                                direction = direction_index[shared.vars.bar_position] == "horizontal" and "north" or "west",
-                                widget = wibox.container.rotate
-                            },
-                            draw_pickers = {
-                                fg = prism.picker.switch{
-                                    {"highlighted", prism.picker.beautiful{"special_focus"}},
-                                    {"minimized", prism.picker.beautiful{"special_focus"}},
-                                    default = prism.picker.beautiful{"special_normal"},
+                                draw_pickers = {
+                                    fg = prism.picker.switch{
+                                        {"highlighted", prism.picker.beautiful{"special_focus"}},
+                                        {"minimized", prism.picker.beautiful{"special_focus"}},
+                                        default = prism.picker.beautiful{"special_normal"},
+                                    },
                                 },
+                                widget = prism.wrap(wibox.container.background),
                             },
-                            widget = prism.wrap(wibox.container.background),
+                            [left_index[shared.vars.bar_position]] = beautiful.sep_small_size,
+                            draw_empty = false,
+                            widget = fixed_margin,
                         },
                         layout = wibox.layout.align[direction_index[shared.vars.bar_position]],
                     },
