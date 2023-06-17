@@ -8,7 +8,7 @@ eval "$(xdotool getmouselocation --shell --prefix MOUSE_)"
 
 BRIGHTNESS_ADJUSTMENT="${1:-}"
 
-readonly HEADER_PATTERN="(.*) (dis)?connected (primary)? ([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+)"
+readonly HEADER_PATTERN="(.*) (dis)?connected (primary )?([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+)"
 readonly BRIGHTNESS_PATTERN="Brightness:[ \t]*([0-9.]+)"
 readonly DELTA_PATTERN="^(-|\+)"
 

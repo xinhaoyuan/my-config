@@ -120,7 +120,7 @@ elif [[ "${1:-}" == "--run-with-env" ]] && (( $# > 2 )) ; then
 elif (( $# )); then
     env NS_NAME="${NS_NAME}" BR_DEV="${BR_DEV}" BR_ADDR="${BR_ADDR}" DEBUG="${DEBUG}" "$0" "--start"
     if [[ "$1" = "sudo" ]]; then
-        exec sudo $NS_EXEC "$@"
+        exec sudo -E $NS_EXEC "$@"
     else
         exec sudo $NS_EXEC sudo -u "${USER}" env -i "$0" --run-with-env "$(export -p)" "$@"
     fi
