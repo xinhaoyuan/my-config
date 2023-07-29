@@ -66,6 +66,12 @@ elif [[ "${1:-}" == "--start" ]]; then
         exec sudo env NS_NAME="${NS_NAME}" BR_DEV="${BR_DEV}" BR_ADDR="${BR_ADDR}" DEBUG="${DEBUG}" "$0" "$@"
     fi
 
+    if (( ! $(cat /proc/sys/net/ipv4/ip_forward) )); then
+        echo "$@"
+        echo "IPv4 forwarding is required but disabled."
+        exit 1
+    fi
+
     if ip link add "${BR_DEV}" type bridge 2>/dev/null; then
         ip addr add "${BR_ADDR}/16" dev "${BR_DEV}"
         iptables -A FORWARD -o wl+ -i "${BR_DEV}" -j ACCEPT

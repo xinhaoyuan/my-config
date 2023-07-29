@@ -19,6 +19,7 @@ DEP_ARRAY=(
     curl
     htop
     pmount
+    iptables
 )
 
 install_dep xy-base "${DEP_ARRAY[@]}"
