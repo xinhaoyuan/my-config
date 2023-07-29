@@ -828,7 +828,7 @@ local function setup_screen(scr)
                                 )
                             end
                         end),
-           awful.button({         }, 3, nil, function() notix.remove_unpinned() end)
+           awful.button({         }, 2, nil, function() notix.remove_unpinned() end)
        )
    )
    clock_area:connect_signal(

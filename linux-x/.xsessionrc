@@ -28,4 +28,4 @@ else
     xrdb -merge $HOME/.Xresources.d/hidpi
 fi
 
-python3 -m pywal -R
+wal -R
