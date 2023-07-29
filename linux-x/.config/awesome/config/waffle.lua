@@ -398,26 +398,31 @@ local function show_tray_view()
     -- waffle:show(waffle_tray_view, { mode = "push" })
 
     local widget = { layout = wibox.layout.fixed.vertical }
-    for index, info in ipairs(awesome.systray_list()) do
-        table.insert(widget, button {
-                         text = info[2],
-                         indicator = em(get_tray_item_key(index)),
-                         key = get_tray_item_key(index),
-                         action = function (alt)
-                             awful.spawn({'activate-tray-window', tostring(info[1]), alt and '1' or ''}, false)
-                             waffle:hide()
-                         end,
-        })
+    local has_items
+    if awesome.systray_list then
+        for index, info in ipairs(awesome.systray_list()) do
+            has_items = true
+            table.insert(widget, button {
+                             text = info[2],
+                             indicator = em(get_tray_item_key(index)),
+                             key = get_tray_item_key(index),
+                             action = function (alt)
+                                 awful.spawn({'activate-tray-window', tostring(info[1]), alt and '1' or ''}, false)
+                                 waffle:hide()
+                             end,
+                         })
+        end
     end
-
-    waffle:show(view {
-                    root = decorate_waffle(
-                        decorate_panel {
-                            widget = wibox.widget(widget)
-                        }
-                    )
-                     },
-                { mode = "push" })
+    if has_items then
+        waffle:show(view {
+                        root = decorate_waffle(
+                            decorate_panel {
+                                widget = wibox.widget(widget)
+                            }
+                        )
+                    },
+                    { mode = "push" })
+    end
 end
 
 local battery_widget_width = waffle_width - button_height - button_padding * 3
@@ -1261,13 +1266,15 @@ function get_apps_widget_source()
             post_filter = function (e)
                 if e.widget then return e.widget end
                 local icon_path
-                repeat
-                    local icon = e.ai:get_icon()
-                    if icon == nil then break end
-                    local icon_info = gtk_icon_theme:lookup_by_gicon(icon, beautiful.icon_size, 0)
-                    if icon_info == nil then break end
-                    icon_path = icon_info:get_filename()
-                until true
+                if gtk_icon_theme then
+                    repeat
+                        local icon = e.ai:get_icon()
+                        if icon == nil then break end
+                        local icon_info = gtk_icon_theme:lookup_by_gicon(icon, beautiful.icon_size, 0)
+                        if icon_info == nil then break end
+                        icon_path = icon_info:get_filename()
+                    until true
+                end
                 local w = wibox.widget{
                     {
                         {
