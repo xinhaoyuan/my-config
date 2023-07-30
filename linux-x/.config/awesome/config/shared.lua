@@ -19,6 +19,60 @@ local shared = {
         }
     ),
     on_start_functions = {},
+    -- Bottom is the baseline
+    index_transform = {
+        span_width = {
+            ["top"] = "height",
+            ["bottom"] = "height",
+            ["left"] = "width",
+            ["right"] = "width",
+        },
+        span_len = {
+            ["top"] = "width",
+            ["bottom"] = "width",
+            ["left"] = "height",
+            ["right"] = "height",
+        },
+        span_dir = {
+            ["top"] = "horizontal",
+            ["bottom"] = "horizontal",
+            ["left"] = "vertical",
+            ["right"] = "vertical",
+        },
+        north = {
+            ["bottom"] = "top",
+            ["top"] = "bottom",
+            ["left"] = "right",
+            ["right"] = "left",
+        },
+        south = {
+            ["bottom"] = "bottom",
+            ["top"] = "top",
+            ["left"] = "left",
+            ["right"] = "right",
+        },
+        west = {
+            ["bottom"] = "left",
+            ["top"] = "right",
+            ["left"] = "top",
+            ["right"] = "bottom",
+        },
+        east = {
+            ["bottom"] = "right",
+            ["top"] = "left",
+            ["left"] = "bottom",
+            ["right"] = "top",
+        },
+        dual = {
+            ["bottom"] = "top",
+            ["top"] = "bottom",
+            ["left"] = "right",
+            ["right"] = "left",
+            ["horizontal"] = "vertical",
+            ["vertical"] = "horizontal",
+        },
+    },
+    -- To be deprecated
     size_index = {
         ["top"] = "height",
         ["bottom"] = "height",

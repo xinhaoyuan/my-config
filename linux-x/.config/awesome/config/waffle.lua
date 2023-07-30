@@ -2526,6 +2526,29 @@ waffle_settings_view = view{
                 (
                     function()
                         local b
+                        local pos_cycle = {"bottom", "right", "top", "left"}
+                        b = button{
+                            indicator = em("p"),
+                            key = {"p", "P"},
+                            action = function (alt)
+                                for i, p in ipairs(pos_cycle) do
+                                    if p == beautiful.bar_position then
+                                        print(p, pos_cycle[i % 4 + 1])
+                                        beautiful.set_bar_position(pos_cycle[i % 4 + 1])
+                                        break
+                                    end
+                                end
+                                b.label.text = "Bar position: "..beautiful.bar_position
+                                capi.screen.emit_signal("list")
+                            end
+                        }
+                        b.label.text = "Bar position: "..beautiful.bar_position
+                        return b
+                    end
+                )(),
+                (
+                    function()
+                        local b
                         b = button{
                             indicator = em("b"),
                             key = {"b", "B"},

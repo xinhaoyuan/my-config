@@ -196,7 +196,7 @@ local function tasklist_update_function(widget, c, index, objects)
     local title_widget = widget:get_children_by_id("title_text_role")[1]
     local status_text = ""
     local prop = {}
-    local forced_width
+    local forced_size
     local group_hidden = c.cgroup and c.cgroup.current_client ~= c
     local brief
     if not c.screen.client_compare then
@@ -206,8 +206,8 @@ local function tasklist_update_function(widget, c, index, objects)
     end
     brief = brief or beautiful.tasklist_brief
     if group_hidden then
-        if not brief then forced_width = dpi(150)
-        elseif shared.vars.bar_rows == 1 then forced_width = dpi(75)
+        if not brief then forced_size = dpi(150)
+        elseif shared.vars.bar_rows == 1 then forced_size = dpi(75)
         end
         if c.cgroup.current_client.manage_ticket < c.manage_ticket then
             status_text = "<"
@@ -215,8 +215,8 @@ local function tasklist_update_function(widget, c, index, objects)
             status_text = ">"
         end
     else
-        if not brief then forced_width = dpi(300)
-        elseif shared.vars.bar_rows == 1 then forced_width = dpi(75)
+        if not brief then forced_size = dpi(300)
+        elseif shared.vars.bar_rows == 1 then forced_size = dpi(75)
         end
         for _, pp in ipairs(property_to_text) do
             local key = pp[1]
@@ -236,7 +236,7 @@ local function tasklist_update_function(widget, c, index, objects)
             status_text = "m"
         end
     end
-    widget.forced_width = forced_width
+    widget["forced_"..(direction_index[shared.vars.bar_position] == "horizontal" and "width" or "height")] = forced_size
     if brief and shared.vars.bar_rows == 1 then
         if title_widget then title_widget.text = c.name or "<Untitled>" end
         if status_widget then status_widget.text = status_text end
@@ -279,8 +279,8 @@ local function alt_color(color)
     return alt_color_cache[color]
 end
 
-local tasklist_template = {
-    {
+function module.create(scr)
+    local tasklist_template = {
         {
             {
                 {
@@ -314,8 +314,12 @@ local tasklist_template = {
                         },
                         {
                             {
-                                id = "title_text_role",
-                                widget = wibox.widget.textbox,
+                                {
+                                    id = "title_text_role",
+                                    widget = wibox.widget.textbox,
+                                },
+                                direction = direction_index[shared.vars.bar_position] == "horizontal" and "north" or "west",
+                                widget = wibox.container.rotate,
                             },
                             [left_index[shared.vars.bar_position]] = beautiful.sep_small_size,
                             draw_empty = false,
@@ -324,14 +328,10 @@ local tasklist_template = {
                         {
                             {
                                 {
-                                    {
-                                        id = "status_role",
-                                        valign = "center",
-                                        align = "center",
-                                        widget = wibox.widget.textbox,
-                                    },
-                                    direction = direction_index[shared.vars.bar_position] == "horizontal" and "north" or "west",
-                                    widget = wibox.container.rotate
+                                    id = "status_role",
+                                    valign = "center",
+                                    align = "center",
+                                    widget = wibox.widget.textbox,
                                 },
                                 draw_pickers = {
                                     fg = prism.picker.switch{
@@ -348,37 +348,32 @@ local tasklist_template = {
                         },
                         layout = wibox.layout.align[direction_index[shared.vars.bar_position]],
                     },
-                    direction = direction_index[shared.vars.bar_position] == "horizontal" and "north" or "west",
-                    widget = wibox.container.rotate
+                    [left_index[shared.vars.bar_position]]  = beautiful.sep_small_size,
+                    [right_index[shared.vars.bar_position]] = beautiful.sep_small_size,
+                    widget = wibox.container.margin
                 },
-                [left_index[shared.vars.bar_position]]  = beautiful.sep_small_size,
-                [right_index[shared.vars.bar_position]] = beautiful.sep_small_size,
-                widget = wibox.container.margin
+                layout = wibox.layout.stack,
             },
-            layout = wibox.layout.stack,
-        },
-        draw_pickers = {
-            fg = prism.picker.switch{
-                {"highlighted", prism.picker.beautiful{"fg_focus"}},
-                {"minimized", prism.picker.beautiful{"fg_minimize"}},
-                default = prism.picker.beautiful{"fg_normal"},
-            },
-            prism.picker.list{
-                "bg", prism.picker.switch{
-                    {"highlighted", prism.picker.beautiful{"bg_focus"}},
-                    {"minimized", prism.picker.beautiful{"bg_minimize"}},
+            draw_pickers = {
+                fg = prism.picker.switch{
+                    {"highlighted", prism.picker.beautiful{"fg_focus"}},
+                    {"minimized", prism.picker.beautiful{"fg_minimize"}},
+                    default = prism.picker.beautiful{"fg_normal"},
+                },
+                prism.picker.list{
+                    "bg", prism.picker.switch{
+                        {"highlighted", prism.picker.beautiful{"bg_focus"}},
+                        {"minimized", prism.picker.beautiful{"bg_minimize"}},
+                    },
                 },
             },
+            widget = prism.wrap(wibox.container.background),
         },
-        widget = prism.wrap(wibox.container.background),
-    },
-    id = "base_layer",
-    widget = prism.layer,
-    create_callback = tasklist_create_function,
-    update_callback = tasklist_update_function,
-}
-
-function module.create(scr)
+        id = "base_layer",
+        widget = prism.layer,
+        create_callback = tasklist_create_function,
+        update_callback = tasklist_update_function,
+    }
     local tasklist -- leave it there for reference inside its definition.
     tasklist = awful.widget.tasklist {
         screen = scr,

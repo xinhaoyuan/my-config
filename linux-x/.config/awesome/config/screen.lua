@@ -225,8 +225,6 @@ end
 local my_bars = {}
 local my_tray
 my_tray = wibox.widget.systray()
-my_tray.horizontal = direction_index[shared.vars.bar_position] == "horizontal"
-my_tray.base_size = beautiful.bar_height / beautiful.bar_rows
 local bar_tray_wrapper = wibox.widget {
     {
         my_tray,
@@ -273,50 +271,15 @@ local function sort(l, c)
    return ret
 end
 
-local space_filler = wibox.widget {
-    forced_width = beautiful.useless_gap,
-    widget = wibox.container.constraint
-}
+local space_filler
+local space_filler_left_with_top_border
+local space_filler_right_with_top_border
 
 local with_border = beautiful.apply_border_to_widget
 
 local function with_top_border(widget)
-    return with_border { widget = widget, top = true }
+    return with_border { widget = widget, [top_index[shared.vars.bar_position]] = true }
 end
-
-local space_filler_left_with_top_border = with_top_border {
-    {
-        {
-            beautiful.sep_widget,
-            forced_width = beautiful.sep_median_size,
-            content_fill_vertical = true,
-            content_fill_horizontal = true,
-            widget = wibox.container.place
-        },
-        halign = "left",
-        widget = fixed_place,
-    },
-    width = beautiful.xborder_width * 2 + beautiful.useless_gap,
-    strategy = "min",
-    widget = wibox.container.constraint
-}
-
-local space_filler_right_with_top_border = with_top_border {
-    {
-        {
-            beautiful.sep_widget,
-            forced_width = beautiful.sep_median_size,
-            content_fill_vertical = true,
-            content_fill_horizontal = true,
-            widget = wibox.container.place
-        },
-        halign = "right",
-        widget = fixed_place,
-    },
-    width = beautiful.xborder_width * 2 + beautiful.useless_gap,
-    strategy = "min",
-    widget = wibox.container.constraint
-}
 
 local function set_expanded(bar)
     local space_filler_left = bar.widget:get_children_by_id("space_filler_left")[1]
@@ -586,6 +549,48 @@ local function setup_screen(scr)
    }
    my_bars[#my_bars + 1] = scr.widgets.bar
 
+   -- local
+   space_filler = wibox.widget {
+       [direction_index[shared.vars.bar_position] == "horizontal" and "forced_width" or "forced_height"] = beautiful.useless_gap,
+       widget = wibox.container.constraint
+   }
+
+   -- local
+   space_filler_left_with_top_border = with_top_border {
+       {
+           {
+               beautiful.sep_widget,
+               [direction_index[shared.vars.bar_position] == "horizontal" and "forced_width" or "forced_height"] = beautiful.sep_median_size,
+               content_fill_vertical = true,
+               content_fill_horizontal = true,
+               widget = wibox.container.place
+           },
+           [direction_index[shared.vars.bar_position] == "horizontal" and "halign" or "valign"] = direction_index[shared.vars.bar_position] == "horizontal" and "left" or "top",
+           widget = fixed_place,
+       },
+       [direction_index[shared.vars.bar_position] == "horizontal" and "width" or "height"] = beautiful.xborder_width * 2 + beautiful.useless_gap,
+       strategy = "min",
+       widget = wibox.container.constraint
+   }
+
+   -- local
+   space_filler_right_with_top_border = with_top_border {
+       {
+           {
+               beautiful.sep_widget,
+               [direction_index[shared.vars.bar_position] == "horizontal" and "forced_width" or "forced_height"] = beautiful.sep_median_size,
+               content_fill_vertical = true,
+               content_fill_horizontal = true,
+               widget = wibox.container.place
+           },
+           [direction_index[shared.vars.bar_position] == "horizontal" and "halign" or "valign"] = direction_index[shared.vars.bar_position] == "horizontal" and "right" or "bottom",
+           widget = fixed_place,
+       },
+       [direction_index[shared.vars.bar_position] == "horizontal" and "width" or "height"] = beautiful.xborder_width * 2 + beautiful.useless_gap,
+       strategy = "min",
+       widget = wibox.container.constraint
+   }
+
    local left_layout = wibox.layout.fixed[direction_index[shared.vars.bar_position]]()
    local layoutbox = awful.widget.layoutbox{screen = scr}
    masked_imagebox.convert(layoutbox.imagebox)
@@ -618,10 +623,14 @@ local function setup_screen(scr)
        'mouse::enter', function()
            local waffle_scr = waffle:get_screen()
            if waffle:autohide() or waffle_scr == nil or waffle_scr ~= scr then
-               local anchor = {
-                   x = scr.geometry.x,
-                   y = scr.geometry.y + scr.geometry.height
-               }
+               local anchor = {}
+               if direction_index[shared.vars.bar_position] == "horizontal" then
+                   anchor.x = scr.geometry.x
+                   anchor.y = shared.vars.bar_position == "top" and scr.geometry.y or scr.geometry.y + scr.geometry.height
+               else
+                   anchor.x = shared.vars.bar_position == "left" and scr.geometry.x or scr.geometry.x + scr.geometry.width
+                   anchor.y = scr.geometry.y
+               end
                local locking_callback = function ()
                    if capi.mouse.current_widgets then
                        for _, w in ipairs(capi.mouse.current_widgets) do
@@ -661,14 +670,14 @@ local function setup_screen(scr)
                             width = dpi(150),
                             widget = wibox.container.constraint,
                         },
-                        separator_side = "right",
+                        separator_side = direction_index[shared.vars.bar_position] == "horizontal" and "right" or "bottom",
                         separator_size = beautiful.sep_median_size,
                     })
 
    if scr == primary_screen then
        right_layout:add(beautiful.with_separator{
                             widget = bar_tray_wrapper,
-                            separator_side = "right",
+                            separator_side = direction_index[shared.vars.bar_position] == "horizontal" and "right" or "bottom",
                             separator_size = beautiful.sep_median_size,
                         })
    end
@@ -700,7 +709,8 @@ local function setup_screen(scr)
        clock = wibox.widget{
            {
                {
-                   format = "%m<b>%d</b>",
+                   format = beautiful.bar_rows == 1 and "%m\n%d" or "%m/%d",
+                   align = "center",
                    widget = wibox.widget.textclock,
                },
                pickers = {
@@ -709,9 +719,11 @@ local function setup_screen(scr)
                widget = prism.container.background,
            },
            {
-               format = "%H<b>%M</b>",
+               format = beautiful.bar_rows == 1 and "%H\n%M" or "%H:%M",
+               align = "center",
                widget = wibox.widget.textclock,
            },
+           spacing = beautiful.sep_small_size,
            layout = wibox.layout.fixed.vertical,
        }
    end
@@ -724,7 +736,6 @@ local function setup_screen(scr)
                    forced_width = beautiful.bar_height / beautiful.bar_rows,
                    widget = masked_imagebox,
                },
-               valign = "center",
                widget = wibox.container.place
            },
            {
@@ -732,38 +743,44 @@ local function setup_screen(scr)
                widget = wibox.container.place
            },
            expand = true,
-           horizontal_homogeneous = false,
+           [direction_index[shared.vars.bar_position].."_homogeneous"] = false,
            layout = wibox.layout.grid[direction_index[shared.vars.bar_position]](beautiful.bar_rows),
        }
    }
    notix_counter_widget_container.children = {
        wibox.widget{
            {
-               image = icons.notification,
-               forced_height = beautiful.bar_height / beautiful.bar_rows,
-               forced_width = beautiful.bar_height / beautiful.bar_rows,
-               widget = masked_imagebox,
+               {
+                   image = icons.notification,
+                   forced_height = beautiful.bar_height / beautiful.bar_rows,
+                   forced_width = beautiful.bar_height / beautiful.bar_rows,
+                   widget = masked_imagebox,
+               },
+               widget = wibox.container.place,
            },
            {
                notix.counter_widget,
                widget = wibox.container.place,
            },
            expand = true,
-           horizontal_homogeneous = false,
+           [direction_index[shared.vars.bar_position].."_homogeneous"] = false,
            layout = wibox.layout.grid[direction_index[shared.vars.bar_position]](beautiful.bar_rows),
        }
    }
    next_todo_widget_container.children = {
        wibox.widget{
            {
-               image = icons.alert,
-               forced_height = beautiful.bar_height / beautiful.bar_rows,
-               forced_width = beautiful.bar_height / beautiful.bar_rows,
-               widget = masked_imagebox,
+               {
+                   image = icons.alert,
+                   forced_height = beautiful.bar_height / beautiful.bar_rows,
+                   forced_width = beautiful.bar_height / beautiful.bar_rows,
+                   widget = masked_imagebox,
+               },
+               widget = wibox.container.place,
            },
            next_todo_counter,
            expand = true,
-           horizontal_homogeneous = false,
+           [direction_index[shared.vars.bar_position].."_homogeneous"] = false,
            layout = wibox.layout.grid[direction_index[shared.vars.bar_position]](beautiful.bar_rows),
        }
    }
@@ -772,29 +789,29 @@ local function setup_screen(scr)
            {
                {
                    clock,
-                   left = beautiful.sep_small_size,
-                   right = beautiful.sep_small_size,
+                   [direction_index[shared.vars.bar_position] == "horizontal" and "left" or "top"] = beautiful.sep_small_size,
+                   [direction_index[shared.vars.bar_position] == "horizontal" and "right" or "bottom"] = beautiful.sep_small_size,
                    widget = fixed_margin,
                },
                {
                    orgenda_counter_widget_container,
-                   right = beautiful.sep_small_size,
+                   [direction_index[shared.vars.bar_position] == "horizontal" and "right" or "bottom"] = beautiful.sep_small_size,
                    draw_empty = false,
                    widget = fixed_margin,
                },
                {
                    next_todo_widget_container,
-                   right = beautiful.sep_small_size,
+                   [direction_index[shared.vars.bar_position] == "horizontal" and "right" or "bottom"] = beautiful.sep_small_size,
                    draw_empty = false,
                    widget = fixed_margin,
                },
                {
                    notix_counter_widget_container,
-                   right = beautiful.sep_small_size,
+                   [direction_index[shared.vars.bar_position] == "horizontal" and "right" or "bottom"] = beautiful.sep_small_size,
                    draw_empty = false,
                    widget = fixed_margin,
                },
-               layout = wibox.layout.fixed.horizontal,
+               layout = wibox.layout.fixed[direction_index[shared.vars.bar_position]],
            },
            draw_pickers = {
                fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
@@ -810,17 +827,21 @@ local function setup_screen(scr)
        clock_area.context_transformation = {highlighted = f}
        clock_area_focused = f
    end
+   local clock_corner_anchor = {}
+   if direction_index[shared.vars.bar_position] == "horizontal" then
+       clock_corner_anchor.x = scr.geometry.x + scr.geometry.width
+       clock_corner_anchor.y = shared.vars.bar_position == "top" and scr.geometry.y or scr.geometry.y + scr.geometry.height
+   else
+       clock_corner_anchor.x = shared.vars.bar_position == "left" and scr.geometry.x or scr.geometry.x + scr.geometry.width
+       clock_corner_anchor.y = scr.geometry.y + scr.geometry.height
+   end
    clock_area:buttons(
        awful.util.table.join(
            awful.button({         }, 1, nil, function()
                             if not clock_area_focused then
                                 gtimer.delayed_call(
                                     function()
-                                        local anchor = {
-                                            x = scr.geometry.x + scr.geometry.width,
-                                            y = scr.geometry.y + scr.geometry.height
-                                        }
-                                        capi.awesome.emit_signal("toggle_calendar_waffle", { anchor = anchor })
+                                        capi.awesome.emit_signal("toggle_calendar_waffle", { anchor = clock_corner_anchor })
                                         if not waffle:is_in_view(nil) then
                                             scr.actions.set_clock_area_focus(true)
                                         end
@@ -835,10 +856,6 @@ local function setup_screen(scr)
        'mouse::enter', function()
            local waffle_scr = waffle:get_screen()
            if waffle:autohide() or waffle_scr == nil or waffle_scr ~= scr then
-               local anchor = {
-                   x = scr.geometry.x + scr.geometry.width,
-                   y = scr.geometry.y + scr.geometry.height
-               }
                local locking_callback = function ()
                    if capi.mouse.current_widgets then
                        for _, w in ipairs(capi.mouse.current_widgets) do
@@ -848,7 +865,7 @@ local function setup_screen(scr)
                end
                capi.awesome.emit_signal(
                    "show_calendar_waffle", {
-                       anchor = anchor,
+                       anchor = clock_corner_anchor,
                        screen = scr,
                        autohide = 0.5,
                        autohide_locking_callback = locking_callback,
@@ -880,17 +897,17 @@ local function setup_screen(scr)
                },
                layout = fixed_align[direction_index[shared.vars.bar_position]],
            },
-           top = true
+           [top_index[shared.vars.bar_position]] = true
        }
    else
        scr.widgets.bar.middle_margin_expanded = with_border {
            widget = tasklist_with_fallback,
            draw_empty = false,
-           top = true
+           [top_index[shared.vars.bar_position]] = true
        }
        scr.widgets.bar.left_margin_expanded = with_border {
            widget = left_layout,
-           top = true,
+           [top_index[shared.vars.bar_position]] = true,
        }
        scr.widgets.bar.right_margin_expanded = with_border {
            widget = wibox.widget {
@@ -898,17 +915,17 @@ local function setup_screen(scr)
                -- left = beautiful.sep_median_size,
                widget = fixed_margin
            },
-           top = true,
+           [top_index[shared.vars.bar_position]] = true,
        }
 
        scr.widgets.bar.middle_margin_splitted = with_border {
            widget = tasklist_with_fallback,
            draw_empty = false,
-           top = true, left = true, right = true,
+           [top_index[shared.vars.bar_position]] = true, [left_index[shared.vars.bar_position]] = true, [right_index[shared.vars.bar_position]] = true,
        }
        scr.widgets.bar.left_margin_splitted = with_border {
            widget = left_layout,
-           top = true, right = true,
+           [top_index[shared.vars.bar_position]] = true, [direction_index[shared.vars.bar_position] == "horizontal" and "right" or "bottom"] = true,
        }
        scr.widgets.bar.right_margin_splitted = with_border {
            widget = wibox.widget {
@@ -916,7 +933,7 @@ local function setup_screen(scr)
                -- left = scr == primary_screen and beautiful.sep_median_size or nil,
                widget = fixed_margin
            },
-           top = true, left = true,
+           [top_index[shared.vars.bar_position]] = true, [direction_index[shared.vars.bar_position] == "horizontal" and "left" or "top"] = true,
        }
 
        layout = wibox.widget {
@@ -963,7 +980,7 @@ local function setup_screen(scr)
            layout = fixed_align[direction_index[shared.vars.bar_position]],
        }
    end
-   (awful.placement["bottom"] + awful.placement["maximize_horizontally"])(
+   (awful.placement[shared.vars.bar_position] + awful.placement["maximize_"..shared.direction_index[shared.vars.bar_position].."ly"])(
        scr.widgets.bar, {attach = true})
    scr.widgets.bar.widget = layout
    scr.widgets.bar.visible = true
@@ -985,6 +1002,9 @@ local function reset_widgets()
     my_bars = {}
     current_screen = nil
     primary_screen = capi.screen.primary
+
+    my_tray.horizontal = direction_index[shared.vars.bar_position] == "horizontal"
+    my_tray.base_size = beautiful.bar_height / beautiful.bar_rows
 
     for scr in capi.screen do
         setup_screen(scr)

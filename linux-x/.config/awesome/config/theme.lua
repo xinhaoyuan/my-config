@@ -204,6 +204,11 @@ theme.font_minor = theme.font_name_mono.." "..tostring(theme.font_size_small)
 -- custom property string font descriptor
 theme.font_mono = theme.font_name_mono.." "..tostring(theme.font_size_normal)
 theme.useless_gap = dpi(4)
+function theme.set_bar_position(pos)
+    shared.vars.bar_position = pos
+    theme.bar_position = pos
+end
+theme.set_bar_position(shared.vars.bar_position)
 -- custom property number
 function theme.set_bar_rows(r)
     shared.vars.bar_rows = r
