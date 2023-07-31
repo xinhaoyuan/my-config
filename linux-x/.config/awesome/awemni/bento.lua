@@ -36,12 +36,21 @@ local bento = {}
 
 function bento.new(args)
     local list_layout = wibox.widget{
-        layout = scrlist.top,
+        layout = scrlist[args.list_direction or "top"],
     }
-    local bento_lister = lister(
-        setmetatable(
-            {scrlist = list_layout},
-            {__index = args}))
+    list_layout:connect_signal(
+        "button::press", function (_self, _x, _y, b)
+            if b == 4 then
+                go_prior()
+            elseif b == 5 then
+                go_next()
+            end
+        end)
+
+    local bento_lister = lister{
+        scrlist = list_layout,
+        placeholder_widget = args.placeholder_widget
+    }
 
     local function go_up()
         local f = bento_lister.focus
@@ -70,7 +79,7 @@ function bento.new(args)
     end
 
     local cover = args.cover
-    local input_widget = args.container:get_children_by_id("input_widget")[1]
+    local input_widget = args.input_widget
     assert(input_widget)
     local function reset()
         bento_lister.source = nil
@@ -156,21 +165,9 @@ function bento.new(args)
         return true
     end
 
-    local list_container = args.container:get_children_by_id("list_container")[1]
-    assert(list_container)
-    list_container.widget = list_layout
-    list_layout:connect_signal(
-        "button::press", function (_self, _x, _y, b)
-            if b == 4 then
-                go_prior()
-            elseif b == 5 then
-                go_next()
-            end
-        end)
-
     reset()
     return {
-        widget = args.container,
+        list_widget = list_layout,
         reload_source = function ()
             bento_lister.source = args.source_generator()
         end,
