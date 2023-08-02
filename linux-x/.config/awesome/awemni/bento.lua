@@ -38,14 +38,6 @@ function bento.new(args)
     local list_layout = wibox.widget{
         layout = scrlist[args.list_direction or "top"],
     }
-    list_layout:connect_signal(
-        "button::press", function (_self, _x, _y, b)
-            if b == 4 then
-                go_prior()
-            elseif b == 5 then
-                go_next()
-            end
-        end)
 
     local bento_lister = lister{
         scrlist = list_layout,
@@ -77,6 +69,15 @@ function bento.new(args)
             list_layout.alignment = "start"
         end
     end
+
+    list_layout:connect_signal(
+        "button::press", function (_self, _x, _y, b)
+            if b == 4 then
+                go_prior()
+            elseif b == 5 then
+                go_next()
+            end
+        end)
 
     local cover = args.cover
     local input_widget = args.input_widget

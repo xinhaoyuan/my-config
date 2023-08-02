@@ -49,6 +49,8 @@ DEP_ARRAY=(
     sassc
     librsvg2-bin
     gtk2-engines-murrine
+    mplayer
+    mpv
 )
 
 install_dep xy-desktop "${DEP_ARRAY[@]}"
