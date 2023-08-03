@@ -106,6 +106,7 @@ function lister:set_source(source)
     local state = self._private
     if state.start_timer_running then
         state.start_timer:stop()
+        state.start_timer_running = false
     end
     if state.source then
         state.source:disconnect_signal("property::children", state.source_children_signal_handler)
