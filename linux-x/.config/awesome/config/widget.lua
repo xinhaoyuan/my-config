@@ -2,22 +2,27 @@ local capi = {
     awesome = awesome,
     mousegrabber = mousegrabber,
 }
-local wibox = require("wibox")
-local beautiful = require("beautiful")
-local gtimer = require("gears.timer")
+local shared = require((...):match("(.-)[^%.]+$") .. "shared")
 local awful = require("awful")
+local beautiful = require("beautiful")
+local compactor = require("compactor")
+local debug_container = require("debug_container")
 local dpi = require("beautiful.xresources").apply_dpi
-local prism = require("prism")
-local icons = require("icons")
-local masked_imagebox = require("masked_imagebox")
-local outlined_textbox = require("outlined_textbox")
 local fallback = require("fallback")
+local fixed_align = require("fixed_align")
+local fixed_place = require("fixed_place")
 local gshape = require("gears.shape")
 local gsurf = require("gears.surface")
-local fixed_align = require("fixed_align")
-local compactor = require("compactor")
+local gtimer = require("gears.timer")
+local icons = require("icons")
+local masked_imagebox = require("masked_imagebox")
+local mycalendar = require("my-calendar")
+local orgenda = require("orgenda")
+local outlined_textbox = require("outlined_textbox")
+local prism = require("prism")
 local regulator = require("regulator")
-local debug_container = require("debug_container")
+local wibox = require("wibox")
+local scroller = require("scroller")
 
 local update_interval_s = 2
 -- TODO dedup with waffle.lua
@@ -1133,6 +1138,382 @@ do
 
 end
 
+local cal_widget
+cal_widget = wibox.widget{
+    date = os.date('*t'),
+    -- custom property.
+    today = os.date('*t'),
+    -- custom property.
+    active_dates = {},
+    font = beautiful.font_mono,
+    week_numbers = true,
+    start_sunday = true,
+    long_weekdays = true,
+    spacing = 0,
+    widget = mycalendar.month
+}
+-- Has to set it after the properties.
+function cal_widget.fn_embed(widget, flag, date)
+    local active_dates = cal_widget.active_dates
+    local today = cal_widget.today
+    if flag == "header" then
+        local sign
+        if date.year == today.year then
+            if date.month == today.month then
+                sign = 0
+            else
+                sign = date.month < today.month and -1 or 1
+            end
+        else
+            sign = date.year < today.year and -1 or 1
+        end
+        widget.font = beautiful.font_name_normal..' 12'
+        widget = wibox.widget{
+            sign > 0 and {
+                text = " <<",
+                align = "left",
+                font = widget.font,
+                widget = wibox.widget.textbox,
+            },
+            widget,
+            sign < 0 and {
+                text =  ">> ",
+                align = "right",
+                font = widget.font,
+                widget = wibox.widget.textbox,
+            },
+            expand = "outside",
+            layout = wibox.layout.align.horizontal,
+        }
+        return widget
+    elseif flag == "month" then
+        return widget
+    elseif flag == "weekday" or flag == "weeknumber" then
+        widget.font = font_info
+        widget = wibox.widget{
+            widget,
+            draw_pickers = {
+                fg = prism.picker.beautiful{"minor_", prism.picker.highlighted_switcher},
+            },
+            widget = prism.container.background,
+        }
+    end
+
+    local inverted = false
+
+    if flag == "normal" or flag == "focus" then
+        if today.year == date.year and today.month == date.month and today.day == date.day then
+            inverted = true
+        end
+
+        if active_dates[date.year] and active_dates[date.year][date.month] and active_dates[date.year][date.month][date.day] then
+            widget = wibox.widget {
+                widget,
+                draw_pickers = {
+                    fg = prism.picker.beautiful{
+                        "special_", prism.picker.branch{"inverted", "focus", "normal"}},
+                },
+                widget = prism.container.background,
+            }
+        end
+    end
+    widget = wibox.widget{
+        widget,
+        halign = "center",
+        widget = wibox.container.place,
+    }
+
+    if inverted then
+        return wibox.widget{
+            {
+                {
+                    widget,
+                    margins = dpi(2),
+                    widget = wibox.container.margin
+                },
+                shape = function (cr, width, height)
+                    if beautiful.xborder_radius and beautiful.xborder_radius >= beautiful.xborder_width then
+                        beautiful.rect_with_corners(cr, width, height, true, true, true, true,
+                                                    beautiful.xborder_radius - beautiful.xborder_width)
+                    else
+                        beautiful.rect_with_corners(cr, width, height)
+                    end
+                end,
+                draw_pickers = {
+                    fg = prism.picker.beautiful{"fg_focus"},
+                    bg = prism.picker.beautiful{"bg_focus"},
+                },
+                widget = prism.container.background,
+            },
+            context_transformation = {inverted = true},
+            widget = prism.layer,
+        }
+    else
+        return wibox.widget {
+            widget,
+            margins = dpi(2),
+            widget = wibox.container.margin
+        }
+    end
+end
+
+function cal_widget:move_date(delta)
+    local date = cal_widget:get_date()
+    if delta.day ~= nil then date.day = date.day + delta.day end
+    if delta.month ~= nil then date.month = date.month + delta.month end
+    if delta.year ~= nil then date.year = date.year + delta.year end
+    cal_widget:set_date(nil)
+    cal_widget:set_date(date)
+end
+
+function cal_widget:reset_to_today()
+    self:set_date(nil)
+    self:set_date(cal_widget.today)
+end
+
+function cal_widget:refresh()
+    self:move_date{}
+end
+
+cal_widget:connect_signal(
+    "button::press",
+    function (self, x, y, button)
+        if button == 2 then
+            self:reset_to_today()
+        elseif button == 1 or button == 4 then
+            self:move_date{month = -1}
+        elseif button == 3 or button == 5 then
+            self:move_date{month = 1}
+        end
+    end)
+
+gtimer {
+    timeout = 10,
+    autostart = true,
+    call_now = true,
+    callback = function()
+        local new_today = os.date("*t")
+        if cal_widget.today.year ~= new_today.year or
+            cal_widget.today.month ~= new_today.month or
+            cal_widget.today.day ~= new_today.day then
+            cal_widget.today = new_today
+            cal_widget:refresh()
+        end
+    end
+}
+
+orgenda.data:connect_signal(
+    "property::items",
+    function ()
+        local active_dates = {}
+        for _, item in ipairs(orgenda.data.items) do
+            if item.timestamp and not item.done then
+                local date = os.date("*t", item.timestamp)
+                local y = active_dates[date.year] or {}
+                local m = y[date.month] or {}
+                m[date.day] = true
+                y[date.month] = m
+                active_dates[date.year] = y
+            end
+        end
+        cal_widget.active_dates = active_dates
+        cal_widget:refresh()
+    end
+)
+
+local orgenda_widget
+local orgenda_items_widget
+do
+    local orgenda_header
+    orgenda_header = wibox.widget{
+        {
+            {
+                nil,
+                {
+                    markup = "<span size='large'>TODO</span>",
+                    widget = wibox.widget.textbox,
+                },
+                {
+                    {
+                        {
+                            image = icons.refresh,
+                            resize = true,
+                            forced_height = button_height,
+                            forced_width = button_height,
+                            widget = masked_imagebox,
+                        },
+                        margins = 0,
+                        widget = wibox.container.margin,
+                    },
+                    halign = "right",
+                    widget = wibox.container.place,
+                },
+                expand = "outside",
+                layout = wibox.layout.align.horizontal,
+            },
+            draw_pickers = {
+                fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
+                bg = prism.picker.beautiful{"bg_", prism.picker.highlighted_switcher},
+            },
+            widget = prism.container.background,
+        },
+        context_transformation = {highlighted = false},
+        widget = prism.layer,
+    }
+    orgenda_header:connect_signal(
+        "mouse::enter",
+        function ()
+            orgenda_header.context_transformation = {highlighted = true}
+        end
+    )
+    orgenda_header:connect_signal(
+        "mouse::leave",
+        function ()
+            orgenda_header.context_transformation = {highlighted = false}
+        end
+    )
+    orgenda_header:connect_signal(
+        "button::release",
+        function ()
+            orgenda.schedule_reset()
+        end
+    )
+
+    local organda_color_func = function (priority, done)
+        local key = "orgenda_color_p"..tostring(priority)..(done and "_done" or "_todo")
+        return beautiful[key]
+    end
+    function orgenda_get_icon(item)
+        return beautiful["orgenda_icon_p"..tostring(item.priority).."_"..(item.done and "done" or "todo")]
+    end
+    -- local
+    orgenda_items_widget = orgenda.widget{
+        create_item_widget_cb = function ()
+            local widget = wibox.widget{
+                {
+                    {
+                        {
+                            {
+                                {
+                                    id = "icon_role",
+                                    {
+                                        forced_width = beautiful.icon_size,
+                                        forced_height = beautiful.icon_size,
+                                        widget = masked_imagebox,
+                                    },
+                                    widget = prism.container.background,
+                                },
+                                valign = "top",
+                                widget = wibox.container.place
+                            },
+                            right = beautiful.sep_small_size,
+                            widget = wibox.container.margin,
+                        },
+                        {
+                            {
+                                {
+                                    id = "timestamp_role",
+                                    widget = wibox.widget.textbox
+                                },
+                                {
+                                    {
+                                        id = "text_role",
+                                        ellipsize = "none",
+                                        align = "left",
+                                        valign = "center",
+                                        wrap = "word_char",
+                                        widget = wibox.widget.textbox
+                                    },
+                                    fill_horizontal = true,
+                                    content_fill_horizontal = true,
+                                    widget = wibox.container.place,
+                                },
+                                layout = wibox.layout.fixed.vertical
+                            },
+                            valign = "center",
+                            widget = wibox.container.place,
+                        },
+                        layout = wibox.layout.fixed.horizontal
+                    },
+                    draw_pickers = {
+                        fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
+                        prism.picker.list{"bg", prism.picker.beautiful{"bg_", prism.picker.branch{"highlighted", "focus"}}},
+                    },
+                    widget = prism.container.background,
+                },
+                context_transformation = {highlighted = false},
+                widget = prism.layer,
+            }
+            function widget:set_focused(f)
+                self._private.focused = f
+                self.context_transformation = {highlighted = f}
+            end
+            function widget:execute()
+                if self._private.focused then
+                    orgenda.toggle_done(self.item)
+                end
+            end
+            widget:connect_signal(
+                "button::release",
+                function (self, _x, _y, button)
+                    if button == 2 then
+                        orgenda.hide(self.item)
+                    elseif button == 3 then
+                        orgenda.promote(self.item)
+                    end
+                end
+            )
+            return widget
+        end,
+        update_item_widget_cb = function (widget, item)
+            widget:get_children_by_id("icon_role")[1].widget.image = orgenda_get_icon(item)
+            widget:get_children_by_id("icon_role")[1].draw_pickers = {
+                fg = prism.picker.wrap{
+                    organda_color_func,
+                    item.priority,
+                    item.done,
+                },
+            }
+            widget:get_children_by_id("text_role")[1].markup = item.decorated_text
+            widget.item = item
+        end,
+    }
+    -- local
+    orgenda_widget = wibox.widget{
+        {
+            orgenda_header,
+            {
+                {
+                    orgenda_items_widget,
+                    widget = scroller,
+                },
+                {
+                    {
+                        markup = "<span size='large' foreground='"..beautiful.minor_normal.."'>Wow!\nNo TODOs!\nSo clean!</span>",
+                        align = "center",
+                        widget = wibox.widget.textbox,
+                    },
+                    widget = wibox.container.place,
+                },
+                widget = fallback,
+            },
+            layout = wibox.layout.align.vertical,
+        },
+        fill_vertical = true,
+        content_fill_vertical = true,
+        valign = "top",
+        widget = fixed_place,
+    }
+
+    orgenda_widget.visible = shared.vars.show_notes
+    shared.vars:connect_signal(
+        "property::show_notes",
+        function(_, value)
+            orgenda_widget.visible = value
+        end
+    )
+end
+
 return {
     cpu_widget = cpu_widget,
     ram_widget = ram_widget,
@@ -1141,4 +1522,7 @@ return {
     audio_sink_widget = audio_sink_widget,
     audio_source_widget = audio_source_widget,
     playerctl_widget = playerctl_widget,
+    cal_widget = cal_widget,
+    orgenda_widget = orgenda_widget,
+    orgenda_items_widget = orgenda_items_widget,
 }

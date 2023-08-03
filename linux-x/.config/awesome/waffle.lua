@@ -15,9 +15,11 @@ local lgi = require("lgi")
 local dpi = require("beautiful.xresources").apply_dpi
 local af = require("my-autofocus")
 
--- A waffle view is a table with the following elements
---   .widget -- the entry widget
---   .key_handler (optional) -- the key handling function. It returns a boolean if the key event is captured.
+-- A waffle view is a widget with the following optional handlers which returns a boolean if the event is handled.
+--   :handle_key(mods, key, event)
+--   :handle_back()
+--   :handle_open(screen, is_new)
+--   :handle_close()
 
 local waffle = {
 }
@@ -174,15 +176,15 @@ waffle.widget_container.widget:connect_signal(
     end)
 
 function waffle:set_view(view, is_new_view)
-    if self.view_ and self.view_.on_close then
-        self.view_:on_close()
+    if self.view_ and self.view_.handle_close then
+        self.view_:handle_close()
     end
     self.view_ = view
     if view then
-        if view.on_open then
-            view:on_open(self.wibox_.screen, is_new_view)
+        if view.handle_open then
+            view:handle_open(self.wibox_.screen, is_new_view)
         end
-        self.widget_container.widget.widget = view.widget
+        self.widget_container.widget.widget = view
     end
 end
 
@@ -341,7 +343,7 @@ function waffle:show(view, args)
     else
         self.keygrabber_ = awful.keygrabber.run(
             function (mod, key, event)
-                if self.view_.key_handler and self.view_:key_handler(mod, key, event) then
+                if self.view_.handle_key and self.view_:handle_key(mod, key, event) then
                     -- pass
                 elseif key == "Escape" then
                     if event == "press" then

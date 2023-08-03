@@ -11,8 +11,18 @@ function mod:fit(context, width, height)
     end
 
     local w, h = base.fit_widget(self, context, self._private.widget, width, height)
+    if self._private.horizontal_fit == false then w = 0 end
+    if self._private.vertical_fit == false then h = 0 end
 
     return (self._private.fill_horizontal and width or w), (self._private.fill_vertical and height or h)
+end
+
+function mod:set_vertical_fit(f)
+    self._private.vertical_fit = f
+end
+
+function mod:set_horizontal_fit(f)
+    self._private.horizontal_fit = f
 end
 
 function mod:new(...)

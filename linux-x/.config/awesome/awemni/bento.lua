@@ -1,4 +1,4 @@
--- Launcher widget with optional cover.
+-- Listing widget associated with a prompt input box.
 
 local prefix = (...):match("(.-)[^%.]+$")
 local lister = require(prefix.."lister")
@@ -79,17 +79,8 @@ function bento.new(args)
             end
         end)
 
-    local cover = args.cover
     local input_widget = args.input_widget
     assert(input_widget)
-    local function reset()
-        bento_lister.source = nil
-        bento_lister.input = ""
-        if cover then
-            cover.active = true
-            cover.direct_hotkey = false
-        end
-    end
     local prompt, key_handler
     prompt = prompter{
         textbox = input_widget,
@@ -109,53 +100,64 @@ function bento.new(args)
         },
         changed_callback = function (input)
             bento_lister.input = input
-            if #input > 0 and cover then
-                cover.active = false
-            end
         end,
         done_callback = function ()
             key_handler({}, "Escape", "press")
         end,
     }
-    function key_handler(mods, key, event)
+
+    local function reset()
+        bento_lister.source = nil
+        bento_lister.input = ""
+    end
+
+    function list_layout:reload_source()
+        bento_lister.source = args.source_generator()
+    end
+
+    function list_layout:open()
+        bento_lister.source = args.source_generator()
+    end
+
+    function list_layout:close()
+        reset()
+        prompt({}, "Escape", "press")
+    end
+
+    function list_layout:handle_key(mods, key, event)
         if (key == "Escape" or key == "BackSpace") and
             (bento_lister.input == nil or bento_lister.input == "") then
-            if key == "BackSpace" and cover and not cover.active and cover.key_handler and event == "press" then
+            if event == "press" then
                 reset()
-                bento_lister.source = args.source_generator()
-                return true
-            else
-                return false
             end
-        end
-        if cover and cover.active and cover.key_handler then
-            if cover.direct_hotkey then
-                return cover:key_handler(mods, key, event)
-            else
-                if cover:key_handler(mods, key, event) then return true end
-            end
-        end
-        if event == "press" then
-            if key == "Escape" then
-                prompt(mods, key, event)
-                return true
-            elseif key == "Up" then
+            return false
+        elseif key == "Escape" then
+            prompt(mods, key, event)
+            return true
+        elseif key == "Up" then
+            if event == "press" then
                 go_up()
-                return true
-            elseif key == "Down" then
-                go_down()
-                return true
-            elseif key == "Prior" then
-                go_prior()
-                return true
-            elseif key == "Next" then
-                go_next()
-                return true
             end
+            return true
+        elseif key == "Down" then
+            if event == "press" then
+                go_down()
+            end
+            return true
+        elseif key == "Prior" then
+            if event == "press" then
+                go_prior()
+            end
+            return true
+        elseif key == "Next" then
+            if event == "press" then
+                go_next()
+            end
+            return true
         end
         local f = bento_lister.focus and list_layout.children[bento_lister.focus]
         f = f and f.child
-        if f and f.visible and f.key_handler and f:key_handler(mods, key, event) then
+        if f and f.visible and f.key_handler and f:handle_key(mods, key, event) then
             return true
         end
         if key == "Return" then
@@ -166,25 +168,7 @@ function bento.new(args)
         return true
     end
 
-    reset()
-    return {
-        list_widget = list_layout,
-        reload_source = function ()
-            bento_lister.source = args.source_generator()
-        end,
-        on_open = function (_self, ...)
-            bento_lister.source = args.source_generator()
-            if cover and cover.on_open then cover:on_open(...) end
-        end,
-        on_close = function (_self, ...)
-            reset()
-            prompt({}, "Escape", "press")
-            if cover and cover.on_close then cover:on_close(...) end
-        end,
-        key_handler = function (_self, mods, key, event)
-            return key_handler(mods, key, event)
-        end
-    }
+    return list_layout
 end
 
 return setmetatable(bento, {__call = function (_self, ...) return bento.new(...) end})
