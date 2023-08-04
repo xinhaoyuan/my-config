@@ -1,4 +1,9 @@
--- Listing widgets with filtering, focus, sealing, and extension.
+-- Listing widgets from a source with focus and execution.
+--
+-- For widgets, `focused` property use be used to indicate whether it is the focus;
+-- `execute()` method will be called on execution.
+--
+-- TODO: document the access with the source.
 
 local wibox = require("wibox")
 local base = wibox.widget.base

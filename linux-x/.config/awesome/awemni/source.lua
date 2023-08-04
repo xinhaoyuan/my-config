@@ -1,3 +1,5 @@
+-- A source is an expandable list of objects (widgets or not).
+
 local gobject = require("gears.object")
 
 local array_proxy = {}
