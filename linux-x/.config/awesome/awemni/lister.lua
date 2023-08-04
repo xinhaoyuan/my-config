@@ -78,6 +78,7 @@ local lister = {}
 
 function lister:start()
     local state = self._private
+    state.about_to_start = false
     if state.source == nil then return end
     state.source.input = state.input
 end
@@ -91,10 +92,10 @@ function lister:set_input(input)
     if state.input ~= input then
         state.input = input
         state.executing_index = nil
-        self.focus = nil
         state.scrlist.anchor_index = nil
-        state.start_timer_running = true
+        state.about_to_start = true
         state.start_timer:again()
+        self.focus = nil
     end
 end
 
@@ -104,9 +105,10 @@ end
 
 function lister:set_source(source)
     local state = self._private
-    if state.start_timer_running then
+    if state.start_timer.started then
         state.start_timer:stop()
-        state.start_timer_running = false
+    else
+        state.start_timer.started = true
     end
     if state.source then
         state.source:disconnect_signal("property::children", state.source_children_signal_handler)
@@ -123,7 +125,10 @@ end
 
 function lister:set_focus(index)
     local state = self._private
-    if state.start_timer_running then return nil end
+    if state.about_to_start then
+        state.focused_index = index
+        return
+    end
     if index then
         if index < 1 then index = 1 end
         if state.source.sealed_count and index >= state.source.sealed_count then
@@ -135,7 +140,6 @@ function lister:set_focus(index)
     state.scrlist.view_index = index
     state.focused_index = state.scrlist.view_index
     local new_container = state.focused_index and state.scrlist.children[state.focused_index]
-    if old_container == new_container then return end
     if old_container and old_container.child then
         old_container.child.focused = nil
     end
@@ -150,16 +154,16 @@ end
 
 function lister:get_focused_widget()
     local state = self._private
-    local container = not state.start_timer_running and state.scrlist.children[state.focused_index]
+    local container = not state.about_to_start and state.scrlist.children[state.focused_index]
     return container and container.child
 end
 
 function lister:execute()
     local state = self._private
-    local container = not state.start_timer_running and state.scrlist.children[state.focused_index or 1]
+    local container = not state.about_to_start and state.scrlist.children[state.focused_index or 1]
     if container and container.child and container.child.execute then
         container.child:execute()
-    elseif state.start_timer_running then
+    elseif state.about_to_start then
         state.executing_index = 1
     elseif state.focused_index and state.source then
         state.executing_index = state.focused_index
@@ -183,8 +187,7 @@ function lister:new(args)
             timeout = 0.05,
             single_shot = true,
             callback = function ()
-                state.start_timer_running = false
-                if state.source then ret:start() end
+                ret:start()
             end,
         },
     }
@@ -226,6 +229,8 @@ function lister:new(args)
                 local new_child = state.source.children[index]
                 if old_child ~= new_child then
                     self._containers[index].child = new_child
+                end
+                if not state.about_to_start then
                     new_child.focused = index == state.focused_index
                 end
                 return self._containers[index]
