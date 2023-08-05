@@ -46,12 +46,12 @@ function bento.new(args)
 
     local function go_up()
         local f = bento_lister.focus
-        bento_lister.focus = f and f - 1 or 1
+        bento_lister.focus = f and f - 1 or list_layout.end_index
     end
 
     local function go_down()
         local f = bento_lister.focus
-        bento_lister.focus = f and f + 1 or 1
+        bento_lister.focus = f and f + 1 or list_layout.start_index
     end
 
     local function go_prior()
@@ -157,7 +157,7 @@ function bento.new(args)
         end
         local f = bento_lister.focus and list_layout.children[bento_lister.focus]
         f = f and f.child
-        if f and f.visible and f.key_handler and f:handle_key(mods, key, event) then
+        if f and f.visible and f.handle_key and f:handle_key(mods, key, event) then
             return true
         end
         if key == "Return" then
