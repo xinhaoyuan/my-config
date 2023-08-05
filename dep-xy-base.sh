@@ -20,6 +20,7 @@ DEP_ARRAY=(
     htop
     pmount
     iptables
+    jq
 )
 
 install_dep xy-base "${DEP_ARRAY[@]}"

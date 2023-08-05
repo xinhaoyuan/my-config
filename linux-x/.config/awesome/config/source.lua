@@ -17,6 +17,7 @@ local gcolor = require("gears.color")
 local notix = require("notix")
 local waffle = require("waffle")
 local glib = require("lgi").GLib
+local csv = require("csv")
 
 local gtk_icon_theme = gtk.IconTheme.get_default()
 -- Force build the cache.
@@ -257,10 +258,10 @@ local function get_audio_sinks()
         },
     }
     awful.spawn.easy_async_with_shell(
-        [[pactl list sinks | awk 'match($0,/Name:\s*(.*)/,m){id=m[1]} match($0,/Description:\s*(.*)$/,m){print id"="m[1]}']],
+        [[pactl --format=json list sinks | jq -r '.[] | [.name, .description, .mute, ([.volume[] | .value_percent | match("[0-9]*") | .string | tonumber] | select(length > 0) | add / length)] | @csv']],
         function (stdout, _stderr, _exitreason, _exitcode)
-            for id, name in string.gmatch(stdout, "([^\n\r]*)=([^\n\r]*)") do
-                output:append{id = id, name = name}
+            for _, row in csv.rows_iterator(stdout) do
+                output:append{id = row[1], name = row[2], muted = string.lower(row[3]) == "true", volume = tonumber(row[4])}
             end
         end
     )
@@ -318,10 +319,10 @@ local function get_audio_sources()
         },
     }
     awful.spawn.easy_async_with_shell(
-        [[pactl list sources | awk 'match($0,/Name:\s*(.*)/,m){id=m[1]} match($0,/Description:\s*(.*)$/,m){print id"="m[1]}']],
+        [[pactl --format=json list sources | jq -r '.[] | [.name, .description, .mute, ([.volume[] | .value_percent | match("[0-9]*") | .string | tonumber] | select(length > 0) | add / length)] | @csv']],
         function (stdout, _stderr, _exitreason, _exitcode)
-            for id, name in string.gmatch(stdout, "([^\n\r]*)=([^\n\r]*)") do
-                output:append{id = id, name = name}
+            for _, row in csv.rows_iterator(stdout) do
+                output:append{id = row[1], name = row[2], muted = string.lower(row[3]) == "true", volume = tonumber(row[4])}
             end
         end
     )
