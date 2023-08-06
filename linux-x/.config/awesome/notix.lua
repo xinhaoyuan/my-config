@@ -278,7 +278,7 @@ function config.create_notif_widget(notif)
     }
     ret.notif = notif
 
-    function ret:key_handler(mods, key, event)
+    function ret:handle_key(mods, key, event)
         if event ~= "press" then return false end
         if key == "Return" then
             remove_notification(notif, 2)
