@@ -309,12 +309,16 @@ local function decorate_panel(args)
 end
 
 local function decorate_waffle(widget)
-    return beautiful.apply_border_to_widget{
-        widget = widget,
-        top = true,
-        bottom = true,
-        left = true,
-        right = true,
+    return wibox.widget{
+        beautiful.apply_border_to_widget{
+            widget = widget,
+            top = true,
+            bottom = true,
+            left = true,
+            right = true,
+        },
+        margins = beautiful.useless_gap,
+        widget = wibox.container.margin,
     }
 end
 
@@ -1331,12 +1335,12 @@ waffle_root_bento = bento{
     source_generator = get_source,
 }
 waffle_root_view = wibox.widget{
-    beautiful.apply_border_to_widget_template{
-        widget = {
-            waffle_dashboard_widget,
+    waffle_dashboard_widget,
+    {
+        id = "bentobox",
+        visible = false,
+        {
             {
-                id = "bentobox",
-                visible = false,
                 {
                     {
                         {
@@ -1344,78 +1348,69 @@ waffle_root_view = wibox.widget{
                                 {
                                     {
                                         {
-                                            {
-                                                {
-                                                    id = "source_indicator",
-                                                    widget = masked_imagebox,
-                                                },
-                                                height = button_height,
-                                                width = button_height,
-                                                strategy = "exact",
-                                                widget = wibox.container.constraint,
-                                            },
-                                            right = beautiful.sep_small_size,
-                                            widget = wibox.container.margin,
+                                            id = "source_indicator",
+                                            widget = masked_imagebox,
                                         },
-                                        {
-                                            id = "input_area",
-                                            {
-                                                {
-                                                    waffle_root_input_widget,
-                                                    fill_horizontal = true,
-                                                    content_fill_horizontal = true,
-                                                    widget = wibox.container.place,
-                                                },
-                                                margins = dpi(2),
-                                                widget = wibox.container.margin,
-                                            },
-                                            draw_pickers = {
-                                                bg = prism.picker.concat{prism.picker.beautiful{"fg_normal"}, "20"},
-                                            },
-                                            widget = prism.container.background,
-                                        },
-                                        layout = fixed_align.horizontal,
+                                        height = button_height,
+                                        width = button_height,
+                                        strategy = "exact",
+                                        widget = wibox.container.constraint,
                                     },
-                                    widget = wibox.container.place,
-                                },
-                                {
-                                    {
-                                        waffle_root_bento,
-                                        widget = wibox.container.background,
-                                    },
-                                    top = dpi(4),
+                                    right = beautiful.sep_small_size,
                                     widget = wibox.container.margin,
                                 },
-                                layout = fixed_align.vertical
+                                {
+                                    id = "input_area",
+                                    {
+                                        {
+                                            waffle_root_input_widget,
+                                            fill_horizontal = true,
+                                            content_fill_horizontal = true,
+                                            widget = wibox.container.place,
+                                        },
+                                        margins = dpi(2),
+                                        widget = wibox.container.margin,
+                                    },
+                                    draw_pickers = {
+                                        bg = prism.picker.concat{prism.picker.beautiful{"fg_normal"}, "20"},
+                                    },
+                                    widget = prism.container.background,
+                                },
+                                layout = fixed_align.horizontal,
                             },
-                            margins = dpi(4),
+                            widget = wibox.container.place,
+                        },
+                        {
+                            {
+                                waffle_root_bento,
+                                widget = wibox.container.background,
+                            },
+                            top = dpi(4),
                             widget = wibox.container.margin,
                         },
-                        draw_pickers = {
-                            fg = prism.picker.beautiful{"fg_normal"},
-                        },
-                        widget = prism.container.background,
+                        layout = fixed_align.vertical
                     },
-                    width = dpi(500),
-                    strategy = "exact",
-                    widget = wibox.container.constraint,
+                    margins = dpi(4),
+                    widget = wibox.container.margin,
                 },
-                content_fill_vertical = true,
-                vertical_fit = false,
-                widget = fixed_place,
+                draw_pickers = {
+                    fg = prism.picker.beautiful{"fg_normal"},
+                },
+                widget = prism.container.background,
             },
-            layout = wibox.layout.fixed.horizontal,
+            width = dpi(500),
+            strategy = "exact",
+            widget = wibox.container.constraint,
         },
-        top = true,
-        bottom = true,
-        left = true,
-        right = true,
+        content_fill_vertical = true,
+        vertical_fit = false,
+        widget = fixed_place,
     },
-    margins = beautiful.useless_gap,
-    widget = wibox.container.margin,
+    layout = wibox.layout.fixed.horizontal,
 }
 -- local
 waffle_root_bentobox = waffle_root_view:get_children_by_id("bentobox")[1]
+waffle_root_view = decorate_waffle(decorate_panel{widget = waffle_root_view})
 function waffle_root_view:handle_key(mods, key, event)
     if root_bentobox_is_active() then
         return waffle_root_bento:handle_key(mods, key, event)
@@ -1476,72 +1471,64 @@ local waffle_calendar_bento = bento{
 
 -- local
 waffle_calendar_view = wibox.widget{
-    beautiful.apply_border_to_widget_template{
-        widget = {
+    {
+        {
+            cwidget.cal_widget,
+            {
+                forced_height = beautiful.sep_big_size,
+                bgimage = function(context, cr, width, height)
+                    height = beautiful.sep_big_size
+                    beautiful.draw_separator(cr, width, height)
+                end,
+                widget = wibox.container.background,
+            },
             {
                 {
-                    cwidget.cal_widget,
-                    {
-                        forced_height = beautiful.sep_big_size,
-                        bgimage = function(context, cr, width, height)
-                            height = beautiful.sep_big_size
-                            beautiful.draw_separator(cr, width, height)
-                        end,
-                        widget = wibox.container.background,
-                    },
                     {
                         {
+                            id = "input_area",
                             {
-                                {
-                                    id = "input_area",
-                                    {
-                                        waffle_calendar_input_widget,
-                                        margins = dpi(2),
-                                        widget = wibox.container.margin,
-                                    },
-                                    draw_pickers = {
-                                        bg = prism.picker.concat{prism.picker.beautiful{"fg_normal"}, "20"},
-                                    },
-                                    widget = prism.container.background,
-                                },
-                                bottom = dpi(4),
-                                draw_empty = false,
-                                widget = fixed_margin,
+                                waffle_calendar_input_widget,
+                                margins = dpi(2),
+                                widget = wibox.container.margin,
                             },
-                            {
-                                waffle_calendar_bento,
-                                widget = wibox.container.background,
+                            draw_pickers = {
+                                bg = prism.picker.concat{prism.picker.beautiful{"fg_normal"}, "20"},
                             },
-                            layout = wibox.layout.fixed.vertical,
+                            widget = prism.container.background,
                         },
-                        left = dpi(4),
-                        right = dpi(4),
                         bottom = dpi(4),
-                        widget = wibox.container.margin,
+                        draw_empty = false,
+                        widget = fixed_margin,
+                    },
+                    {
+                        waffle_calendar_bento,
+                        widget = wibox.container.background,
                     },
                     layout = wibox.layout.fixed.vertical,
                 },
-                height = calendar_waffle_width * 2,
-                width = calendar_waffle_width,
-                strategy = "exact",
-                widget = wibox.container.constraint,
+                left = dpi(4),
+                right = dpi(4),
+                bottom = dpi(4),
+                widget = wibox.container.margin,
             },
-            layout = wibox.layout.fixed.horizontal,
+            layout = wibox.layout.fixed.vertical,
         },
-        top = true,
-        bottom = true,
-        left = true,
-        right = true,
+        height = calendar_waffle_width * 2,
+        width = calendar_waffle_width,
+        strategy = "exact",
+        widget = wibox.container.constraint,
     },
-    margins = beautiful.useless_gap,
-    widget = wibox.container.margin,
+    layout = wibox.layout.fixed.horizontal,
 }
+local waffle_calendar_input = waffle_calendar_view:get_children_by_id("input_area")[1]
+waffle_calendar_view = decorate_waffle(decorate_panel{widget = waffle_calendar_view})
 function waffle_calendar_view:handle_key(mods, key, event)
     return waffle_calendar_bento:handle_key(mods, key, event)
 end
 function waffle_calendar_view:handle_open(_screen, _is_new)
     waffle_calendar_bento:open()
-    waffle_calendar_view:get_children_by_id("input_area")[1].visible =
+    waffle_calendar_input.visible =
         not waffle:autohide()
 end
 function waffle_calendar_view:handle_close()
