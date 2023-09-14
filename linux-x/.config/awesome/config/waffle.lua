@@ -851,6 +851,7 @@ end
 -- -- end
 
 local waffle_root_view
+local waffle_root_indicator
 local waffle_root_source_mode
 local waffle_root_bento
 local waffle_root_bentobox
@@ -1307,20 +1308,19 @@ local waffle_dashboard_handle_key = aggregate_key_handlers{
 }
 
 function get_source()
-    local indicator = waffle_root_view:get_children_by_id("source_indicator")[1]
     if waffle_root_source_mode == "audio_sink" then
-        indicator.image = icons.audio
+        waffle_root_indicator.image = icons.audio
         return csource.get_audio_sinks()
     elseif waffle_root_source_mode == "audio_source" then
-        indicator.image = icons.mic
+        waffle_root_indicator.image = icons.mic
         return csource.get_audio_sources()
     elseif waffle_root_source_mode == "screen_layout" then
-        indicator.image = icons.monitor
+        waffle_root_indicator.image = icons.monitor
         return csource.get_screen_layouts()
     elseif waffle_root_source_mode == "tray" then
         return csource.get_tray_items()
     end
-    indicator.image = icons.launcher
+    waffle_root_indicator.image = icons.launcher
     return csource.get_apps()
 end
 
@@ -1410,6 +1410,7 @@ waffle_root_view = wibox.widget{
 }
 -- local
 waffle_root_bentobox = waffle_root_view:get_children_by_id("bentobox")[1]
+waffle_root_indicator = waffle_root_view:get_children_by_id("source_indicator")[1]
 waffle_root_view = decorate_waffle(decorate_panel{widget = waffle_root_view})
 function waffle_root_view:handle_key(mods, key, event)
     if root_bentobox_is_active() then
