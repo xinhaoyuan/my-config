@@ -614,6 +614,7 @@ end
 
 theme.decorator_border_width = dpi(2)
 theme.decorator_padding_width = dpi(2)
+--------------------------------------------------------------------------------
 theme.decorator_shade_width = dpi(6)
 theme.decorator = decorator.presets.soft_relief{
     light_shade = "#ffffff40",
@@ -625,6 +626,7 @@ theme.decorator = decorator.presets.soft_relief{
     border_width = theme.decorator_border_width,
     padding_width = theme.decorator_padding_width,
 }
+--------------------------------------------------------------------------------
 -- theme.decorator_shade_width = theme.decorator_padding_width
 -- theme.decorator = decorator.presets.cutted_box{
 --     padding_color = theme.bg_normal,
@@ -634,6 +636,7 @@ theme.decorator = decorator.presets.soft_relief{
 --     top_left_cut = dpi(8),
 --     bottom_right_cut = dpi(8),
 -- }
+--------------------------------------------------------------------------------
 
 local function dispose_pattern(pattern)
     local status, s = pattern:get_surface()
