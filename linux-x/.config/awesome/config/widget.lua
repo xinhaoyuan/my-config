@@ -603,6 +603,171 @@ do
     }
 end
 
+local audio_widget_cache = {
+    sink = setmetatable({}, {__mode = "v"}),
+    source = setmetatable({}, {__mode = "v"}),
+}
+local function get_audio_widget(name, device_type)
+    if audio_widget_cache[device_type] == nil then return end
+    if audio_widget_cache[device_type][name] then return audio_widget_cache[device_type][name] end
+
+--     local buttons
+--     local toggle_mute
+--     local SET_VOLUME_CMD = "pactl set-sink-volume "..name
+--     local INC_VOLUME_CMD = SET_VOLUME_CMD.." +5%"
+--     local DEC_VOLUME_CMD = SET_VOLUME_CMD.." -5%"
+--     local TOG_VOLUME_CMD = "pactl set-sink-mute "..name.." toggle"
+
+    local widget = wibox.widget{
+        nil,
+        {
+            id = "name",
+            ellipsize = "start",
+            align = "center",
+            valign = "center",
+            outline_size = dpi(2),
+            widget = outlined_textbox,
+        },
+        {
+            id = "volume",
+            max_value = 1,
+            forced_height = dpi(2),
+            border_width = 0,
+            background_color = "#00000000",
+            shape = gshape.bar,
+            clip = true,
+            widget = wibox.widget.progressbar
+        },
+        layout = fixed_align.vertical
+    }
+
+--    local function spawn_and_update_audio_sink(cmd)
+--        awful.spawn.easy_async_with_shell(
+--            cmd .. ">/dev/null&&" .. GET_VOLUME_CMD,
+--            function (stdout, stderr, exitreason, exitcode)
+--                update_graphic(stdout, stderr, exitreason, exitcode)
+--            end
+--        )
+--    end
+
+--    function audio_sink_toggle_mute()
+--        spawn_and_update_audio_sink(TOG_VOLUME_CMD)
+--    end
+
+--    -- For waffle.
+--    widget.keys = {
+--        ["-"] = function (mod, _, event)
+--            if event == "release" then return end
+--            awful.spawn.easy_async_with_shell(
+--                DEC_VOLUME_CMD,
+--                function (...)
+--                    print("dec vol:", ...)
+--                end
+--            )
+--        end,
+--        ["0"] = function (_mod, _key, event)
+--            if event == "release" then return end
+--            awful.spawn.easy_async_with_shell(
+--                TOG_VOLUME_CMD,
+--                function (...)
+--                    print("tog vol:", ...)
+--                end
+--            )
+--        end,
+--        ["="] = function (_mod, _key, event)
+--            if event == "release" then return end
+--            awful.spawn.easy_async_with_shell(
+--                INC_VOLUME_CMD,
+--                function (...)
+--                    print("inc vol:", ...)
+--                end
+--            )
+--        end,
+--    }
+
+--    -- For bento.
+--    function widget:handle_key(mods, key, event)
+--        if event ~= "press" then return end
+--        if self.keys[key] then
+--            self.keys[key](mods, key, event)
+--            return true
+--        end
+--        return false
+--    end
+
+--    widget:connect_signal(
+--        "button::press", function (_widget, x, y, b, _mods, info)
+--            if b == 2 then
+--                awful.spawn.easy_async_with_shell(
+--                    TOG_VOLUME_CMD..">/dev/null&&" .. GET_VOLUME_CMD,
+--                    function (stdout, stderr, exitreason, exitcode)
+--                        update_graphic(stdout, stderr, exitreason, exitcode)
+--                    end)
+--            elseif b == 3 then
+--                local sx = info.drawable.drawable:geometry().x + info.x
+--                local sy = info.drawable.drawable:geometry().y + info.y
+--                local width = info.width
+--                local value = math.floor(math.max(0, math.min(x / width, 1)) * 100 + 0.5)
+--                local prev_value
+--                local timer = gtimer{
+--                    timeout = 0.1,
+--                    autostart = true,
+--                    callback = function ()
+--                        if prev_value == value then return end
+--                        prev_value = value
+--                        awful.spawn.easy_async_with_shell(
+--                            SET_VOLUME_CMD.." "..tostring(value),
+--                            function (stdout, stderr, exitreason, exitcode)
+--                                print("set vol:", ...)
+--                            end)
+--                    end,
+--                }
+--                local init_info = info
+--                capi.mousegrabber.run(
+--                    function (info)
+--                        local p = (info.x - sx) / width
+--                        value = math.floor(math.max(0, math.min(p, 1)) * 100 + 0.5)
+--                        if not info.buttons[3] then
+--                            timer:stop()
+--                            awful.spawn.easy_async_with_shell(
+--                                SET_VOLUME_CMD.." "..tostring(value),
+--                                function (stdout, stderr, exitreason, exitcode)
+--                                    print("set vol:", ...)
+--                                end)
+--                            audio_sink_widget:emit_signal_recursive("button::release", init_info.x, init_info.y, 3, {}, init_info)
+--                            return false
+--                        end
+--                        return true
+--                    end,
+--                    "sb_h_double_arrow")
+--            elseif b == 4 then
+--                awful.spawn.easy_async_with_shell(
+--                    INC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
+--                    function (stdout, stderr, exitreason, exitcode)
+--                        update_graphic(stdout, stderr, exitreason, exitcode)
+--                    end
+--                )
+--            elseif b == 5 then
+--                awful.spawn.easy_async_with_shell(
+--                    DEC_VOLUME_CMD .. ">/dev/null&&" .. GET_VOLUME_CMD,
+--                    function (stdout, stderr, exitreason, exitcode)
+--                        update_graphic(stdout, stderr, exitreason, exitcode)
+--                    end
+--                )
+--            end
+--        end)
+--    function audio_sink_widget:execute(alt)
+--        if alt then
+--            -- awful.spawn({"pavucontrol"})
+--            return false
+--        else
+--            audio_sink_choose_default()
+--            return true
+--        end
+--    end
+
+end
+
 local audio_sink_widget
 do
     local audio_sink_name_widget

@@ -194,7 +194,7 @@ theme.notification_icon_size = dpi(48)
 -- Interesting fonts: Hack, Iosevka SS08 (or SS03), Lato, Quicksand, Lobster Two, Purisa, Dosis, Fantasque Sans Mono, Agave, Ubuntu Mono, mononoki
 theme.font_name_normal = "Agave"
 -- custom property string
-theme.font_name_mono = "Iosevka XY Sans UI"
+theme.font_name_mono = "Iosevka XY Mono UI"
 -- custom property number
 theme.font_size_normal = 10
 theme.font_size_small = 9

@@ -2,7 +2,7 @@
 ! Xcursor.theme: Capitaine Cursors
 Xcursor.theme: Breeze
 
-st.font: Iosevka XY Sans UI:size=10
+st.font: Iosevka XY Mono UI:size=10
 st.bold_font: 1
 st.borderpx: 0
 st.cursorshape: 2

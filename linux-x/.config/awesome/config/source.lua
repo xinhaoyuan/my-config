@@ -190,7 +190,7 @@ local function get_apps()
                     widget = prism.layer,
                 }
                 function w:execute()
-                    cache_execution(e.name, apps_source.filter.assignment)
+                    cache_execution(e.name, apps_source.filter and apps_source.filter.assignment)
                     e.ai:launch()
                     waffle:hide()
                 end
@@ -602,10 +602,12 @@ local function get_tray_items()
     local output = source.array_proxy()
     if capi.awesome.systray_list then
         for index, info in ipairs(capi.awesome.systray_list()) do
-            output:append{
-                xid = info[1],
-                name = info[2],
-            }
+            if xid and name then
+                output:append{
+                    xid = info[1],
+                    name = info[2],
+                }
+            end
         end
     end
     local ret = source.filterable{

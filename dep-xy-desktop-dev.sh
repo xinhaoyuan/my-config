@@ -47,8 +47,9 @@ DEP_ARRAY=(
     inkscape
     # luakit
     libwebkit2gtk-4.0-dev
-    libluajit-5.1-dev
-    luajit
+    # Better build local luajit ..
+    # libluajit-5.1-dev
+    # luajit
 )
     
 install_dep xy-desktop-dev "${DEP_ARRAY[@]}"
