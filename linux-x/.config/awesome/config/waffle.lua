@@ -39,6 +39,7 @@ local fts = require("hotpot").focus_timestamp
 local dpi = require("beautiful.xresources").apply_dpi
 local prism = require("prism")
 local bento = require("awemni.bento")
+local notix = require("notix")
 
 local waffle_width = beautiful.waffle_panel_width or dpi(240)
 local calendar_waffle_width = waffle_width
@@ -444,6 +445,24 @@ local waffle_settings_view = decorate_waffle(
                     end
                 end,
             },
+            (
+                function()
+                    local get_label = function ()
+                        return "Notification: "..(notix.config.silent and "silent" or "show")
+                    end
+                    local b
+                    b = button{
+                        indicator = em("o"),
+                        key = {"o", "O"},
+                        action = function (alt)
+                            notix.config.silent = not notix.config.silent
+                            b.label.text = get_label()
+                        end
+                    }
+                    b.label.text = get_label()
+                    return b
+                end
+            )(),
             (
                 function()
                     local b
@@ -1525,6 +1544,27 @@ waffle_calendar_view = wibox.widget{
 local waffle_calendar_input = waffle_calendar_view:get_children_by_id("input_area")[1]
 waffle_calendar_view = decorate_waffle(decorate_panel{widget = waffle_calendar_view})
 function waffle_calendar_view:handle_key(mods, key, event)
+    local captured
+    if key == "[" or key == "]" or key == "\\" then
+        for _, m in pairs(mods) do
+            if m == "Mod4" then
+                captured = true
+                break
+            end
+        end
+        if captured then
+            if event == "release" then
+                if key == "\\" then
+                    notix.remove_unpinned()
+                elseif key == "[" then
+                    cwidget.cal_widget:move_date({month = -1})
+                elseif key == "]" then
+                    cwidget.cal_widget:move_date({month = 1})
+                end
+            end
+            return true;
+        end
+    end
     return waffle_calendar_bento:handle_key(mods, key, event)
 end
 function waffle_calendar_view:handle_open(_screen, _is_new)

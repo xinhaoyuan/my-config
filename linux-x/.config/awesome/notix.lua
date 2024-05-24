@@ -20,6 +20,7 @@ local scroller = require("scroller")
 
 local config = {
     initialize_naughty = true,
+    enabled = true,
 }
 
 local notif_id_counter = 0
@@ -396,6 +397,11 @@ gtimer.delayed_call(
         )
     end
 )
+
+naughty.config.notify_callback = function (args)
+    args.ignore = config.silent
+    return args
+end
 
 return {
     config = config,
