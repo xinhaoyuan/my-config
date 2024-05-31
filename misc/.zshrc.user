@@ -18,6 +18,7 @@ alias x="tmux new -As"
 alias xclip="xclip -selection clipboard"
 alias emacs="emacs -nw"
 alias lt="ll --sort=time -r"
+alias fzf-git-commit="git log --oneline | fzf --multi --preview 'git show {+1}' | awk '{print \$1}'"
 
 if type -p dircolors > /dev/null; then
     if [[ "$TERM" = dvtm || "$TERM" = dvtm-* ]]; then
