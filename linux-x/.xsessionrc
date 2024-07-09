@@ -28,4 +28,4 @@ else
     xrdb -merge $HOME/.Xresources.d/hidpi
 fi
 
-wal -R
+wal -R || pipx run pywal -R || echo "Cannot restore pywal theme" >2
