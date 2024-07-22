@@ -40,6 +40,7 @@ local dpi = require("beautiful.xresources").apply_dpi
 local prism = require("prism")
 local bento = require("awemni.bento")
 local notix = require("notix")
+local taglist = require("config.taglist")
 
 local waffle_width = beautiful.waffle_panel_width or dpi(240)
 local calendar_waffle_width = waffle_width
@@ -1308,6 +1309,11 @@ waffle_dashboard_widget = wibox.widget{
     layout = wibox.layout.fixed.vertical,
 }
 
+local tag_keys = {}
+for i = 1, #shared.screen.tags do
+    local key = tostring(i)
+    tag_keys[key] = i
+end
 local waffle_dashboard_handle_key = aggregate_key_handlers{
     widget = waffle_dashboard_widget,
     key_filter = function (mod, key, event)
@@ -1320,6 +1326,11 @@ local waffle_dashboard_handle_key = aggregate_key_handlers{
             pcall(awful.screen.focus_bydirection, key:lower())
             waffle:hide()
             capi.awesome.emit_signal("show_main_waffle", {anchor = "screen"})
+            return false
+        end
+        if tag_keys[key] ~= nil then
+            -- Support other tag operation?
+            taglist.switch_or_restore(awful.screen.focused().tags[tag_keys[key]])
             return false
         end
         return true
