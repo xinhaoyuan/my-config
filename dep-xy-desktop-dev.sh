@@ -45,8 +45,8 @@ DEP_ARRAY=(
     libgtk-3-dev
     python3-pil
     inkscape
-    # luakit
-    libwebkit2gtk-4.0-dev
+    # luakit - disabled for now.
+    # libwebkit2gtk-4.0-dev
     # Better build local luajit ..
     # libluajit-5.1-dev
     # luajit
