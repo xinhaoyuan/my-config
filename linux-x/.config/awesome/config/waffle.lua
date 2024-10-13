@@ -1337,7 +1337,7 @@ local waffle_dashboard_handle_key = aggregate_key_handlers{
     end
 }
 
-function get_source()
+local function get_source()
     if waffle_root_source_mode == "audio_sink" then
         waffle_root_indicator.image = icons.audio
         return csource.get_audio_sinks()

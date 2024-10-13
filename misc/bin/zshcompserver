@@ -119,7 +119,7 @@ if (( ZSH_COMPLETION_SERVER_INNER )); then
 	    # add a dir suffix?
 	    (( dirsuf )) && [[ -d $__hits[$i] ]] && dsuf=/ || dsuf=
 	    # description to be displayed afterwards
-	    (( $#__dscr >= $i )) && dscr=$'\2'"${__dscr[$i]}" || dscr=
+	    (( $#__dscr >= $i )) && dscr="${__dscr[$i]}" || dscr=
             
             # local item="$IPREFIX$ipre$apre${hpre}$__hits[$i]$dsuf$hsuf$asuf$dscr$isuf"
 	    # print -r $'\1'"$item"

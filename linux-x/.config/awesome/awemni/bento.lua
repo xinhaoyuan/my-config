@@ -81,7 +81,7 @@ function bento.new(args)
 
     local input_widget = args.input_widget
     assert(input_widget)
-    local prompt, key_handler
+    local prompt
     prompt = prompter{
         textbox = input_widget,
         hooks = {
@@ -102,7 +102,7 @@ function bento.new(args)
             bento_lister.input = input
         end,
         done_callback = function ()
-            key_handler({}, "Escape", "press")
+            prompt({}, "Escape", "press")
         end,
     }
 
@@ -113,6 +113,10 @@ function bento.new(args)
 
     function list_layout:reload_source()
         bento_lister.source = args.source_generator()
+    end
+
+    function list_layout:reset_input()
+        prompt({}, "Escape", "press")
     end
 
     function list_layout:open()
