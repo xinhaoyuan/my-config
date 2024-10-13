@@ -1109,7 +1109,7 @@ local waffle_dashboard_action_grid_widget = decorate_panel{
                 key = {"r", "R", " "},
                 action = function (alt)
                     if waffle:is_in_view(waffle_root_view) then
-                        root_bentobox_open()
+                        root_bentobox_open(alt and "zsh" or "apps")
                     end
                 end,
             },
@@ -1349,6 +1349,8 @@ local function get_source()
         return csource.get_screen_layouts()
     elseif waffle_root_source_mode == "tray" then
         return csource.get_tray_items()
+    elseif waffle_root_source_mode == "zsh" then
+        return csource.get_zsh_completion(waffle_root_bento)
     end
     waffle_root_indicator.image = icons.launcher
     return csource.get_apps()

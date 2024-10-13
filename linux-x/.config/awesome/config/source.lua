@@ -542,6 +542,157 @@ local function get_screen_layouts()
     return ret
 end
 
+local previous_zshcompserver_pid
+local function get_zsh_completion(bento)
+    local input_stack = {}
+    local start_array = {
+        { name = "Kill process", value = "kill" },
+        { name = "xinput manipulation", value = "xinput" },
+    }
+    local output = source.array_proxy()
+    if previous_zshcompserver_pid ~= nil then
+        print("Killing previous zshcompserver "..previous_zshcompserver_pid)
+        awful.spawn({"kill", previous_zshcompserver_pid}, false)
+    end
+    local pid_or_error, _, stdin_fd, stdout_fd, stderr_fd = capi.awesome.spawn({"zshcompserver"},
+        --[[use_sn=]]false, --[[use_stdin=]]true, --[[use_stdout=]]true, --[[use_stderr=]]true,
+        --[[exit_callback=]]function (_exit_type)
+        end, --[[env=]]nil)
+    if type(pid_or_error) == "string" then
+        print("Failed to launch zshcompserver: "..pid_or_error)
+        return nil
+    end
+    previous_zshcompserver_pid = pid_or_error
+    local stdin = gio.UnixOutputStream.new(stdin_fd, --[[close_fd=]]true)
+    local stdout = gio.UnixInputStream.new(stdout_fd, --[[close_fd=]]true)
+    local current_item = {}
+    local reading_done = true
+    local SPECIAL_CURRENT_INPUT = 0
+    local SPECIAL_PREVIOUS_INPUT = 1
+    awful.spawn.read_lines(
+        stdout, function (line)
+            if line == "" then
+                output:set_size(#output.array)
+                reading_done = true
+                return
+            end
+            if current_item.value == nil then
+                current_item.value = line
+            else
+                current_item.name = line
+                output.array[#output.array + 1] = current_item
+                current_item = {}
+            end
+        end
+    )
+    local function last_input()
+        return #input_stack == 0 and "" or input_stack[#input_stack]
+    end
+    local function send_input()
+        if not reading_done then
+            print("Error! Attempting to send input while previous reading is in progress")
+            return
+        end
+        if #input_stack > 0 then
+            reading_done = false
+            local input = input_stack[#input_stack]
+            output.array = {}
+            output.array[1] = { name = "RUN: "..input, special = SPECIAL_CURRENT_INPUT }
+            output.array[2] = { name = (#input_stack > 1 and "BACK: "..input_stack[#input_stack - 1] or "BACK TO EMPTY"), special = SPECIAL_PREVIOUS_INPUT }
+            input = last_input()
+            output:set_size(#output.array)
+            current_item = {}
+            stdin:write_all(input.."\n")
+            print("Sent input ["..input.."]")
+        else
+            output.array = start_array
+            output:set_size(#output.array)
+        end
+    end
+    local ret = source.filterable{
+        upstream = output,
+        callbacks = {
+            filter = function (f, e)
+                if e == nil then return false end
+                if f == nil then return 0 end
+                f = f:lower()
+                local n = e.name:lower()
+                local succ, start = pcall(string.find, n, f)
+                return succ and start
+            end,
+            reduce = function (filtered_results)
+                table.sort(filtered_results, function (a, b)
+                               if a[2] == b[2] then return a[1] < b[1] end
+                               return a[2] < b[2]
+                           end)
+            end,
+            post_filter = function (e)
+                if e.widget then return e.widget end
+                local w = wibox.widget{
+                    {
+                        {
+                            {
+                                e.config and {
+                                    forced_width = screen_layout_preview_max_size,
+                                    forced_height = math.min(
+                                        screen_layout_preview_max_size,
+                                        math.ceil(e.config.overall_height / e.config.overall_width *
+                                                  screen_layout_preview_max_size)),
+                                    bgimage = function (context, cr, width, height)
+                                        draw_autorandr_config(e.config, cr, width, height)
+                                    end,
+                                    widget = wibox.container.background,
+                                },
+                                {
+                                    {
+                                        text = e.name,
+                                        widget = wibox.widget.textbox,
+                                    },
+                                    left = dpi(2),
+                                    widget = wibox.container.margin,
+                                },
+                                layout = fixed_align.horizontal,
+                            },
+                            margins = dpi(2),
+                            widget = wibox.container.margin,
+                        },
+                        draw_pickers = {
+                            fg = prism.picker.beautiful{"fg_", prism.picker.highlighted_switcher},
+                            prism.picker.list{"bg", prism.picker.beautiful{"bg_", prism.picker.branch{"highlighted", "focus"}}},
+                        },
+                        widget = prism.container.background,
+                    },
+                    widget = prism.layer,
+                }
+                function w:execute()
+                    if e.special == SPECIAL_CURRENT_INPUT then
+                        waffle:hide()
+                        awful.spawn.with_shell(last_input(), false)
+                        return
+                    elseif e.special == SPECIAL_PREVIOUS_INPUT then
+                        input_stack[#input_stack] = nil
+                        send_input()
+                        bento:reset_input()
+                        return
+                    end
+                    input_stack[#input_stack + 1] = last_input()..e.value.." "
+                    send_input()
+                    bento:reset_input()
+                end
+                function w:set_focused(v)
+                    -- local preview = self:get_children_by_id("preview")[1]
+                    if preview then preview.visible = v end
+                    self.context_transformation = {highlighted = v}
+                end
+                e.widget = w
+                return w
+            end,
+        },
+    }
+    send_input()
+    return ret
+end
+
 local calendar = source.concat{
     upstreams = {
         source.filterable{
@@ -666,6 +817,7 @@ return {
     get_audio_sinks = get_audio_sinks,
     get_audio_sources = get_audio_sources,
     get_screen_layouts = get_screen_layouts,
+    get_zsh_completion = get_zsh_completion,
     calendar = calendar,
     get_tray_items = get_tray_items,
 }
