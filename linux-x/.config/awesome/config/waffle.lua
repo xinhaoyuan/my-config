@@ -1462,7 +1462,12 @@ function waffle_root_view:handle_close()
 end
 function shared.waffle.launcher()
     waffle:show(nil, {anchor = "screen"})
-    root_bentobox_open()
+    root_bentobox_open("apps")
+end
+
+function shared.waffle.zsh_completion()
+    waffle:show(nil, {anchor = "screen"})
+    root_bentobox_open("zsh")
 end
 
 waffle:set_root_view(waffle_root_view)
