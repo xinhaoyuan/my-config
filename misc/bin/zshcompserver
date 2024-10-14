@@ -48,6 +48,8 @@ if (( ZSH_COMPLETION_SERVER_INNER )); then
     # no color formatting
     zstyle -d ':completion:*' list-colors
 
+    zstyle ':completion:*:*:*:*:processes' command 'ps -u "$USER" -o pid,args -w -w'
+
     # we use zparseopts
     zmodload zsh/zutil
 
