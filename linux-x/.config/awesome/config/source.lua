@@ -543,7 +543,7 @@ local function get_screen_layouts()
 end
 
 local previous_zshcompserver_pid
-local function get_zsh_completion(bento)
+local function get_zsh_completion(bento, prompt)
     local input_stack = {}
     local start_array = {
         { name = "Kill process", value = "kill" },
@@ -597,14 +597,16 @@ local function get_zsh_completion(bento)
             reading_done = false
             local input = input_stack[#input_stack]
             output.array = {}
-            output.array[1] = { name = "RUN: "..input, special = SPECIAL_CURRENT_INPUT }
-            output.array[2] = { name = (#input_stack > 1 and "BACK: "..input_stack[#input_stack - 1] or "BACK TO EMPTY"), special = SPECIAL_PREVIOUS_INPUT }
+            output.array[1] = { name = "[RUN]", special = SPECIAL_CURRENT_INPUT }
+            output.array[2] = { name = "[BACK]", special = SPECIAL_PREVIOUS_INPUT }
             input = last_input()
             output:set_size(#output.array)
             current_item = {}
             stdin:write_all(input.."\n")
+            prompt.text = input
             print("Sent input ["..input.."]")
         else
+            prompt.text = ""
             output.array = start_array
             output:set_size(#output.array)
         end

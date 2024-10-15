@@ -874,6 +874,7 @@ local waffle_root_view
 local waffle_root_indicator
 local waffle_root_source_mode
 local waffle_root_bento
+local waffle_root_prompt
 local waffle_root_bentobox
 local waffle_root_bentobox_open
 local waffle_dashboard_widget
@@ -1338,6 +1339,7 @@ local waffle_dashboard_handle_key = aggregate_key_handlers{
 }
 
 local function get_source()
+    waffle_root_prompt.text = ""
     if waffle_root_source_mode == "audio_sink" then
         waffle_root_indicator.image = icons.audio
         return csource.get_audio_sinks()
@@ -1348,9 +1350,11 @@ local function get_source()
         waffle_root_indicator.image = icons.monitor
         return csource.get_screen_layouts()
     elseif waffle_root_source_mode == "tray" then
+        waffle_root_indicator.image = icons.dots
         return csource.get_tray_items()
     elseif waffle_root_source_mode == "zsh" then
-        return csource.get_zsh_completion(waffle_root_bento)
+        waffle_root_indicator.image = icons.terminal
+        return csource.get_zsh_completion(waffle_root_bento, waffle_root_prompt)
     end
     waffle_root_indicator.image = icons.launcher
     return csource.get_apps()
@@ -1380,16 +1384,28 @@ waffle_root_view = wibox.widget{
                                 {
                                     {
                                         {
-                                            id = "source_indicator",
-                                            widget = masked_imagebox,
+                                            {
+                                                id = "source_indicator",
+                                                widget = masked_imagebox,
+                                            },
+                                            height = button_height,
+                                            width = button_height,
+                                            strategy = "exact",
+                                            widget = wibox.container.constraint,
+                                        },
+                                        right = beautiful.sep_small_size,
+                                        widget = wibox.container.margin,
+                                    },
+                                    {
+                                        {
+                                            id = "prompt",
+                                            widget = wibox.widget.textbox,
                                         },
                                         height = button_height,
-                                        width = button_height,
                                         strategy = "exact",
                                         widget = wibox.container.constraint,
                                     },
-                                    right = beautiful.sep_small_size,
-                                    widget = wibox.container.margin,
+                                    widget = wibox.layout.fixed.horizontal,
                                 },
                                 {
                                     id = "input_area",
@@ -1443,6 +1459,7 @@ waffle_root_view = wibox.widget{
 -- local
 waffle_root_bentobox = waffle_root_view:get_children_by_id("bentobox")[1]
 waffle_root_indicator = waffle_root_view:get_children_by_id("source_indicator")[1]
+waffle_root_prompt = waffle_root_view:get_children_by_id("prompt")[1]
 waffle_root_view = decorate_waffle(decorate_panel{widget = waffle_root_view})
 function waffle_root_view:handle_key(mods, key, event)
     if root_bentobox_is_active() then
