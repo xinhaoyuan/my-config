@@ -87,6 +87,7 @@ function bento.new(args)
         hooks = {
             {{}, "Escape", function (_input)
                  bento_lister.input = ""
+                 bento_lister.focus = nil
                  return "", false
              end},
             {{}, "BackSpace", function (input)
@@ -109,6 +110,7 @@ function bento.new(args)
     local function reset()
         bento_lister.source = nil
         bento_lister.input = ""
+        bento_lister.focus = nil
     end
 
     function list_layout:reload_source()
