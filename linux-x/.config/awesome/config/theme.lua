@@ -126,8 +126,12 @@ if theme.xborder_radius and theme.xborder_radius >= theme.xborder_width then
 else
     theme.xborder_indent = dpi(4)
 end
-theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
-theme.border_normal = acolor(is_light_color(theme.bg_normal) and "#ffffff" or "#000000"):blend_with(acolor(theme.bg_normal), 0.5):to_string()
+-- -- Strong border
+-- theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
+-- theme.border_normal = acolor(is_light_color(theme.bg_normal) and "#ffffff" or "#000000"):blend_with(acolor(theme.bg_normal), 0.5):to_string()
+-- Weak border
+theme.border_focus  = gcolor(acolor(theme.fg_normal):blend_with(acolor(theme.bg_normal), 0.8):to_string())
+theme.border_normal = theme.bg_normal
 theme.xborder_shade = c_black[2].."80"
 -- theme.xborder_space = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
 -- theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
