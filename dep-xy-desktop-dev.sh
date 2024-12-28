@@ -19,7 +19,7 @@ DEP_ARRAY=(
     lua-lgi
     imagemagick
     libglib2.0-dev
-    libgdk-pixbuf2.0-dev
+    libgdk-pixbuf-xlib-2.0-dev
     libcairo2-dev
     libxcb-cursor-dev
     libxcb-randr0-dev
@@ -51,5 +51,5 @@ DEP_ARRAY=(
     # libluajit-5.1-dev
     # luajit
 )
-    
+
 install_dep xy-desktop-dev "${DEP_ARRAY[@]}"
