@@ -1,7 +1,7 @@
 . "$HOME/.path_profile"
 . "$HOME/.xprofile"
 
-export $(dbus-launch)
+# export $(dbus-launch)
 export QT_QPA_PLATFORMTHEME=qt5ct
 
 set_dpi.py --fallback-dpi 144 --min-dpi 96 --max-dpi 144
