@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t -*-
 ;;; simple-indent-mode.el --- a minor mode to provide a consistent indentation.
 
 ;; Copyright 2021 Xinhao Yuan
@@ -49,16 +50,16 @@
         ))
     ))
 
-(defun si-calculate-indentation ()
-  "Calculate the indentation of the current line by looking back to the previous non-empty line."
-  (save-excursion
-    (forward-line -1)
-    (loop
-     if (equal (point) (point-min)) return 0
-     do (back-to-indentation)
-     unless (looking-at "$") return (current-indentation)
-     do (forward-line -1)
-     )))
+(defun si-previous-indentation (shrink)
+  "Finds the indentation of the cloest previous non-empty line. If `shrink` is t, ignores lines with larger indentation."
+  (let ((cur-ind (current-indentation)))
+    (save-excursion
+      (loop
+       if (< (forward-line -1) 0) return 0
+       do (back-to-indentation)
+       for new-ind = (current-indentation)
+       unless (or (looking-at "$") (and shrink (>= new-ind cur-ind))) return new-ind
+       ))))
 
 (defun si-do-indent (levels repeat)
   "Indent regions/lines based on the context."
@@ -68,7 +69,7 @@
             (deactivate-mark nil)
             )
         (si-indent-region start end levels))
-    (let ((new (si-calculate-indentation))
+    (let ((new (si-previous-indentation (< levels 0)))
           (old (current-indentation))
           (col (current-column)))
       (cond
@@ -87,12 +88,31 @@
 
 (defun si-indent-cmd () (interactive) (si-do-indent 1 (eq last-command 'si-indent-cmd)))
 (defun si-back-indent-cmd () (interactive) (si-do-indent -1 (eq last-command 'si-back-indent-cmd)))
+(defun si-back-indent-key-cmd (key)
+  (lambda () (interactive)
+    (let ((cur-ind (current-indentation))
+          (cur-col (current-column)))
+      (if (and (not (use-region-p)) (> cur-col 0) (= cur-col cur-ind))
+          (let* ((prev-ind (si-previous-indentation t))
+                 (back-ind (save-excursion
+                             (si-indent-line -1)
+                             (current-column)))
+                 (target-ind (if (< prev-ind cur-ind) (max prev-ind back-ind) back-ind))
+                 )
+            (indent-line-to target-ind))
+        (let* ((simple-indent-mode nil)
+               (orig-func (key-binding key)))
+          (call-interactively orig-func)
+          )))))
 (defun si-newline-and-indent () (interactive) (newline) (si-do-indent 0 nil))
 
 (defconst si-mode-map
   (let ((keymap (make-sparse-keymap)))
     (define-key keymap (kbd "TAB") 'si-indent-cmd)
     (define-key keymap (kbd "<backtab>") 'si-back-indent-cmd)
+    (define-key keymap (kbd "DEL") (si-back-indent-key-cmd (kbd "DEL")))
+    ;;;; Does not work when <backspace> is translated to DEL
+    ;; (define-key keymap (kbd "<backspace>") (si-back-indent-key-cmd (kbd "")))
     (define-key keymap (kbd "RET") 'si-newline-and-indent)
     (define-key keymap (kbd "<return>") 'si-newline-and-indent)
     keymap))
