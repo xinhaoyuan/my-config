@@ -50,12 +50,17 @@
         ))
     ))
 
+(defcustom simple-indent-mode-max-lookup-lines 80 "Number of lines to look up for indenting the current line.")
+
 (defun si-previous-indentation (shrink)
   "Finds the indentation of the cloest previous non-empty line. If `shrink` is t, ignores lines with larger indentation."
-  (let ((cur-ind (current-indentation)))
+  (let ((cur-ind (current-indentation))
+        (num-lookup-lines 0)
+        )
     (save-excursion
-      (loop
+      (cl-loop
        if (< (forward-line -1) 0) return 0
+       if (> (setq num-lookup-lines (+ num-lookup-lines 1)) simple-indent-mode-max-lookup-lines) return 0
        do (back-to-indentation)
        for new-ind = (current-indentation)
        unless (or (looking-at "$") (and shrink (>= new-ind cur-ind))) return new-ind
