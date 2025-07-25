@@ -89,47 +89,47 @@
                    ;; for xterm-query
                    (load "term/xterm")
                    ;; (message "Querying the background color")
-                   (flet ((my-xterm-maybe-set-dark-background-mode
-                           (redc greenc bluec)
-                           ;; (message "background rgb %d %d %d" redc greenc bluec)
-                           ;; Use the heuristic in `frame-set-background-mode' to decide if a
-                           ;; frame is dark.
-                           (if (< (+ redc greenc bluec) (* .6 (+ 65535 65535 65535)))
-                               (setq frame-background-mode 'dark)
-                             (setq frame-background-mode 'light)
-                             )
-                           (frame-set-background-mode f)
-                           )
-                          (my-xterm--report-background-handler
-                           ()
-                           (let ((str "")
-                                 chr)
-                             ;; The reply should be: \e ] 11 ; rgb: NUMBER1 / NUMBER2 / NUMBER3 \e \\
-                             (while (and (setq chr (read-event nil nil 0.1)) (not (equal chr ?\\)))
-                               (setq str (concat str (string chr))))
-                             (when (string-match
-                                    "rgb:\\([a-f0-9]+\\)/\\([a-f0-9]+\\)/\\([a-f0-9]+\\)" str)
-                               (let ((recompute-faces
-                                      (my-xterm-maybe-set-dark-background-mode
-                                       (string-to-number (match-string 1 str) 16)
-                                       (string-to-number (match-string 2 str) 16)
-                                       (string-to-number (match-string 3 str) 16))))
+                   (let ((my-xterm-maybe-set-dark-background-mode
+                          (lambda (redc greenc bluec)
+                            ;; (message "background rgb %d %d %d" redc greenc bluec)
+                            ;; Use the heuristic in `frame-set-background-mode' to decide if a
+                            ;; frame is dark.
+                            (if (< (+ redc greenc bluec) (* .6 (+ 65535 65535 65535)))
+                                (setq frame-background-mode 'dark)
+                              (setq frame-background-mode 'light)
+                              )
+                            (frame-set-background-mode f)
+                            ))
+                         (my-xterm--report-background-handler
+                          (lambda ()
+                            (let ((str "")
+                                  chr)
+                              ;; The reply should be: \e ] 11 ; rgb: NUMBER1 / NUMBER2 / NUMBER3 \e \\
+                              (while (and (setq chr (read-event nil nil 0.1)) (not (equal chr ?\\)))
+                                (setq str (concat str (string chr))))
+                              (when (string-match
+                                     "rgb:\\([a-f0-9]+\\)/\\([a-f0-9]+\\)/\\([a-f0-9]+\\)" str)
+                                (let ((recompute-faces
+                                       (funcall my-xterm-maybe-set-dark-background-mode
+                                                (string-to-number (match-string 1 str) 16)
+                                                (string-to-number (match-string 2 str) 16)
+                                                (string-to-number (match-string 3 str) 16))))
 
-                                 ;; Recompute faces here in case the background mode was
-                                 ;; set to dark.  We used to call
-                                 ;; `tty-set-up-initial-frame-faces' only once, but that
-                                 ;; caused the light background faces to be computed
-                                 ;; incorrectly.  See:
-                                 ;; http://permalink.gmane.org/gmane.emacs.devel/119627
-                                 (when recompute-faces
-                                   (tty-set-up-initial-frame-faces)))))))
+                                  ;; Recompute faces here in case the background mode was
+                                  ;; set to dark.  We used to call
+                                  ;; `tty-set-up-initial-frame-faces' only once, but that
+                                  ;; caused the light background faces to be computed
+                                  ;; incorrectly.  See:
+                                  ;; http://permalink.gmane.org/gmane.emacs.devel/119627
+                                  (when recompute-faces
+                                    (tty-set-up-initial-frame-faces))))))))
                      ;; I've been seeing "Quit" occuring when the response from terminal
                      ;; does not end with ST ("\e\\").
                      (with-local-quit
                        (let ((inhibit-quit t))
-                         (xterm--query "\e]11;?\e\\" '(("\e]11;" .  my-xterm--report-background-handler)))))
+                         (xterm--query "\e]11;?\e\\" `(("\e]11;" .  ,my-xterm--report-background-handler)))))
 	             ))))
-	     )
+	   )
 	 )))
   (add-hook 'after-make-frame-functions init-new-frame)
   )

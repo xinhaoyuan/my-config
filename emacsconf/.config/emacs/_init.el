@@ -194,7 +194,8 @@
 
 (require 'gas-mode)
 (add-to-list 'auto-mode-alist '("\\.S\\'" . gas-mode))
-(require 'quack)
+;; Disabled since it's old and start to cause error on Emacs 30.1
+;; (require 'quack)
 
 (if (require 'irony nil 'noerror)
     (progn
@@ -510,7 +511,7 @@
 (define-key my-prefix (kbd "r") (lambda () (interactive) (revert-buffer nil t t)))
 (define-key my-prefix (kbd "t") 'tabify-buffer)
 (define-key my-prefix (kbd "v") 'set-variable)
-(define-key my-prefix (kbd "x") 'kill-this-buffer)
+(define-key my-prefix (kbd "x") 'kill-current-buffer)
 
 (global-unset-key (kbd "C-x C-c"))
 (global-set-key (kbd "C-x C-c") 'my-exit)
