@@ -7,6 +7,7 @@ local beautiful = require("beautiful")
 local gfs = require("gears.filesystem")
 local lgi = require("lgi")
 local gio = lgi.Gio
+local gio_unix = lgi.GioUnix
 local gtk = lgi.require("Gtk", "3.0")
 local dpi = require("beautiful.xresources").apply_dpi
 local wibox = require("wibox")
@@ -563,8 +564,8 @@ local function get_zsh_completion(bento, prompt)
         return nil
     end
     previous_zshcompserver_pid = pid_or_error
-    local stdin = gio.UnixOutputStream.new(stdin_fd, --[[close_fd=]]true)
-    local stdout = gio.UnixInputStream.new(stdout_fd, --[[close_fd=]]true)
+    local stdin = gio_unix.OutputStream.new(stdin_fd, --[[close_fd=]]true)
+    local stdout = gio_unix.InputStream.new(stdout_fd, --[[close_fd=]]true)
     local current_item = {}
     local reading_done = true
     local SPECIAL_CURRENT_INPUT = 0

@@ -1430,20 +1430,20 @@ function shared.screen.silhouette(filename)
     end
 end
 
-local launcher
-awful.keyboard.append_global_keybindings{
-    awful.key({ "Mod4", "Shift" }, "r", function ()
-                  if launcher == nil then
-                      launcher = require("bling.widget.app_launcher"){
-                          prompt_icon = "🚀",
-                          app_width = dpi(80),
-                          app_height = dpi(80),
-                          apps_per_column = 3,
-                          apps_per_row = 3,
-                      }
-                  end
-                  launcher:show()
-              end),
-}
+-- local launcher
+-- awful.keyboard.append_global_keybindings{
+--     awful.key({ "Mod4", "Shift" }, "r", function ()
+--                   if launcher == nil then
+--                       launcher = require("bling.widget.app_launcher"){
+--                           prompt_icon = "🚀",
+--                           app_width = dpi(80),
+--                           app_height = dpi(80),
+--                           apps_per_column = 3,
+--                           apps_per_row = 3,
+--                       }
+--                   end
+--                   launcher:show()
+--               end),
+-- }
 
 return nil
