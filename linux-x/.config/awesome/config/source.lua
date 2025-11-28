@@ -568,8 +568,8 @@ local function get_zsh_completion(bento, prompt)
     local stdout = gio_unix.InputStream.new(stdout_fd, --[[close_fd=]]true)
     local current_item = {}
     local reading_done = true
-    local SPECIAL_CURRENT_INPUT = 0
-    local SPECIAL_PREVIOUS_INPUT = 1
+    local SPECIAL_RUN = 0
+    local SPECIAL_BACK = 1
     awful.spawn.read_lines(
         stdout, function (line)
             if line == "" then
@@ -598,8 +598,8 @@ local function get_zsh_completion(bento, prompt)
             reading_done = false
             local input = input_stack[#input_stack]
             output.array = {}
-            output.array[1] = { name = "[RUN]", special = SPECIAL_CURRENT_INPUT }
-            output.array[2] = { name = "[BACK]", special = SPECIAL_PREVIOUS_INPUT }
+            output.array[#output.array + 1] = { name = "[RUN]", special = SPECIAL_RUN }
+            output.array[#output.array + 1] = { name = "[BACK]", special = SPECIAL_BACK }
             input = last_input()
             output:set_size(#output.array)
             current_item = {}
@@ -668,11 +668,11 @@ local function get_zsh_completion(bento, prompt)
                     widget = prism.layer,
                 }
                 function w:execute()
-                    if e.special == SPECIAL_CURRENT_INPUT then
+                    if e.special == SPECIAL_RUN then
                         waffle:hide()
                         awful.spawn.with_shell(last_input(), false)
                         return
-                    elseif e.special == SPECIAL_PREVIOUS_INPUT then
+                    elseif e.special == SPECIAL_BACK then
                         input_stack[#input_stack] = nil
                         send_input()
                         bento:reset_input()
