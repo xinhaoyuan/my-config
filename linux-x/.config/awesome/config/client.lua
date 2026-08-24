@@ -506,15 +506,17 @@ local function update_shape(c)
     local width = geo.width - decorator.left_space - decorator.right_space + decorator.left_size + decorator.right_size
     local height = geo.height - decorator.top_space - decorator.bottom_space + decorator.top_size + decorator.bottom_size
 
-
-
     if c.invalidate_frame then
         if c.client_mask then
             c.client_mask:finish()
             c.client_mask = nil
         end
 
-        if c.fullscreen or not c.has_decorator then
+        if c.fullscreen or not c.has_decorator or
+            (c.skip_decorator_top and
+             c.skip_decorator_bottom and
+             c.skip_decorator_left and
+             c.skip_decorator_right) then
             c.composite = nil
             return
         end
@@ -525,7 +527,7 @@ local function update_shape(c)
             if c.client_mask == nil then
                 c.client_mask = cr:get_target():create_similar("ALPHA", width, height)
                 decorator:draw({}, cairo.Context(c.client_mask), true, width, height,
-                               {["top"] = true, ["bottom"] = true, ["left"] = true, ["right"] = true})
+                               {["top"] = not c.skip_decorator_top, ["bottom"] = not c.skip_decorator_bottom, ["left"] = not c.skip_decorator_left, ["right"] = not c.skip_decorator_right})
             end
             cr:set_operator("DEST_OUT")
             cr:set_source_surface(c.client_mask, 0, 0)
@@ -612,8 +614,57 @@ local function delayed_update_shape(c)
         c.container_shape_update_scheduled = true
         gtimer.delayed_call(function ()
                 if not c.valid then return end
+                if c.decoration_update_scheduled then return end
                 update_shape(c)
                 c.container_shape_update_scheduled = nil
+        end)
+    end
+end
+
+local function update_decoration(c)
+    local geo = c:geometry()
+    local decorator = beautiful.decorator
+    local workarea =  c.screen.workarea
+    local x = geo.x + decorator.left_space - decorator.left_size
+    local y = geo.y + decorator.top_space - decorator.top_size
+    local skip_left = workarea.x == x
+    local skip_right = workarea.x + workarea.width == geo.x + geo.width - decorator.right_space + decorator.right_size
+    local skip_top = workarea.y == y
+    local skip_bottom = workarea.y + workarea.height == geo.y + geo.height - decorator.bottom_space + decorator.bottom_size
+    local skip_changed
+    if not c.skip_decorator_top ~= not skip_top then
+        c.skip_decorator_top = skip_top
+        skip_changed = true
+    end
+    if not c.skip_decorator_bottom ~= not skip_bottom then
+        c.skip_decorator_bottom = skip_bottom
+        skip_changed = true
+    end
+    if not c.skip_decorator_left ~= not skip_left then
+        c.skip_decorator_left = skip_left
+        skip_changed = true
+    end
+    if not c.skip_decorator_right ~= not skip_right then
+        c.skip_decorator_right = skip_right
+        skip_changed = true
+    end
+    if skip_changed then
+        delayed_update_shape(c)
+        capi.client.emit_signal("list")
+    end
+end
+
+local function delayed_update_decoration(c)
+    if c.decoration_update_scheduled == nil then
+        c.decoration_update_scheduled = true
+        gtimer.delayed_call(function ()
+                if not c.valid then return end
+                update_decoration(c)
+                if c.container_shape_update_scheduled then
+                    update_shape(c)
+                    c.container_shape_update_scheduled = nil
+                end
+                c.decoration_update_scheduled = nil
         end)
     end
 end
@@ -763,8 +814,12 @@ local function decorate(c)
                            size = decorator.top_space,
                            bg = "#00000000",
                            bgimage = function (context, cr, width, height)
+                               local off = c.skip_decorator_top and decorator.top_space - decorator.top_size or 0
+                               local left_off = c.skip_decorator_left and decorator.left_space - decorator.left_size or 0
+                               local right_off = c.skip_decorator_right and decorator.right_space - decorator.right_size or 0
+                               cr:translate(left_off, off)
                                beautiful.decorator:draw(setmetatable({focus = capi.client.focus == c}, {__index=context}),
-                                              cr, false, width, height, {["top"] = true, ["left"] = true, ["right"] = true})
+                                              cr, false, width - left_off - right_off, height - off, {["top"] = not c.skip_decorator_top, ["left"] = not c.skip_decorator_left, ["right"] = not c.skip_decorator_right})
                            end,
                        })
         c:titlebar_top(decorator.top_space, decorator.top_size)
@@ -774,8 +829,12 @@ local function decorate(c)
                            size = decorator.bottom_space,
                            bg = "#00000000",
                            bgimage = function (context, cr, width, height)
+                               local off = c.skip_decorator_bottom and decorator.bottom_space - decorator.bottom_size or 0
+                               local left_off = c.skip_decorator_left and decorator.left_space - decorator.left_size or 0
+                               local right_off = c.skip_decorator_right and decorator.right_space - decorator.right_size or 0
+                               cr:translate(left_off, 0)
                                beautiful.decorator:draw(setmetatable({focus = capi.client.focus == c}, {__index=context}),
-                                               cr, false, width, height, {["bottom"] = true, ["left"] = true, ["right"] = true})
+                                               cr, false, width - left_off - right_off, height - off, {["bottom"] = not c.skip_decorator_bottom, ["left"] = not c.skip_decorator_left, ["right"] = not c.skip_decorator_right})
                            end,
                        })
         c:titlebar_bottom(decorator.bottom_space, decorator.bottom_size)
@@ -785,6 +844,7 @@ local function decorate(c)
                            size = decorator.left_space,
                            bg = "#00000000",
                            bgimage = function (context, cr, width, height)
+                               if c.skip_decorator_left then return end
                                beautiful.decorator:draw(setmetatable({focus = capi.client.focus == c}, {__index=context}),
                                               cr, false, width, height, {["left"] = true})
                            end,
@@ -796,6 +856,7 @@ local function decorate(c)
                            size = decorator.right_space,
                            bg = "#00000000",
                            bgimage = function (context, cr, width, height)
+                               if c.skip_decorator_right then return end
                                beautiful.decorator:draw(setmetatable({focus = capi.client.focus == c}, {__index=context}),
                                               cr, false, width, height, {["right"] = true})
                            end,
@@ -813,6 +874,7 @@ local function decorate(c)
     if restore_geo then c:geometry(geo) end
 end
 
+capi.client.connect_signal("property::geometry", delayed_update_decoration)
 capi.client.connect_signal("property::size", delayed_update_shape)
 capi.client.connect_signal("request::titlebars", decorate)
 capi.client.connect_signal("property::has_decorator",

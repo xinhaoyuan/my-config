@@ -336,11 +336,11 @@ capi.awesome.connect_signal(
             print("Expecting auto bar_style but got", beautiful.bar_style)
         end
 
-        local has_maximized = false
+        local need_expand = false
         for _, c in ipairs(s.clients) do
-            has_maximized = has_maximized or c.maximized
+            need_expand = need_expand or c.maximized or c["skip_decorator_"..shared.vars.bar_position]
         end
-        if has_maximized then
+        if need_expand then
             set_expanded(s.widgets.bar)
         else
             set_splitted(s.widgets.bar)

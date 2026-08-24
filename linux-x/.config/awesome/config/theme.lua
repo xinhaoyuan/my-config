@@ -642,6 +642,11 @@ theme.decorator = decorator.presets.soft_relief{
 -- }
 --------------------------------------------------------------------------------
 
+theme.machi_workarea_adjust_left = theme.decorator.left_size - theme.decorator.left_space
+theme.machi_workarea_adjust_right = theme.decorator.right_size - theme.decorator.right_space
+theme.machi_workarea_adjust_top = theme.decorator.top_size - theme.decorator.top_space
+theme.machi_workarea_adjust_bottom = theme.decorator.bottom_size - theme.decorator.bottom_space
+
 local function dispose_pattern(pattern)
     local status, s = pattern:get_surface()
     if status == "SUCCESS" then
