@@ -127,12 +127,12 @@ else
     theme.xborder_indent = dpi(4)
 end
 -- -- Strong border
--- theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
--- theme.border_normal = acolor(is_light_color(theme.bg_normal) and "#ffffff" or "#000000"):blend_with(acolor(theme.bg_normal), 0.5):to_string()
+theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.8):to_string()
+theme.border_normal = acolor(is_light_color(theme.bg_normal) and "#ffffff" or "#000000"):blend_with(acolor(theme.bg_normal), 0.5):to_string()
 -- Weak border
-theme.border_focus  = gcolor(acolor(theme.fg_normal):blend_with(acolor(theme.bg_normal), 0.8):to_string())
-theme.border_normal = theme.bg_normal
-theme.xborder_shade = c_black[2].."80"
+-- theme.border_focus  = gcolor(acolor(theme.fg_normal):blend_with(acolor(theme.bg_normal), 0.8):to_string())
+-- theme.border_normal = theme.bg_normal
+-- theme.xborder_shade = c_black[2].."80"
 -- theme.xborder_space = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
 -- theme.border_focus  = acolor(c_black[2]):blend_with(acolor(theme.bg_focus), 0.5):to_string()
 -- theme.border_normal = theme.bg_normal
@@ -645,7 +645,8 @@ theme.decorator = decorator.presets.soft_relief{
 theme.machi_workarea_adjust_left = theme.decorator.left_size - theme.decorator.left_space
 theme.machi_workarea_adjust_right = theme.decorator.right_size - theme.decorator.right_space
 theme.machi_workarea_adjust_top = theme.decorator.top_size - theme.decorator.top_space
-theme.machi_workarea_adjust_bottom = theme.decorator.bottom_size - theme.decorator.bottom_space
+-- theme.machi_workarea_adjust_bottom = theme.decorator.bottom_size - theme.decorator.bottom_space
+theme.machi_workarea_adjust_bottom = theme.useless_gap + theme.decorator.bottom_space - theme.decorator.bottom_size
 
 local function dispose_pattern(pattern)
     local status, s = pattern:get_surface()

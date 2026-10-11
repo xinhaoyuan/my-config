@@ -14,7 +14,11 @@
 (load "_fstar.el")
 (load "_boogie.el")
 (load "_lang-server.el")
+(load "_org.el")
 (autoload 'simple-indent-mode "simple-indent-mode.el" "simple-indent-mode" t)
+
+;; Do not leave gap when windows size is not standard.
+(setq frame-resize-pixelwise t)
 
 ;; coq {{{
 (setq auto-mode-alist (cons '("\\.v$" . coq-mode) auto-mode-alist))
@@ -508,7 +512,7 @@
 (define-key my-prefix (kbd "o c") 'org-agenda)
 (define-key my-prefix (kbd "o o") (lambda () (interactive) (find-file my-org-dir)))
 (define-key my-prefix (kbd "o p") 'org-publish-current-project)
-(define-key my-prefix (kbd "r") (lambda () (interactive) (revert-buffer nil t t)))
+(define-key my-prefix (kbd "r") (lambda () (interactive) (revert-buffer nil t nil)))
 (define-key my-prefix (kbd "t") 'tabify-buffer)
 (define-key my-prefix (kbd "v") 'set-variable)
 (define-key my-prefix (kbd "x") 'kill-current-buffer)
@@ -697,17 +701,6 @@
             (setq imaxima-scale-factor 1.5)
             (setq imaxima-equation-color "black")))
 ;; }}}
-
-;; org-mode {{{
-(if (require 'org nil 'noerror)
-    (progn
-      (setq org-directory "~/org")
-      (setq org-agenda-files '("~/org/agenda-work.org"))
-      (setq-default org-display-custom-times t)
-      (setq org-time-stamp-custom-formats '("<%Y-%m-%d %a>" . "<%Y-%m-%d %a %H:%M>"))
-      ))
-;; }}}
-
 
 ;; no tabs by default. modes that really need tabs should enable
 ;; indent-tabs-mode explicitly. makefile-mode already does that, for
