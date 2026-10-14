@@ -16,7 +16,9 @@ local term_cmd
 local browser_cmd
 do
     local term_prog = "urxvt"
-    if os.execute("command -v st") then
+    if os.execute("command -v xyterm") then
+        term_prog = "xyterm"
+    elseif os.execute("command -v st") then
         term_prog = "st"
     elseif os.execute("command -v urxvt") then
         term_prog = "urxvt"
