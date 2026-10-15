@@ -1,0 +1,16 @@
+# Moved from the old build-time config.rs files (xyterm-gui and xyterm-macos).
+
+# The family is Core Text's on macOS: ~/Library/Fonts/iosevka-xy-mono.ttc.
+# On X11 this was "Monospace:size=11".
+font = "Iosevka XY Mono:size=13"
+
+[colors]
+foreground = "#3b3a47"
+background = "#e0e0e0"
+cursor = "#3b3a47"
+palette = [
+    "#262626", "#8d170f", "#598540", "#d29910",
+    "#0f7793", "#f76bcb", "#4fa691", "#c0c0c0",
+    "#404040", "#bb1f14", "#70a751", "#efb426",
+    "#149cc1", "#fa9bdc", "#6ebaa8", "#f0f0f0",
+]
