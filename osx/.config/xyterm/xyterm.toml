@@ -4,6 +4,8 @@
 # On X11 this was "Monospace:size=11".
 font = "Iosevka XY Mono:size=13"
 
+option_as_meta = "both"
+
 [colors]
 foreground = "#3b3a47"
 background = "#e0e0e0"
