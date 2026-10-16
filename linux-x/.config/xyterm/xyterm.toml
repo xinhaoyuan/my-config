@@ -1,0 +1,11 @@
+# xyterm's run-time settings (over the build-time config.rs, below X
+# resources). Ctrl+Shift+R reloads this file. Keys: see project/config-file.md
+# in the xyterm repository.
+#
+# Colors come from the shared X resource theme (*.color0..15, *foreground,
+# *background; ~/.Xresources.d/theme), which overrides [colors] here.
+
+font = "Iosevka XY Mono UI:size=10"
+
+[colors]
+cursor = "#3b3a47"
