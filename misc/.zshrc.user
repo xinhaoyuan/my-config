@@ -215,3 +215,7 @@ push_path() { export PATH="$1:$PATH" }
 pop_path() { export PATH="$(echo "$PATH" | sed -e 's|[^:]*:||')" }
 
 bindkey "^P" change_prompt
+
+if [[ -n "$XYTERM_PID" ]]; then
+    export CLAUDE_CODE_FORCE_TERMINAL_IMAGES=1
+fi
