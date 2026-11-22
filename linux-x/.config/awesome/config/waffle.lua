@@ -333,6 +333,16 @@ local waffle_shutdown_view = decorate_waffle(
         widget = wibox.widget{
             button{
                 -- icon = icons.sleep,
+                markup = "Turn off screens",
+                indicator = em("t"),
+                key = {"t", "T"},
+                action = function (alt)
+                    waffle:hide()
+                    awful.spawn({"xset", "dpms", "force", "off"}, false)
+                end
+            },
+            button{
+                -- icon = icons.sleep,
                 markup = "Suspend",
                 indicator = em("s"),
                 key = {"s", "S"},
