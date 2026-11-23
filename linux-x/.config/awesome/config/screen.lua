@@ -1136,10 +1136,10 @@ local global_keys = {
    awful.key({ "Mod4" }, "Tab", function ()
                  local c = capi.client.focus
                  if c == nil then return end
-                 if c.floating then
-                     c.floating = false
-                     return
-                 end
+                 -- if c.floating then
+                 --     c.floating = false
+                 --     return
+                 -- end
 
                  local layout = c.screen.selected_tag.layout
                  if layout.machi_set_cmd ~= nil then

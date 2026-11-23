@@ -181,12 +181,12 @@ end
 capi.client.connect_signal("list", function() waffle:autohide_delayed_check() end)
 
 local property_to_text = {
-    {"sticky", "S"},
-    {"above", "A"},
-    {"ontop", "T"},
-    {"floating", "F"},
-    {"maximized", "M"},
-    {"minimized", ""},
+    {"sticky", { [true] = "S", [false] = "" }},
+    {"above", { [true] = "A", [false] = "" }},
+    {"ontop", { [true] = "T", [false] = "" }},
+    {"floating", { [true] = "", [false] = "L" }},
+    {"maximized", { [true] = "M", [false] = "" }},
+    {"minimized", { [true] = "m", [false] = "" }},
 }
 
 local function tasklist_update_function(widget, c, index, objects)
@@ -227,10 +227,8 @@ local function tasklist_update_function(widget, c, index, objects)
             end
         end
         for _, pp in ipairs(property_to_text) do
-            local key, text = unpack(pp)
-            if prop[key] == true then
-                status_text = status_text .. text
-            end
+            local key, indicator = unpack(pp)
+            status_text = status_text .. indicator[prop[key]]
         end
         if status_text == "" and prop["minimized"] then
             status_text = "m"
