@@ -1,0 +1,137 @@
+#!/usr/bin/env python3
+"""Run xyterm-tui with --kitty-osc52 and xyterm-gui's color theme.
+
+Colors are layered as xyterm-gui does (see ~/src/xyterm/docs/config-file.md):
+the [colors] table of $XDG_CONFIG_HOME/xyterm/xyterm.toml (or -c FILE), then
+X resources (xyterm.* / Xyterm.* / *.*) unless the file sets
+x_resources = false or no X display is reachable. Extra arguments are passed
+to xyterm-tui (e.g. -e PROGRAM ARGS...).
+
+Wrapper options (before any xyterm-tui arguments, in any order):
+  -c FILE       read FILE instead of the default xyterm.toml
+  -n, --dump    print the resolved colors and the command instead of running it
+"""
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tomllib
+
+TUI = os.environ.get("XYTERM_TUI", "xyterm-tui")
+
+
+def parse_args(args):
+    """(config path, dump?, remaining args for xyterm-tui)."""
+    path, dump = None, False
+    while args:
+        if args[0] in ("-n", "--dump"):
+            dump, args = True, args[1:]
+        elif args[0] == "-c" and len(args) >= 2:
+            path, args = args[1], args[2:]
+        else:
+            break
+    if path is None:
+        xdg = os.environ.get("XDG_CONFIG_HOME", "")
+        base = xdg if os.path.isabs(xdg) else os.path.join(os.path.expanduser("~"), ".config")
+        path = os.path.join(base, "xyterm", "xyterm.toml")
+    return path, dump, args
+
+
+def norm(value):
+    """A color xyterm-tui accepts (#rrggbb or rgb:rr/gg/bb), or None."""
+    v = str(value).strip()
+    if re.fullmatch(r"#[0-9a-fA-F]{6}", v):
+        return v
+    if re.fullmatch(r"#[0-9a-fA-F]{3}", v):
+        return "#" + "".join(c * 2 for c in v[1:])
+    m = re.fullmatch(r"rgb:([0-9a-fA-F]{1,4})/([0-9a-fA-F]{1,4})/([0-9a-fA-F]{1,4})", v)
+    if m:  # scale each component to 8 bits, as X does
+        return "#" + "".join(
+            "%02x" % round(int(c, 16) * 255 / (16 ** len(c) - 1)) for c in m.groups()
+        )
+    return None
+
+
+def warn(msg):
+    print(f"xyterm-tui-themed: {msg}", file=sys.stderr)
+
+
+def from_file(path, theme):
+    try:
+        with open(path, "rb") as f:
+            conf = tomllib.load(f)
+    except FileNotFoundError:
+        return {}
+    except (OSError, tomllib.TOMLDecodeError) as e:
+        warn(f"skipping {path}: {e}")
+        return {}
+    colors = conf.get("colors", {})
+    for i, c in enumerate(colors.get("palette", [])[:16]):
+        theme[str(i)] = c
+    for key, c in colors.items():
+        if key in ("foreground", "background", "cursor") or (key.isdigit() and int(key) < 16):
+            theme[key] = c
+    return conf
+
+
+def from_xresources(theme):
+    if not os.environ.get("DISPLAY") or not shutil.which("xrdb"):
+        return
+    try:
+        out = subprocess.run(["xrdb", "-query"], capture_output=True, text=True,
+                             timeout=2).stdout
+    except (OSError, subprocess.SubprocessError):
+        return
+    # Most specific binding wins: xyterm.x > Xyterm.x > *.x / *x.
+    rank = {}
+    names = {f"color{i}": str(i) for i in range(16)}
+    names.update(foreground="foreground", background="background", cursorColor="cursor")
+    for line in out.splitlines():
+        res, sep, value = line.partition(":")
+        if not sep:
+            continue
+        res = res.strip()
+        for prefix, r in (("xyterm.", 3), ("Xyterm.", 2), ("*.", 1), ("*", 1)):
+            if res.startswith(prefix):
+                key = res[len(prefix):]
+                key = key[0].lower() + key[1:] if key else key  # Color0 -> color0
+                if key in names and r >= rank.get(key, 0) and value.strip():
+                    rank[key] = r
+                    theme[names[key]] = value.strip()
+                break
+
+
+def main():
+    path, dump, args = parse_args(sys.argv[1:])
+    theme = {}
+    conf = from_file(path, theme)
+    if conf.get("x_resources", True):
+        from_xresources(theme)
+
+    cmd = [TUI, "--kitty-osc52"]
+    flags = {"foreground": "--fg", "background": "--bg", "cursor": "--cursor-color"}
+    for key in ["foreground", "background", "cursor"] + [str(i) for i in range(16)]:
+        if key not in theme:
+            continue
+        c = norm(theme[key])
+        if c is None:
+            warn(f"ignoring color {key}: {theme[key]!r} (needs #rrggbb or rgb:r/g/b)")
+        elif key in flags:
+            cmd += [flags[key], c]
+        else:
+            cmd += ["--color", f"{key}={c}"]
+    cmd += args
+    if dump:
+        print(theme)
+        print(cmd)
+        return
+    try:
+        os.execvp(cmd[0], cmd)
+    except OSError as e:
+        warn(f"{cmd[0]}: {e}")
+        sys.exit(127)
+
+
+if __name__ == "__main__":
+    main()
